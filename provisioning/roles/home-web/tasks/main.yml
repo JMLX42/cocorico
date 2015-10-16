@@ -1,6 +1,6 @@
 - set_fact: role_name=home-web
 
-- name: install node
+- name: install nodejs
   include: ../../../tasks/install_node.yml
 
 - name: create www root folder
@@ -9,11 +9,12 @@
 - name: link www project root folder
   file: src=/vagrant/www dest=/var/www/home-web state=link
 
-# - name: install app dependencies
-#   npm: path={{ www_dir }}/{{ role_name }} production={{ "no" if is_development_environment else "yes" }}
+- npm: name=brunch global=yes
 
-# - name: install app dependencies
-#   command: npm cache clean && npm install --unsafe-perm
-#   args:
-#         chdir: "{{ www_dir }}/{{ role_name }}"
-#         creates: "{{ www_dir }}/{{ role_name }}/node_modules"
+- name: install app dependencies
+  command: npm cache clean && npm install --unsafe-perm
+  args:
+        chdir: "{{ www_dir }}/{{ role_name }}"
+        creates: "{{ www_dir }}/{{ role_name }}/node_modules"
+
+- command: brunch build creates={{ www_dir }}/{{ role_name }}/public/js/app.js

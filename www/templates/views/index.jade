@@ -1,20 +1,17 @@
 doctype html
 html
-	//- HTML HEADER
 	head
 		meta(charset="utf-8")
 		meta(name="viewport", content="width=device-width, initial-scale=1.0")
 		meta(http-equiv="X-UA-Compatible" content="IE=edge")
 
-		title My Site
 		link(rel="shortcut icon", href="/favicon.ico", type="image/x-icon")
 
-		//- Customise the stylesheet for your site by editing /public/styles/site.less
-		//- All .less files will be automatically compiled and minified in production.
-		link(href="/styles/site.min.css", rel="stylesheet")
+		link(href="/css/app.css", rel="stylesheet")
 
-	//- HTML BODY
+		script(src='/js/vendor.js')
+		script(src='/js/app.js')
+
 	body
-		#app
-		script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyCBroD1_P_WPvdhf3uyBxRzPiRbKvLiLBk')
-		script(src='/js/application.js')
+		script(type='text/javascript').
+			require('init')
