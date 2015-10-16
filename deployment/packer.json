@@ -1,0 +1,15 @@
+{
+  "provisioners": [
+    {
+      "type": "ansible-local",
+      "playbook_file": "provisioning/provision.yml"
+    }
+  ],
+  "builders": [
+    {
+      "type": "docker",
+      "image": "ubuntu:14.04",
+      "export_path": "bin/minko-cloud-ubuntu-docker.tar"
+    }
+  ]
+}

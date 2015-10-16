@@ -1,0 +1,4 @@
+data_dir: /var/data
+backup_dir: /var/backup
+www_dir: /var/www
+download_dir: /opt/download

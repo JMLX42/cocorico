@@ -1,0 +1,57 @@
+---
+- set_fact: role_name=common
+
+- name: show environment name
+  debug: var=environment_name
+
+- name: set hostname
+  hostname: name={{ hostname }}
+
+- name: enable multiverse
+  apt_repository: repo="deb http://archive.ubuntu.com/ubuntu trusty multiverse" state=present update_cache=yes
+
+- name: install ansible dependencies
+  apt: name={{ item }} state=present update_cache=no
+  with_items:
+    - python-mysqldb
+    - python-pymongo
+    - unzip
+    - curl
+    - htop
+    - git
+    - toilet
+    - rdiff-backup
+
+- name: remove unused dependencies
+  apt: name={{ item }} state=absent update_cache=no
+  with_items:
+    - puppet
+    - chef
+  register: result
+
+- name: autoremove unused dependencies
+  command: apt-get -y autoremove
+  when: result|changed
+
+- name: set timezone
+  copy: src=timezone dest=/etc/timezone
+  register: result
+
+- name: update timezone
+  command: dpkg-reconfigure --frontend noninteractive tzdata
+  when: result|changed
+
+- name: set motd
+  shell: toilet {{ environment_name }} > /etc/motd
+  args:
+    creates: /etc/motd
+
+- name: switch to root when running "vagrant ssh"
+  lineinfile: dest=/home/vagrant/.bashrc line="sudo -i"
+  when: is_development_environment
+
+- name: create backup directory
+  file: path={{ backup_dir }} state=directory
+
+- name: create download directory
+  file: path={{ download_dir }} state=directory

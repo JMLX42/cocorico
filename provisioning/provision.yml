@@ -1,0 +1,10 @@
+---
+- hosts:
+    - local
+    - staging
+    - prod
+  gather_facts: yes
+  roles:
+    - { role: "common" }
+    - { role: "home-web", tags: ["website"] }
+    - { role: "home-db", tags: ["website"] }

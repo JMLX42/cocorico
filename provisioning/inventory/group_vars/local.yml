@@ -1,0 +1,3 @@
+environment_name: local
+hostname: citoyen.io-{{ environment_name }}
+is_development_environment: yes
