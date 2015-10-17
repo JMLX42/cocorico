@@ -26,15 +26,14 @@
 - name: build app
   command: brunch build creates={{ www_dir }}/{{ role_name }}/public/js/app.js
 
-# FIXME: https://github.com/creynders/headstone/issues/4
-# - name: create admin user
-#   when: is_development_environment
-#   shell: NODE_PATH={{ www_dir }}/{{ role_name }}/node_modules headstone /vagrant/provisioning/roles/{{ role_name }}/files/add_keystonejs_user.js --cwd={{ www_dir }}/{{ role_name }} --userEmail={{ keystonejs_admin_email }} --userPassword={{ keystonejs_admin_password }} --userIsAdmin=true
-#   args:
-#     chdir: "{{ www_dir }}/{{ role_name }}"
-#   register: result
-#   changed_when: "'created' in result.stdout"
-#   failed_when: result.stderr
+- name: create admin user
+  when: is_development_environment
+  shell: NODE_PATH={{ www_dir }}/{{ role_name }}/node_modules headstone /vagrant/provisioning/roles/{{ role_name }}/files/add_keystonejs_user.js --cwd={{ www_dir }}/{{ role_name }} --userEmail={{ keystonejs_admin_email }} --userPassword={{ keystonejs_admin_password }} --userFirstname=Admin --userLastname=Admin --userIsAdmin=true
+  args:
+    chdir: "{{ www_dir }}/{{ role_name }}"
+  register: result
+  changed_when: "'created' in result.stdout"
+  failed_when: result.stderr
 
 - name: install upstart script
   template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ role_name }}.conf

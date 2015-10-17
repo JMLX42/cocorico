@@ -3,7 +3,7 @@ require('dotenv').load();
 var keystone = require("keystone");
 var User = keystone.list("User");
 
-module.exports = function(userEmail, userPassword, userIsAdmin, done)
+module.exports = function(userEmail, userPassword, userIsAdmin, userFirstname, userLastname, done)
 {
     User.model.find()
         .where('email', userEmail)
@@ -13,24 +13,27 @@ module.exports = function(userEmail, userPassword, userIsAdmin, done)
             {
                 var newUser = new User.model({
                 	email: userEmail,
-                    name: {'first' : 'test', 'last' : 'test' },
+                    name: {'first' : userFirstname, 'last' : userLastname },
                 	password: userPassword,
                 	isAdmin: userIsAdmin == 'true'
                 });
 
                 newUser.save(function(err)
                 {
-                    console.log(err);
-                });
+                    if (err)
+                    {
+                      console.log(err);
+                      return done(err);
+                    }
 
-                console.log('User created.');
-                console.log(newUser);
+                    console.log('User created.');
+                    done();
+                });
             }
             else
             {
                 console.log('User already exists.');
+                done();
             }
-
-            done();
         });
 };
