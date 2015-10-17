@@ -9,6 +9,7 @@
     "browserify": "^11.2.0",
     "browserify-middleware": "^7.0.0",
     "keystone": "^0.3.13",
+    "dotenv": "1.2.0",
     "model-transform": "^1.1.0",
     "brunch": "1.7.20",
     "javascript-brunch": "1.7.1",
@@ -32,7 +33,7 @@
     "npm": ">=1.3.14"
   },
   "scripts": {
-    "start": "node keystone.js"
+    "start": "nodemon keystone.js"
   },
   "overrides": {
     "react": {

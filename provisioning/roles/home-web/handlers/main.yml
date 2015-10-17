@@ -1,0 +1,3 @@
+---
+- name: restart home-web service
+  service: name=home-web state=restarted

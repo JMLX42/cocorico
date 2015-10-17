@@ -11,10 +11,32 @@
 
 - npm: name=brunch global=yes
 
-- name: install app dependencies
+- name: install headstone
+  npm: name=headstone global=yes
+
+- name: install npm modules
   command: npm cache clean && npm install --unsafe-perm
   args:
-        chdir: "{{ www_dir }}/{{ role_name }}"
-        creates: "{{ www_dir }}/{{ role_name }}/node_modules"
+    chdir: "{{ www_dir }}/{{ role_name }}"
+    creates: "{{ www_dir }}/{{ role_name }}/node_modules"
 
-- command: brunch build creates={{ www_dir }}/{{ role_name }}/public/js/app.js
+- name: install .env file
+  template: src=.env.j2 dest={{ www_dir }}/{{ role_name }}/.env
+
+- name: build app
+  command: brunch build creates={{ www_dir }}/{{ role_name }}/public/js/app.js
+
+# FIXME: https://github.com/creynders/headstone/issues/4
+# - name: create admin user
+#   when: is_development_environment
+#   shell: NODE_PATH={{ www_dir }}/{{ role_name }}/node_modules headstone /vagrant/provisioning/roles/{{ role_name }}/files/add_keystonejs_user.js --cwd={{ www_dir }}/{{ role_name }} --userEmail={{ keystonejs_admin_email }} --userPassword={{ keystonejs_admin_password }} --userIsAdmin=true
+#   args:
+#     chdir: "{{ www_dir }}/{{ role_name }}"
+#   register: result
+#   changed_when: "'created' in result.stdout"
+#   failed_when: result.stderr
+
+- name: install upstart script
+  template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ role_name }}.conf
+  notify:
+    - restart home-web service

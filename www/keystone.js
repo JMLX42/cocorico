@@ -1,15 +1,19 @@
+require('dotenv').load();
+
 var keystone = require('keystone');
 
 keystone.init({
 
-	'name': 'My Site',
-	'brand': 'My Site',
+	'name': 'cocorico',
+	'brand': 'cocorico',
 
 	'less': 'public',
 	'static': 'public',
 	'favicon': 'public/favicon.ico',
 	'views': 'templates/views',
 	'view engine': 'jade',
+
+	'mongo' : process.env.MONGO_URI,
 
 	'auto update': true,
 	'session': true,

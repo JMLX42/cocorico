@@ -1,3 +1,12 @@
 environment_name: local
 hostname: cocorico.io-{{ environment_name }}
 is_development_environment: yes
+http_protocol_prefix: http
+
+mongodb_database_name: "{{ project_name }}"
+
+front_hostname: cocorico.io
+front_web_public_host: "{{ front_hostname }}.test"
+
+keystonejs_admin_email: "admin@{{ front_hostname }}"
+keystonejs_admin_password: admin

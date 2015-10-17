@@ -1,0 +1,65 @@
+# {{ ansible_managed }}
+
+# Actual virtual host
+<VirtualHost *:80>
+    ServerName          {{ front_web_public_host }}
+
+{% if environment_name == 'staging' %}
+    <Proxy *>
+        Options +FollowSymLinks +Multiviews +Indexes
+        AllowOverride None
+
+        # AuthType Basic
+        # AuthName "Authentication Required"
+        # AuthUserFile /etc/apache2/.htpasswd
+        # Require valid-user
+        Require ip {{ ip_white_list | join(' ') }}
+    </Proxy>
+{% endif %}
+
+    ProxyRequests           Off
+    ProxyPreserveHost       On
+
+    RewriteEngine           On
+    RewriteRule             ^/([a-z]+)$          /$1/ [L,R=301]
+
+    #
+    # Endpoints: /
+    # Component: Website
+    # Role: home-web
+    #
+    RewriteRule         ^/(.*) http://{{ home_web_private_host }}:{{ home_web_private_port }}/$1 [P,L]
+    ProxyPassReverse    / http://{{ home_web_private_host }}:{{ home_web_private_port }}
+    
+    # Including all additional rewrite rule configurations set by roles.
+    IncludeOptional     /etc/apache2/sites-available/front-web-include/*.conf
+
+    #
+    # Compression
+    #
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+
+    <Files *.data>
+        SetOutputFilter DEFLATE
+    </Files>
+    <Files *.mem>
+        SetOutputFilter DEFLATE
+    </Files>
+
+    #
+    # Cache control
+    #
+    <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|js|css|swf|data|mem|scene|html)$">
+        Header unset Cache-Control
+        Header set Cache-Control "max-age=290304000, public"
+    </FilesMatch>
+
+</VirtualHost>

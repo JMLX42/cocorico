@@ -6,5 +6,6 @@
   gather_facts: yes
   roles:
     - { role: "common" }
-    - { role: "home-web", tags: ["website"] }
+    - { role: "front-web", tags: ["front"] }
     - { role: "home-db", tags: ["website"] }
+    - { role: "home-web", tags: ["website"] }

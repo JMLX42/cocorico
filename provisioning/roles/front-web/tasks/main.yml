@@ -1,0 +1,99 @@
+---
+- set_fact: role_name=front-web
+
+- name: install apache2
+  apt: name={{ item }} state=present
+  with_items:
+    - apache2
+
+- name: enable apache modules
+  apache2_module: name={{ item }} state=present
+  with_items:
+    - deflate
+    - filter
+    - headers
+    - proxy
+    - proxy_http
+    - proxy_wstunnel
+    - ssl
+    - rewrite
+
+- name: disable apache modules
+  apache2_module: name={{ item }} state=absent
+  with_items:
+    - autoindex
+  notify:
+    - restart apache2 service
+
+- name: install hosts
+  lineinfile: dest=/etc/hosts line='{{ item }}'
+  with_items:
+    - "127.0.0.1 localhost"
+    - "::1 ip6-localhost ip6-loopback"
+    - "fe00::0 ip6-localnet"
+    - "ff00::0 ip6-mcastprefix"
+    - "ff02::1 ip6-allnodes"
+    - "ff02::2 ip6-allrouters"
+    - "ff02::3 ip6-allhosts"
+    - "127.0.0.1 {{ front_web_public_host }} {{ front_hostname }} {{ project_name }} {{ hostname }}"
+
+- name: install htpasswd
+  copy: src=.htpasswd dest=/etc/apache2/.htpasswd
+  when: environment_name == 'staging'
+
+- name: install site configuration
+  template: src={{ role_name }}.conf.j2 dest=/etc/apache2/sites-available/{{ role_name }}.conf
+  notify:
+    - restart apache2 service
+
+- name: enable site
+  file: src=/etc/apache2/sites-available/{{ role_name }}.conf dest=/etc/apache2/sites-enabled/{{ role_name }}.conf state=link
+  notify:
+    - restart apache2 service
+
+- name: disable default vhost
+  file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+  notify:
+    - restart apache2 service
+
+- name: create ssl directory
+  file: path=/etc/apache2/ssl state=directory
+
+- name: create include directory
+  file: path=/etc/apache2/sites-available/{{ role_name }}-include state=directory
+
+# - name: copy ca certificate
+#   copy: src={{ item }} dest=/etc/apache2/ssl/{{ item }}
+#   with_items:
+#     - GandiStandardSSLCA2.pem
+#   notify:
+#     - restart apache2 service
+
+- name: copy ssl certificate
+  copy: src={{ item }} dest=/etc/apache2/ssl/{{ item }}
+  when: not is_development_environment
+  with_items:
+    - "{{ front_hostname }}.crt"
+    - "{{ front_hostname }}.key"
+  notify:
+    - restart apache2 service
+
+- name: create self-signed certificate
+  shell: openssl req -new -nodes -x509 -subj "/C=FR/ST=IdF/L=Paris/O=IT/CN={{ front_web_public_host }}" -days 3650 -keyout /etc/apache2/ssl/{{ front_hostname }}.key -out /etc/apache2/ssl/{{ front_hostname }}.crt -extensions v3_ca
+  args:
+    creates: /etc/apache2/ssl/{{ front_hostname }}.crt
+  when: is_development_environment
+  notify:
+    - restart apache2 service
+
+- name: remove unused sites
+  file: path=/etc/apache2/sites-available/{{ item }} state=absent
+  with_items:
+    - 000-default.conf
+    - default-ssl.conf
+
+- name: set global server name
+  lineinfile: dest=/etc/apache2/apache2.conf line='ServerName localhost'
+
+- name: start apache2 service
+  service: name=apache2 state=started enabled=yes
