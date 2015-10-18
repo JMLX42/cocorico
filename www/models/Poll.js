@@ -13,10 +13,7 @@ Poll.add({
 	author: { type: Types.Relationship, ref: 'User' },
 	createdAt: { type: Date, default: Date.now },
     publishedAt: Date,
-	content: {
-        brief: { type: Types.Html, wysiwyg: true, height: 150 },
-        extended: { type: Types.Html, wysiwyg: true, height: 400 }
-    }
+	content: { type: Types.Markdown, wysiwyg: true, height: 400 }
 });
 
 Poll.relationship({ path: 'votes', ref: 'Vote', refPath: 'poll' });

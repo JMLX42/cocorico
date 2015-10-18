@@ -4,18 +4,18 @@ var keystone = require('keystone');
 
 var importRoutes = keystone.importer(__dirname);
 
+var routes = {
+	views: importRoutes('./views'),
+	api: importRoutes('./api')
+};
+
 // Setup Route Bindings
 exports = module.exports = function(app) {
 
-	// app.use('/js', browserify('./client/app', {
-	// 	transform: [babelify.configure({
-	// 		plugins: ['object-assign']
-	// 	})]
-	// }));
+	app.get('/', routes.views.index);
 
-	// Views
-	app.use(function(req, res) {
-		res.render('index');
-	});
+	app.get('/api/poll/list', keystone.middleware.api, routes.api.poll.list);
+	app.get('/api/poll/latest', keystone.middleware.api, routes.api.poll.latest);
+	app.get('/api/poll/:id', keystone.middleware.api, routes.api.poll.get);
 
 };

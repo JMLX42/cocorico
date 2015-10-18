@@ -7,41 +7,40 @@
     "babel-plugin-object-assign": "^1.2.1",
     "babelify": "^6.1.3",
     "browserify": "^11.2.0",
+    "watchify": "latest",
     "browserify-middleware": "^7.0.0",
+    "browserify-incremental": "latest",
     "keystone": "^0.3.13",
     "dotenv": "1.2.0",
     "model-transform": "^1.1.0",
-    "brunch": "1.7.20",
-    "javascript-brunch": "1.7.1",
-    "browserify-brunch": "1.7.3",
-    "css-brunch": "1.7.0",
-    "less-brunch": "1.7.2",
-    "babel-brunch": "5.1.2",
-    "reactify": "1.1.1",
-    "react": "^0.13.3",
-    "react-brunch": "git://github.com/SBRK/react-brunch.git#master",
+    "react": "latest",
     "react-router": "latest",
+    "react-bootstrap": "latest",
+    "react-dom": "latest",
+    "react-remarkable": "latest",
+    "react-intl": "latest",
+    "reflux": "latest",
     "request": "^2.60.0",
     "store-prototype": "^1.1.1",
     "underscore": "^1.8.3",
     "forever": "0.14.1",
-    "bower": "1.4.1",
-    "d3": "3.5.6"
+    "d3": "3.5.6",
+    "jquery": "2.1.4",
+    "node-lessify": "latest"
   },
   "engines": {
     "node": ">=0.10.22",
     "npm": ">=1.3.14"
   },
   "scripts": {
-    "start": "nodemon keystone.js"
+    "start": "nodemon -w models -w routes -w templates -w keystone.js -d 1 keystone.js",
+    "build-app": "browserify -t babelify -t node-lessify --extension=.jsx app/script/index.js -o public/js/app.js",
+    "watch-app": "watchify -v -t babelify -t node-lessify --extension=.jsx app/script/index.js --poll=1000 -o public/js/app.js"
   },
   "overrides": {
     "react": {
       "main": "react.js"
     }
-  },
-  "browserify": {
-      "transform": ["reactify"]
   },
   "main": "keystone.js"
 }
