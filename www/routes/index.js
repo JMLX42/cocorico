@@ -18,4 +18,9 @@ exports = module.exports = function(app) {
 	app.get('/api/poll/latest', keystone.middleware.api, routes.api.poll.latest);
 	app.get('/api/poll/:id', keystone.middleware.api, routes.api.poll.get);
 
+	app.get('/api/page/list', keystone.middleware.api, routes.api.page.list);
+	app.get('/api/page/navbar', keystone.middleware.api, routes.api.page.list);
+	app.get('/api/page/:id', keystone.middleware.api, routes.api.page.get);
+	app.get('/api/page/getBySlug/:slug', keystone.middleware.api, routes.api.page.getBySlug);
+
 };

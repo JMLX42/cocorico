@@ -18,8 +18,8 @@ var Poll = React.createClass({
                     <Markdown source={this.props.poll.content.extended.md} />
                 </div>
                 <ButtonToolbar className="text-center">
-                    <VoteButton text="Yes" className="btn-vote-yes"/>
-                    <VoteButton text="No" className="btn-vote-no"/>
+                    <VoteButton text="vote.YES" className="btn-vote-yes"/>
+                    <VoteButton text="vote.NO" className="btn-vote-no"/>
                 </ButtonToolbar>
             </div>
 		);

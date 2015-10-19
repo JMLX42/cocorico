@@ -2,12 +2,15 @@ var React = require('react')
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
+var ReactRouter = require('react-router');
 
 var Poll = require('./component/Poll');
 var Header = require('./component/Header');
 var Footer = require('./component/Footer');
 var PollAction = require('./action/PollAction');
 var PollStore = require("./store/PollStore");
+
+var RouteHandler = ReactRouter.RouteHandler;
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row;
@@ -54,13 +57,13 @@ var App = React.createClass({
 		return (
 			<div>
 				<Header />
-				<div id="content">
-					<Grid>
-						<Row>
-							<Poll poll={this.state.latestPoll}/>
-						</Row>
-					</Grid>
-				</div>
+                    <div id="content">
+                        <Grid>
+    						<Row>
+                                {this.props.children || ''}
+    						</Row>
+    					</Grid>
+    				</div>
 				<Footer />
 			</div>
 		);

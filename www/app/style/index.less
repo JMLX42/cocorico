@@ -19,14 +19,17 @@ body {
 }
 
 #content {
+    padding-top: 80px;
     font-size: 1.5em;
 }
 
 #footer {
     border-top: 1px solid #E7E7E7;
-    margin-top: 20px;
+    margin-top: 50px;
     min-height: 200px;
     background-color: #f8f8f8;
+    padding-top: 20px;
+    color: #777;
 }
 
 .poll-content {
@@ -36,18 +39,32 @@ body {
 
 .btn-vote {
     color: white;
-    width: 125px;
+    width: 170px;
     padding: 20px;
+
+    &:hover {
+        color: white;
+    }
 }
 
 .btn-vote-yes {
     .btn-vote;
     background-color: blue;
     border-color: darkblue;
+
+    &:hover {
+        border-color: blue;
+        background-color: darkblue;
+    }
 }
 
 .btn-vote-no {
     .btn-vote;
     background-color: red;
     border-color: darkred;
+
+    &:hover {
+        border-color: red;
+        background-color: darkred;
+    }
 }

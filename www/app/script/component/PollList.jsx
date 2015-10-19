@@ -1,8 +1,8 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var Reflux = require('reflux');
-var PollAction = require("./action/PollAction");
-var PollStore = require("./store/PollStore");
+var PollAction = require("../action/PollAction");
+var PollStore = require("../store/PollStore");
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row;
