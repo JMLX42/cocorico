@@ -36,3 +36,4 @@ node_modules
 public/js/app.js*
 public/js/vendor.js*
 public/css/app.css*
+config

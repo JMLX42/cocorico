@@ -6,7 +6,8 @@ var Intl = {
 			USERNAME: "Utilisateur",
 			PASSWORD: "Mot de passe",
 			FORGOTTEN_PASSWORD: "Mot de passe oublié",
-			LOGIN: "Se Connecter"
+			SIGN_IN: "Se Connecter",
+			SIGN_UP: "Créer un compte"
 		},
 
 		footer: {

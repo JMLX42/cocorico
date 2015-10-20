@@ -27,6 +27,7 @@ exports.navbar = function(req, res)
 	Page.model.find()
         .where('published', true)
         .where('navbar', true)
+		.sort('sortOrder')
         .exec(function(err, items)
         {
     		if (err) return res.apiError('database error', err);

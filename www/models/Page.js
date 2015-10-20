@@ -5,7 +5,7 @@ var Types = keystone.Field.Types;
 var Page = new keystone.List('Page', {
     autokey: { path: 'slug', from: 'title', unique: true },
     map: { name: 'title' },
-    defaultSort: '-createdAt'
+    sortable: true
 });
 
 Page.add({

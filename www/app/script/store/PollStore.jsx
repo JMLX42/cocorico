@@ -31,7 +31,7 @@ module.exports = Reflux.createStore({
             function(data)
             {
                 self._latest = data.poll;
-                self.trigger(null, self._latest);
+                self.trigger(self);
             }
         );
     },
@@ -45,7 +45,7 @@ module.exports = Reflux.createStore({
             function(data)
             {
                 self._polls = data.polls;
-                self.trigger(null, self._polls);
+                self.trigger(self);
             }
         );
     }

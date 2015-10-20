@@ -26,6 +26,9 @@
 - name: build app
   command: brunch build creates={{ www_dir }}/{{ role_name }}/public/js/app.js
 
+- name: copy app configuration
+  template: src=config.json.j2 dest={{ www_dir }}/{{ role_name }}/config/config.json
+
 - name: create admin user
   when: is_development_environment
   shell: NODE_PATH={{ www_dir }}/{{ role_name }}/node_modules headstone /vagrant/provisioning/roles/{{ role_name }}/files/add_keystonejs_user.js --cwd={{ www_dir }}/{{ role_name }} --userEmail={{ keystonejs_admin_email }} --userPassword={{ keystonejs_admin_password }} --userFirstname=Admin --userLastname=Admin --userIsAdmin=true

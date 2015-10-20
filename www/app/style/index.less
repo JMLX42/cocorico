@@ -3,6 +3,11 @@
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans);
 
+@cocorico-blue: #00AAFF;
+@cocorico-dark-blue: #0077CC;
+@cocorico-red: #ee3300;
+@cocorico-dark-red: #993300;
+
 body {
     background-color: #f8f8f8;
     font-family: 'Open Sans', sans-serif;
@@ -15,6 +20,26 @@ body {
 #header {
     .navbar {
         border-radius: 0;
+    }
+
+    .navbar-header {
+        margin-top: 20px;
+    }
+
+    .navbar-nav {
+        margin-top: 20px;
+    }
+
+    .navbar-right {
+        margin-top: 0;
+    }
+
+    .navbar-default .navbar-nav > li > a.active {
+        color: @cocorico-blue;
+    }
+
+    #logo {
+        text-transform: uppercase;
     }
 }
 
@@ -30,6 +55,14 @@ body {
     background-color: #f8f8f8;
     padding-top: 20px;
     color: #777;
+
+    a {
+        color: #777;
+    }
+}
+
+.poll-title {
+    margin-top: 50px;
 }
 
 .poll-content {
@@ -49,22 +82,26 @@ body {
 
 .btn-vote-yes {
     .btn-vote;
-    background-color: blue;
-    border-color: darkblue;
+    background-color: @cocorico-blue;
+    border-color: @cocorico-dark-blue;
 
     &:hover {
-        border-color: blue;
-        background-color: darkblue;
+        border-color: @cocorico-blue;
+        background-color: @cocorico-dark-blue;
     }
 }
 
 .btn-vote-no {
     .btn-vote;
-    background-color: red;
-    border-color: darkred;
+    background-color: @cocorico-red;
+    border-color: @cocorico-dark-red;
 
     &:hover {
-        border-color: red;
-        background-color: darkred;
+        border-color: @cocorico-red;
+        background-color: @cocorico-dark-red;
     }
+}
+
+.btn-login {
+    height: 50px
 }

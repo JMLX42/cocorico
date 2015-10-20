@@ -14,6 +14,8 @@ var Navbar = ReactBootstrap.Navbar,
 
 var Link = ReactRouter.Link;
 
+var LoginButton = require('./LoginButton');
+
 var Header = React.createClass({
     mixins: [Reflux.connect(PageStore, 'pages'), ReactIntl.IntlMixin],
 
@@ -23,17 +25,19 @@ var Header = React.createClass({
             <div id="header">
                 <Navbar fixedTop>
     		    	<NavBrand>
-                        <Link to="/">
-                            <span style={{color:'blue'}}>co</span>
-                            cori
-                            <span style={{color:'red'}}>co</span>                            
-                        </Link>
+                        <div id="logo">
+                            <Link to="/">
+                                <span style={{color:'blue'}}>co</span>
+                                <span style={{color:'grey'}}>cori</span>
+                                <span style={{color:'red'}}>co</span>
+                            </Link>
+                        </div>
                     </NavBrand>
                     <Nav>
                         {!this.state.pages ? '' : this.state.pages.navBar().map(function(page) {
                             return (
                                 <li>
-                                    <Link to={'/page/' + page.slug}>
+                                    <Link to={'/page/' + page.slug} activeClassName="active">
                                         {page.title}
                                     </Link>
                                 </li>
@@ -41,9 +45,9 @@ var Header = React.createClass({
                         })}
     			    </Nav>
                     <Nav right>
-    					<NavItem eventKey={1} href="#">
-                            {this.getIntlMessage('login.LOGIN')}
-    					</NavItem>
+    					<li>
+                            <LoginButton />
+    					</li>
     			    </Nav>
     		  	</Navbar>
             </div>

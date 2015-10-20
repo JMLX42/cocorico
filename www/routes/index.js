@@ -1,18 +1,25 @@
 var babelify = require('babelify');
 var browserify = require('browserify-middleware');
 var keystone = require('keystone');
+var passport = require('passport');
 
 var importRoutes = keystone.importer(__dirname);
 
 var routes = {
 	views: importRoutes('./views'),
-	api: importRoutes('./api')
+	api: importRoutes('./api'),
+	auth: importRoutes('./auth')
 };
 
 // Setup Route Bindings
 exports = module.exports = function(app) {
 
+	app.use(passport.initialize());
+	app.use(passport.session());
+
 	app.get('/', routes.views.index);
+
+	app.get('/auth/login', keystone.middleware.api, routes.auth.index.login);
 
 	app.get('/api/poll/list', keystone.middleware.api, routes.api.poll.list);
 	app.get('/api/poll/latest', keystone.middleware.api, routes.api.poll.latest);

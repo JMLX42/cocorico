@@ -26,7 +26,13 @@
     "forever": "0.14.1",
     "d3": "3.5.6",
     "jquery": "2.1.4",
-    "node-lessify": "latest"
+    "node-lessify": "latest",
+    "passport": "latest",
+    "oauth": "~0.9.12",
+    "passport": "~0.2.1",
+    "passport-oauth": "^1.0.0",
+    "passport-openidconnect": "0.0.1",
+    "lodash": "~2.4.1"
   },
   "engines": {
     "node": ">=0.10.22",

@@ -10,3 +10,7 @@ front_web_public_host: "{{ front_hostname }}.test"
 
 keystonejs_admin_email: "admin@{{ front_hostname }}"
 keystonejs_admin_password: admin
+
+franceconnect_cliend_id: 10e0a74c752107f712b890e6183b03b179146eb682189c3158370cb8f3fe7068
+franceconnect_client_secret: 9ecc4856675778548fae7c3042b07df78a5134f3ab9ae09b91543965b24f04a3
+franceconnect_url: fcp.integ01.dev-franceconnect.fr
