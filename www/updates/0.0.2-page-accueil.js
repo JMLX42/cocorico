@@ -1,0 +1,14 @@
+var keystone = require('keystone');
+var async = require('async');
+
+var Page = keystone.list('Page');
+var Media = keystone.list('Media');
+
+module.exports = function(done) {
+	async.series([
+		function(next) {
+			new Page.model({"contentType":"HTML","createdAt":"2015-10-25T20:37:31.000Z","html":"<h1 style=\"text-align: center;\">Aux urnes, citoyens !</h1>\r\n<p style=\"text-align: center;\">Cocorico est une plateforme de d&eacute;mocratie participative o&ugrave; les citoyens peuvent voter et proposer des r&eacute;f&eacute;rendums de fa&ccedil;on 100% anonyme et s&eacute;curis&eacute;e.</p>","published":true,"publishedAt":"2015-10-25T20:37:34.000Z","showInNavBar":false,"slug":"accueil","sortOrder":4,"title":"Accueil"}).save(next);
+		},
+		function(next) { done(); }
+	]);
+};
