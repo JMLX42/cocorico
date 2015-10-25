@@ -10,7 +10,6 @@ var Router = ReactRouter.Router,
 
     App = require('./App'),
     Page = require('./page/Page'),
-    Login = require('./page/Login'),
     Home = require('./page/Home');
 
 ReactDOM.render(
@@ -18,7 +17,7 @@ ReactDOM.render(
         <Route path='/' component={App}>
             <IndexRoute component={Home}/>
             <Route path='page/:slug' component={Page}/>
-            <Route path='login' component={Login}/>
+            <Route path=':slug' component={Page}/>
         </Route>
     </Router>,
     document.getElementById('app')

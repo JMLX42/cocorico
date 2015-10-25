@@ -8,10 +8,10 @@ var Poll = require('./component/Poll');
 var Header = require('./component/Header');
 var Footer = require('./component/Footer');
 
+var Intl = require('./intl/intl');
+
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row;
-
-var Intl = require('./intl/intl');
 
 var App = React.createClass({
 
@@ -30,11 +30,7 @@ var App = React.createClass({
 			<div>
 				<Header />
                     <div id="content">
-                        <Grid>
-    						<Row>
-                                {this.props.children || ''}
-    						</Row>
-    					</Grid>
+                        {this.props.children || <div />}
     				</div>
 				<Footer />
 			</div>

@@ -4,8 +4,14 @@ var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
 var ReactRouter = require('react-router');
 
-var PageStore = require('../store/PageStore');
-var PageAction = require('../action/PageAction');
+var PageStore = require('../store/PageStore'),
+    UserStore = require('../store/UserStore');
+
+var PageAction = require('../action/PageAction'),
+    UserAction = require('../action/UserAction');
+
+var LoginButton = require('./LoginButton'),
+    AccountDropdown = require('./AccountDropdown');
 
 var Navbar = ReactBootstrap.Navbar,
     Nav = ReactBootstrap.Nav,
@@ -14,22 +20,33 @@ var Navbar = ReactBootstrap.Navbar,
 
 var Link = ReactRouter.Link;
 
-var LoginButton = require('./LoginButton');
-
 var Header = React.createClass({
-    mixins: [Reflux.connect(PageStore, 'pages'), ReactIntl.IntlMixin],
+    mixins: [
+        Reflux.connect(PageStore, 'pages'),
+        Reflux.connect(UserStore, 'users'),
+        ReactIntl.IntlMixin
+    ],
+
+    componentDidMount: function()
+    {
+        UserAction.requireLogin();
+    },
 
     render: function()
     {
+        var currentUser = this.state.users
+            ? this.state.users.getCurrentUser()
+            : null;
+
 		return (
             <div id="header">
                 <Navbar fixedTop>
     		    	<NavBrand>
                         <div id="logo">
                             <Link to="/">
-                                <span style={{color:'blue'}}>co</span>
-                                <span style={{color:'grey'}}>cori</span>
-                                <span style={{color:'red'}}>co</span>
+                                <span className="cocorico-blue">co</span>
+                                <span className="cocorico-grey">cori</span>
+                                <span className="cocorico-red">co</span>
                             </Link>
                         </div>
                     </NavBrand>
@@ -37,7 +54,7 @@ var Header = React.createClass({
                         {!this.state.pages ? '' : this.state.pages.navBar().map(function(page) {
                             return (
                                 <li>
-                                    <Link to={'/page/' + page.slug} activeClassName="active">
+                                    <Link to={'/' + page.slug} activeClassName="active">
                                         {page.title}
                                     </Link>
                                 </li>
@@ -45,10 +62,12 @@ var Header = React.createClass({
                         })}
     			    </Nav>
                     <Nav right>
-    					<li>
-                            <LoginButton />
-    					</li>
-    			    </Nav>
+                        <li>
+                            {!!currentUser
+                                ? <AccountDropdown fullName={currentUser.firstName + ' ' + currentUser.lastName}/>
+                                : <LoginButton />}
+                        </li>
+                    </Nav>
     		  	</Navbar>
             </div>
 		);

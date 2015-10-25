@@ -4,8 +4,11 @@ var ReactRouter = require('react-router');
 var Reflux = require('reflux');
 
 var PollStore = require("../store/PollStore");
+
 var PollAction = require("../action/PollAction");
-var Poll = require("../component/Poll");
+
+var Poll = require("../component/Poll"),
+    Page = require("../component/Page");
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -14,24 +17,19 @@ var Grid = ReactBootstrap.Grid,
 var Link = ReactRouter.Link;
 
 var Home = React.createClass({
-    mixins: [Reflux.connect(PollStore, 'polls')],
+    // mixins: [Reflux.connect(PollStore, 'polls')],
 
     componentDidMount: function()
     {
-        PollAction.showLatest();
+        // PollAction.showLatest();
     },
 
     render: function()
     {
-        if (!this.state.polls)
-            return null;
-
 		return (
-            <Grid>
-                <Row>
-                    <Poll poll={this.state.polls.latest()}/>
-                </Row>
-            </Grid>
+            <div className="page-home">
+                <Page slug="accueil"/>
+            </div>
 		);
 	}
 });

@@ -31,7 +31,7 @@
 
 - name: create admin user
   when: is_development_environment
-  shell: NODE_PATH={{ www_dir }}/{{ role_name }}/node_modules headstone /vagrant/provisioning/roles/{{ role_name }}/files/add_keystonejs_user.js --cwd={{ www_dir }}/{{ role_name }} --userEmail={{ keystonejs_admin_email }} --userPassword={{ keystonejs_admin_password }} --userFirstname=Admin --userLastname=Admin --userIsAdmin=true
+  shell: NODE_PATH={{ www_dir }}/{{ role_name }}/node_modules headstone {{ www_dir }}/{{ role_name }}/scripts/add-user.js --cwd={{ www_dir }}/{{ role_name }} --userEmail={{ home_web_admin_email }} --userPassword={{ home_web_admin_password }} --userName={{ home_web_admin_name }} --userIsAdmin=true
   args:
     chdir: "{{ www_dir }}/{{ role_name }}"
   register: result

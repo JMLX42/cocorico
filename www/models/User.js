@@ -5,9 +5,9 @@ var Types = keystone.Field.Types;
 var User = new keystone.List('User');
 
 User.add({
-	name: { type: Types.Name, required: true, index: true },
-	email: { type: Types.Email, initial: true, required: true, index: true },
-	password: { type: Types.Password, initial: true, required: true }
+	name: { type: String, initial: true },
+	email: { type: Types.Email, initial: true, index: true },
+	password: { type: Types.Password, initial: true }
 }, 'Permissions', {
 	isAdmin: { type: Boolean, label: 'Can access Keystone', index: true }
 });
@@ -21,5 +21,5 @@ User.relationship({ path: 'polls', ref: 'Poll', refPath: 'author' });
 
 transform.toJSON(User);
 
-User.defaultColumns = 'name, email, isAdmin';
+User.defaultColumns = 'hash, name, email, isAdmin';
 User.register();

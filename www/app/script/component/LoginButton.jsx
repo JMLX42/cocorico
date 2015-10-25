@@ -1,13 +1,22 @@
 var React = require('react');
+var ReactIntl = require('react-intl');
+var ReactRouter = require('react-router');
+var ReactBootstrap = require('react-bootstrap');
+
+var Link = ReactRouter.Link;
+
+var Glyphicon = ReactBootstrap.Glyphicon
 
 var LoginButton = React.createClass({
+
+    mixins: [ReactIntl.IntlMixin],
 
     render: function()
     {
 		return (
-            <a href="/auth/login">
-                <img src="/img/franceconnect_logo_login.png" className="btn-login"/>
-            </a>
+            <Link to={this.getIntlMessage('login.SIGN_IN_URL')}>
+                {this.getIntlMessage('login.SIGN_IN')}
+            </Link>
 		);
 	}
 });

@@ -13,6 +13,10 @@ keystone.init({
 	'views': 'templates/views',
 	'view engine': 'jade',
 
+	'wysiwyg images': true,
+	'wysiwyg menubar': true,
+	'wysiwyg additional plugins': 'table',
+
 	'mongo' : process.env.MONGO_URI,
 
 	'auto update': true,

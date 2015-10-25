@@ -18,7 +18,8 @@
     "react-bootstrap": "latest",
     "react-dom": "latest",
     "react-remarkable": "latest",
-    "react-intl": "latest",
+    "react-intl": "1.2.0",
+    "react-document-title": "latest",
     "reflux": "latest",
     "request": "^2.60.0",
     "store-prototype": "^1.1.1",
@@ -32,16 +33,19 @@
     "passport": "~0.2.1",
     "passport-oauth": "^1.0.0",
     "passport-openidconnect": "0.0.1",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "client-sessions": "latest",
+    "bcrypt": "latest",
+    "async": "latest"
   },
   "engines": {
     "node": ">=0.10.22",
     "npm": ">=1.3.14"
   },
   "scripts": {
-    "start": "nodemon -w models -w routes -w templates -w keystone.js -d 1 keystone.js",
+    "start": "nodemon -w models -w routes -w templates -w keystone.js -w config -d 1 keystone.js",
     "build-app": "browserify -t babelify -t node-lessify --extension=.jsx app/script/index.js -o public/js/app.js",
-    "watch-app": "watchify -v -t babelify -t node-lessify --extension=.jsx app/script/index.js --poll=1000 -o public/js/app.js"
+    "watch-app": "watchify -v -t babelify -t node-lessify --extension=.jsx app/script/index.js --poll=2000 -o public/js/app.js"
   },
   "overrides": {
     "react": {

@@ -3,7 +3,7 @@ require('dotenv').load();
 var keystone = require("keystone");
 var User = keystone.list("User");
 
-module.exports = function(userEmail, userPassword, userIsAdmin, userFirstname, userLastname, done)
+module.exports = function(userEmail, userPassword, userIsAdmin, userName, done)
 {
     User.model.find()
         .where('email', userEmail)
@@ -13,7 +13,7 @@ module.exports = function(userEmail, userPassword, userIsAdmin, userFirstname, u
             {
                 var newUser = new User.model({
                 	email: userEmail,
-                    name: {'first' : userFirstname, 'last' : userLastname },
+                    name: userName,
                 	password: userPassword,
                 	isAdmin: userIsAdmin == 'true'
                 });

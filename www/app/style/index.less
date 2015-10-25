@@ -1,20 +1,40 @@
 @import "./bootstrap/bootstrap.less";
-@import "./bootswatch-lumen.less";
 
-@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+// @import "./bootswatch-lumen.less";
 
-@cocorico-blue: #00AAFF;
-@cocorico-dark-blue: #0077CC;
-@cocorico-red: #ee3300;
+@import "./bootswatch-journal-variables.less";
+
+@cocorico-blue: #4285F4;
+@cocorico-dark-blue: #0d64f3;
+@cocorico-red: @brand-primary;
 @cocorico-dark-red: #993300;
+@cocorico-grey: #999;
+@cocorico-light-grey: #E7E7E7;
+
+@text-color: #444;
+@headings-color: @text-color;
+@component-active-bg: @cocorico-blue;
+
+@import "./bootswatch-journal.less";
 
 body {
     background-color: #f8f8f8;
-    font-family: 'Open Sans', sans-serif;
 }
 
 #app {
     background-color: white;
+}
+
+.cocorico-blue {
+    color: @cocorico-blue;
+}
+
+.cocorico-grey {
+    color: @cocorico-grey;
+}
+
+.cocorico-red {
+    color: @cocorico-red;
 }
 
 #header {
@@ -22,16 +42,8 @@ body {
         border-radius: 0;
     }
 
-    .navbar-header {
-        margin-top: 20px;
-    }
-
-    .navbar-nav {
-        margin-top: 20px;
-    }
-
-    .navbar-right {
-        margin-top: 0;
+    .nav button {
+        margin-top: 6px;
     }
 
     .navbar-default .navbar-nav > li > a.active {
@@ -40,63 +52,92 @@ body {
 
     #logo {
         text-transform: uppercase;
+        font-size: 24px;
+    }
+
+    .account-dropdown {
+        min-width: 200px;
+        font-size: 20px;
+        padding: 4px 0px;
+
+        ul {
+            min-width: 200px;
+            margin-top: -5px;
+        }
     }
 }
 
 #content {
-    padding-top: 80px;
+    padding-top: @navbar-height;
     font-size: 1.5em;
 }
 
 #footer {
     border-top: 1px solid #E7E7E7;
-    margin-top: 50px;
     min-height: 200px;
     background-color: #f8f8f8;
     padding-top: 20px;
-    color: #777;
+    color: @cocorico-grey;
 
     a {
-        color: #777;
+        color: @cocorico-grey;
+    }
+
+    .list-inline li {
+        margin-right: 20px;
     }
 }
 
-.poll-title {
-    margin-top: 50px;
+.poll {
+    .poll-text {
+        // font-family: "dominereg";
+        text-align: justify;
+    }
+
+    .poll-title {
+        margin-top: 80px;
+    }
 }
 
-.poll-content {
+.page {
     margin: 50px 0;
-    text-align: justify;
+}
+
+.page-home {
 }
 
 .btn-vote {
-    color: white;
     width: 170px;
     padding: 20px;
-
-    &:hover {
-        color: white;
-    }
 }
 
 .btn-vote-yes {
     .btn-vote;
+
+    color: white;
     background-color: @cocorico-blue;
     border-color: @cocorico-dark-blue;
 
     &:hover {
+        color: white;
         border-color: @cocorico-blue;
         background-color: @cocorico-dark-blue;
     }
 }
 
+.btn-vote-blank {
+    .btn-vote;
+}
+
 .btn-vote-no {
     .btn-vote;
+
+    color: white;
     background-color: @cocorico-red;
     border-color: @cocorico-dark-red;
 
     &:hover {
+        color: white;
         border-color: @cocorico-red;
         background-color: @cocorico-dark-red;
     }
@@ -104,4 +145,18 @@ body {
 
 .btn-login {
     height: 50px
+}
+
+.error-404 {
+    font-size: 2em;
+}
+
+.section {
+    padding-top: 30px;
+    padding-bottom: 30px;
+    border-top: 1px solid @cocorico-light-grey;
+
+    .section-title {
+        margin-bottom: 20px;
+    }
 }

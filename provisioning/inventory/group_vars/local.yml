@@ -1,16 +1,23 @@
 environment_name: local
-hostname: cocorico.io-{{ environment_name }}
+front_hostname: cocorico.cc
+front_web_public_host: "{{ front_hostname }}.test"
+hostname: "{{ front_hostname }}-{{ environment_name }}"
 is_development_environment: yes
 http_protocol_prefix: http
 
 mongodb_database_name: "{{ project_name }}"
 
-front_hostname: cocorico.io
-front_web_public_host: "{{ front_hostname }}.test"
-
-keystonejs_admin_email: "admin@{{ front_hostname }}"
-keystonejs_admin_password: admin
-
 franceconnect_cliend_id: 10e0a74c752107f712b890e6183b03b179146eb682189c3158370cb8f3fe7068
 franceconnect_client_secret: 9ecc4856675778548fae7c3042b07df78a5134f3ab9ae09b91543965b24f04a3
-franceconnect_url: fcp.integ01.dev-franceconnect.fr
+franceconnect_url: https://fcp.integ01.dev-franceconnect.fr
+
+home_web_admin_email: "admin@{{ front_hostname }}"
+home_web_admin_password: admin
+home_web_admin_name: Admin
+home_web_upload_dir: upload
+
+home_db_saved_pages:
+    - connexion
+    - accueil
+    - aide
+    - politique-de-confidentialite

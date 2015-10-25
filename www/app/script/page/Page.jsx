@@ -1,51 +1,33 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
-var Reflux = require('reflux');
-var Markdown = require('react-remarkable');
 
-var PageStore = require('../store/PageStore');
-var PageAction = require('../action/PageAction');
+var PageComponent = require('../component/Page');
 
 var Grid = ReactBootstrap.Grid,
-    Row = ReactBootstrap.Row;
+    Row = ReactBootstrap.Row,
+    Col = ReactBootstrap.Col;
 
 var Page = React.createClass({
-    mixins: [Reflux.connect(PageStore, 'pages')],
 
     componentWillReceiveProps: function(props)
     {
-        PageAction.readPage(props.params.slug);
+        this.setState({'slug': props.params.slug});
     },
 
     componentDidMount: function()
     {
-        PageAction.readPage(this.props.params.slug);
-    },
-
-    getPageContent: function(page)
-    {
-        if (page.contentType == 'Markdown')
-            return <Markdown source={page.markdown.md} />;
-        else
-            return <div dangerouslySetInnerHTML={{__html: this.state.pages.getPageBySlug(this.props.params.slug).html}}></div>;
+        this.setState({'slug': this.props.params.slug});
     },
 
     render: function()
     {
-        if (!this.state.pages)
-            return null;
-
-        var page = this.state.pages.getPageBySlug(this.props.params.slug);
-
-        if (!page)
+        if (!this.state || !this.state.slug)
             return null;
 
 		return (
-            <Grid>
-                <Row>
-                    {this.getPageContent(page)}
-                </Row>
-            </Grid>
+            <div className="page">
+                <PageComponent slug={this.state.slug} />
+            </div>
 		);
 	}
 });

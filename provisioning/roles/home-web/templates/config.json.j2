@@ -5,22 +5,22 @@
     "env": "production",
 {% endif %}
     "franceConnect" : {
-        "URL": "http://{{ franceconnect_url }}/",
+        "URL": "{{ franceconnect_url }}/",
         "openIDConnectStrategyParameters": {
             "clientID": "{{ franceconnect_cliend_id }}",
             "clientSecret": "{{ franceconnect_client_secret }}",
-            "callbackURL": "http://{{ front_web_public_host }}/api/user/openIDConnectCallback",
-            "authorizationURL": "http://{{ franceconnect_url }}/api/v1/authorize",
-            "tokenURL": "http://{{ franceconnect_url }}/api/v1/token",
-            "userInfoURL": "http://{{ franceconnect_url }}/api/v1/userinfo",
-            "logoutURL": "http://{{ franceconnect_url }}/api/v1/logout",
-            "acr_values": "eidas2",
-            "scope": ["profile", "email", "address", "phone", "openid"]
+            "callbackURL": "http://{{ front_web_public_host }}/auth/connectCallback",
+            "authorizationURL": "{{ franceconnect_url }}/api/v1/authorize",
+            "tokenURL": "{{ franceconnect_url }}/api/v1/token",
+            "userInfoURL": "{{ franceconnect_url }}/api/v1/userinfo",
+            "logoutURL": "{{ franceconnect_url }}/api/v1/logout",
+            "acr_values": "eidas2"
         },
         "oauth": {
-            "authorizationURL": "http://{{ franceconnect_url }}/api/v1/authorize",
-            "tokenURL": "http://{{ franceconnect_url }}/api/v1/token",
-            "callbackURL": "http://{{ front_web_public_host }}/api/user/openIDConnectCallback"
+            "authorizationURL": "{{ franceconnect_url }}/api/v1/authorize",
+            "tokenURL": "{{ franceconnect_url }}/api/v1/token",
+            "callbackURL": "http://{{ front_web_public_host }}/auth/connectCallback",
+            "scope": ["openid", "profile"]
         }
     }
 }

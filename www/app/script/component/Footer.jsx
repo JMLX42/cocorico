@@ -6,7 +6,8 @@ var ReactRouter = require('react-router');
 var Link = ReactRouter.Link;
 
 var Grid = ReactBootstrap.Grid,
-    Row = ReactBootstrap.Row;
+    Row = ReactBootstrap.Row,
+    Col = ReactBootstrap.Col;
 
 var Footer = React.createClass({
 
@@ -18,9 +19,20 @@ var Footer = React.createClass({
             <div id="footer">
                 <Grid>
                     <Row>
-                        <Link to="/page/privacy-policy">
-                            {this.getIntlMessage('footer.PRIVACY_POLICY')}
-                        </Link>
+                        <Col md={12}>
+                            <ul className="list-unstyled list-inline">
+                                <li>
+                                    <Link to={this.getIntlMessage('footer.PRIVACY_POLICY_URL')}>
+                                        {this.getIntlMessage('footer.PRIVACY_POLICY')}
+                                    </Link>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/promethe42/cocorico">
+                                        {this.getIntlMessage('footer.SOURCE_CODE')}
+                                    </a>
+                                </li>
+                            </ul>
+                        </Col>
                     </Row>
                 </Grid>
             </div>

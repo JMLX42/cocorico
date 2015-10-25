@@ -27,8 +27,6 @@ module.exports = Reflux.createStore({
 
     fetchNavBar: function()
     {
-        var self = this;
-
         if (this._navBar != null)
             return;
 
@@ -36,46 +34,42 @@ module.exports = Reflux.createStore({
 
         jquery.get(
             '/api/page/navbar',
-            function(data)
-            {
-                self._navBar = data.pages;
-                self.trigger(self);
+            (data) => {
+                this._navBar = data.pages;
+                this.trigger(this);
             }
         );
     },
 
     fetchPages: function()
     {
-        var self = this;
-
         jquery.get(
             '/api/page/list',
-            function(data)
-            {
-                self._pages = data.pages;
-                self.trigger(self);
+            (data) => {
+                this._pages = data.pages;
+                this.trigger(this);
             }
         );
     },
 
     fetchPageBySlug: function(slug)
     {
-        var self = this;
-
         if (this.getPageBySlug(slug))
         {
-            self.trigger(self);
+            this.trigger(this);
             return;
         }
 
         jquery.get(
             '/api/page/getBySlug/' + slug,
-            function(data)
-            {
-                self._pages.push(data.page);
-                self.trigger(self);
+            (data, textStatus, xhr) => {
+                this._pages.push(data.page);
+                this.trigger(this);
             }
-        );
+        ).error((xhr, textStatus, err) => {
+            this._pages.push({ slug: slug, error: xhr.status });
+            this.trigger(this);
+        });
     },
 
     getPageBySlug: function(slug)

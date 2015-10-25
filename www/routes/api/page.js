@@ -26,7 +26,7 @@ exports.navbar = function(req, res)
 {
 	Page.model.find()
         .where('published', true)
-        .where('navbar', true)
+        .where('showInNavBar', true)
 		.sort('sortOrder')
         .exec(function(err, items)
         {
@@ -59,16 +59,15 @@ exports.get = function(req, res)
  */
 exports.getBySlug = function(req, res)
 {
-	Page.model.find()
+	Page.model.findOne()
 		.where('slug', req.params.slug)
-		.limit(1)
-		.exec(function(err, items)
+		.exec(function(err, item)
 	    {
-			if (err) return res.apiError('database error', err);
-			if (!items) return res.apiError('not found');
+			if (err)
+				return res.apiError('database error', err);
+			if (!item)
+				return res.status(404).send();
 
-			res.apiResponse({
-				page: items[0]
-			});
+			res.apiResponse({ page: item });
 		});
 }

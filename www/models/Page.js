@@ -10,7 +10,6 @@ var Page = new keystone.List('Page', {
 
 Page.add({
 	title: { type: String, required: true },
-	author: { type: Types.Relationship, ref: 'User' },
 	createdAt: { type: Date, default: Date.now },
     publishedAt: Date,
     published: { type: Boolean, default: false },
