@@ -6,7 +6,9 @@ var redis = require('redis');
 var Types = keystone.Field.Types;
 
 var Vote = new keystone.List('Vote', {
-	defaultSort: '-time'
+	defaultSort: '-time',
+	nodelete: true,
+	nocreate: true
 });
 
 Vote.add({

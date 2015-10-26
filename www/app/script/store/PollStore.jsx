@@ -32,13 +32,22 @@ module.exports = Reflux.createStore({
         return null;
     },
 
+    getById: function(id)
+    {
+        for (var poll of this._polls)
+            if (poll.id == id)
+                return poll;
+
+        return null;
+    },
+
     _fetchLatest: function()
     {
         jquery.get(
             '/api/poll/latest',
             (data) => {
                 this._latest = data.poll;
-                this.trigger(this);
+                this.trigger(this, this._latest);
             }
         );
     },
@@ -56,9 +65,10 @@ module.exports = Reflux.createStore({
 
     _fetchPollBySlug: function(slug)
     {
-        if (this.getBySlug(slug))
+        var poll = this.getBySlug(slug);
+        if (poll)
         {
-            this.trigger(this);
+            this.trigger(this, poll);
             return;
         }
 
@@ -66,11 +76,13 @@ module.exports = Reflux.createStore({
             '/api/poll/getBySlug/' + slug,
             (data) => {
                 this._polls.push(data.poll);
-                this.trigger(this);
+                this.trigger(this, data.poll);
             }
         ).error((xhr, textStatus, err) => {
-            this._polls.push({ slug: slug, error: xhr.status });
-            this.trigger(this);
+            var poll = { slug: slug, error: xhr.status };
+
+            this._polls.push(poll);
+            this.trigger(this, poll);
         });;
     }
 });

@@ -42,6 +42,10 @@ var Poll = React.createClass({
         this.listenTo(PollAction.vote, (pollId, value) => {
             PollAction.show(this.props.slug);
         });
+
+        this.listenTo(PollStore, (store, poll) => {
+            PollAction.showCurrentUserVote(poll.id);
+        });
     },
 
     componentWillReceiveProps: function(props)
@@ -57,8 +61,6 @@ var Poll = React.createClass({
 
         if (!poll)
             return null;
-
-        PollAction.showCurrentUserVote(poll.id);
 
         var vote = this.state.votes
             ? this.state.votes.getVoteByPollId(poll.id)
