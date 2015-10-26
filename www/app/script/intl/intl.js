@@ -39,6 +39,7 @@ var Intl = {
 		},
 
 		poll: {
+			POLLS: 'Référendums',
 			VOTE_YES: 'pour',
 			VOTE_BLANK: 'blanc',
 			VOTE_NO: 'contre',

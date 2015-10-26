@@ -7,7 +7,7 @@ module.exports = Reflux.createStore({
     init: function()
     {
         this.listenTo(PollAction.vote, this._vote);
-        this.listenTo(PollAction.show, this._fetchVoteByPoll);
+        // this.listenTo(PollAction.show, this._fetchVoteByPoll);
 
         this._votes = {};
     },
@@ -20,21 +20,21 @@ module.exports = Reflux.createStore({
         return null;
     },
 
-    _fetchVoteByPoll: function(poll)
+    _fetchVoteByPoll: function(pollSlug)
     {
-        if (this._votes[poll.id])
+        if (this._votes[pollSlug])
             return false;
 
-        this._votes[poll.id] = true;
+        this._votes[pollSlug] = true;
 
         jquery.get(
-            '/api/poll/vote/' + poll.id,
+            '/api/poll/vote/' + pollSlug,
             (data) => {
-                this._votes[poll.id] = data.vote;
+                this._votes[pollSlug] = data.vote;
                 this.trigger(this);
             }
         ).error((xhr, textStatus, err) => {
-            delete this._votes[poll.id];
+            delete this._votes[pollSlug];
             this.trigger(this);
         });
 

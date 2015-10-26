@@ -10,7 +10,6 @@ var Poll = new keystone.List('Poll', {
 
 Poll.add({
 	title: { type: String, required: true },
-	author: { type: Types.Relationship, ref: 'User' },
 	createdAt: { type: Date, default: Date.now },
     publishedAt: Date,
 	content: { type: Types.Markdown, wysiwyg: true, height: 400 }

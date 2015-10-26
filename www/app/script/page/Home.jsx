@@ -1,13 +1,14 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var ReactRouter = require('react-router');
+var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
 
 var PollStore = require("../store/PollStore");
 
 var PollAction = require("../action/PollAction");
 
-var Poll = require("../component/Poll"),
+var PollList = require("../component/PollList"),
     Page = require("../component/Page");
 
 var Grid = ReactBootstrap.Grid,
@@ -17,18 +18,26 @@ var Grid = ReactBootstrap.Grid,
 var Link = ReactRouter.Link;
 
 var Home = React.createClass({
-    // mixins: [Reflux.connect(PollStore, 'polls')],
 
-    componentDidMount: function()
-    {
-        // PollAction.showLatest();
-    },
+    mixins: [ReactIntl.IntlMixin],
 
     render: function()
     {
 		return (
             <div className="page-home">
                 <Page slug="accueil"/>
+                <Grid>
+                    <Row>
+                        <Col md={12}>
+                            <h2>{this.getIntlMessage('poll.POLLS')}</h2>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={12}>
+                            <PollList />
+                        </Col>
+                    </Row>
+                </Grid>
             </div>
 		);
 	}

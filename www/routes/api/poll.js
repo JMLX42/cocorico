@@ -127,3 +127,21 @@ exports.voteNo = function(req, res)
 {
 	vote(req, res, 'no');
 }
+
+/**
+ * Get Poll by slug
+ */
+exports.getBySlug = function(req, res)
+{
+	Poll.model.findOne()
+		.where('slug', req.params.slug)
+		.exec(function(err, item)
+	    {
+			if (err)
+				return res.apiError('database error', err);
+			if (!item)
+				return res.status(404).send();
+
+			res.apiResponse({ poll: item });
+		});
+}
