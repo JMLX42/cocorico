@@ -89,8 +89,6 @@ exports.connectCallback = function(req, res, next)
                 birthdate: user._json.birthdate
             };
 
-            console.log(user);
-
             req.login(user, function(err) {
                 return res.redirect(302, '/');
             });
