@@ -38,7 +38,8 @@
     "client-sessions": "latest",
     "bcrypt": "latest",
     "async": "latest",
-    "node_redis": "latest"
+    "node_redis": "latest",
+    "node-metainspector": "latest"
   },
   "engines": {
     "node": ">=0.10.22",

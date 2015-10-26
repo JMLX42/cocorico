@@ -87,11 +87,16 @@ var Poll = React.createClass({
                                 </div>
                             </Col>
                         </Row>
-                        <Row className="section">
-                            <Col md={12}>
-                                <h2 className="section-title">{this.getIntlMessage('poll.ADDITIONAL_DATA')}</h2>
-                            </Col>
-                        </Row>
+                        
+                        {!!poll && poll.additionalData
+                            ? <Row className="section">
+                                <Col md={12}>
+                                    <h2 className="section-title">{this.getIntlMessage('poll.ADDITIONAL_DATA')}</h2>
+                                    <Markdown source={poll.additionalData} />
+                                </Col>
+                              </Row>
+                            : <div/>}
+
                         <Row className="section">
                             <Col md={12}>
                                 <h2 className="section-title">{this.getIntlMessage('poll.PARTICIPATION')}</h2>
