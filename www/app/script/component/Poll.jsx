@@ -44,7 +44,8 @@ var Poll = React.createClass({
         });
 
         this.listenTo(PollStore, (store, poll) => {
-            PollAction.showCurrentUserVote(poll.id);
+            if (poll.slug == this.props.slug)
+                PollAction.showCurrentUserVote(poll.id);
         });
     },
 

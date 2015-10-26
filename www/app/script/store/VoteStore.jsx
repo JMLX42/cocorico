@@ -25,7 +25,7 @@ module.exports = Reflux.createStore({
     {
         if (this._votes[pollId])
         {
-            this.trigger(this);
+            this.trigger(this, this._votes[pollId]);
             return false;
         }
 
@@ -35,11 +35,11 @@ module.exports = Reflux.createStore({
             '/api/poll/vote/' + pollId,
             (data) => {
                 this._votes[pollId] = data.vote;
-                this.trigger(this);
+                this.trigger(this, data.vote);
             }
         ).error((xhr, textStatus, err) => {
             this._votes[pollId] = { error: xhr.status };
-            this.trigger(this);
+            this.trigger(this, this._votes[pollId]);
         });
 
         return true;
@@ -50,8 +50,8 @@ module.exports = Reflux.createStore({
         jquery.get(
             '/api/poll/vote/' + value + '/' + pollId,
             (data) => {
-                delete this._votes[pollId];
-                this.trigger(this);
+                this._votes[pollId] = data.vote;
+                this.trigger(this, data.vote);
             }
         );
     },
@@ -62,7 +62,7 @@ module.exports = Reflux.createStore({
             '/api/poll/unvote/' + pollId,
             (data) => {
                 delete this._votes[pollId];
-                this.trigger(this);
+                this.trigger(this, null);
             }
         );
     }
