@@ -8,7 +8,8 @@
 @cocorico-dark-blue: #0d64f3;
 @cocorico-red: @brand-primary;
 @cocorico-dark-red: #993300;
-@cocorico-grey: #999;
+@cocorico-grey: #aaa;
+@cocorico-dark-grey: #999;
 @cocorico-light-grey: #E7E7E7;
 
 @text-color: #444;
@@ -54,6 +55,10 @@ body {
     #logo {
         text-transform: uppercase;
         font-size: 24px;
+
+        a:hover {
+            text-decoration: none;
+        }
     }
 
     .account-dropdown {
@@ -78,10 +83,10 @@ body {
     min-height: 200px;
     background-color: #f8f8f8;
     padding-top: 20px;
-    color: @cocorico-grey;
+    color: @cocorico-dark-grey;
 
     a {
-        color: @cocorico-grey;
+        color: @cocorico-dark-grey;
     }
 
     .list-inline li {
@@ -128,6 +133,8 @@ body {
 
 .btn-vote-blank {
     .btn-vote;
+
+    background-color: @cocorico-grey;
 }
 
 .btn-vote-no {
