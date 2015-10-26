@@ -14,7 +14,8 @@ var PollAction = require('../action/PollAction'),
     UserAction = require('../action/UserAction');
 
 var VoteButtonBar = require('./VoteButtonBar'),
-    LoginButton = require('./LoginButton');
+    LoginButton = require('./LoginButton'),
+    UnvoteButton = require('./UnvoteButton');
 
 var VoteStore = require('../store/VoteStore'),
     UserStore = require('../store/UserStore'),
@@ -98,6 +99,8 @@ var Poll = React.createClass({
                                             <FormattedMessage message={this.getIntlMessage('poll.ALREADY_VOTED')}
                                                               value={vote ? this.getIntlMessage('poll.VOTE_' + vote.value.toUpperCase()) : ''}
                                                               date={<FormattedTime value={vote ? vote.time : Date.now()}/>}/>
+                                            <br/>
+                                            <UnvoteButton poll={poll}/>
                                           </div>
                                     : <div>
                                         {this.getIntlMessage('poll.LOGIN_REQUIRED')} <LoginButton />

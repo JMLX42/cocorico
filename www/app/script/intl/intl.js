@@ -44,6 +44,7 @@ var Intl = {
 			VOTE_BLANK: 'blanc',
 			VOTE_NO: 'contre',
 			VOTE: 'je vote { value }',
+			UNVOTE: 'retirer mon vote',
 			ALREADY_VOTED: 'Vous avez voté \'{ value }\' le { date }.',
 			LOGIN_REQUIRED: 'Vous devez être connecté pour voter.',
 			ADDITIONAL_DATA: 'Données Additionnelles',

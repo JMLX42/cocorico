@@ -31,6 +31,7 @@ exports = module.exports = function(app) {
 	app.get('/api/poll/vote/yes/:id', keystone.middleware.api, routes.api.poll.voteYes);
 	app.get('/api/poll/vote/blank/:id', keystone.middleware.api, routes.api.poll.voteBlank);
 	app.get('/api/poll/vote/no/:id', keystone.middleware.api, routes.api.poll.voteNo);
+	app.get('/api/poll/unvote/:id', keystone.middleware.api, routes.api.poll.unvote);
 
 	app.get('/api/page/list', keystone.middleware.api, routes.api.page.list);
 	app.get('/api/page/navbar', keystone.middleware.api, routes.api.page.navbar);

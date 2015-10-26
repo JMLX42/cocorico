@@ -16,18 +16,21 @@ Vote.add({
 	poll: { type: Types.Relationship, ref: 'Poll', required: true, initial: true }
 });
 
-Vote.schema.post('remove', function(next)
+Vote.schema.post('remove', function(vote)
 {
 	var client = redis.createClient();
-	var key = 'vote/' + this.poll + '/' + this.voter;
 
-	client.on('connect', function()
-	{
-		client.del(key, function(err, reply)
-		{
-			next();
-		});
-	});
+	// TODO: flush all if the user is an admin
+
+	// client.on('connect', function()
+	// {
+	// 	client.del(key, function(err, reply)
+	// 	{
+	// 		if (err)
+	// 			console.log(err);
+	// 		console.log('removed', key);
+	// 	});
+	// });
 });
 
 Vote.getByPollIdAndVoter = function(pollId, voter, callback)
