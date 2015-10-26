@@ -2,6 +2,7 @@ var React = require('react');
 var Markdown = require('react-remarkable');
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
+var ReactDocumentTitle = require('react-document-title');
 var Reflux = require('reflux');
 
 var ButtonToolbar = ReactBootstrap.ButtonToolbar;
@@ -60,64 +61,64 @@ var Poll = React.createClass({
             ? this.state.votes.getVoteByPollId(poll.id)
             : null;
 
-        console.log(vote);
-
         var currentUser = this.state.users
             ? this.state.users.getCurrentUser()
             : null;
 
 		return (
-            <div className="poll">
-                <div className="section">
-                    <Grid>
-                        <Row>
-                            <Col md={12}>
-                                <h1 className="poll-title">{poll.title}</h1>
-                            </Col>
-                        </Row>
-                    </Grid>
-                </div>
-                <div className="section">
-                    <Grid>
-                        <Row>
-                            <Col md={12}>
-                                <div className="poll-text">
-                                    <Markdown source={poll.content.md} />
-                                </div>
-                            </Col>
-                        </Row>
-                    </Grid>
-                </div>
-                <div className="section">
-                    <Grid>
-                        <Row>
-                            <Col md={12}>
-                                <h2 className="section-title">{this.getIntlMessage('poll.ADDITIONAL_DATA')}</h2>
-                            </Col>
-                        </Row>
-                    </Grid>
-                </div>
-                <div className="section">
-                    <Grid>
-                        <Row>
-                            <Col md={12}>
-                                <h2 className="section-title">{this.getIntlMessage('poll.PARTICIPATION')}</h2>
-                                {!!currentUser
-                                    ? !!this.state.votes && !vote
-                                        ? <VoteButtonBar pollId={poll.id}/>
+            <ReactDocumentTitle title={poll.title + ' - ' + this.getIntlMessage('site.TITLE')}>
+                <div className="poll">
+                    <div className="section">
+                        <Grid>
+                            <Row>
+                                <Col md={12}>
+                                    <h1 className="poll-title">{poll.title}</h1>
+                                </Col>
+                            </Row>
+                        </Grid>
+                    </div>
+                    <div className="section">
+                        <Grid>
+                            <Row>
+                                <Col md={12}>
+                                    <div className="poll-text">
+                                        <Markdown source={poll.content.md} />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Grid>
+                    </div>
+                    <div className="section">
+                        <Grid>
+                            <Row>
+                                <Col md={12}>
+                                    <h2 className="section-title">{this.getIntlMessage('poll.ADDITIONAL_DATA')}</h2>
+                                </Col>
+                            </Row>
+                        </Grid>
+                    </div>
+                    <div className="section">
+                        <Grid>
+                            <Row>
+                                <Col md={12}>
+                                    <h2 className="section-title">{this.getIntlMessage('poll.PARTICIPATION')}</h2>
+                                    {!!currentUser
+                                        ? !!this.state.votes && !vote
+                                            ? <VoteButtonBar pollId={poll.id}/>
+                                            : <div>
+                                                <FormattedMessage message={this.getIntlMessage('poll.ALREADY_VOTED')}
+                                                                  value={vote ? this.getIntlMessage('poll.VOTE_' + vote.value.toUpperCase()) : ''}
+                                                                  date={<FormattedTime value={vote ? vote.time : Date.now()}/>}/>
+                                              </div>
                                         : <div>
-                                            <FormattedMessage message={this.getIntlMessage('poll.ALREADY_VOTED')}
-                                                              value={vote ? this.getIntlMessage('poll.VOTE_' + vote.value.toUpperCase()) : ''}
-                                                              date={<FormattedTime value={vote ? vote.time : Date.now()}/>}/>
-                                          </div>
-                                    : <div>
-                                        {this.getIntlMessage('poll.LOGIN_REQUIRED')} <LoginButton />
-                                      </div>}
-                            </Col>
-                        </Row>
-                    </Grid>
+                                            {this.getIntlMessage('poll.LOGIN_REQUIRED')} <LoginButton />
+                                          </div>}
+                                </Col>
+                            </Row>
+                        </Grid>
+                    </div>
                 </div>
-            </div>
+            </ReactDocumentTitle>
 		);
 	}
 });
