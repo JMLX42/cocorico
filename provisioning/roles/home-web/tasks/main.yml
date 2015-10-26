@@ -42,3 +42,6 @@
   template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ role_name }}.conf
   notify:
     - restart home-web service
+
+- name: install redis server
+  apt: name=redis-server state=present

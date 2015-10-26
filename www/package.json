@@ -37,7 +37,8 @@
     "lodash": "~2.4.1",
     "client-sessions": "latest",
     "bcrypt": "latest",
-    "async": "latest"
+    "async": "latest",
+    "node_redis": "latest"
   },
   "engines": {
     "node": ">=0.10.22",
