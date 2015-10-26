@@ -1,12 +1,13 @@
 var React = require('react')
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
-var Reflux = require('reflux');
 var ReactRouter = require('react-router');
+var Reflux = require('reflux');
 
 var Poll = require('./component/Poll');
 var Header = require('./component/Header');
 var Footer = require('./component/Footer');
+var Pace = require('./component/Pace');
 
 var Intl = require('./intl/intl');
 
@@ -28,6 +29,7 @@ var App = React.createClass({
     {
 		return (
 			<div>
+                <Pace />
 				<Header />
                     <div id="content">
                         {this.props.children || <div />}
