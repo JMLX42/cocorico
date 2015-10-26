@@ -57,6 +57,8 @@ var Poll = React.createClass({
         if (!poll)
             return null;
 
+        PollAction.showCurrentUserVote(poll.id);
+
         var vote = this.state.votes
             ? this.state.votes.getVoteByPollId(poll.id)
             : null;
@@ -90,7 +92,7 @@ var Poll = React.createClass({
                             <Col md={12}>
                                 <h2 className="section-title">{this.getIntlMessage('poll.PARTICIPATION')}</h2>
                                 {!!currentUser
-                                    ? !!this.state.votes && !vote
+                                    ? !!this.state.votes && (!vote || vote.error == 404)
                                         ? <VoteButtonBar pollId={poll.id}/>
                                         : <div>
                                             <FormattedMessage message={this.getIntlMessage('poll.ALREADY_VOTED')}
