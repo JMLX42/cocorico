@@ -5,10 +5,28 @@ var Page = keystone.list('Page');
 var Media = keystone.list('Media');
 
 module.exports = function(done) {
-	async.series([
-		function(next) {
-			new Page.model({"contentType":"Markdown","createdAt":"2015-10-26T21:58:48.000Z","published":true,"publishedAt":"2015-10-26T21:59:03.000Z","showInNavBar":true,"slug":"manifeste","sortOrder":0,"title":"Manifeste","markdown":{"html":"<h1 id=\"manifeste\">Manifeste</h1>\n","md":"# Manifeste\r\n"}}).save(next);
+	async.waterfall([
+		function(callback) {
+			Page.model.update(
+				{slug: 'manifeste'},
+				{
+					"contentType": "Markdown",
+					"createdAt": "2015-10-26T21:58:48.000Z",
+					"published": true,
+					"publishedAt": "2015-10-26T21:59:03.000Z",
+					"showInNavBar": true,
+					"slug": "manifeste",
+					"sortOrder": 0,
+					"title": "Manifeste",
+					"markdown": {
+						"html": "<h1 id=\"manifeste\">Manifeste</h1>\n",
+						"md": "# Manifeste\r\n"
+					}
+				},
+				{upsert: true},
+				function(err) { callback(err); }
+			);
 		},
-		function(next) { done(); }
+		function(error, result) { done(); }
 	]);
 };

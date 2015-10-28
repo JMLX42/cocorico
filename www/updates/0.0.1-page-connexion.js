@@ -5,10 +5,43 @@ var Page = keystone.list('Page');
 var Media = keystone.list('Media');
 
 module.exports = function(done) {
-	async.series([
-		function(next) {
-			new Page.model({"contentType":"HTML","createdAt":"2015-10-24T10:30:18.000Z","html":"<p><a href=\"../../auth/login\"> <img src=\"../../upload/franceconnect-button.png\" alt=\"\" /> </a></p>","published":true,"publishedAt":"2015-10-24T10:32:31.000Z","showInNavBar":false,"slug":"connexion","sortOrder":2,"title":"Connexion"}).save(next);
+	async.waterfall([
+		function(callback) {
+			Media.model.update(
+				{slug: 'franceconnect-button'},
+				{
+					"slug": "franceconnect-button",
+					"title": "FranceConnect Button",
+					"file": {
+						"filename": "franceconnect-button.png",
+						"originalname": "franceconnect-button.png",
+						"path": "public/upload",
+						"size": 17657,
+						"filetype": "image/png"
+					}
+				},
+				{upsert: true},
+				function(err) { callback(err); }
+			);
 		},
-		function(next) { done(); }
+		function(callback) {
+			Page.model.update(
+				{slug: 'connexion'},
+				{
+					"contentType": "HTML",
+					"createdAt": "2015-10-24T10:30:18.000Z",
+					"html": "<p><a href=\"../../auth/login\"> <img src=\"../../upload/franceconnect-button.png\" alt=\"\" /> </a></p>",
+					"published": true,
+					"publishedAt": "2015-10-24T10:32:31.000Z",
+					"showInNavBar": false,
+					"slug": "connexion",
+					"sortOrder": 2,
+					"title": "Connexion"
+				},
+				{upsert: true},
+				function(err) { callback(err); }
+			);
+		},
+		function(error, result) { done(); }
 	]);
 };

@@ -73,7 +73,7 @@ function savePage(slug, next)
 
             process.stdout.write('done\n');
 
-            var uriRegex = new RegExp("\/" + process.env.UPLOAD_DIR + "\/(.*)\.");
+            var uriRegex = new RegExp("\/" + process.env.UPLOAD_DIR + "\/([^\.]*)\.");
             var imgRegEx = page.contentType == 'HTML'
                 ? new RegExp(/<img\s[^>]*?src\s*=\s*['\"]([^'\"]*?)['\"][^>]*?>/g)
                 : new RegExp(/(!\[.*?\]\()(.+?)(\))/g);
@@ -84,6 +84,7 @@ function savePage(slug, next)
 
             while (match = imgRegEx.exec(content))
             {
+                console.log(match[1].match(uriRegex));
                 match = match[1].match(uriRegex)[1];
 
                 if (match)
@@ -98,13 +99,22 @@ function savePage(slug, next)
                 .select('-_id')
                 .exec(function(err, medias)
                 {
-                    var first = true;
                     for (var media of medias)
                     {
-                        mediaMigration += "\t\tfunction(next) {\n"
-                            + "\t\t\tnew Media.model(" + JSON.stringify(media) + ").save(next);\n"
+                        mediaMigration += "\t\tfunction(callback) {\n"
+                            + "\t\t\tMedia.model.update(\n"
+                            + "\t\t\t\t{slug: '" + media.slug + "'},";
+
+                        JSON.stringify(media, null, '\t').split('\n').map(function(v, i, t)
+                        {
+                            mediaMigration += "\n\t\t\t\t" + v;
+                        });
+
+                        mediaMigration += ",\n"
+                            + "\t\t\t\t{upsert: true},\n"
+                            + "\t\t\t\tfunction(err) { callback(err); }\n"
+                            + "\t\t\t);\n"
                             + "\t\t},\n";
-                        first = false;
                     }
 
                     process.stdout.write('writing page \'' + slug + '\'... ');
@@ -113,12 +123,23 @@ function savePage(slug, next)
                         + "var Page = keystone.list('Page');\n"
                         + "var Media = keystone.list('Media');\n\n"
                         + "module.exports = function(done) {\n"
-                        + "\tasync.series([\n"
+                        + "\tasync.waterfall([\n"
                         + mediaMigration
-                        + "\t\tfunction(next) {\n"
-                        + "\t\t\tnew Page.model(" + JSON.stringify(page) + ").save(next);\n"
+                        + "\t\tfunction(callback) {\n"
+                        + "\t\t\tPage.model.update(\n"
+                        + "\t\t\t\t{slug: '" + slug + "'},";
+
+                    JSON.stringify(page, null, '\t').split('\n').map(function(v, i, t)
+                    {
+                        migrationScript += "\n\t\t\t\t" + v;
+                    });
+
+                    migrationScript += ",\n"
+                        + "\t\t\t\t{upsert: true},\n"
+                        + "\t\t\t\tfunction(err) { callback(err); }\n"
+                        + "\t\t\t);\n"
                         + "\t\t},\n"
-                        + "\t\tfunction(next) { done(); }\n"
+                        + "\t\tfunction(error, result) { done(); }\n"
                         + "\t]);\n"
                         + "};";
                     fs.writeFileSync(output, migrationScript, 'utf8');
