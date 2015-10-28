@@ -38,8 +38,9 @@
     "client-sessions": "latest",
     "bcrypt": "latest",
     "async": "latest",
-    "node_redis": "latest",
-    "node-metainspector": "latest"
+    "redis": "latest",
+    "node-metainspector": "latest",
+    "json-stable-stringify": "latest"
   },
   "engines": {
     "node": ">=0.10.22",

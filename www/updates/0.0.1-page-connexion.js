@@ -10,15 +10,15 @@ module.exports = function(done) {
 			Media.model.update(
 				{slug: 'franceconnect-button'},
 				{
-					"slug": "franceconnect-button",
-					"title": "FranceConnect Button",
 					"file": {
 						"filename": "franceconnect-button.png",
+						"filetype": "image/png",
 						"originalname": "franceconnect-button.png",
 						"path": "public/upload",
-						"size": 17657,
-						"filetype": "image/png"
-					}
+						"size": 17657
+					},
+					"slug": "franceconnect-button",
+					"title": "FranceConnect Button"
 				},
 				{upsert: true},
 				function(err) { callback(err); }

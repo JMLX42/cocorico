@@ -4,6 +4,7 @@ require('dotenv').load();
 
 var async = require('async');
 var keystone = require('keystone');
+var stringify = require('json-stable-stringify');
 var fs = require('fs');
 
 var Page = keystone.list('Page'),
@@ -105,7 +106,7 @@ function savePage(slug, next)
                             + "\t\t\tMedia.model.update(\n"
                             + "\t\t\t\t{slug: '" + media.slug + "'},";
 
-                        JSON.stringify(media, null, '\t').split('\n').map(function(v, i, t)
+                        stringify(media, {space : '\t'}).split('\n').map(function(v, i, t)
                         {
                             mediaMigration += "\n\t\t\t\t" + v;
                         });
@@ -129,7 +130,7 @@ function savePage(slug, next)
                         + "\t\t\tPage.model.update(\n"
                         + "\t\t\t\t{slug: '" + slug + "'},";
 
-                    JSON.stringify(page, null, '\t').split('\n').map(function(v, i, t)
+                    stringify(page, {space : '\t'}).split('\n').map(function(v, i, t)
                     {
                         migrationScript += "\n\t\t\t\t" + v;
                     });
