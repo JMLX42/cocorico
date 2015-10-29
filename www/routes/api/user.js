@@ -7,8 +7,5 @@ var User = keystone.list('User');
  */
 exports.me = function(req, res)
 {
-    if (!req.isAuthenticated())
-        res.status(404).apiResponse({ 'error': 'not logged in' });
-    else
-        res.apiResponse({ 'user': req.user });
+    res.apiResponse({ 'user': req.user });
 }

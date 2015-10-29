@@ -52,9 +52,6 @@ exports.latest = function(req, res)
 
 exports.getVote = function(req, res)
 {
-	if (!req.isAuthenticated() || !req.user.sub)
-        return res.status(401).apiResponse({ 'error': 'not logged in' });
-
 	Vote.getByPollIdAndVoter(
 		req.params.id,
 		req.user.sub,
@@ -75,9 +72,6 @@ exports.getVote = function(req, res)
 
 function vote(req, res, value)
 {
-	if (!req.isAuthenticated() || !req.user.sub)
-		return res.status(401).apiResponse({ 'error': 'not logged in' });
-
 	Poll.model.findById(req.params.id).exec(function(err, poll)
 	{
 		if (err)
@@ -130,9 +124,6 @@ exports.voteNo = function(req, res)
 
 exports.unvote = function(req, res)
 {
-	if (!req.isAuthenticated() || !req.user.sub)
-		return res.status(401).apiResponse({ 'error': 'not logged in' });
-
 	Poll.model.findById(req.params.id).exec(function(err, poll)
 	{
 		if (err)
