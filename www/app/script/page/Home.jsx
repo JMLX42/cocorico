@@ -4,11 +4,11 @@ var ReactRouter = require('react-router');
 var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
 
-var PollStore = require("../store/PollStore");
+var TextStore = require("../store/TextStore");
 
-var PollAction = require("../action/PollAction");
+var TextAction = require("../action/TextAction");
 
-var PollList = require("../component/PollList"),
+var TextList = require("../component/TextList"),
     Page = require("../component/Page");
 
 var Grid = ReactBootstrap.Grid,
@@ -29,12 +29,12 @@ var Home = React.createClass({
                 <Grid>
                     <Row>
                         <Col md={12}>
-                            <h2>{this.getIntlMessage('poll.POLLS')}</h2>
+                            <h2>{this.getIntlMessage('text.TEXTS')}</h2>
                         </Col>
                     </Row>
                     <Row>
                         <Col md={12}>
-                            <PollList />
+                            <TextList />
                         </Col>
                     </Row>
                 </Grid>

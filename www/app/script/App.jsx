@@ -4,7 +4,6 @@ var ReactIntl = require('react-intl');
 var ReactRouter = require('react-router');
 var Reflux = require('reflux');
 
-var Poll = require('./component/Poll');
 var Header = require('./component/Header');
 var Footer = require('./component/Footer');
 var Pace = require('./component/Pace');

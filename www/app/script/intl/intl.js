@@ -22,6 +22,12 @@ var Intl = {
 			TITLE: "Cocorico"
 		},
 
+		route: {
+			SIGN_IN: "/connexion",
+			PRIVACY_POLICY: "/politique-de-confidentialite",
+			POLL: "/vote"
+		},
+
 		login: {
 			USERNAME: "Utilisateur",
 			PASSWORD: "Mot de passe",
@@ -29,17 +35,16 @@ var Intl = {
 			SIGN_IN: "Se Connecter",
 			SIGN_OUT: "Se Déconnecter",
 			SIGN_UP: "Créer un compte",
-			SIGN_IN_URL: "/connexion"
 		},
 
 		footer: {
 			PRIVACY_POLICY: "Politique de Confidentialité",
-			PRIVACY_POLICY_URL: "/politique-de-confidentialite",
 			SOURCE_CODE: "Code Source"
 		},
 
-		poll: {
-			POLLS: 'Référendums',
+		text: {
+			CREATE: 'Créer un texte',
+			TEXTS: 'Textes',
 			VOTE_YES: 'pour',
 			VOTE_BLANK: 'blanc',
 			VOTE_NO: 'contre',

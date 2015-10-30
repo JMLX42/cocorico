@@ -5,13 +5,13 @@ var MetaInspector = require('node-metainspector');
 
 var Types = keystone.Field.Types;
 
-var Poll = new keystone.List('Poll', {
+var Text = new keystone.List('Text', {
     autokey: { path: 'slug', from: 'title', unique: true },
     map: { name: 'title' },
     defaultSort: '-createdAt'
 });
 
-Poll.add({
+Text.add({
 	title: { type: String, required: true },
 	createdAt: { type: Date, default: Date.now },
     publishedAt: Date,
@@ -36,7 +36,7 @@ function fetchPageTitle(url, callback)
     client.fetch();
 }
 
-Poll.schema.pre('save', function(next)
+Text.schema.pre('save', function(next)
 {
     var self = this;
     var mdLinkRegex = new RegExp(/\[([^\[]+)\]\(([^\)]+)\)/g);
@@ -59,16 +59,15 @@ Poll.schema.pre('save', function(next)
 
     async.waterfall(ops, function(error, result)
     {
-        console.log(result);
         self.additionalData = result;
 
         next();
     });
 });
 
-Poll.relationship({ path: 'votes', ref: 'Vote', refPath: 'poll' });
+Text.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'text' });
 
-transform.toJSON(Poll);
+transform.toJSON(Text);
 
-Poll.defaultColumns = 'title, state|20%, author, publishedAt|15%';
-Poll.register();
+Text.defaultColumns = 'title, state|20%, author, publishedAt|15%';
+Text.register();

@@ -1,9 +1,12 @@
 var React = require('react');
 var ReactIntl = require('react-intl');
 var ReactBootstrap = require('react-bootstrap');
+var ReactRouter = require('react-router');
 
 var DropdownButton = ReactBootstrap.DropdownButton,
     MenuItem = ReactBootstrap.MenuItem;
+
+var Link = ReactRouter.Link;
 
 var AccountDropdown = React.createClass({
 

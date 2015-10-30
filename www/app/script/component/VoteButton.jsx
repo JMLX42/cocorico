@@ -2,7 +2,7 @@ var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 
-var PollAction = require('../action/PollAction');
+var TextAction = require('../action/TextAction');
 
 var FormattedMessage = ReactIntl.FormattedMessage;
 
@@ -13,7 +13,7 @@ var VoteButton = React.createClass({
 
     handleClick: function()
     {
-        PollAction.vote(this.props.poll, this.props.value);
+        TextAction.vote(this.props.text, this.props.value);
     },
 
     render: function()
@@ -22,8 +22,8 @@ var VoteButton = React.createClass({
             <Button bsSize="large"
                     className={this.props.className}
                     onClick={this.handleClick}>
-                <FormattedMessage message={this.getIntlMessage('poll.VOTE')}
-                                  value={this.getIntlMessage(this.props.text)}/>
+                <FormattedMessage message={this.getIntlMessage('text.VOTE')}
+                                  value={this.getIntlMessage(this.props.message)}/>
             </Button>
 		);
 	}

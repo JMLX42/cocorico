@@ -10,14 +10,16 @@ var Router = ReactRouter.Router,
 
     App = require('./App'),
     Page = require('./page/Page'),
-    Poll = require('./page/Poll'),
+    Text = require('./page/Text'),
+    CreateText = require('./page/CreateText'),
     Home = require('./page/Home');
 
 ReactDOM.render(
     <Router>
         <Route path='/' component={App}>
             <IndexRoute component={Home}/>
-            <Route path='poll/:slug' component={Poll}/>
+            <Route path='text/create' component={CreateText}/>
+            <Route path='text/:slug' component={Text}/>
             <Route path='page/:slug' component={Page}/>
             <Route path=':slug' component={Page}/>
         </Route>

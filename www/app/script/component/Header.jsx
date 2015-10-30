@@ -62,11 +62,9 @@ var Header = React.createClass({
                         })}
     			    </Nav>
                     <Nav right>
-                        <li>
-                            {!!currentUser
-                                ? <AccountDropdown fullName={currentUser.firstName + ' ' + currentUser.lastName}/>
-                                : <LoginButton />}
-                        </li>
+                        <li>{!!currentUser ? <Link to="#">Mes Projets</Link> : ''}</li>
+                        <li>{!!currentUser ? <AccountDropdown fullName={currentUser.firstName + ' ' + currentUser.lastName}/> : ''}</li>
+                        <li>{!currentUser ? <LoginButton /> : ''}</li>
                     </Nav>
     		  	</Navbar>
             </div>

@@ -13,16 +13,16 @@ var VoteButtonBar = React.createClass({
     {
 		return (
             <ButtonToolbar className="text-center">
-                <VoteButton text="poll.VOTE_YES"
-                            poll={this.props.pollId}
+                <VoteButton message="text.VOTE_YES"
+                            text={this.props.textId}
                             value="yes"
                             className="btn-vote-yes"/>
-                        <VoteButton text="poll.VOTE_BLANK"
-                            poll={this.props.pollId}
+                        <VoteButton message="text.VOTE_BLANK"
+                            text={this.props.textId}
                             value="blank"
                             className="btn-vote-blank"/>
-                        <VoteButton text="poll.VOTE_NO"
-                            poll={this.props.pollId}
+                        <VoteButton message="text.VOTE_NO"
+                            text={this.props.textId}
                             value="no"
                             className="btn-vote-no"/>
             </ButtonToolbar>

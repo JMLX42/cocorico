@@ -22,7 +22,7 @@ var Footer = React.createClass({
                         <Col md={12}>
                             <ul className="list-unstyled list-inline">
                                 <li>
-                                    <Link to={this.getIntlMessage('footer.PRIVACY_POLICY_URL')}>
+                                    <Link to={this.getIntlMessage('route.PRIVACY_POLICY')}>
                                         {this.getIntlMessage('footer.PRIVACY_POLICY')}
                                     </Link>
                                 </li>

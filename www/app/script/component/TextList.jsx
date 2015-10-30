@@ -3,37 +3,37 @@ var ReactBootstrap = require('react-bootstrap');
 var ReactRouter = require('react-router');
 var Reflux = require('reflux');
 
-var PollAction = require("../action/PollAction");
-var PollStore = require("../store/PollStore");
+var TextAction = require("../action/TextAction");
+var TextStore = require("../store/TextStore");
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row;
 
 var Link = ReactRouter.Link;
 
-var PollList = React.createClass({
+var TextList = React.createClass({
 
-    mixins: [Reflux.connect(PollStore, 'polls')],
+    mixins: [Reflux.connect(TextStore, 'texts')],
 
     componentDidMount: function()
     {
-        PollAction.list();
+        TextAction.list();
     },
 
 	render: function()
     {
-        if (!this.state.polls)
+        if (!this.state.texts)
             return null;
 
 		return (
             <Grid>
                 <Row>
         			<ul className="list-unstyled">
-                        {this.state.polls.get().map(function(poll)
+                        {this.state.texts.get().map(function(text)
                         {
                             return <li>
-                                <Link to={'/poll/' + poll.slug}>
-                                    {poll.title}
+                                <Link to={'/text/' + text.slug}>
+                                    {text.title}
                                 </Link>
                             </li>;
                         })}
@@ -44,4 +44,4 @@ var PollList = React.createClass({
 	}
 });
 
-module.exports = PollList;
+module.exports = TextList;

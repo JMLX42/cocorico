@@ -1,9 +1,9 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 
-var PollComponent = require('../component/Poll');
+var TextComponent = require('../component/Text');
 
-var Poll = React.createClass({
+var Text = React.createClass({
 
     componentWillReceiveProps: function(props)
     {
@@ -21,9 +21,9 @@ var Poll = React.createClass({
             return null;
 
 		return (
-            <PollComponent slug={this.state.slug} />
+            <TextComponent slug={this.state.slug} />
 		);
 	}
 });
 
-module.exports = Poll;
+module.exports = Text;

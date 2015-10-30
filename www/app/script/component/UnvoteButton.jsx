@@ -2,7 +2,7 @@ var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 
-var PollAction = require('../action/PollAction');
+var TextAction = require('../action/TextAction');
 
 var FormattedMessage = ReactIntl.FormattedMessage;
 
@@ -13,7 +13,7 @@ var VoteButton = React.createClass({
 
     handleClick: function()
     {
-        PollAction.unvote(this.props.poll.id);
+        TextAction.unvote(this.props.text.id);
 
         return false;
     },
@@ -22,7 +22,7 @@ var VoteButton = React.createClass({
     {
 		return (
             <Button onClick={this.handleClick} className="btn-unvote">
-                <FormattedMessage message={this.getIntlMessage('poll.UNVOTE')}/>
+                <FormattedMessage message={this.getIntlMessage('text.UNVOTE')}/>
             </Button>
 		);
 	}

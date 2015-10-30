@@ -2,42 +2,42 @@ var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 var redis = require('redis');
 
-var Poll = keystone.list('Poll');
-var Vote = keystone.list('Vote');
+var Text = keystone.list('Text');
+var Ballot = keystone.list('Ballot');
 
 /**
- * List Polls
+ * List Texts
  */
 exports.list = function(req, res)
 {
-	Poll.model.find(function(err, items)
+	Text.model.find(function(err, texts)
     {
 		if (err)
 			return res.apiError('database error', err);
 
-		res.apiResponse({ polls: items });
+		res.apiResponse({ texts: texts });
 	});
 }
 
 /**
- * Get Poll by ID
+ * Get Text by ID
  */
 exports.get = function(req, res)
 {
-	Poll.model.findById(req.params.id).exec(function(err, item)
+	Text.model.findById(req.params.id).exec(function(err, item)
     {
 		if (err)
 			return res.apiError('database error', err);
 		if (!item)
 			return res.apiError('not found');
 
-		res.apiResponse({ poll: item });
+		res.apiResponse({ text: item });
 	});
 }
 
 exports.latest = function(req, res)
 {
-	Poll.model.findOne()
+	Text.model.findOne()
 		.sort('-publishedAt')
 		.exec(function(err, item)
 	    {
@@ -46,61 +46,64 @@ exports.latest = function(req, res)
 			if (!item)
 				return res.apiError('not found');
 
-			res.apiResponse({ poll: item });
+			res.apiResponse({ text: item });
 		});
 }
 
-exports.getVote = function(req, res)
+exports.getBallot = function(req, res)
 {
-	Vote.getByPollIdAndVoter(
+	Ballot.getByTextIdAndVoter(
 		req.params.id,
 		req.user.sub,
-		function(err, vote)
+		function(err, ballot)
 		{
 			if (err)
 				return res.apiError('database error', err);
 
-			if (!vote)
+			if (!ballot)
 				return res.status(404).apiResponse({
-					error: 'vote does not exist'
+					error: 'ballot does not exist'
 				});
 
-			return res.apiResponse({ vote: vote });
+			return res.apiResponse({ ballot: ballot });
 		}
 	);
 }
 
 function vote(req, res, value)
 {
-	Poll.model.findById(req.params.id).exec(function(err, poll)
+	Text.model.findById(req.params.id).exec(function(err, text)
 	{
 		if (err)
 			return res.apiError('database error', err);
-		if (!poll)
+		if (!text)
 			return res.apiError('not found');
 
-		Vote.getByPollIdAndVoter(
+		Ballot.getByTextIdAndVoter(
 			req.params.id,
 			req.user.sub,
-			function(err, vote)
+			function(err, ballot)
 			{
 				if (err)
 					return res.apiError('database error', err);
 
-				if (vote)
+				if (ballot)
 					return res.status(403).apiResponse({
 						error: 'user already voted'
 					});
 
-				vote = Vote.model({
-					poll: poll,
+				ballot = Ballot.model({
+					text: text,
 					voter: bcrypt.hashSync(req.user.sub, 10),
 					value: value
 				});
 
-				vote.save(function(err)
+				ballot.save(function(err)
 				{
-					res.apiResponse({ vote: vote });
+					if (err)
+						return res.apiError('database error', err);
+					
+					res.apiResponse({ ballot: ballot });
 				});
 			}
 		);
@@ -124,30 +127,30 @@ exports.voteNo = function(req, res)
 
 exports.unvote = function(req, res)
 {
-	Poll.model.findById(req.params.id).exec(function(err, poll)
+	Text.model.findById(req.params.id).exec(function(err, text)
 	{
 		if (err)
 			return res.apiError('database error', err);
-		if (!poll)
+		if (!text)
 			return res.apiError('not found');
 
-		Vote.getByPollIdAndVoter(
+		Ballot.getByTextIdAndVoter(
 			req.params.id,
 			req.user.sub,
-			function(err, vote)
+			function(err, ballot)
 			{
 				if (err)
 					return res.apiError('database error', err);
 
-				if (!vote)
+				if (!ballot)
 					return res.status(404).apiResponse({
-						error: 'vote does not exist'
+						error: 'ballot does not exist'
 					});
 
-				Vote.model.findById(vote.id).remove(function(err)
+				Ballot.model.findById(ballot.id).remove(function(err)
 				{
 					var client = redis.createClient();
-					var key = 'vote/' + req.params.id + '/' + req.user.sub;
+					var key = 'ballot/' + req.params.id + '/' + req.user.sub;
 
 					if (err)
 						return res.apiError('database error', err);
@@ -159,7 +162,7 @@ exports.unvote = function(req, res)
 							if (err)
 								console.log(err);
 
-							return res.apiResponse({ vote: 'removed' });
+							return res.apiResponse({ ballot: 'removed' });
 						});
 					});
 				});
@@ -168,19 +171,19 @@ exports.unvote = function(req, res)
 }
 
 /**
- * Get Poll by slug
+ * Get Text by slug
  */
 exports.getBySlug = function(req, res)
 {
-	Poll.model.findOne()
+	Text.model.findOne()
 		.where('slug', req.params.slug)
-		.exec(function(err, item)
+		.exec(function(err, text)
 	    {
 			if (err)
 				return res.apiError('database error', err);
-			if (!item)
+			if (!text)
 				return res.status(404).send();
 
-			res.apiResponse({ poll: item });
+			res.apiResponse({ text: text });
 		});
 }
