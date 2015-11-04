@@ -34,25 +34,21 @@ var TextList = React.createClass({
             return null;
 
 		return (
-            <Grid>
-                <Row>
-        			<ul className="list-unstyled">
-                        {texts.map((text) => {
-                            return <li>
-                                <Link to={this.getIntlMessage('route.VIEW_TEXT') + '/' + text.slug}>
-                                    {text.title}
-                                </Link>
-                                {this.props.editable
-                                    ? <Link to={this.getIntlMessage('route.EDIT_TEXT') + '/' + text.slug} className="pull-right">Modifier</Link>
-                                    : <div/>}
-                                {this.props.deletable
-                                    ? <Link to="/" className="pull-right">Supprimer</Link>
-                                    : <div/>}
-                            </li>;
-                        })}
-        			</ul>
-                </Row>
-            </Grid>
+			<ul className="list-unstyled">
+                {texts.map((text) => {
+                    return <li>
+                        <Link to={this.getIntlMessage('route.VIEW_TEXT') + '/' + text.slug}>
+                            {text.title}
+                        </Link>
+                        {this.props.editable
+                            ? <Link to={this.getIntlMessage('route.EDIT_TEXT') + '/' + text.slug} className="pull-right">Modifier</Link>
+                            : <div/>}
+                        {this.props.deletable
+                            ? <Link to="/" className="pull-right">Supprimer</Link>
+                            : <div/>}
+                    </li>;
+                })}
+			</ul>
 		);
 	}
 });
