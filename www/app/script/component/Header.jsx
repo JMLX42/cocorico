@@ -64,7 +64,7 @@ var Header = React.createClass({
                     <Nav right>
                         <li>
                             {!!currentUser
-                                ? <Link to={this.getIntlMessage('route.MY_TEXTS')}>
+                                ? <Link to={this.getIntlMessage('route.MY_TEXTS')} activeClassName="active">
                                     {this.getIntlMessage('page.myTexts.TITLE')}
                                 </Link>
                                 : <div />}

@@ -104,12 +104,51 @@ body {
 
 .text {
     .text-content {
-        // font-family: "dominereg";
         text-align: justify;
     }
 
     .text-title {
         margin-top: 80px;
+        font-size: 3em;
+        text-transform: capitalize;
+    }
+
+    .voted-blank {
+        background-color: @cocorico-light-grey;
+
+        .section {
+            border: none;
+        }
+    }
+
+    .voted-no {
+        .voted-blank;
+
+        background-color: @cocorico-red;
+        color: white;
+
+        h2 {
+            color: white;
+        }
+
+        .btn-unvote {
+            background-color: white;
+            color: @cocorico-red;
+            border: none !important;
+
+            &:hover {
+                background-color: @cocorico-light-grey;
+            }
+        }
+    }
+
+    .voted-yes {
+        .voted-no;
+        background-color: @cocorico-blue;
+
+        .btn-unvote {
+            color: @cocorico-blue;
+        }
     }
 }
 

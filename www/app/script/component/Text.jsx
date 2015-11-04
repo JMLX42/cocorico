@@ -96,26 +96,29 @@ var Text = React.createClass({
                                 </Col>
                             </Row>
                             : <div/>}
-
-                        <Row className="section">
-                            <Col md={12}>
-                                <h2 className="section-title">{this.getIntlMessage('text.PARTICIPATION')}</h2>
-                                {!!currentUser
-                                    ? !!this.state.ballots && (!ballot || ballot.error == 404)
-                                        ? <VoteButtonBar textId={text.id}/>
-                                        : <div>
-                                            <FormattedMessage message={this.getIntlMessage('text.ALREADY_VOTED')}
-                                                              value={ballot ? this.getIntlMessage('text.VOTE_' + ballot.value.toUpperCase()) : ''}
-                                                              date={<FormattedTime value={ballot ? ballot.time : Date.now()}/>}/>
-                                            <br/>
-                                            <UnvoteButton text={text}/>
-                                         </div>
-                                    : <div>
-                                        {this.getIntlMessage('text.LOGIN_REQUIRED')} <LoginButton />
-                                     </div>}
-                            </Col>
-                        </Row>
                     </Grid>
+                    <div className={this.state.ballots && ballot && !ballot.error && ballot.value ? 'voted-' + ballot.value : ''}>
+                        <Grid>
+                            <Row className="section">
+                                <Col md={12}>
+                                    <h2 className="section-title">{this.getIntlMessage('text.PARTICIPATION')}</h2>
+                                    {!!currentUser
+                                        ? !!this.state.ballots && (!ballot || ballot.error == 404)
+                                            ? <VoteButtonBar textId={text.id}/>
+                                            : <div>
+                                                <FormattedMessage message={this.getIntlMessage('text.ALREADY_VOTED')}
+                                                                  value={ballot ? this.getIntlMessage('text.VOTE_' + ballot.value.toUpperCase()) : ''}
+                                                                  date={<FormattedTime value={ballot ? ballot.time : Date.now()}/>}/>
+                                                <br/>
+                                                <UnvoteButton text={text}/>
+                                             </div>
+                                        : <div>
+                                            {this.getIntlMessage('text.LOGIN_REQUIRED')} <LoginButton />
+                                         </div>}
+                                </Col>
+                            </Row>
+                        </Grid>
+                    </div>
                 </div>
             </ReactDocumentTitle>
 		);
