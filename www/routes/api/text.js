@@ -201,7 +201,7 @@ exports.save = function(req, res)
 		content: { md: req.body.content }
 	});
 
-	Text.model.findOne(req.params.id ? {id : req.params.id} : {slug: newText.slug})
+	Text.model.findOne(req.body.id ? {_id : req.body.id} : {slug: newText.slug})
 		.exec(function(err, text)
 	    {
 			if (err)
@@ -215,7 +215,10 @@ exports.save = function(req, res)
 					if (err)
 						return res.apiError('database error', err);
 
-					return res.apiResponse({ text : newText })
+					return res.apiResponse({
+						action: 'create',
+						text : newText
+					})
 				});
 			}
 			else
@@ -223,13 +226,16 @@ exports.save = function(req, res)
 				if (bcrypt.compareSync(req.user.sub, text.author))
 				{
 					text.title = newText.title;
-					text.content.md = newText.content;
+					text.content.md = newText.content.md;
 					text.save(function(err, text)
 					{
 						if (err)
 							return res.apiError('database error', err);
-						
-						return res.apiResponse({ text : text });
+
+						return res.apiResponse({
+							action: 'update',
+							text : text
+						});
 					});
 				}
 				else

@@ -1,9 +1,14 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 
-var TextComponent = require('../component/Text');
+var Text = require('../component/Text');
 
-var Text = React.createClass({
+var ViewText = React.createClass({
+
+    getInitialState: function()
+    {
+        return {slug: null};
+    },
 
     componentWillReceiveProps: function(props)
     {
@@ -17,13 +22,13 @@ var Text = React.createClass({
 
     render: function()
     {
-        if (!this.state || !this.state.slug)
+        if (!this.state.slug)
             return null;
 
 		return (
-            <TextComponent slug={this.state.slug} />
+            <Text slug={this.state.slug} />
 		);
 	}
 });
 
-module.exports = Text;
+module.exports = ViewText;

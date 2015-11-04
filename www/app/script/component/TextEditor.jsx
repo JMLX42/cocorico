@@ -28,10 +28,32 @@ var Text = React.createClass({
         Reflux.connect(UserStore, 'users')
     ],
 
+    getInitialState: function()
+    {
+        return {
+            id: null,
+            title: '',
+            content: ''
+        };
+    },
+
     componentDidMount: function()
     {
         if (this.props.slug)
+        {
+            this.listenTo(TextStore, (store, text) => {
+                if (text && text.slug == this.props.slug)
+                {
+                    this.setState({
+                        id: text.id,
+                        title: text.title,
+                        content: text.content.md
+                    });
+                }
+            });
+
             TextAction.show(this.props.slug);
+        }
 
         UserAction.requireLogin();
     },
@@ -42,7 +64,7 @@ var Text = React.createClass({
 
     handleClick: function()
     {
-        TextAction.save(this.state.title, this.state.content);
+        TextAction.save(this.state.id, this.state.title, this.state.content);
     },
 
     handleTitleChange: function(event)

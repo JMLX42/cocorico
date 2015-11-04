@@ -121,11 +121,12 @@ module.exports = Reflux.createStore({
         });
     },
 
-    _textSaveHandler: function(title, content)
+    _textSaveHandler: function(id, title, content)
     {
         jquery.post(
             '/api/text/save',
             {
+                id: id,
                 title: title,
                 content: content
             },

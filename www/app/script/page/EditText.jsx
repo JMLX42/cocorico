@@ -16,28 +16,46 @@ var Grid = ReactBootstrap.Grid,
 
 var Link = ReactRouter.Link;
 
-var CreateText = React.createClass({
+var EditText = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin
     ],
 
+    getInitialState: function()
+    {
+        return {slug: null};
+    },
+
+    componentWillReceiveProps: function(props)
+    {
+        this.setState({slug: props.params.slug});
+    },
+
+    componentDidMount: function()
+    {
+        this.setState({slug: this.props.params.slug});
+    },
+
     render: function()
     {
+        if (!this.state.slug)
+            return null;
+
 		return (
             <div className="page page-create-text">
                 <Grid>
                     <Row>
                         <Col md={12}>
-                            <h1>Créer un texte</h1>
+                            <h1>Modifier un texte</h1>
                         </Col>
                     </Row>
                 </Grid>
 
-                <TextEditor />
+                <TextEditor slug={this.state.slug}/>
             </div>
 		);
 	}
 });
 
-module.exports = CreateText;
+module.exports = EditText;

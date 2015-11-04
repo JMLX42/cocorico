@@ -45,7 +45,7 @@ var MyTexts = React.createClass({
                                 ? <div/>
                                 : texts.length == 0
                                     ? <p>{this.getIntlMessage('page.myTexts.NO_TEXT')}</p>
-                                    : <TextList texts={texts}/>}
+                                    : <TextList texts={texts} editable={true} deletable={true}/>}
                         </Col>
                     </Row>
                     <Row>

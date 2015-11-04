@@ -28,7 +28,8 @@ var Intl = {
 			POLL: "/vote",
 			MY_TEXTS: "/mes-textes",
 			CREATE_TEXT: "/texte/nouveau",
-			TEXT: "/texte"
+			VIEW_TEXT: "/texte",
+			EDIT_TEXT: "/texte/modifier"
 		},
 
 		login: {
