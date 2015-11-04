@@ -62,7 +62,13 @@ var Header = React.createClass({
                         })}
     			    </Nav>
                     <Nav right>
-                        <li>{!!currentUser ? <Link to="#">Mes Projets</Link> : ''}</li>
+                        <li>
+                            {!!currentUser
+                                ? <Link to={this.getIntlMessage('route.MY_TEXTS')}>
+                                    {this.getIntlMessage('page.myTexts.TITLE')}
+                                </Link>
+                                : <div />}
+                        </li>
                         <li>{!!currentUser ? <AccountDropdown fullName={currentUser.firstName + ' ' + currentUser.lastName}/> : ''}</li>
                         <li>{!currentUser ? <LoginButton /> : ''}</li>
                     </Nav>

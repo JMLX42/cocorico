@@ -102,7 +102,7 @@ function vote(req, res, value)
 				{
 					if (err)
 						return res.apiError('database error', err);
-					
+
 					res.apiResponse({ ballot: ballot });
 				});
 			}
@@ -185,5 +185,55 @@ exports.getBySlug = function(req, res)
 				return res.status(404).send();
 
 			res.apiResponse({ text: text });
+		});
+}
+
+exports.save = function(req, res)
+{
+	if (!req.body.title)
+		return res.status(400).apiResponse({ error : 'missing title' });
+
+	if (!req.body.content)
+		return res.status(400).apiResponse({ error : 'missing content' });
+
+	var newText = Text.model({
+		title: req.body.title,
+		content: { md: req.body.content }
+	});
+
+	Text.model.findOne(req.params.id ? {id : req.params.id} : {slug: newText.slug})
+		.exec(function(err, text)
+	    {
+			if (err)
+				return res.apiError('database error', err);
+
+			if (!text)
+			{
+				newText.author = bcrypt.hashSync(req.user.sub, 10);
+				newText.save(function(err, text)
+				{
+					if (err)
+						return res.apiError('database error', err);
+
+					return res.apiResponse({ text : newText })
+				});
+			}
+			else
+			{
+				if (bcrypt.compareSync(req.user.sub, text.author))
+				{
+					text.title = newText.title;
+					text.content.md = newText.content;
+					text.save(function(err, text)
+					{
+						if (err)
+							return res.apiError('database error', err);
+						
+						return res.apiResponse({ text : text });
+					});
+				}
+				else
+					return res.status(403).send();
+			}
 		});
 }

@@ -8,9 +8,10 @@ module.exports = Reflux.createStore({
         this.listenTo(TextAction.list, this._fetchTexts);
         this.listenTo(TextAction.showLatest, this._fetchLatest);
         this.listenTo(TextAction.show, this._fetchTextBySlug);
+        this.listenTo(TextAction.listCurrentUserTexts, this._fetchCurrentUserTexts);
+        this.listenTo(TextAction.save, this._textSaveHandler);
 
-        this._texts = [];
-        this._latest = null;
+        this._clearCache();
     },
 
     get: function()
@@ -40,6 +41,11 @@ module.exports = Reflux.createStore({
                 return text;
 
         return null;
+    },
+
+    getCurrentUserTexts: function()
+    {
+        return this._currentUserTexts;
     },
 
     _fetchLatest: function()
@@ -91,5 +97,75 @@ module.exports = Reflux.createStore({
             this._texts.push(text);
             this.trigger(this, text);
         });
-    }
+    },
+
+    _fetchCurrentUserTexts: function()
+    {
+        if (this._currentUserTexts === true)
+            return;
+
+        if (this._currentUserTexts)
+            return this.trigger(this, null);
+
+        this._currentUserTexts = true;
+
+        jquery.get(
+            '/api/user/texts',
+            (data) => {
+                this._currentUserTexts = data.texts;
+                this.trigger(this, data.texts);
+            }
+        ).error((xhr, textStatus, err) => {
+            this._currentUserTexts = null;
+            this.trigger(this, null);
+        });
+    },
+
+    _textSaveHandler: function(title, content)
+    {
+        jquery.post(
+            '/api/text/save',
+            {
+                title: title,
+                content: content
+            },
+            (data) => {
+                if (!this._updateText(data.text))
+                {
+                    if (!this._currentUserTexts)
+                        this._currentUserTexts = [];
+                    this._currentUserTexts.push(data.text);
+
+                    this._texts.push(data.text);
+
+                    this._latest = null;
+                }
+
+                this.trigger(this);
+            }
+        );
+    },
+
+    _updateText: function(newText)
+    {
+        var updated = false;
+
+        for (var texts of [this._texts, this._latest, this._currentUserTexts])
+            for (var i in texts)
+                if (texts[i].id == newText.id)
+                {
+                    texts[i] = newText;
+                    updated = true;
+                    break;
+                }
+
+        return updated;
+    },
+
+    _clearCache: function()
+    {
+        this._texts = [];
+        this._latest = null;
+        this._currentUserTexts = null;
+    },
 });

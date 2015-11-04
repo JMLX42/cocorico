@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var ReactRouter = require('react-router');
+var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
 
 var TextAction = require("../action/TextAction");
@@ -13,26 +14,32 @@ var Link = ReactRouter.Link;
 
 var TextList = React.createClass({
 
-    mixins: [Reflux.connect(TextStore, 'texts')],
+    mixins: [ReactIntl.IntlMixin, Reflux.connect(TextStore, 'texts')],
 
     componentDidMount: function()
     {
-        TextAction.list();
+        if (!this.props.texts)
+            TextAction.list();
     },
 
 	render: function()
     {
-        if (!this.state.texts)
+        var texts = this.props.texts
+            ? this.props.texts
+            : this.state.texts
+                ? this.state.texts.get()
+                : null;
+
+        if (!texts)
             return null;
 
 		return (
             <Grid>
                 <Row>
         			<ul className="list-unstyled">
-                        {this.state.texts.get().map(function(text)
-                        {
+                        {texts.map((text) => {
                             return <li>
-                                <Link to={'/text/' + text.slug}>
+                                <Link to={this.getIntlMessage('route.TEXT') + '/' + text.slug}>
                                     {text.title}
                                 </Link>
                             </li>;

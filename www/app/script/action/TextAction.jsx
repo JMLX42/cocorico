@@ -6,5 +6,7 @@ module.exports = Reflux.createActions({
     'vote': {sync: false},
     'unvote': {sync: false},
     'show': {sync: false},
-    'showCurrentUserVote': {sync: false}
+    'showCurrentUserVote': {sync: false},
+    'listCurrentUserTexts': {sync: false},
+    'save': {sync: false}
 });

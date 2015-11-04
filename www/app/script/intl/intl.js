@@ -25,7 +25,10 @@ var Intl = {
 		route: {
 			SIGN_IN: "/connexion",
 			PRIVACY_POLICY: "/politique-de-confidentialite",
-			POLL: "/vote"
+			POLL: "/vote",
+			MY_TEXTS: "/mes-textes",
+			CREATE_TEXT: "/texte/nouveau",
+			TEXT: "/texte"
 		},
 
 		login: {
@@ -42,8 +45,19 @@ var Intl = {
 			SOURCE_CODE: "Code Source"
 		},
 
+		page: {
+			myTexts : {
+				TITLE: "Mes Textes",
+				NO_TEXT: "Vous n'avez aucun texte.",
+				NEW_TEXT: 'Créer un texte'
+			},
+
+			createText: {
+				TITLE: "Créer un nouveau texte"
+			}
+		},
+
 		text: {
-			CREATE: 'Créer un texte',
 			TEXTS: 'Textes',
 			VOTE_YES: 'pour',
 			VOTE_BLANK: 'blanc',
@@ -54,6 +68,12 @@ var Intl = {
 			LOGIN_REQUIRED: 'Vous devez être connecté pour voter.',
 			ADDITIONAL_DATA: 'Données Additionnelles',
 			PARTICIPATION: 'Participation'
+		},
+
+		textEditor: {
+			SAVE: 'Enregistrer',
+			TITLE: 'Titre',
+			CONTENT: 'Texte'
 		},
 
 		error : {

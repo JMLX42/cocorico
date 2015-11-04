@@ -40,6 +40,7 @@ exports = module.exports = function(app) {
 	app.get('/api/text/vote/blank/:id', keystone.middleware.api, isAuthenticated, routes.api.text.voteBlank);
 	app.get('/api/text/vote/no/:id', keystone.middleware.api, isAuthenticated, routes.api.text.voteNo);
 	app.get('/api/text/unvote/:id', keystone.middleware.api, isAuthenticated, routes.api.text.unvote);
+	app.post('/api/text/save', keystone.middleware.api, isAuthenticated, routes.api.text.save);
 
 	app.get('/api/page/list', keystone.middleware.api, routes.api.page.list);
 	app.get('/api/page/navbar', keystone.middleware.api, routes.api.page.navbar);
@@ -47,4 +48,5 @@ exports = module.exports = function(app) {
 	app.get('/api/page/getBySlug/:slug', keystone.middleware.api, routes.api.page.getBySlug);
 
 	app.get('/api/user/me', keystone.middleware.api, isAuthenticated, routes.api.user.me);
+	app.get('/api/user/texts', keystone.middleware.api, isAuthenticated, routes.api.user.texts);
 };
