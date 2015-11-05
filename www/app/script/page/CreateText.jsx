@@ -4,11 +4,13 @@ var ReactRouter = require('react-router');
 var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
 
-var TextStore = require("../store/TextStore");
+var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
-var TextAction = require("../action/TextAction");
+var TextStore = require('../store/TextStore');
 
-var TextEditor = require("../component/TextEditor");
+var TextAction = require('../action/TextAction');
+
+var TextEditor = require('../component/TextEditor');
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -19,11 +21,15 @@ var Link = ReactRouter.Link;
 var CreateText = React.createClass({
 
     mixins: [
-        ReactIntl.IntlMixin
+        ReactIntl.IntlMixin,
+        ForceAuthMixin
     ],
 
     render: function()
     {
+        if (!this.isAuthenticated())
+            return this.renderLoginPage(this.getIntlMessage('login.REQUIRE_LOGIN'));
+
 		return (
             <div className="page page-create-text">
                 <Grid>

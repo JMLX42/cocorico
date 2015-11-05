@@ -39,6 +39,7 @@ var Intl = {
 			SIGN_IN: "Se Connecter",
 			SIGN_OUT: "Se Déconnecter",
 			SIGN_UP: "Créer un compte",
+			REQUIRE_LOGIN: "Vous devez être connecté pour accéder à cette page."
 		},
 
 		footer: {

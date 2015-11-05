@@ -4,6 +4,8 @@ var ReactRouter = require('react-router');
 var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
 
+var ForceAuthMixin = require('../mixin/ForceAuthMixin');
+
 var TextStore = require("../store/TextStore");
 
 var TextAction = require("../action/TextAction");
@@ -19,7 +21,8 @@ var Link = ReactRouter.Link;
 var EditText = React.createClass({
 
     mixins: [
-        ReactIntl.IntlMixin
+        ReactIntl.IntlMixin,
+        ForceAuthMixin
     ],
 
     getInitialState: function()
@@ -39,6 +42,9 @@ var EditText = React.createClass({
 
     render: function()
     {
+        if (!this.isAuthenticated())
+            return this.renderLoginPage(this.getIntlMessage('login.REQUIRE_LOGIN'));
+
         if (!this.state.slug)
             return null;
 

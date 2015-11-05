@@ -9,6 +9,8 @@ var TextStore = require("../store/TextStore");
 
 var TextList = require("../component/TextList");
 
+var ForceAuthMixin = require('../mixin/ForceAuthMixin');
+
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
     Col = ReactBootstrap.Col,
@@ -18,7 +20,11 @@ var Link = ReactRouter.Link;
 
 var MyTexts = React.createClass({
 
-    mixins: [Reflux.connect(TextStore, 'texts'), ReactIntl.IntlMixin],
+    mixins: [
+        Reflux.connect(TextStore, 'texts'),
+        ReactIntl.IntlMixin,
+        ForceAuthMixin
+    ],
 
     componentDidMount: function()
     {
@@ -27,6 +33,9 @@ var MyTexts = React.createClass({
 
 	render: function()
     {
+        if (!this.isAuthenticated())
+            return this.renderLoginPage(this.getIntlMessage('login.REQUIRE_LOGIN'));
+
         var texts = this.state.texts
             ? this.state.texts.getCurrentUserTexts()
             : null;
