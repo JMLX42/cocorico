@@ -17,8 +17,6 @@ User.schema.virtual('canAccessKeystone').get(function() {
 	return this.isAdmin;
 });
 
-User.relationship({ path: 'polls', ref: 'Poll', refPath: 'author' });
-
 transform.toJSON(User);
 
 User.defaultColumns = 'hash, name, email, isAdmin';

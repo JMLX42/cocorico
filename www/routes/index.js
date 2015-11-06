@@ -13,6 +13,7 @@ var routes = {
 
 function isAuthenticated(req, res, next)
 {
+	// FIXME: users should be able to login without FranceConnect for offline dev
 	if (!req.isAuthenticated() || !req.user.sub)
 		return res.status(401).apiResponse({ 'error': 'not logged in' });
 
@@ -41,6 +42,8 @@ exports = module.exports = function(app) {
 	app.get('/api/text/vote/no/:id', keystone.middleware.api, isAuthenticated, routes.api.text.voteNo);
 	app.get('/api/text/unvote/:id', keystone.middleware.api, isAuthenticated, routes.api.text.unvote);
 	app.post('/api/text/save', keystone.middleware.api, isAuthenticated, routes.api.text.save);
+	// app.get('/api/text/delete/:id', keystone.middleware.api, isAuthenticated, routes.api.text.delete);
+	app.get('/api/text/status/:id/:status', keystone.middleware.api, isAuthenticated, routes.api.text.status);
 
 	app.get('/api/page/list', keystone.middleware.api, routes.api.page.list);
 	app.get('/api/page/navbar', keystone.middleware.api, routes.api.page.navbar);

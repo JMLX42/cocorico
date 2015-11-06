@@ -6,10 +6,12 @@ module.exports = Reflux.createStore({
     init: function()
     {
         this.listenTo(TextAction.list, this._fetchTexts);
-        this.listenTo(TextAction.showLatest, this._fetchLatest);
-        this.listenTo(TextAction.show, this._fetchTextBySlug);
+        this.listenTo(TextAction.showLatestTexts, this._fetchLatest);
+        this.listenTo(TextAction.show, this._fetchTextById);
         this.listenTo(TextAction.listCurrentUserTexts, this._fetchCurrentUserTexts);
         this.listenTo(TextAction.save, this._textSaveHandler);
+        this.listenTo(TextAction.delete, this._deleteTextById);
+        this.listenTo(TextAction.changeStatus, this._changeTextStatus);
 
         this._clearCache();
     },
@@ -19,7 +21,7 @@ module.exports = Reflux.createStore({
         return this._texts;
     },
 
-    latest: function()
+    getLatestTexts: function()
     {
         return this._latest;
     },
@@ -53,8 +55,8 @@ module.exports = Reflux.createStore({
         jquery.get(
             '/api/text/latest',
             (data) => {
-                this._latest = data.text;
-                this.trigger(this, this._latest);
+                this._latest = data.texts;
+                this.trigger(this);
             }
         );
     },
@@ -76,12 +78,35 @@ module.exports = Reflux.createStore({
         );
     },
 
+    _fetchTextById: function(textId)
+    {
+        var text = this.getById(textId);
+        if (text)
+        {
+            this.trigger(this);
+            return;
+        }
+
+        jquery.get(
+            '/api/text/' + textId,
+            (data) => {
+                this._texts.push(data.text);
+                this.trigger(this);
+            }
+        ).error((xhr, textStatus, err) => {
+            var text = { textId: textId, error: xhr.status };
+
+            this._texts.push(text);
+            this.trigger(this);
+        });
+    },
+
     _fetchTextBySlug: function(slug)
     {
         var text = this.getBySlug(slug);
         if (text)
         {
-            this.trigger(this, text);
+            this.trigger(this);
             return;
         }
 
@@ -89,13 +114,13 @@ module.exports = Reflux.createStore({
             '/api/text/getBySlug/' + slug,
             (data) => {
                 this._texts.push(data.text);
-                this.trigger(this, data.text);
+                this.trigger(this);
             }
         ).error((xhr, textStatus, err) => {
             var text = { slug: slug, error: xhr.status };
 
             this._texts.push(text);
-            this.trigger(this, text);
+            this.trigger(this);
         });
     },
 
@@ -105,7 +130,7 @@ module.exports = Reflux.createStore({
             return;
 
         if (this._currentUserTexts)
-            return this.trigger(this, null);
+            return this.trigger(this);
 
         this._currentUserTexts = true;
 
@@ -113,11 +138,11 @@ module.exports = Reflux.createStore({
             '/api/user/texts',
             (data) => {
                 this._currentUserTexts = data.texts;
-                this.trigger(this, data.texts);
+                this.trigger(this);
             }
         ).error((xhr, textStatus, err) => {
             this._currentUserTexts = null;
-            this.trigger(this, null);
+            this.trigger(this);
         });
     },
 
@@ -166,7 +191,32 @@ module.exports = Reflux.createStore({
     _clearCache: function()
     {
         this._texts = [];
-        this._latest = null;
+        this._latest = [];
         this._currentUserTexts = null;
     },
+
+    _deleteTextById: function(textId)
+    {
+        jquery.get(
+            '/api/text/delete/' + textId,
+            (data) => {
+                this.trigger(this);
+            }
+        ).error((xhr, textStatus, err) => {
+            this.trigger(this);
+        });
+    },
+
+    _changeTextStatus: function(textId, status)
+    {
+        jquery.get(
+            '/api/text/status/' + textId + '/' + status,
+            (data) => {
+                this._updateText(data.text);
+                this.trigger(this);
+            }
+        ).error((xhr, textStatus, err) => {
+            this.trigger(this);
+        });
+    }
 });

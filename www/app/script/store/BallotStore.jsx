@@ -25,7 +25,7 @@ module.exports = Reflux.createStore({
     {
         if (this._ballots[textId])
         {
-            this.trigger(this, this._ballots[textId]);
+            this.trigger(this);
             return false;
         }
 
@@ -35,7 +35,7 @@ module.exports = Reflux.createStore({
             '/api/text/ballot/' + textId,
             (data) => {
                 this._ballots[textId] = data.ballot;
-                this.trigger(this, data.ballot);
+                this.trigger(this);
             }
         ).error((xhr, textStatus, err) => {
             this._ballots[textId] = { error: xhr.status };
@@ -51,7 +51,7 @@ module.exports = Reflux.createStore({
             '/api/text/vote/' + value + '/' + textId,
             (data) => {
                 this._ballots[textId] = data.ballot;
-                this.trigger(this, data.ballot);
+                this.trigger(this);
             }
         );
     },
@@ -62,7 +62,7 @@ module.exports = Reflux.createStore({
             '/api/text/unvote/' + textId,
             (data) => {
                 delete this._ballots[textId];
-                this.trigger(this, null);
+                this.trigger(this);
             }
         );
     }

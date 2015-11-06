@@ -14,6 +14,7 @@ var Router = ReactRouter.Router,
     ViewText = require('./page/ViewText'),
     CreateText = require('./page/CreateText'),
     EditText = require('./page/EditText'),
+    DeleteText = require('./page/DeleteText'),
     Home = require('./page/Home'),
     MyTexts = require('./page/MyTexts');
 
@@ -23,8 +24,9 @@ ReactDOM.render(
             <IndexRoute component={Home}/>
             <Route path={messages.route.MY_TEXTS} component={MyTexts}/>
             <Route path={messages.route.CREATE_TEXT} component={CreateText}/>
-            <Route path={messages.route.EDIT_TEXT + '/:slug'} component={EditText}/>
-            <Route path={messages.route.VIEW_TEXT + '/:slug'} component={ViewText}/>
+            <Route path={messages.route.EDIT_TEXT + '/:textId/:slug'} component={EditText}/>
+            <Route path={messages.route.VIEW_TEXT + '/:textId/:slug'} component={ViewText}/>
+            <Route path={messages.route.DELETE_TEXT + '/:textId/:slug'} component={DeleteText}/>
             <Route path='page/:slug' component={Page}/>
             <Route path=':slug' component={Page}/>
         </Route>

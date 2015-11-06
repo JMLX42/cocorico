@@ -7,26 +7,26 @@ var ViewText = React.createClass({
 
     getInitialState: function()
     {
-        return {slug: null};
+        return {textId: null};
     },
 
     componentWillReceiveProps: function(props)
     {
-        this.setState({'slug': props.params.slug});
+        this.setState({'textId': props.params.textId});
     },
 
     componentDidMount: function()
     {
-        this.setState({'slug': this.props.params.slug});
+        this.setState({'textId': this.props.params.textId});
     },
 
     render: function()
     {
-        if (!this.state.slug)
+        if (!this.state.textId)
             return null;
 
 		return (
-            <Text slug={this.state.slug} />
+            <Text textId={this.state.textId} />
 		);
 	}
 });

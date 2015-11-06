@@ -5,18 +5,36 @@ var redis = require('redis');
 var Text = keystone.list('Text');
 var Ballot = keystone.list('Ballot');
 
+function textIsReadable(text, req, checkAuthor)
+{
+	return ['draft'].indexOf(text.status) < 0
+		|| (!checkAuthor && req.isAuthenticated() && bcrypt.compareSync(req.user.sub, text.author));
+}
+
+function filterReadableTexts(texts, req, checkAuthor)
+{
+	var filtered = [];
+
+	for (var text of texts)
+		if (textIsReadable(text, req, checkAuthor))
+			filtered.push(text);
+
+	return filtered;
+}
+
 /**
  * List Texts
  */
 exports.list = function(req, res)
 {
-	Text.model.find(function(err, texts)
-    {
-		if (err)
-			return res.apiError('database error', err);
+	Text.model.find()
+		.exec(function(err, texts)
+	    {
+			if (err)
+				return res.apiError('database error', err);
 
-		res.apiResponse({ texts: texts });
-	});
+			res.apiResponse({ texts: filterReadableTexts(texts, req, true) });
+		});
 }
 
 /**
@@ -24,29 +42,33 @@ exports.list = function(req, res)
  */
 exports.get = function(req, res)
 {
-	Text.model.findById(req.params.id).exec(function(err, item)
+	Text.model.findById(req.params.id).exec(function(err, text)
     {
 		if (err)
 			return res.apiError('database error', err);
-		if (!item)
+		if (!text)
 			return res.apiError('not found');
 
-		res.apiResponse({ text: item });
+		if (!textIsReadable(text, req))
+			return res.status(403).send();
+
+		res.apiResponse({ text: text });
 	});
 }
 
 exports.latest = function(req, res)
 {
-	Text.model.findOne()
+	Text.model.find()
 		.sort('-publishedAt')
-		.exec(function(err, item)
+		.limit(10)
+		.exec(function(err, texts)
 	    {
 			if (err)
 				return res.apiError('database error', err);
-			if (!item)
+			if (!texts)
 				return res.apiError('not found');
 
-			res.apiResponse({ text: item });
+			res.apiResponse({ texts: filterReadableTexts(texts, req, true) });
 		});
 }
 
@@ -78,6 +100,9 @@ function vote(req, res, value)
 			return res.apiError('database error', err);
 		if (!text)
 			return res.apiError('not found');
+
+		if (!textIsReadable(text, req))
+			return res.status(403).send();
 
 		Ballot.getByTextIdAndVoter(
 			req.params.id,
@@ -134,6 +159,9 @@ exports.unvote = function(req, res)
 		if (!text)
 			return res.apiError('not found');
 
+		if (!textIsReadable(text, req))
+			return res.status(403).send();
+
 		Ballot.getByTextIdAndVoter(
 			req.params.id,
 			req.user.sub,
@@ -183,6 +211,8 @@ exports.getBySlug = function(req, res)
 				return res.apiError('database error', err);
 			if (!text)
 				return res.status(404).send();
+			if (!textIsReadable(text, req))
+				return res.status(403).send();
 
 			res.apiResponse({ text: text });
 		});
@@ -206,6 +236,8 @@ exports.save = function(req, res)
 	    {
 			if (err)
 				return res.apiError('database error', err);
+			if (text && !textIsReadable(text, req))
+				return res.status(403).send();
 
 			if (!text)
 			{
@@ -241,5 +273,42 @@ exports.save = function(req, res)
 				else
 					return res.status(403).send();
 			}
+		});
+}
+
+// exports.delete = function(req, res)
+// {
+// 	Text.model.findById(req.params.id).remove(function(err)
+// 	{
+// 		if (err)
+// 			return res.apiError('database error', err);
+//
+// 		return res.apiResponse({action: 'deleted'});
+// 	});
+// }
+
+exports.status = function(req, res)
+{
+	Text.model.findOne({_id : req.params.id})
+		.exec(function(err, text)
+	    {
+			if (err)
+				return res.apiError('database error', err);
+			if (!text)
+				return res.status(404).send();
+			if (!bcrypt.compareSync(req.user.sub, text.author))
+				return res.status(403).send();
+
+			text.status = req.params.status;
+			text.save(function(err)
+			{
+				if (err)
+					return res.apiError('database error', err);
+
+				return res.apiResponse({
+					action: 'update',
+					text : text
+				});
+			});
 		});
 }

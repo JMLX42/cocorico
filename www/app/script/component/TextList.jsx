@@ -6,6 +6,8 @@ var Reflux = require('reflux');
 
 var TextAction = require("../action/TextAction");
 var TextStore = require("../store/TextStore");
+var TextLink = require("../component/TextLink"),
+    TextStatusSelect = require("../component/TextStatusSelect");
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row;
@@ -19,7 +21,13 @@ var TextList = React.createClass({
     componentDidMount: function()
     {
         if (!this.props.texts)
-            TextAction.list();
+            TextAction.showLatestTexts();
+    },
+
+    componentWillReceiveProps: function(props)
+    {
+        if (!props.texts)
+            TextAction.showLatestTexts();
     },
 
 	render: function()
@@ -27,28 +35,40 @@ var TextList = React.createClass({
         var texts = this.props.texts
             ? this.props.texts
             : this.state.texts
-                ? this.state.texts.get()
+                ? this.state.texts.getLatestTexts()
                 : null;
 
         if (!texts)
             return null;
 
+        if (texts.length == 0)
+            return (
+                <p>{this.getIntlMessage('page.myTexts.NO_TEXT')}</p>
+            );
+
+        var filteredTexts = [];
+        for (var text of texts)
+            if (!this.props.filterFunction || this.props.filterFunction(text))
+                filteredTexts.push(text);
+
 		return (
-			<ul className="list-unstyled">
-                {texts.map((text) => {
-                    return <li>
-                        <Link to={this.getIntlMessage('route.VIEW_TEXT') + '/' + text.slug}>
-                            {text.title}
-                        </Link>
-                        {this.props.editable
-                            ? <Link to={this.getIntlMessage('route.EDIT_TEXT') + '/' + text.slug} className="pull-right">Modifier</Link>
-                            : <div/>}
-                        {this.props.deletable
-                            ? <Link to="/" className="pull-right">Supprimer</Link>
-                            : <div/>}
-                    </li>;
-                })}
-			</ul>
+            <div>
+                {filteredTexts.length == 0
+                    ? <p>{this.getIntlMessage('page.myTexts.NO_TEXT')}</p>
+                    : <ul className="list-unstyled text-list">
+                        {filteredTexts.map((text) => {
+                            return (<li>
+                                <TextLink text={text}/>
+                                {this.props.editable
+                                    ? <Link to={this.getIntlMessage('route.EDIT_TEXT') + '/' + text.id + '/' + text.slug} className="pull-right">Modifier</Link>
+                                    : ''}
+                                {this.props.editable
+                                    ? <TextStatusSelect text={text} className="pull-right"/>
+                                    : ''}
+                            </li>);
+                        })}
+        			</ul>}
+            </div>
 		);
 	}
 });

@@ -17,7 +17,8 @@ Text.add({
     publishedAt: Date,
 	content: { type: Types.Markdown, wysiwyg: true, height: 400 },
     additionalData: { type: String, hidden: true },
-    author: { type: String, required: true, initial: true }
+    author: { type: String, required: true, initial: true },
+    status: { type: Types.Select, options: ['draft', 'published'] }
 });
 
 function fetchPageTitle(url, callback)

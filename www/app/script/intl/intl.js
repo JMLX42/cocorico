@@ -29,7 +29,8 @@ var Intl = {
 			MY_TEXTS: "/mes-textes",
 			CREATE_TEXT: "/texte/nouveau",
 			VIEW_TEXT: "/texte",
-			EDIT_TEXT: "/texte/modifier"
+			EDIT_TEXT: "/texte/modifier",
+			DELETE_TEXT: "/texte/supprimer"
 		},
 
 		login: {
@@ -50,7 +51,7 @@ var Intl = {
 		page: {
 			myTexts : {
 				TITLE: "Mes Textes",
-				NO_TEXT: "Vous n'avez aucun texte.",
+				NO_TEXT: "Aucun texte.",
 				NEW_TEXT: 'Créer un texte'
 			},
 
@@ -69,13 +70,16 @@ var Intl = {
 			ALREADY_VOTED: 'Vous avez voté \'{ value }\' le { date }.',
 			LOGIN_REQUIRED: 'Vous devez être connecté pour voter.',
 			ADDITIONAL_DATA: 'Données Additionnelles',
-			PARTICIPATION: 'Participation'
+			YOUR_VOTE: 'Votre Vote',
+			PARTICIPATIONS: 'Participations'
 		},
 
 		textEditor: {
 			SAVE: 'Enregistrer',
 			TITLE: 'Titre',
-			CONTENT: 'Texte'
+			TITLE_PLACEHOLDER: 'le titre de votre texte',
+			CONTENT: 'Texte',
+			CONTENT_PLACEHOLDER: 'le contenu de votre texte'
 		},
 
 		error : {

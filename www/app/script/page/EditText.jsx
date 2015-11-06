@@ -27,17 +27,17 @@ var EditText = React.createClass({
 
     getInitialState: function()
     {
-        return {slug: null};
+        return {textId: null};
     },
 
     componentWillReceiveProps: function(props)
     {
-        this.setState({slug: props.params.slug});
+        this.setState({textId: props.params.textId});
     },
 
     componentDidMount: function()
     {
-        this.setState({slug: this.props.params.slug});
+        this.setState({textId: this.props.params.textId});
     },
 
     render: function()
@@ -45,7 +45,7 @@ var EditText = React.createClass({
         if (!this.isAuthenticated())
             return this.renderLoginPage(this.getIntlMessage('login.REQUIRE_LOGIN'));
 
-        if (!this.state.slug)
+        if (!this.state.textId)
             return null;
 
 		return (
@@ -58,7 +58,7 @@ var EditText = React.createClass({
                     </Row>
                 </Grid>
 
-                <TextEditor slug={this.state.slug}/>
+                <TextEditor textId={this.state.textId}/>
             </div>
 		);
 	}

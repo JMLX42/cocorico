@@ -34,6 +34,9 @@ module.exports = Reflux.createStore({
         if (this._currrentUser === true)
             return;
 
+        if (this._currrentUser)
+            this.trigger(this);
+
         this._currrentUser = true;
 
         jquery.get(

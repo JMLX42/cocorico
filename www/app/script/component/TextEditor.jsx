@@ -39,10 +39,11 @@ var Text = React.createClass({
 
     componentDidMount: function()
     {
-        if (this.props.slug)
+        if (this.props.textId)
         {
-            this.listenTo(TextStore, (store, text) => {
-                if (text && text.slug == this.props.slug)
+            this.listenTo(TextStore, (store) => {
+                var text = store.getById(this.props.textId);
+                if (text && text.id == this.props.textId)
                 {
                     this.setState({
                         id: text.id,
@@ -52,7 +53,7 @@ var Text = React.createClass({
                 }
             });
 
-            TextAction.show(this.props.slug);
+            TextAction.show(this.props.textId);
         }
 
         UserAction.requireLogin();
@@ -79,8 +80,8 @@ var Text = React.createClass({
 
     render: function()
     {
-        var text = this.state.texts
-            ? this.state.texts.getBySlug(this.props.slug)
+        var text = this.state && this.state.texts
+            ? this.state.texts.getById(this.props.textId)
             : null;
 
         return (
@@ -89,7 +90,9 @@ var Text = React.createClass({
                     <Col md={12}>
                         <h2>{this.getIntlMessage('textEditor.TITLE')}</h2>
                         <Input type="texte" name="title" value={this.state.title}
-                               onChange={this.handleTitleChange}>
+                               onChange={this.handleTitleChange}
+                               enabled={this.props.textId && text}
+                               placeholder={this.getIntlMessage('textEditor.TITLE_PLACEHOLDER')}>
                             {!!text ? text.title : ''}
                         </Input>
                     </Col>
@@ -98,7 +101,9 @@ var Text = React.createClass({
                     <Col md={12}>
                         <h2>{this.getIntlMessage('textEditor.CONTENT')}</h2>
                         <Input type="textarea" name="content" className="text-content"
-                               value={this.state.content} onChange={this.handleContentChange}>
+                               value={this.state.content} onChange={this.handleContentChange}
+                               enabled={this.props.textId && text}
+                               placeholder={this.getIntlMessage('textEditor.CONTENT_PLACEHOLDER')}>
                             {!!text ? text.content.md : ''}
                         </Input>
                     </Col>

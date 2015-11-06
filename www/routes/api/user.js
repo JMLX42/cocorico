@@ -16,6 +16,7 @@ exports.me = function(req, res)
 exports.texts = function(req, res)
 {
 	Text.model.find()
+        .sort('-publishedAt')
 		.exec(function(err, texts)
 		{
 			if (err)

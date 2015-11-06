@@ -23,7 +23,9 @@ var BallotStore = require('../store/BallotStore'),
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
-    Col = ReactBootstrap.Col;
+    Col = ReactBootstrap.Col,
+    Tabs = ReactBootstrap.Tabs,
+    Tab = ReactBootstrap.Tab;
 
 var Text = React.createClass({
 
@@ -36,28 +38,25 @@ var Text = React.createClass({
 
     componentDidMount: function()
     {
-        TextAction.show(this.props.slug);
+        TextAction.show(this.props.textId);
+        TextAction.showCurrentUserVote(this.props.textId);
         UserAction.requireLogin();
 
-        this.listenTo(TextAction.vote, (textId, value) => {
-            TextAction.show(this.props.slug);
-        });
-
-        this.listenTo(TextStore, (store, text) => {
-            if (text.slug == this.props.slug)
-                TextAction.showCurrentUserVote(text.id);
+        this.listenTo(TextAction.vote, (textId) => {
+            TextAction.show(this.props.textId);
         });
     },
 
     componentWillReceiveProps: function(props)
     {
-        TextAction.show(props.slug);
+        if (props.textId != this.props.textId)
+            TextAction.show(props.textId);
     },
 
     render: function()
     {
         var text = this.state.texts
-            ? this.state.texts.getBySlug(this.props.slug)
+            ? this.state.texts.getById(this.props.textId)
             : null;
 
         if (!text)
@@ -101,7 +100,7 @@ var Text = React.createClass({
                         <Grid>
                             <Row className="section">
                                 <Col md={12}>
-                                    <h2 className="section-title">{this.getIntlMessage('text.PARTICIPATION')}</h2>
+                                    <h2 className="section-title">{this.getIntlMessage('text.YOUR_VOTE')}</h2>
                                     {!!currentUser
                                         ? !!this.state.ballots && (!ballot || ballot.error == 404)
                                             ? <VoteButtonBar textId={text.id}/>
@@ -115,6 +114,20 @@ var Text = React.createClass({
                                         : <div>
                                             {this.getIntlMessage('text.LOGIN_REQUIRED')} <LoginButton />
                                          </div>}
+                                </Col>
+                            </Row>
+                        </Grid>
+                    </div>
+                    <div>
+                        <Grid>
+                            <Row className="section">
+                                <Col md={12}>
+                                    <h2 className="section-title">{this.getIntlMessage('text.PARTICIPATIONS')}</h2>
+                                    <Tabs defaultActiveKey={1}>
+                                        <Tab eventKey={1} title="Propositions"/>
+                                        <Tab eventKey={2} title="Arguments"/>
+                                        <Tab eventKey={3} title="Sources"/>
+                                    </Tabs>
                                 </Col>
                             </Row>
                         </Grid>
