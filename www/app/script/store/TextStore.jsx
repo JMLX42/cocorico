@@ -52,6 +52,14 @@ module.exports = Reflux.createStore({
 
     _fetchLatest: function()
     {
+        if (this._latest === true)
+            return;
+
+        if (this._latest)
+            return this.trigger(this);
+
+        this._latest = true;
+
         jquery.get(
             '/api/text/latest',
             (data) => {
@@ -191,7 +199,7 @@ module.exports = Reflux.createStore({
     _clearCache: function()
     {
         this._texts = [];
-        this._latest = [];
+        this._latest = null;
         this._currentUserTexts = null;
     },
 
