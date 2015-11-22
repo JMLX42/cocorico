@@ -2,8 +2,9 @@ var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 var redis = require('redis');
 
-var Text = keystone.list('Text');
-var Ballot = keystone.list('Ballot');
+var Text = keystone.list('Text'),
+	Ballot = keystone.list('Ballot'),
+	Source = keystone.list('Source');
 
 function textIsReadable(text, req, checkAuthor)
 {
@@ -311,4 +312,31 @@ exports.status = function(req, res)
 				});
 			});
 		});
+}
+
+exports.listArguments = function(req, res)
+{
+	Arguments.model.find({_id : req.params.id})
+		.exec(function(err, arguments)
+		{
+			if (err)
+				return res.apiError('database error', err);
+
+			res.apiResponse({ arguments: arguments });
+		});
+}
+
+exports.addArgument = function(req, res)
+{
+	var newArgument = Argument.model({
+		title: req.body.title,
+		content: req.body.content,
+		text: req.body.textId,
+		author: bcrypt.hashSync(req.user.sub, 10)
+	});
+
+	newArgument.save(function(err)
+	{
+		return res.apiResponse({ argument: newArgument });
+	});
 }

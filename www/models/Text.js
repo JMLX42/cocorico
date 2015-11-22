@@ -1,7 +1,9 @@
 var keystone = require('keystone');
 var async = require('async');
 var transform = require('model-transform');
-var MetaInspector = require('node-metainspector');
+var bcrypt = require('bcrypt');
+
+var Source = keystone.list('Source');
 
 var Types = keystone.Field.Types;
 
@@ -16,42 +18,28 @@ Text.add({
 	createdAt: { type: Date, default: Date.now },
     publishedAt: Date,
 	content: { type: Types.Markdown, wysiwyg: true, height: 400 },
-    additionalData: { type: String, hidden: true },
     author: { type: String, required: true, initial: true },
-    status: { type: Types.Select, options: ['draft', 'published'] }
+    status: { type: Types.Select, options: ['draft', 'review', 'debate', 'published'], default: 'draft' }
 });
-
-function fetchPageTitle(url, callback)
-{
-    var client = new MetaInspector(url, { timeout: 5000 });
-
-    client.on("fetch", function()
-    {
-        callback(null, client.title);
-    });
-
-    client.on("error", function(err)
-    {
-        callback(error, null);
-    });
-
-    client.fetch();
-}
 
 Text.schema.pre('save', function(next)
 {
     var self = this;
     var mdLinkRegex = new RegExp(/\[([^\[]+)\]\(([^\)]+)\)/g);
-    var ops = [function(callback) { callback(null, ""); }];
+    var ops = [function(callback) { callback(null, []); }];
 
     while (match = mdLinkRegex.exec(this.content.md))
     {
         (function(url) {
             ops.push(function(result, callback)
             {
-                fetchPageTitle(url, function(err, title)
+                // FIXME: do not fetch pages that are already listed in the text sources
+                Source.fetchPageTitle(url, function(err, title)
                 {
-                    result += (result ? '\n' : '') + '* [' + title + '](' + url + ')';
+                    if (err)
+                        result.push({url: url, title: ''});
+                    else
+                        result.push({url: url, title: title});
 
                     callback(null, result);
                 });
@@ -61,13 +49,48 @@ Text.schema.pre('save', function(next)
 
     async.waterfall(ops, function(error, result)
     {
-        self.additionalData = result;
+        var saveOps = [function(callback)
+        {
+            Source.model.find({text: self, author: ''}).remove(function(err)
+            {
+                callback(err);
+            });
+        }];
 
-        next();
+        if (error)
+        {
+            console.log(error);
+            next(error); // FIXME: retry later
+        }
+        else
+        {
+            saveOps = saveOps.concat(result.map(function(source)
+            {
+                return function(callback)
+                {
+                    Source.model({
+                        title: source.title,
+                        url: source.url,
+                        // auto: true,
+                        // author: bcrypt.hashSync(req.user.sub, 10),
+                        text: self
+                    }).save(function(err)
+                    {
+                        callback(err);
+                    });
+                };
+            }));
+
+            async.waterfall(saveOps, function(error)
+            {
+                next();
+            });
+        }
     });
 });
 
 Text.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'text' });
+Text.relationship({ path: 'sources', ref: 'Source', refPath: 'text' });
 
 transform.toJSON(Text);
 

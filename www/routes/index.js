@@ -31,6 +31,8 @@ exports = module.exports = function(app) {
 	app.get('/auth/login', keystone.middleware.api, routes.auth.index.login);
 	app.get('/auth/logout', keystone.middleware.api, routes.auth.index.logout);
 	app.get('/auth/connectCallback', keystone.middleware.api, routes.auth.index.connectCallback);
+	// FIXME: only in dev environment
+	app.get('/auth/fakeLogin', keystone.middleware.api, routes.auth.index.fakeLogin);
 
 	app.get('/api/text/list', keystone.middleware.api, routes.api.text.list);
 	app.get('/api/text/latest', keystone.middleware.api, routes.api.text.latest);
@@ -44,6 +46,9 @@ exports = module.exports = function(app) {
 	app.post('/api/text/save', keystone.middleware.api, isAuthenticated, routes.api.text.save);
 	// app.get('/api/text/delete/:id', keystone.middleware.api, isAuthenticated, routes.api.text.delete);
 	app.get('/api/text/status/:id/:status', keystone.middleware.api, isAuthenticated, routes.api.text.status);
+
+	app.get('/api/source/list/:textId', keystone.middleware.api, routes.api.source.list);
+	app.post('/api/source/add', keystone.middleware.api, isAuthenticated, routes.api.source.add);
 
 	app.get('/api/page/list', keystone.middleware.api, routes.api.page.list);
 	app.get('/api/page/navbar', keystone.middleware.api, routes.api.page.navbar);
