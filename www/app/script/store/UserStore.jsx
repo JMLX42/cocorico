@@ -8,17 +8,20 @@ module.exports = Reflux.createStore({
     {
         this.listenTo(UserAction.requireLogin, this._requireLoginHandler);
 
-        this._currrentUser = null;
+        this._currentUser = null;
     },
 
     getCurrentUser: function()
     {
-        return this._currrentUser;
+        return this._currentUser && !this._currentUser.error
+            ? this._currentUser
+            : null;
     },
 
     isAuthenticated: function()
     {
-        return typeof(this._currrentUser) == 'object' && !!this._currrentUser;
+        return typeof(this._currentUser) == 'object' && !!this._currentUser
+            && !this._currentUser.error;
     },
 
     _requireLoginHandler: function()
@@ -31,22 +34,22 @@ module.exports = Reflux.createStore({
 
     _fetchCurrentUser: function()
     {
-        if (this._currrentUser === true)
+        if (this._currentUser === true)
             return;
 
-        if (this._currrentUser)
-            this.trigger(this);
+        if (this._currentUser)
+            return this.trigger(this);
 
-        this._currrentUser = true;
+        this._currentUser = true;
 
         jquery.get(
             '/api/user/me',
             (data) => {
-                this._currrentUser = data.user;
+                this._currentUser = data.user;
                 this.trigger(this);
             }
         ).error((xhr, textStatus, err) => {
-            this._currrentUser = null;
+            this._currentUser = {error: xhr.status};
             this.trigger(this);
         });
     }
