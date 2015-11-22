@@ -71,7 +71,20 @@ var Intl = {
 			LOGIN_REQUIRED: 'Vous devez être connecté pour voter.',
 			ADDITIONAL_DATA: 'Données Additionnelles',
 			YOUR_VOTE: 'Votre Vote',
-			PARTICIPATIONS: 'Participations'
+			NO_PROPOSAL: 'Aucune proposition.',
+			ADD_PROPOSAL: 'Faire une proposition',
+			ADD_PROPOSAL_LOGIN: 'Vous devez être connecté pour faire une proposition.',
+			NO_ARGUMENT: 'Aucun argument.',
+			ADD_ARGUMENT: 'Ajouter un argument \'{ value }\'',
+			ADD_ARGUMENT_LOGIN: 'Vous devez être connecté pour proposer un argument.',
+			TEXT_SOURCES: 'Sources mentionnées dans le texte',
+			COMMUNITY_SOURCES: 'Sources ajoutées par la communauté',
+			NO_SOURCE: 'Aucune source.',
+			ADD_SOURCE_BUTTON: 'Ajouter une source',
+			ADD_SOURCE_FORM_TITLE: 'Ajouter une source',
+			ADD_SOURCE_LOGIN: 'Vous devez être connecté pour proposer une source.',
+			ADD_SOURCE_URL_HINT: 'Adresse Web de la source que vous désirez ajouter :',
+			ADD_SOURCE_SUBMIT_BUTTON: 'Ajouter'
 		},
 
 		textEditor: {
@@ -83,7 +96,8 @@ var Intl = {
 		},
 
 		error : {
-			ERROR_404: 'Oops... nous n\'avons pas pu trouver la page que vous cherchez !'
+			ERROR_404: 'Oops... nous n\'avons pas pu trouver la page que vous cherchez !',
+			ERROR_SOURCE_ALREADY_EXISTS: 'Cette source a déjà été ajoutée.'
 		}
 	}
 }
