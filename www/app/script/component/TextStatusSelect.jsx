@@ -17,8 +17,10 @@ var TextStatusSelect = React.createClass({
     },
 
     options: {
-        "draft": "Brouillon",
-        "published": "Publié"
+        'draft': 'Brouillon',
+        'review': 'Révision',
+        'debate': 'Débat',
+        'published': 'Publié'
     },
 
     render: function()
