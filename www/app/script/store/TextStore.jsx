@@ -18,12 +18,12 @@ module.exports = Reflux.createStore({
 
     get: function()
     {
-        return this._texts;
+        return this._texts === true ? null : this._texts;
     },
 
     getLatestTexts: function()
     {
-        return this._latest;
+        return this._latest === true ? null : this._latest;
     },
 
     getBySlug: function(slug)
@@ -220,7 +220,12 @@ module.exports = Reflux.createStore({
         jquery.get(
             '/api/text/status/' + textId + '/' + status,
             (data) => {
+                var userTexts = this._currentUserTexts;
+
+                this._clearCache();
+                this._currentUserTexts = userTexts;
                 this._updateText(data.text);
+
                 this.trigger(this);
             }
         ).error((xhr, textStatus, err) => {
