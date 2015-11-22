@@ -19,7 +19,15 @@ var Link = ReactRouter.Link;
 
 var Home = React.createClass({
 
-    mixins: [ReactIntl.IntlMixin],
+    mixins: [
+        ReactIntl.IntlMixin,
+        Reflux.connect(TextStore, 'texts')
+    ],
+
+    componentWillMount: function()
+    {
+        TextAction.showLatestTexts();
+    },
 
     render: function()
     {
@@ -34,7 +42,9 @@ var Home = React.createClass({
                     </Row>
                     <Row>
                         <Col md={12}>
-                            <TextList />
+                            {this.state && this.state.texts
+                                ? <TextList texts={this.state.texts.getLatestTexts()} />
+                                : <div/>}
                         </Col>
                     </Row>
                 </Grid>
