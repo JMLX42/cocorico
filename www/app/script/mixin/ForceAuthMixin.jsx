@@ -41,19 +41,14 @@ var ForceAuthMixin = {
     {
         return (
             <div className="page">
-                <Grid>
-                    <Row>
-                        <Col md={12}>
-                            <p>
-                                {message}
-                                &nbsp;
-                                <LoginButton />
-                            </p>
-                        </Col>
-                    </Row>
-                </Grid>
+                <span>{message} <LoginButton /></span>
             </div>
         );
+    },
+
+    renderLoginMessage: function(message)
+    {
+        return (<span>{message} <LoginButton /></span>);
     }
 };
 
