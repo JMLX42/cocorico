@@ -37,6 +37,14 @@ body {
     color: @cocorico-grey;
 }
 
+.cocorico-grey-background {
+    background-color: @cocorico-grey;
+}
+
+.cocorico-light-grey-background {
+    background-color: @cocorico-light-grey;
+}
+
 .cocorico-dark-grey {
     color: @cocorico-dark-grey;
 }
@@ -111,6 +119,10 @@ body {
 }
 
 .text {
+    .tab-content {
+        padding: 20px 0;
+    }
+
     .text-content {
         text-align: justify;
     }
@@ -218,6 +230,14 @@ body {
     margin-top: 10px;
 }
 
+.btn-like {
+    .cocorico-dark-grey;
+
+    border: 1px solid @cocorico-dark-grey;
+    background-color: white;
+    margin-left: 10px;
+}
+
 .error-404 {
     font-size: 2em;
 }
@@ -230,6 +250,16 @@ body {
     .section-title {
         margin-bottom: 20px;
     }
+}
+
+.section-notice-review {
+    .section;
+
+    border-bottom: 1px solid @cocorico-grey;
+}
+
+.hint {
+    color: @cocorico-dark-grey;
 }
 
 .pace {
@@ -274,10 +304,6 @@ body {
 .tabs-my-texts {
     margin-top: 20px;
 
-    p {
-        margin: 10px 10px;
-    }
-
     .text-list li {
         padding: 10px 10px;
 
@@ -285,4 +311,11 @@ body {
             background: @cocorico-light-grey;
         }
     }
+}
+
+.toc {
+    border: 1px solid @cocorico-grey;
+    background-color: @cocorico-light-grey;
+    padding: 10px 20px;
+    display: inline-block;
 }
