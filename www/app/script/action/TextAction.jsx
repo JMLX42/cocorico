@@ -10,5 +10,7 @@ module.exports = Reflux.createActions({
     'listCurrentUserTexts': {sync: false},
     'save': {sync: false},
     'delete': {sync: false},
-    'changeStatus': {sync: false}
+    'changeStatus': {sync: false},
+    'showSources': {sync: false},
+    'addSource': {sync: false}
 });
