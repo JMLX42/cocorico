@@ -41,7 +41,13 @@ var ForceAuthMixin = {
     {
         return (
             <div className="page">
-                <span>{message} <LoginButton /></span>
+                <Grid>
+                    <Row>
+                        <Col md={12}>
+                            <span>{message} <LoginButton /></span>
+                        </Col>
+                    </Row>
+                </Grid>
             </div>
         );
     },
