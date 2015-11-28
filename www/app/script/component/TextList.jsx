@@ -20,10 +20,7 @@ var TextList = React.createClass({
 
 	render: function()
     {
-        var texts = this.props.texts;
-
-        if (!texts)
-            return null;
+        var texts = this.props.texts || [];
 
         var filteredTexts = texts.filter((text) => {
             return !this.props.filterFunction || this.props.filterFunction(text)

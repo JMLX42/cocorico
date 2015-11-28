@@ -43,6 +43,13 @@ var MyTexts = React.createClass({
             ? this.state.texts.getCurrentUserTexts()
             : null;
 
+        var filteredTexts = {};
+        for (var text of texts)
+            if (filteredTexts[text.status])
+                filteredTexts[text.status].push(text);
+            else
+                filteredTexts[text.status] = [text];
+
 		return (
             <ReactDocumentTitle title={this.getIntlMessage('page.myTexts.TITLE') + ' - ' + this.getIntlMessage('site.TITLE')}>
                 <div className="page page-my-texts">
@@ -63,20 +70,20 @@ var MyTexts = React.createClass({
                         <Row>
                             <Col md={12}>
                                 <Tabs defaultActiveKey={1} className="tabs-my-texts">
-                                    <Tab eventKey={1} title="Brouillon">
-                                        <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'draft'}/>
+                                    <Tab eventKey={1} title={"Brouillon (" + (filteredTexts['draft'] || []).length + ")"}>
+                                        <TextList texts={filteredTexts['draft']} editable={true}/>
                                     </Tab>
-                                    <Tab eventKey={2} title="Révision">
-                                        <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'review'} />
+                                    <Tab eventKey={2} title={"Révision (" + (filteredTexts['review'] || []).length + ")"}>
+                                        <TextList texts={filteredTexts['review']} editable={true} />
                                     </Tab>
-                                    <Tab eventKey={3} title="Débat">
-                                        <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'debate'} />
+                                    <Tab eventKey={3} title={"Débat (" + (filteredTexts['debate'] || []).length + ")"}>
+                                        <TextList texts={filteredTexts['debate']} editable={true} />
                                     </Tab>
-                                    <Tab eventKey={4} title="Vote">
-                                        <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'vote'} />
+                                    <Tab eventKey={4} title={"Vote (" + (filteredTexts['vote'] || []).length + ")"}>
+                                        <TextList texts={filteredTexts['vote']} editable={true} />
                                     </Tab>
-                                    <Tab eventKey={5} title="Publié">
-                                        <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'published'}/>
+                                    <Tab eventKey={5} title={"Publié (" + (filteredTexts['published'] || []).length + ")"}>
+                                        <TextList texts={filteredTexts['published']} editable={true} />
                                     </Tab>
                                 </Tabs>
                             </Col>
