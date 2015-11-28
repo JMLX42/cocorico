@@ -29,7 +29,7 @@ var MyTexts = React.createClass({
         ForceAuthMixin
     ],
 
-    componentDidMount: function()
+    componentWillMount: function()
     {
         TextAction.listCurrentUserTexts();
     },
@@ -66,17 +66,17 @@ var MyTexts = React.createClass({
                                     <Tab eventKey={1} title="Brouillon">
                                         <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'draft'}/>
                                     </Tab>
-                                    <Tab eventKey={2} title="Publié">
-                                        <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'published'}/>
+                                    <Tab eventKey={2} title="Révision">
+                                        <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'review'} />
                                     </Tab>
-                                    <Tab eventKey={3} title="Revue">
-                                        <TextList texts={texts} editable={true} filterFunction={(text) => false} />
+                                    <Tab eventKey={3} title="Débat">
+                                        <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'debate'} />
                                     </Tab>
                                     <Tab eventKey={4} title="Vote">
-                                        <TextList texts={texts} editable={true} filterFunction={(text) => false} />
+                                        <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'vote'} />
                                     </Tab>
-                                    <Tab eventKey={5} title="Validé">
-                                        <TextList texts={texts} editable={true} filterFunction={(text) => false} />
+                                    <Tab eventKey={5} title="Publié">
+                                        <TextList texts={texts} editable={true} filterFunction={(text) => text.status == 'published'}/>
                                     </Tab>
                                 </Tabs>
                             </Col>
