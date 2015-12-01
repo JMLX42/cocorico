@@ -20,6 +20,14 @@ function isAuthenticated(req, res, next)
 	next();
 }
 
+function checkCSRFToken(req, res, next)
+{
+	if (!keystone.security.csrf.validate(req))
+		return res.status(400).apiResponse({ 'error': 'invalid CSRF token' });
+
+	next();
+}
+
 // Setup Route Bindings
 exports = module.exports = function(app) {
 
