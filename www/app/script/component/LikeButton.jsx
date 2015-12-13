@@ -17,9 +17,7 @@ var LikeButton = React.createClass({
     render: function()
     {
 		return (
-            <Button bsSize="small" className="btn-like" onClick={this.props.onClick}>
-                J'approuve ({this.props.count})
-            </Button>
+            <span className={(this.props.dislike ? 'icon-thumb_down' : 'icon-thumb_up') + ' icon-btn'}></span>
 		);
 	}
 });

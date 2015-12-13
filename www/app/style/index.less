@@ -172,6 +172,16 @@ body {
     }
 }
 
+.source-list {
+    .source-item {
+        .source-score {
+            display: inline-block;
+            color: @cocorico-dark-grey;
+            margin-left: 5px;
+        }
+    }
+}
+
 .page {
     margin: 50px 0;
 }
@@ -318,4 +328,29 @@ body {
     background-color: @cocorico-light-grey;
     padding: 10px 20px;
     display: inline-block;
+}
+
+@import "./font-icomoon.less";
+
+[class^="icon-"], [class*=" icon-"] {
+    color: @cocorico-dark-grey;
+}
+
+.icon-btn {
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+.icon-btn.icon-thumb_up {
+    &.icon-btn-active,
+    &:hover {
+        color: @cocorico-blue;
+    }
+}
+
+.icon-btn.icon-thumb_down {
+    &.icon-btn-active,
+    &:hover {
+        color: @cocorico-red;
+    }
 }

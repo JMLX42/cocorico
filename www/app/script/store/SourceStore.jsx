@@ -1,7 +1,8 @@
 var Reflux = require('reflux');
 var jquery = require('jquery');
 
-var TextAction = require('../action/TextAction');
+var TextAction = require('../action/TextAction'),
+    SourceAction = require('../action/SourceAction');
 
 module.exports = Reflux.createStore({
     init: function()
@@ -9,6 +10,8 @@ module.exports = Reflux.createStore({
         this.listenTo(TextAction.showSources, this._fetchSourcesByTextId);
         this.listenTo(TextAction.save, this._textSaveHandler);
         this.listenTo(TextAction.addSource, this._addSourceHandler);
+        this.listenTo(SourceAction.like, this._likeHandler);
+        this.listenTo(SourceAction.removeLike, this._removeLikeHandler);
 
         this._sources = {};
 
@@ -23,6 +26,16 @@ module.exports = Reflux.createStore({
     clearError: function()
     {
         this._error = null;
+    },
+
+    getSourceById: function(sourceId)
+    {
+        for (var textId in this._sources)
+            for (var source of this._sources[textId])
+                if (source.id == sourceId)
+                    return source;
+
+        return null;
     },
 
     getSourcesByTextId: function(textId)
@@ -80,6 +93,40 @@ module.exports = Reflux.createStore({
             }
         ).error((xhr, textStatus, err) => {
             this._error = xhr.responseJSON;
+            this.trigger(this);
+        });
+    },
+
+    _likeHandler: function(sourceId, value)
+    {
+        jquery.get(
+            '/api/source/like/add/' + sourceId + '/' + value,
+            (data) => {
+                var source = this.getSourceById(sourceId);
+
+                source.likes = [data.like];
+                source.score += data.like.value ? 1 : -1;
+
+                this.trigger(this);
+            }
+        ).error((xhr, textStatus, err) => {
+            this.trigger(this);
+        });
+    },
+
+    _removeLikeHandler: function(sourceId)
+    {
+        jquery.get(
+            '/api/source/like/remove/' + sourceId,
+            (data) => {
+                var source = this.getSourceById(sourceId);
+
+                source.likes = [];
+                source.score += data.like.value ? -1 : 1;
+
+                this.trigger(this);
+            }
+        ).error((xhr, textStatus, err) => {
             this.trigger(this);
         });
     }

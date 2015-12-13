@@ -16,7 +16,7 @@ var LoginButton = require('./LoginButton'),
 var Navbar = ReactBootstrap.Navbar,
     Nav = ReactBootstrap.Nav,
     NavItem = ReactBootstrap.NavItem,
-    NavBrand = ReactBootstrap.NavBrand;
+    NavbarBrand = ReactBootstrap.NavbarBrand;
 
 var Link = ReactRouter.Link;
 
@@ -41,7 +41,7 @@ var Header = React.createClass({
 		return (
             <div id="header">
                 <Navbar fixedTop>
-    		    	<NavBrand>
+    		    	<NavbarBrand>
                         <div id="logo">
                             <Link to="/">
                                 <span className="cocorico-blue">co</span>
@@ -49,7 +49,7 @@ var Header = React.createClass({
                                 <span className="cocorico-red">co</span>
                             </Link>
                         </div>
-                    </NavBrand>
+                    </NavbarBrand>
                     <Nav>
                         {!this.state.pages ? '' : this.state.pages.navBar().map(function(page) {
                             return (
@@ -61,7 +61,7 @@ var Header = React.createClass({
                             )
                         })}
     			    </Nav>
-                    <Nav right>
+                    <Nav pullRight>
                         <li>
                             {!!currentUser
                                 ? <Link to={this.getIntlMessage('route.MY_TEXTS')} activeClassName="active">

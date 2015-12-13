@@ -59,12 +59,25 @@ exports.logout = function(req, res)
     return res.redirect(302, '/');
 }
 
+exports.fakeLogin = function(req, res)
+{
+    user = {
+        sub: '1234567890',
+        firstName: 'Fake',
+        lastName: 'User',
+        gender: 'male',
+        birthdate: '1970-01-01'
+    };
+
+    req.login(user, function(err) {
+        return res.apiResponse(user);
+    });
+}
+
 exports.connectCallback = function(req, res, next)
 {
     if (req.query && req.query.state && !req.query.error && req.session.state !== req.query.state)
         return res.status(404).apiResponse({error: {'name': 'invalid_state', 'message': 'invalid state'}});
-
-    // console.log(req.query.state);
 
     passport.authenticate(
         'provider',

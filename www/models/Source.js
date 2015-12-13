@@ -14,7 +14,8 @@ Source.add({
 	time: { type: Types.Datetime, default: Date.now },
 	author: { type: String, required: false, default: '', initial: true },
 	text: { type: Types.Relationship, ref: 'Text', required: true, initial: true },
-	likes: { type: Types.Relationship, ref: 'Like', required: true, initial: true, many: true }
+	likes: { type: Types.Relationship, ref: 'Like', required: true, initial: true, many: true, noedit: true },
+	score: { type: Types.Number, required: true, default: 0, format: false }
 });
 
 Source.fetchPageTitle = function(url, callback)
@@ -36,5 +37,5 @@ Source.fetchPageTitle = function(url, callback)
 
 transform.toJSON(Source);
 
-Source.defaultColumns = 'author, value, time';
+Source.defaultColumns = 'title, score';
 Source.register();

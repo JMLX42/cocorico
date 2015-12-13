@@ -7,11 +7,10 @@ var $ = require('jquery');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
-var TextAction = require('../action/TextAction');
+var TextAction = require('../action/TextAction'),
+    SourceAction = require('../action/SourceAction');
 
 var SourceStore = require('../store/SourceStore');
-
-var LikeButton = require('./LikeButton');
 
 var Link = ReactRouter.Link;
 
@@ -62,16 +61,67 @@ var SourceTab = React.createClass({
         TextAction.addSource(this.props.text.id, this.state.newSourceURL);
     },
 
+    handleLikeClick: function(event, sourceId)
+    {
+        var source = this.state.sources.getSourceById(sourceId);
+
+        if (source.likes && source.likes.length)
+        {
+            SourceAction.removeLike(sourceId);
+            // FIXME: if like value is different, re-like with new value
+            if (!source.likes[0].value)
+                SourceAction.like(sourceId, true);
+        }
+        else
+            SourceAction.like(sourceId, true);
+    },
+
+    handleDislikeClick: function(event, sourceId)
+    {
+        var source = this.state.sources.getSourceById(sourceId);
+
+        if (source.likes && source.likes.length)
+        {
+            SourceAction.removeLike(sourceId);
+            if (source.likes[0].value)
+                SourceAction.like(sourceId, false);
+        }
+        else
+            SourceAction.like(sourceId, false);
+    },
+
+    getLikeIconClassNames: function(value, source)
+    {
+        if (value)
+            return 'icon-thumb_up icon-btn'
+                + (source.likes.length && source.likes[0].value
+                    ? ' icon-btn-active'
+                    : '');
+
+        return 'icon-thumb_down icon-btn'
+            + (source.likes.length && !source.likes[0].value
+                ? ' icon-btn-active'
+                : '')
+    },
+
     renderSourceList: function(sources)
     {
         return (
-            <ul>
-                {sources.map((source) => {
-                    return <li>
+            <ul className="source-list">
+                {sources.sort((a, b)=> b.score - a.score).map((source) => {
+                    return <li className="source-item">
                         <a href={source.url} target="_blank">
                             {source.title ? source.title : source.url}
                         </a>
-                        <LikeButton count={0}/>
+                        {this.isAuthenticated()
+                            ? <span>
+                                <span className={this.getLikeIconClassNames(true, source)}
+                                      onClick={(e)=>this.handleLikeClick(e, source.id)}></span>
+                                  <span className={this.getLikeIconClassNames(false, source)}
+                                      onClick={(e)=>this.handleDislikeClick(e, source.id)}></span>
+                            </span>
+                            : <span/>}
+                        <span className="source-score">({source.score})</span>
                     </li>;
                 })}
             </ul>
@@ -97,7 +147,10 @@ var SourceTab = React.createClass({
             <Grid>
                 <Row>
                     <Col md={12}>
-                        <h3>{this.getIntlMessage('text.TEXT_SOURCES')}<span className="small"></span></h3>
+                        <h3>
+                            {this.getIntlMessage('text.TEXT_SOURCES')}
+                            <span className="small"> triées par popularité</span>
+                        </h3>
                         {textSources && textSources.length
                             ? this.renderSourceList(textSources)
                             : <p>{this.getIntlMessage('text.NO_SOURCE')}</p>}
