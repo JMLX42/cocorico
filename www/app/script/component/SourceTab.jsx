@@ -63,31 +63,12 @@ var SourceTab = React.createClass({
 
     handleLikeClick: function(event, sourceId)
     {
-        var source = this.state.sources.getSourceById(sourceId);
-
-        if (source.likes && source.likes.length)
-        {
-            SourceAction.removeLike(sourceId);
-            // FIXME: if like value is different, re-like with new value
-            if (!source.likes[0].value)
-                SourceAction.like(sourceId, true);
-        }
-        else
-            SourceAction.like(sourceId, true);
+        SourceAction.like(sourceId, true);
     },
 
     handleDislikeClick: function(event, sourceId)
     {
-        var source = this.state.sources.getSourceById(sourceId);
-
-        if (source.likes && source.likes.length)
-        {
-            SourceAction.removeLike(sourceId);
-            if (source.likes[0].value)
-                SourceAction.like(sourceId, false);
-        }
-        else
-            SourceAction.like(sourceId, false);
+        SourceAction.like(sourceId, false);
     },
 
     getLikeIconClassNames: function(value, source)
@@ -116,9 +97,9 @@ var SourceTab = React.createClass({
                         {this.isAuthenticated()
                             ? <span>
                                 <span className={this.getLikeIconClassNames(true, source)}
-                                      onClick={(e)=>this.handleLikeClick(e, source.id)}></span>
+                                      onClick={(e)=>SourceAction.like(source.id, true)}></span>
                                   <span className={this.getLikeIconClassNames(false, source)}
-                                      onClick={(e)=>this.handleDislikeClick(e, source.id)}></span>
+                                      onClick={(e)=>SourceAction.like(source.id, false)}></span>
                             </span>
                             : <span/>}
                         <span className="source-score">({source.score})</span>

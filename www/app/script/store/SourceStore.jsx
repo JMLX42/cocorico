@@ -11,7 +11,6 @@ module.exports = Reflux.createStore({
         this.listenTo(TextAction.save, this._textSaveHandler);
         this.listenTo(TextAction.addSource, this._addSourceHandler);
         this.listenTo(SourceAction.like, this._likeHandler);
-        this.listenTo(SourceAction.removeLike, this._removeLikeHandler);
 
         this._sources = {};
 
@@ -99,6 +98,35 @@ module.exports = Reflux.createStore({
 
     _likeHandler: function(sourceId, value)
     {
+        var source = this.getSourceById(sourceId);
+
+        if (source.likes && source.likes.length)
+        {
+            var oldValue = source.likes[0].value;
+
+            jquery.get(
+                '/api/source/like/remove/' + sourceId,
+                (data) => {
+                    var source = this.getSourceById(sourceId);
+
+                    source.likes = [];
+                    source.score += data.like.value ? -1 : 1;
+
+                    if (value != oldValue)
+                        this._addLike(sourceId, value);
+
+                    this.trigger(this);
+                }
+            ).error((xhr, textStatus, err) => {
+                this.trigger(this);
+            });
+        }
+        else
+            this._addLike(sourceId, value);
+    },
+
+    _addLike: function(sourceId, value)
+    {
         jquery.get(
             '/api/source/like/add/' + sourceId + '/' + value,
             (data) => {
@@ -113,21 +141,4 @@ module.exports = Reflux.createStore({
             this.trigger(this);
         });
     },
-
-    _removeLikeHandler: function(sourceId)
-    {
-        jquery.get(
-            '/api/source/like/remove/' + sourceId,
-            (data) => {
-                var source = this.getSourceById(sourceId);
-
-                source.likes = [];
-                source.score += data.like.value ? -1 : 1;
-
-                this.trigger(this);
-            }
-        ).error((xhr, textStatus, err) => {
-            this.trigger(this);
-        });
-    }
 });
