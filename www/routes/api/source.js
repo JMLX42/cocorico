@@ -14,7 +14,7 @@ exports.list = function(req, res)
             if (err)
                 return res.apiError('database error', err);
 
-            if (req.user.sub)
+            if (req.user && req.user.sub)
                 for (var source of sources)
                 {
                     for (var like of source.likes)
