@@ -30,7 +30,7 @@ module.exports = function(done) {
 				{
 					"contentType": "HTML",
 					"createdAt": "2015-10-24T10:30:18.000Z",
-					"html": "<p style=\"text-align: center;\"><a href=\"../../auth/login\"> <img src=\"../../upload/franceconnect-button.png\" alt=\"\" /> </a></p>",
+					"html": "<p style=\"text-align: center;\"><a href=\"../../auth/login\" id=\"link-login\"> <img src=\"../../upload/franceconnect-button.png\" alt=\"\" /> </a></p>",
 					"published": true,
 					"publishedAt": "2015-10-24T10:32:31.000Z",
 					"showInNavBar": false,
