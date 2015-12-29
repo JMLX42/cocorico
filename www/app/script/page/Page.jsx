@@ -14,7 +14,7 @@ var Page = React.createClass({
         this.setState({'slug': props.params.slug});
     },
 
-    componentDidMount: function()
+    componentWillMount: function()
     {
         this.setState({'slug': this.props.params.slug});
     },

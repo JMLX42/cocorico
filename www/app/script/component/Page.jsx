@@ -21,7 +21,7 @@ var Page = React.createClass({
         Reflux.connect(PageStore, 'pages')
     ],
 
-    componentDidMount: function()
+    componentWillMount: function()
     {
         PageAction.readPage(this.props.slug);
     },
@@ -29,6 +29,12 @@ var Page = React.createClass({
     componentWillReceiveProps: function(props)
     {
         PageAction.readPage(props.slug);
+    },
+
+    componentDidUpdate: function(prevProps, prevState)
+    {
+        if (this.props.componentDidUpdate)
+            this.props.componentDidUpdate(prevProps, prevState);
     },
 
     getPageContent: function(page)

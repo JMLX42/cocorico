@@ -14,7 +14,7 @@ var LoginButton = React.createClass({
     render: function()
     {
 		return (
-            <Link to={this.getIntlMessage('route.SIGN_IN')}>
+            <Link to={this.getIntlMessage('route.SIGN_IN') + '/' + encodeURIComponent('/' + location.hash)}>
                 {this.getIntlMessage('login.SIGN_IN')}
             </Link>
 		);

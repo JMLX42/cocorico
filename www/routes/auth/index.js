@@ -45,12 +45,19 @@ var strat = function() {
 
 passport.use('provider', strat());
 
-exports.login = passport.authenticate(
-    'provider',
-    {
-        scope: config.franceConnect.oauth.scope
-    }
-);
+exports.login = function(req, res)
+{
+    console.log('redirect', req.query.redirect);
+    if (req.query.redirect)
+        req.session.redirectAfterLogin = req.query.redirect;
+
+    passport.authenticate(
+        'provider',
+        {
+            scope: config.franceConnect.oauth.scope
+        }
+    )(req, res);
+}
 
 exports.logout = function(req, res)
 {
@@ -103,7 +110,24 @@ exports.connectCallback = function(req, res, next)
             };
 
             req.login(user, function(err) {
-                return res.redirect(302, '/');
+                // if (err)
+                // {
+                //     req.logout();
+                //
+                //     return res.redirect(302, '/');
+                // }
+
+                if (req.session.redirectAfterLogin)
+                {
+                    var redirect = req.session.redirectAfterLogin;
+
+                    delete req.session.redirectAfterLogin;
+                    return res.redirect(302, redirect);
+                }
+                else
+                {
+                    return res.redirect(302, '/');
+                }
             });
         }
     )(req, res);

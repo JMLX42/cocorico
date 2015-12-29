@@ -8,6 +8,8 @@ var UserAction = require('../action/UserAction');
 
 var LoginButton = require('../component/LoginButton');
 
+var Login = require('../page/Login');
+
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
     Col = ReactBootstrap.Col;
@@ -39,17 +41,7 @@ var ForceAuthMixin = {
 
     renderLoginPage: function(message)
     {
-        return (
-            <div className="page">
-                <Grid>
-                    <Row>
-                        <Col md={12}>
-                            <span>{message} <LoginButton /></span>
-                        </Col>
-                    </Row>
-                </Grid>
-            </div>
-        );
+        return <Login message={message} redirect={'/' + location.hash}/>
     },
 
     renderLoginMessage: function(message)

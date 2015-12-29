@@ -16,12 +16,14 @@ var Router = ReactRouter.Router,
     EditText = require('./page/EditText'),
     DeleteText = require('./page/DeleteText'),
     Home = require('./page/Home'),
+    Login = require('./page/Login'),
     MyTexts = require('./page/MyTexts');
 
 ReactDOM.render(
     <Router>
         <Route path='/' component={App}>
             <IndexRoute component={Home}/>
+            <Route path={messages.route.SIGN_IN + '/(:redirect)'} component={Login}/>
             <Route path={messages.route.MY_TEXTS} component={MyTexts}/>
             <Route path={messages.route.CREATE_TEXT} component={CreateText}/>
             <Route path={messages.route.EDIT_TEXT + '/:textId/:slug'} component={EditText}/>
