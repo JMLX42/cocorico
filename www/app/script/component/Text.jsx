@@ -144,7 +144,7 @@ var Text = React.createClass({
                         : <div/>}
 
                     {text
-                        ? <ContributionTabs text={text} editable={true}/>
+                        ? <ContributionTabs text={text} editable={true} tab={this.props.tab}/>
                         : <div/>}
 
                     {text.status == 'published'

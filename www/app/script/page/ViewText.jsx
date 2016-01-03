@@ -12,12 +12,12 @@ var ViewText = React.createClass({
 
     componentWillReceiveProps: function(props)
     {
-        this.setState({'textId': props.params.textId});
+        this.setState({textId : props.params.textId});
     },
 
     componentDidMount: function()
     {
-        this.setState({'textId': this.props.params.textId});
+        this.setState({textId : this.props.params.textId});
     },
 
     render: function()
@@ -26,7 +26,7 @@ var ViewText = React.createClass({
             return null;
 
 		return (
-            <Text textId={this.state.textId} />
+            <Text textId={this.state.textId} tab={this.props.routeParams.tab}/>
 		);
 	}
 });

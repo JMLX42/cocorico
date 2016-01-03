@@ -29,6 +29,9 @@ var Intl = {
 			MY_TEXTS: "/mes-textes",
 			CREATE_TEXT: "/texte/nouveau",
 			VIEW_TEXT: "/texte",
+			VIEW_TEXT_TAB_ARGUMENTS: "arguments",
+			VIEW_TEXT_TAB_SOURCES: "sources",
+			VIEW_TEXT_TAB_PROPOSITIONS: "propositions",
 			EDIT_TEXT: "/texte/modifier",
 			DELETE_TEXT: "/texte/supprimer"
 		},

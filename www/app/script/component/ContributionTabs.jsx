@@ -29,6 +29,59 @@ var Text = React.createClass({
         Reflux.connect(SourceStore, 'sources')
     ],
 
+    contextTypes: {
+        history: React.PropTypes.object,
+        location: React.PropTypes.object
+    },
+
+    getInitialState: function()
+    {
+        var state = {};
+
+        state.activeKey = 1;
+        if (this.props.tab == this.getIntlMessage('route.VIEW_TEXT_TAB_SOURCES'))
+            state.activeKey = 2;
+        if (this.props.tab == this.getIntlMessage('route.VIEW_TEXT_TAB_PROPOSITIONS'))
+            state.activeKey = 3;
+
+        return state;
+    },
+
+    componentWillMount: function()
+    {
+        this.context.history.key = this.getTabSlugByKey(this.state.activeKey);
+    },
+
+    getTabSlugByKey: function(key)
+    {
+        var slugs = [
+            this.getIntlMessage('route.VIEW_TEXT_TAB_ARGUMENTS'),
+            this.getIntlMessage('route.VIEW_TEXT_TAB_SOURCES'),
+            this.getIntlMessage('route.VIEW_TEXT_TAB_PROPOSITIONS')
+        ];
+
+        if (this.props.text.status != 'debate'
+            && this.props.text.status != 'vote'
+            && this.props.text.status != 'published')
+        {
+            slugs.unshift();
+        }
+
+        return slugs[key - 1];
+    },
+
+    tabSelectHandler: function(key)
+    {
+        this.context.history.push(
+            this.getIntlMessage('route.VIEW_TEXT')
+            + '/' + this.props.text.id
+            + '/' + this.props.text.slug
+            + '/' + this.getTabSlugByKey(key)
+        );
+
+        this.setState({ activeKey : key });
+    },
+
     render: function()
     {
         var text = this.props.text;
@@ -43,7 +96,7 @@ var Text = React.createClass({
             <Grid>
                 <Row className="section" style={{border:'none'}}>
                     <Col md={12}>
-                        <Tabs defaultActiveKey={1}>
+                        <Tabs activeKey={this.state.activeKey} onSelect={this.tabSelectHandler}>
                             {text.status == 'debate' || text.status == 'vote' || text.status == 'published'
                                 ? <Tab eventKey={eventKey++} title="Arguments (0)">
                                     <ArgumentTab text={text} editable={this.props.editable && text.status == 'debate'}/>

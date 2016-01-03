@@ -27,7 +27,7 @@ ReactDOM.render(
             <Route path={messages.route.MY_TEXTS} component={MyTexts}/>
             <Route path={messages.route.CREATE_TEXT} component={CreateText}/>
             <Route path={messages.route.EDIT_TEXT + '/:textId/:slug'} component={EditText}/>
-            <Route path={messages.route.VIEW_TEXT + '/:textId/:slug'} component={ViewText}/>
+            <Route path={messages.route.VIEW_TEXT + '/:textId/:slug(/:tab)'} component={ViewText}/>
             <Route path={messages.route.DELETE_TEXT + '/:textId/:slug'} component={DeleteText}/>
             <Route path='page/:slug' component={Page}/>
             <Route path=':slug' component={Page}/>
