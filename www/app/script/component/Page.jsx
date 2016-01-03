@@ -67,15 +67,23 @@ var Page = React.createClass({
             );
 
 		return (
-            <ReactDocumentTitle title={page.title + ' - ' + this.getIntlMessage('site.TITLE')}>
-                <Grid>
+            this.props.setDocumentTitle
+                ? <ReactDocumentTitle title={page.title + ' - ' + this.getIntlMessage('site.TITLE')}>
+                    <Grid>
+                        <Row>
+                            <Col md={12}>
+                                {this.getPageContent(page)}
+                            </Col>
+                        </Row>
+                    </Grid>
+                </ReactDocumentTitle>
+                : <Grid>
                     <Row>
                         <Col md={12}>
                             {this.getPageContent(page)}
                         </Col>
                     </Row>
                 </Grid>
-            </ReactDocumentTitle>
 		);
 	}
 });
