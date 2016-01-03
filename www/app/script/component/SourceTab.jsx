@@ -12,6 +12,8 @@ var TextAction = require('../action/TextAction'),
 
 var SourceStore = require('../store/SourceStore');
 
+var LikeButtons = require('./LikeButtons');
+
 var Link = ReactRouter.Link;
 
 var FormattedMessage = ReactIntl.FormattedMessage;
@@ -94,15 +96,7 @@ var SourceTab = React.createClass({
                         <a href={source.url} target="_blank">
                             {source.title ? source.title : source.url}
                         </a>
-                        {this.isAuthenticated()
-                            ? <span>
-                                <span className={this.getLikeIconClassNames(true, source)}
-                                      onClick={(e)=>SourceAction.like(source.id, true)}></span>
-                                  <span className={this.getLikeIconClassNames(false, source)}
-                                      onClick={(e)=>SourceAction.like(source.id, false)}></span>
-                            </span>
-                            : <span/>}
-                        <span className="source-score">({source.score})</span>
+                        <LikeButtons likeAction={SourceAction.like} resource={source}/>
                     </li>;
                 })}
             </ul>
