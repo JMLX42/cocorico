@@ -18,7 +18,12 @@ var LoginButton = React.createClass({
 
     componentWillMount: function()
     {
-        this.context.history.listenBefore(this.onTransition);
+        this._historyListener = this.context.history.listenBefore(this.onTransition);
+    },
+
+    componentWillUnmount: function()
+    {
+        this._historyListener();
     },
 
     getInitialState: function()
