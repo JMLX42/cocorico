@@ -26,10 +26,14 @@ var LikeButtons = React.createClass({
     {
         return (
             <span>
-                <span className={this.getLikeIconClassNames(true)}
-                    onClick={(e)=>this.props.likeAction(this.props.resource.id, true)}></span>
-                <span className={this.getLikeIconClassNames(false)}
-                    onClick={(e)=>this.props.likeAction(this.props.resource.id, false)}></span>
+                {this.isAuthenticated()
+                    ? <span>
+                        <span className={this.getLikeIconClassNames(true)}
+                            onClick={(e)=>this.props.likeAction(this.props.resource.id, true)}></span>
+                        <span className={this.getLikeIconClassNames(false)}
+                            onClick={(e)=>this.props.likeAction(this.props.resource.id, false)}></span>
+                    </span>
+                    : <span/>}
                 <span className="like-score">({this.props.resource.score})</span>
             </span>
         );
