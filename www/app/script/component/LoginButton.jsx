@@ -12,7 +12,13 @@ var LoginButton = React.createClass({
     mixins: [ReactIntl.IntlMixin],
 
     contextTypes: {
-        location: React.PropTypes.object
+        location: React.PropTypes.object,
+        history: React.PropTypes.object
+    },
+
+    componentWillMount: function()
+    {
+        this.context.history.listenBefore(this.onTransition);
     },
 
     getInitialState: function()
@@ -22,15 +28,10 @@ var LoginButton = React.createClass({
         }
     },
 
-    shouldComponentUpdate: function()
-    {
-        return this.state.path != this.context.location.pathname;
-    },
-
-    componentWillReceiveProps: function(props)
+    onTransition: function(location)
     {
         this.setState({
-            path: this.context.location.pathname
+            path: location.pathname
         });
     },
 
