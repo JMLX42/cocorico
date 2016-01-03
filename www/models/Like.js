@@ -53,6 +53,47 @@ Like.addLike = function(resourceModel, id, user, value, errorCallback, successCa
         });
 }
 
+Like.removeLike = function(resourceModel, id, user, errorCallback, successCallback)
+{
+    resourceModel.findById(id)
+        .populate('likes')
+        .exec(function(err, resource)
+        {
+            if (err)
+                return errorCallback(err, null, null);
+
+            if (!resource)
+                return errorCallback(err, null, null);
+
+            var authorLike = null;
+            for (var like of resource.likes)
+                if (bcrypt.compareSync(user.sub, like.author))
+                {
+                    authorLike = like;
+                    break;
+                }
+
+            if (!authorLike)
+                return errorCallback(null, resource, null);
+
+            authorLike.remove(function(err)
+            {
+                if (err)
+                    return res.apiError('database error', err);
+
+                resource.likes.splice(resource.likes.indexOf(authorLike), 1);
+                resource.score += authorLike.value ? -1 : 1;
+                resource.save(function(err)
+                {
+                    if (err)
+                        return errorCallback(err, null, null);
+
+                    return successCallback(resource, authorLike);
+                });
+            });
+        });
+}
+
 transform.toJSON(Like);
 
 Like.defaultColumns = 'createdAt, value';

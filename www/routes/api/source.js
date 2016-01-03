@@ -52,45 +52,21 @@ exports.addLike = function(req, res)
 
 exports.removeLike = function(req, res)
 {
-    Source.model.findById(req.params.id)
-        .populate('likes')
-        .exec(function(err, source)
+    Like.removeLike(
+        Source.model, req.params.id, req.user,
+        function(err, resource, like)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!source)
+            if (!resource || !authorLike)
                 return res.status(404).apiResponse();
-
-            var authorLike = null;
-            for (var like of source.likes)
-                if (bcrypt.compareSync(req.user.sub, like.author))
-                {
-                    authorLike = like;
-                    break;
-                }
-
-            if (!authorLike)
-                return res.status(400).apiResponse({
-                    error: 'error.ERROR_SOURCE_ALREADY_LIKED'
-                });
-
-            authorLike.remove(function(err)
-            {
-                if (err)
-                    return res.apiError('database error', err);
-
-                source.likes.splice(source.likes.indexOf(authorLike), 1);
-                source.score += authorLike.value ? -1 : 1;
-                source.save(function(err)
-                {
-                    if (err)
-                        return res.apiError('database error', err);
-
-                    res.apiResponse({ like: authorLike });
-                });
-            });
-        });
+        },
+        function(resource, like)
+        {
+            res.apiResponse({ like : like });
+        }
+    );
 }
 
 exports.add = function(req, res)
