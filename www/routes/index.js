@@ -54,6 +54,8 @@ exports = module.exports = function(app) {
 	app.post('/api/text/save', keystone.middleware.api, isAuthenticated, routes.api.text.save);
 	// app.get('/api/text/delete/:id', keystone.middleware.api, isAuthenticated, routes.api.text.delete);
 	app.get('/api/text/status/:id/:status', keystone.middleware.api, isAuthenticated, routes.api.text.status);
+	app.get('/api/text/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.text.addLike);
+	app.get('/api/text/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.text.removeLike);
 
 	app.get('/api/source/list/:textId', keystone.middleware.api, routes.api.source.list);
 	app.post('/api/source/add', keystone.middleware.api, isAuthenticated, routes.api.source.add);

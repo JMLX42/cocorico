@@ -19,7 +19,9 @@ Text.add({
     publishedAt: Date,
 	content: { type: Types.Markdown, wysiwyg: true, height: 400 },
     author: { type: String, required: true, initial: true },
-    status: { type: Types.Select, options: ['draft', 'review', 'debate', 'published'], default: 'draft' }
+    status: { type: Types.Select, options: ['draft', 'review', 'debate', 'published'], default: 'draft' },
+    likes: { type: Types.Relationship, ref: 'Like', required: true, initial: true, many: true, noedit: true },
+    score: { type: Types.Number, required: true, default: 0, format: false }
 });
 
 Text.schema.pre('save', function(next)

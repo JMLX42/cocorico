@@ -21,7 +21,8 @@ var VoteButtonBar = require('./VoteButtonBar'),
     TableOfContents = require('./TableOfContents'),
     ArgumentEditor = require('./ArgumentEditor'),
     ArgumentTab = require('./ArgumentTab'),
-    ContributionTabs = require('./ContributionTabs');
+    ContributionTabs = require('./ContributionTabs'),
+    LikeButtons = require('./LikeButtons');
 
 var BallotStore = require('../store/BallotStore'),
     UserStore = require('../store/UserStore'),
@@ -91,6 +92,7 @@ var Text = React.createClass({
                         <Row className="section">
                             <Col md={12}>
                                 <h1 className="text-title">{text.title}</h1>
+                                <LikeButtons likeAction={TextAction.like} resource={text}/>
                             </Col>
                         </Row>
 

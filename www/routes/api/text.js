@@ -4,7 +4,8 @@ var redis = require('redis');
 
 var Text = keystone.list('Text'),
 	Ballot = keystone.list('Ballot'),
-	Source = keystone.list('Source');
+	Source = keystone.list('Source'),
+	Like = keystone.list('Like');
 
 function textIsReadable(text, req, checkAuthor)
 {
@@ -339,4 +340,47 @@ exports.addArgument = function(req, res)
 	{
 		return res.apiResponse({ argument: newArgument });
 	});
+}
+
+exports.addLike = function(req, res)
+{
+    Like.addLike(
+        Text.model, req.params.id, req.user, req.params.value == 'true',
+        function(err, resource, like)
+        {
+            if (err)
+                return res.apiError('database error', err);
+
+            if (!resource)
+                return res.status(404).apiResponse();
+
+            if (like)
+                return res.status(400).apiResponse({
+                    error: 'error.ERROR_SOURCE_ALREADY_LIKED'
+                });
+        },
+        function(resource, like)
+        {
+            return res.apiResponse({ like : like });
+        }
+    );
+}
+
+exports.removeLike = function(req, res)
+{
+    Like.removeLike(
+        Text.model, req.params.id, req.user,
+        function(err, resource, like)
+        {
+            if (err)
+                return res.apiError('database error', err);
+
+            if (!resource || !authorLike)
+                return res.status(404).apiResponse();
+        },
+        function(resource, like)
+        {
+            res.apiResponse({ like : like });
+        }
+    );
 }

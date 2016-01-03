@@ -12,5 +12,6 @@ module.exports = Reflux.createActions({
     'delete': {sync: false},
     'changeStatus': {sync: false},
     'showSources': {sync: false},
-    'addSource': {sync: false}
+    'addSource': {sync: false},
+    'like': {sync: false}
 });

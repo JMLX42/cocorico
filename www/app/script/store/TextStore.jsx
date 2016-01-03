@@ -12,6 +12,7 @@ module.exports = Reflux.createStore({
         this.listenTo(TextAction.save, this._textSaveHandler);
         this.listenTo(TextAction.delete, this._deleteTextById);
         this.listenTo(TextAction.changeStatus, this._changeTextStatus);
+        this.listenTo(TextAction.like, this._likeHandler);
 
         this._clearCache();
     },
@@ -231,5 +232,51 @@ module.exports = Reflux.createStore({
         ).error((xhr, textStatus, err) => {
             this.trigger(this);
         });
-    }
+    },
+
+    _likeHandler: function(textId, value)
+    {
+        var text = this.getById(textId);
+
+        if (text.likes && text.likes.length)
+        {
+            var oldValue = text.likes[0].value;
+
+            jquery.get(
+                '/api/text/like/remove/' + textId,
+                (data) => {
+                    var text = this.getById(textId);
+
+                    text.likes = [];
+                    text.score += data.like.value ? -1 : 1;
+
+                    if (value != oldValue)
+                        this._addLike(textId, value);
+
+                    this.trigger(this);
+                }
+            ).error((xhr, textStatus, err) => {
+                this.trigger(this);
+            });
+        }
+        else
+            this._addLike(textId, value);
+    },
+
+    _addLike: function(textId, value)
+    {
+        jquery.get(
+            '/api/text/like/add/' + textId + '/' + value,
+            (data) => {
+                var text = this.getById(textId);
+
+                text.likes = [data.like];
+                text.score += data.like.value ? 1 : -1;
+
+                this.trigger(this);
+            }
+        ).error((xhr, textStatus, err) => {
+            this.trigger(this);
+        });
+    },
 });
