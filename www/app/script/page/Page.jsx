@@ -26,7 +26,7 @@ var Page = React.createClass({
 
 		return (
             <div className="page">
-                <PageComponent slug={this.state.slug} />
+                <PageComponent slug={this.state.slug} setDocumentTitle={true}/>
             </div>
 		);
 	}
