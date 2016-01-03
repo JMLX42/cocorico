@@ -28,47 +28,26 @@ exports.list = function(req, res)
 
 exports.addLike = function(req, res)
 {
-    var value = req.params.value == 'true';
-
-    Source.model.findById(req.params.id)
-        .populate('likes')
-        .exec(function(err, source)
+    Like.addLike(
+        Source.model, req.params.id, req.user, req.params.value == 'true',
+        function(err, resource, like)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!source)
+            if (!resource)
                 return res.status(404).apiResponse();
 
-            var authorLike = null;
-            for (var like of source.likes)
-                if (like.value == value && bcrypt.compareSync(req.user.sub, like.author))
-                    return res.status(400).apiResponse({
-                        error: 'error.ERROR_SOURCE_ALREADY_LIKED'
-                    });
-
-            authorLike = Like.model({
-                author: bcrypt.hashSync(req.user.sub, 10),
-                resource: source.id,
-                value: value
-            });
-
-            authorLike.save(function(err)
-            {
-                if (err)
-                    return res.apiError('database error', err);
-
-                source.likes.push(authorLike);
-                source.score += value ? 1 : -1;
-                source.save(function(err)
-                {
-                    if (err)
-                        return res.apiError('database error', err);
-
-                    res.apiResponse({ like: authorLike });
+            if (like)
+                return res.status(400).apiResponse({
+                    error: 'error.ERROR_SOURCE_ALREADY_LIKED'
                 });
-            });
-        });
+        },
+        function(resource, like)
+        {
+            return res.apiResponse({ like : like });
+        }
+    );
 }
 
 exports.removeLike = function(req, res)
