@@ -36,7 +36,9 @@ exports.addLike = function(req, res)
                 return res.apiError('database error', err);
 
             if (!resource)
-                return res.status(404).apiResponse();
+                return res.status(404).apiResponse({
+                    error: 'error.ERROR_SOURCE_NOT_FOUND'
+                });
 
             if (like)
                 return res.status(400).apiResponse({

@@ -100,7 +100,8 @@ var Intl = {
 
 		error : {
 			ERROR_404: 'Oops... nous n\'avons pas pu trouver la page que vous cherchez !',
-			ERROR_SOURCE_ALREADY_EXISTS: 'Cette source a déjà été ajoutée.'
+			ERROR_SOURCE_ALREADY_EXISTS: 'Cette source a déjà été ajoutée.',
+			ERROR_SOURCE_NOT_FOUND: 'Cette source n\'existe pas.'
 		}
 	}
 }
