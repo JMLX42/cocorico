@@ -10,6 +10,7 @@ module.exports = Reflux.createStore({
         this.listenTo(PageAction.readPage, this.fetchPageBySlug);
 
         this._pages = [];
+        this._loadingPages = {};
         this._navBar = null;
 
         this.fetchNavBar();
@@ -54,19 +55,26 @@ module.exports = Reflux.createStore({
 
     fetchPageBySlug: function(slug)
     {
+        if (this._loadingPages[slug])
+            return;
+
         if (this.getPageBySlug(slug))
         {
             this.trigger(this);
             return;
         }
 
+        this._loadingPages[slug] = true;
+
         jquery.get(
             '/api/page/getBySlug/' + slug,
             (data, textStatus, xhr) => {
+                delete this._loadingPages[slug];
                 this._pages.push(data.page);
                 this.trigger(this);
             }
         ).error((xhr, textStatus, err) => {
+            delete this._loadingPages[slug];
             this._pages.push({ slug: slug, error: xhr.status });
             this.trigger(this);
         });
