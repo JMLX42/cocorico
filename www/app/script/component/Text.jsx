@@ -22,7 +22,8 @@ var VoteButtonBar = require('./VoteButtonBar'),
     ArgumentEditor = require('./ArgumentEditor'),
     ArgumentTab = require('./ArgumentTab'),
     ContributionTabs = require('./ContributionTabs'),
-    LikeButtons = require('./LikeButtons');
+    LikeButtons = require('./LikeButtons'),
+    Hint = require('./Hint');
 
 var BallotStore = require('../store/BallotStore'),
     UserStore = require('../store/UserStore'),
@@ -128,21 +129,7 @@ var Text = React.createClass({
                         : <div/>}
 
                     {text.status == 'debate'
-                        ? <div className="section section-notice-review cocorico-light-grey-background">
-                            <Grid>
-                                <Row>
-                                    <Col md={12}>
-                                        <h3>Ce texte est en cours de débat</h3>
-                                        <p>
-                                            Le texte ci-dessus a été élaboré grâce aux contributions de la communauté.
-                                            Vous pouvez maintenant contribuer au débat contradictoire en proposant des
-                                            arguments pour ou contre ce texte. Ces arguments doivent permettre aux
-                                            futurs voteurs de se forger une opinion sur ce texte.
-                                        </p>
-                                    </Col>
-                                </Row>
-                            </Grid>
-                        </div>
+                        ? <Hint pageSlug="astuce-etape-debat" className="section section-hint cocorico-light-grey-background"/>
                         : <div/>}
 
                     {text
