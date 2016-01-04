@@ -14,6 +14,7 @@ var LoginButton = require('./LoginButton'),
     AccountDropdown = require('./AccountDropdown');
 
 var Navbar = ReactBootstrap.Navbar,
+    Collapse = Navbar.Collapse,
     Nav = ReactBootstrap.Nav,
     NavItem = ReactBootstrap.NavItem,
     NavbarBrand = ReactBootstrap.NavbarBrand;
@@ -41,37 +42,42 @@ var Header = React.createClass({
 		return (
             <div id="header">
                 <Navbar fixedTop>
-    		    	<NavbarBrand>
-                        <div id="logo">
-                            <Link to="/">
-                                <span className="cocorico-blue">co</span>
-                                <span className="cocorico-dark-grey">cori</span>
-                                <span className="cocorico-red">co</span>
-                            </Link>
-                        </div>
-                    </NavbarBrand>
-                    <Nav>
-                        {!this.state.pages ? '' : this.state.pages.navBar().map(function(page) {
-                            return (
-                                <li>
-                                    <Link to={'/' + page.slug} activeClassName="active">
-                                        {page.title}
-                                    </Link>
-                                </li>
-                            )
-                        })}
-    			    </Nav>
-                    <Nav pullRight>
-                        <li>
-                            {!!currentUser
-                                ? <Link to={this.getIntlMessage('route.MY_TEXTS')} activeClassName="active">
-                                    {this.getIntlMessage('page.myTexts.TITLE')}
+                    <Navbar.Header>
+                        <NavbarBrand>
+                            <div id="logo">
+                                <Link to="/">
+                                    <span className="cocorico-blue">co</span>
+                                    <span className="cocorico-dark-grey">cori</span>
+                                    <span className="cocorico-red">co</span>
                                 </Link>
-                                : <div />}
-                        </li>
-                        <li>{!!currentUser ? <AccountDropdown fullName={currentUser.firstName + ' ' + currentUser.lastName}/> : ''}</li>
-                        <li>{!currentUser ? <LoginButton /> : ''}</li>
-                    </Nav>
+                            </div>
+                        </NavbarBrand>
+                        <Navbar.Toggle/>                        
+                    </Navbar.Header>
+                    <Navbar.Collapse>
+                        <Nav>
+                            {!this.state.pages ? '' : this.state.pages.navBar().map(function(page) {
+                                return (
+                                    <li>
+                                        <Link to={'/' + page.slug} activeClassName="active">
+                                            {page.title}
+                                        </Link>
+                                    </li>
+                                )
+                            })}
+        			    </Nav>
+                        <Nav pullRight>
+                            <li>
+                                {!!currentUser
+                                    ? <Link to={this.getIntlMessage('route.MY_TEXTS')} activeClassName="active">
+                                        {this.getIntlMessage('page.myTexts.TITLE')}
+                                    </Link>
+                                    : <div />}
+                            </li>
+                            <li>{!!currentUser ? <AccountDropdown fullName={currentUser.firstName + ' ' + currentUser.lastName}/> : ''}</li>
+                            <li>{!currentUser ? <LoginButton /> : ''}</li>
+                        </Nav>
+                    </Navbar.Collapse>
     		  	</Navbar>
             </div>
 		);
