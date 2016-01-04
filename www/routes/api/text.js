@@ -51,11 +51,17 @@ exports.get = function(req, res)
     {
 		if (err)
 			return res.apiError('database error', err);
+
 		if (!text)
 			return res.apiError('not found');
 
 		if (!textIsReadable(text, req))
 			return res.status(403).send();
+
+		if (req.user && req.user.sub)
+			for (var like of text.likes)
+				if (!bcrypt.compareSync(req.user.sub, like.author))
+					text.likes.splice(text.likes.indexOf(like), 1);
 
 		res.apiResponse({ text: text });
 	});
