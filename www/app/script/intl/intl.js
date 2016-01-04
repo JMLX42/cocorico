@@ -88,7 +88,9 @@ var Intl = {
 			ADD_SOURCE_LOGIN: 'Vous devez être connecté pour noter ou proposer une source.',
 			ADD_SOURCE_URL_HINT: 'Adresse Web de la source que vous désirez ajouter :',
 			ADD_SOURCE_SUBMIT_BUTTON: 'Ajouter',
-			LIKE_SOURCE_LOGIN: 'Vous devez être connecté pour noter une source.'
+			LIKE_SOURCE_LOGIN: 'Vous devez être connecté pour noter une source.',
+			LIKE_BUTTON_TITLE: "J'approuve",
+			DISLIKE_BUTTON_TITLE: "Je désapprouve"
 		},
 
 		textEditor: {

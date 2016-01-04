@@ -1,10 +1,12 @@
 var React = require('react');
+var ReactIntl = require('react-intl');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
 var LikeButtons = React.createClass({
 
     mixins: [
+        ReactIntl.IntlMixin,
         ForceAuthMixin
     ],
 
@@ -29,8 +31,10 @@ var LikeButtons = React.createClass({
                 {this.isAuthenticated()
                     ? <span>
                         <span className={this.getLikeIconClassNames(true)}
+                            title={this.getIntlMessage('text.LIKE_BUTTON_TITLE')}
                             onClick={(e)=>this.props.likeAction(this.props.resource.id, true)}></span>
                         <span className={this.getLikeIconClassNames(false)}
+                            title={this.getIntlMessage('text.DISLIKE_BUTTON_TITLE')}
                             onClick={(e)=>this.props.likeAction(this.props.resource.id, false)}></span>
                     </span>
                     : <span/>}
