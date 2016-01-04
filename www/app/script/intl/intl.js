@@ -94,7 +94,8 @@ var Intl = {
 		},
 
 		textEditor: {
-			SAVE: 'Enregistrer',
+			BUTTON_SAVE: 'Enregistrer',
+			BUTTON_VIEW: 'Voir le texte',
 			TITLE: 'Titre',
 			TITLE_PLACEHOLDER: 'le titre de votre texte',
 			CONTENT: 'Texte',

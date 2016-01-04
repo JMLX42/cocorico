@@ -1,6 +1,7 @@
 var React = require('react');
 var Markdown = require('react-remarkable');
 var ReactBootstrap = require('react-bootstrap');
+var ReactRouter = require('react-router');
 var ReactIntl = require('react-intl');
 var ReactDocumentTitle = require('react-document-title');
 var Reflux = require('reflux');
@@ -12,7 +13,10 @@ var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
     Col = ReactBootstrap.Col,
     Button = ReactBootstrap.Button,
+    ButtonToolbar = ReactBootstrap.ButtonToolbar,
     Input = ReactBootstrap.Input;
+
+var Link = ReactRouter.Link;
 
 var TextAction = require('../action/TextAction'),
     UserAction = require('../action/UserAction');
@@ -84,6 +88,9 @@ var Text = React.createClass({
             ? this.state.texts.getById(this.props.textId)
             : null;
 
+        if (!text)
+            return null;
+
         return (
             <Grid className="text-editor">
                 <Row>
@@ -110,9 +117,16 @@ var Text = React.createClass({
                 </Row>
                 <Row>
                     <Col md={12}>
-                        <Button bsSize="large" bsStyle="primary" onClick={this.handleClick}>
-                            {this.getIntlMessage('textEditor.SAVE')}
-                        </Button>
+                        <ButtonToolbar>
+                            <Button bsSize="large" bsStyle="primary" onClick={this.handleClick}>
+                                {this.getIntlMessage('textEditor.BUTTON_SAVE')}
+                            </Button>
+                            <Link to={this.getIntlMessage('route.VIEW_TEXT') + '/' + text.id + '/' + text.slug}>
+                                <Button bsSize="large" bsStyle="link">
+                                    {this.getIntlMessage('textEditor.BUTTON_VIEW')}
+                                </Button>
+                            </Link>
+                        </ButtonToolbar>
                     </Col>
                 </Row>
             </Grid>
