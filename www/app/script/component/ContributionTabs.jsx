@@ -19,7 +19,9 @@ var Grid = ReactBootstrap.Grid,
     Col = ReactBootstrap.Col,
     Tabs = ReactBootstrap.Tabs,
     Tab = ReactBootstrap.Tab,
-    Button = ReactBootstrap.Button;
+    Button = ReactBootstrap.Button,
+    Accordion = ReactBootstrap.Accordion,
+    Panel = ReactBootstrap.Panel;
 
 var Text = React.createClass({
 
@@ -36,15 +38,9 @@ var Text = React.createClass({
 
     getInitialState: function()
     {
-        var state = {};
-
-        state.activeKey = 1;
-        if (this.props.tab == this.getIntlMessage('route.VIEW_TEXT_TAB_SOURCES'))
-            state.activeKey = 2;
-        if (this.props.tab == this.getIntlMessage('route.VIEW_TEXT_TAB_PROPOSITIONS'))
-            state.activeKey = 3;
-
-        return state;
+        return {
+            activeKey : this.props.tab ? this.getTabKeyBySlug(this.props.tab) : 1
+        };
     },
 
     componentWillReceiveProps: function(nextProps)
@@ -69,7 +65,7 @@ var Text = React.createClass({
             && this.props.text.status != 'vote'
             && this.props.text.status != 'published')
         {
-            slugs.unshift();
+            slugs.shift();
         }
 
         return slugs;
@@ -97,7 +93,7 @@ var Text = React.createClass({
         this.setState({ activeKey : key });
     },
 
-    render: function()
+    renderTabs: function()
     {
         var text = this.props.text;
 
@@ -108,40 +104,88 @@ var Text = React.createClass({
         var eventKey = 1;
 
         return (
-            <Grid>
-                <Row className="section" style={{border:'none'}}>
-                    <Col md={12}>
-                        <Tabs activeKey={this.state.activeKey} onSelect={this.tabSelectHandler}>
-                            {text.status == 'debate' || text.status == 'vote' || text.status == 'published'
-                                ? <Tab eventKey={eventKey++} title="Arguments (0)">
-                                    <ArgumentTab text={text} editable={this.props.editable && text.status == 'debate'}/>
-                                </Tab>
-                                : <div/>}
-                            <Tab eventKey={eventKey++} title={'Sources (' + (sources ? sources.length : 0) + ')'}>
-                                <SourceTab text={text} editable={this.props.editable && text.status == 'review'}/>
-                            </Tab>
-                            <Tab eventKey={eventKey++} title="Propositions (0)">
-                                <Grid>
-                                    <Row>
-                                        <Col md={12}>
-                                            <p>{this.getIntlMessage('text.NO_PROPOSAL')}</p>
-                                            {this.props.editable && text.status == 'review'
-                                                ? !this.isAuthenticated()
-                                                    ? <p className="hint">
-                                                        {this.renderLoginMessage(this.getIntlMessage('text.ADD_PROPOSAL_LOGIN'))}
-                                                    </p>
-                                                    : <Button bsStyle="primary">
-                                                        {this.getIntlMessage('text.ADD_PROPOSAL')}
-                                                    </Button>
-                                                : <div/>}
-                                        </Col>
-                                    </Row>
-                                </Grid>
-                            </Tab>
-                        </Tabs>
-                    </Col>
-                </Row>
-            </Grid>
+            <Tabs animation={false} activeKey={this.state.activeKey} onSelect={this.tabSelectHandler} className="hidden-xs">
+                {text.status == 'debate' || text.status == 'vote' || text.status == 'published'
+                    ? <Tab eventKey={eventKey++} title="Arguments (0)">
+                        <ArgumentTab text={text} editable={this.props.editable && text.status == 'debate'}/>
+                    </Tab>
+                    : <div/>}
+                <Tab eventKey={eventKey++} title={'Sources (' + (sources ? sources.length : 0) + ')'}>
+                    <SourceTab text={text} editable={this.props.editable && text.status == 'review'}/>
+                </Tab>
+                <Tab eventKey={eventKey++} title="Propositions (0)">
+                    <Grid>
+                        <Row>
+                            <Col md={12}>
+                                <p>{this.getIntlMessage('text.NO_PROPOSAL')}</p>
+                                {this.props.editable && text.status == 'review'
+                                    ? !this.isAuthenticated()
+                                        ? <p className="hint">
+                                            {this.renderLoginMessage(this.getIntlMessage('text.ADD_PROPOSAL_LOGIN'))}
+                                        </p>
+                                        : <Button bsStyle="primary">
+                                            {this.getIntlMessage('text.ADD_PROPOSAL')}
+                                        </Button>
+                                    : <div/>}
+                            </Col>
+                        </Row>
+                    </Grid>
+                </Tab>
+            </Tabs>
+        );
+    },
+
+    renderAccordion: function()
+    {
+        var text = this.props.text;
+
+        var sources = this.state.sources
+            ? this.state.sources.getSourcesByTextId(text.id)
+            : null;
+
+        var eventKey = 1;
+
+        return (
+            <Accordion className="hidden-sm hidden-md hidden-lg"
+                activeKey={this.props.tab ? this.state.activeKey : undefined}
+                onSelect={this.tabSelectHandler}>
+                {text.status == 'debate' || text.status == 'vote' || text.status == 'published'
+                    ? <Panel eventKey={eventKey++} header="Arguments (0)">
+                        <ArgumentTab text={text} editable={this.props.editable && text.status == 'debate'}/>
+                    </Panel>
+                    : <div/>}
+                <Panel eventKey={eventKey++} header={'Sources (' + (sources ? sources.length : 0) + ')'}>
+                    <SourceTab text={text} editable={this.props.editable && text.status == 'review'}/>
+                </Panel>
+                <Panel eventKey={eventKey++} header="Propositions (0)">
+                    <Grid>
+                        <Row>
+                            <Col md={12}>
+                                <p>{this.getIntlMessage('text.NO_PROPOSAL')}</p>
+                                {this.props.editable && text.status == 'review'
+                                    ? !this.isAuthenticated()
+                                        ? <p className="hint">
+                                            {this.renderLoginMessage(this.getIntlMessage('text.ADD_PROPOSAL_LOGIN'))}
+                                        </p>
+                                        : <Button bsStyle="primary">
+                                            {this.getIntlMessage('text.ADD_PROPOSAL')}
+                                        </Button>
+                                    : <div/>}
+                            </Col>
+                        </Row>
+                    </Grid>
+                </Panel>
+            </Accordion>
+        );
+    },
+
+    render: function()
+    {
+        return (
+            <div>
+                {this.renderTabs()}
+                {this.renderAccordion()}
+            </div>
         );
     }
 });
