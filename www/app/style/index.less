@@ -104,6 +104,7 @@ body {
     background-color: #f8f8f8;
     padding-top: 20px;
     color: @cocorico-dark-grey;
+    margin-top: 40px;
 
     a {
         color: @cocorico-dark-grey;
@@ -118,9 +119,21 @@ body {
     }
 }
 
+.nav-tabs {
+    border-bottom-color: @cocorico-grey;
+
+    li.active > a {
+        border-color: @cocorico-grey @cocorico-grey transparent;
+    }
+}
+
 .text {
     .tab-content {
         padding: 20px 0;
+    }
+
+    .nav-tabs > li:first-child > a {
+        margin-left: 15px;
     }
 
     .text-content {
@@ -254,6 +267,7 @@ body {
 
 .hint {
     color: @cocorico-dark-grey;
+
 }
 
 .pace {
@@ -343,4 +357,25 @@ body {
     display: inline-block;
     color: @cocorico-dark-grey;
     margin-left: 5px;
+}
+
+a.btn-hint-show {
+    color: @cocorico-dark-grey;
+    cursor: pointer;
+    border-bottom: 1px dashed @cocorico-dark-grey;
+    padding-bottom: 3px;
+
+    .icon-info {
+        vertical-align: middle;
+    }
+
+    .hint-title {
+        padding-left: 5px;
+        padding-top: 4px;
+    }
+
+    &:hover {
+        text-decoration: none;
+        border-bottom-style: solid;
+    }
 }
