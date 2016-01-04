@@ -27,7 +27,7 @@ var LikeButtons = React.createClass({
     render: function()
     {
         return (
-            <span>
+            <span style={{display:'inline-block'}}>
                 {this.isAuthenticated()
                     ? <span>
                         <span className={this.getLikeIconClassNames(true)}
