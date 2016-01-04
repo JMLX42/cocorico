@@ -25,6 +25,7 @@ var MyTexts = React.createClass({
 
     mixins: [
         Reflux.connect(TextStore, 'texts'),
+        Reflux.ListenerMixin,
         ReactIntl.IntlMixin,
         ForceAuthMixin
     ],
@@ -32,6 +33,41 @@ var MyTexts = React.createClass({
     componentWillMount: function()
     {
         TextAction.listCurrentUserTexts();
+
+        this.listenTo(TextAction.changeStatus, this.textStatusChangedHandler);
+    },
+
+    textStatusChangedHandler: function(textId, state)
+    {
+        this.setState({activeKey : this.getTabKeyBySlug(state)});
+    },
+
+    getInitialState: function()
+    {
+        return {
+            activeKey : 1
+        };
+    },
+
+    getTabSlugs: function()
+    {
+        return [
+            'draft',
+            'review',
+            'debate',
+            'vote',
+            'published'
+        ];
+    },
+
+    getTabKeyBySlug: function(slug)
+    {
+        return this.getTabSlugs().indexOf(slug) + 1;
+    },
+
+    tabSelectHandler: function(key)
+    {
+        this.setState({ activeKey : key });
     },
 
 	render: function()
@@ -69,7 +105,7 @@ var MyTexts = React.createClass({
 
                         <Row>
                             <Col md={12}>
-                                <Tabs defaultActiveKey={1} className="tabs-my-texts">
+                                <Tabs activeKey={this.state.activeKey} onSelect={this.tabSelectHandler} className="tabs-my-texts">
                                     <Tab eventKey={1} title={"Brouillon (" + (filteredTexts['draft'] || []).length + ")"}>
                                         <TextList texts={filteredTexts['draft']} editable={true}/>
                                     </Tab>
