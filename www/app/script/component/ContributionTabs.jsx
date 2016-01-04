@@ -147,7 +147,7 @@ var Text = React.createClass({
 
         return (
             <Accordion className="hidden-sm hidden-md hidden-lg"
-                activeKey={this.props.tab ? this.state.activeKey : undefined}
+                activeKey={this.state.activeKey}
                 onSelect={this.tabSelectHandler}>
                 {text.status == 'debate' || text.status == 'vote' || text.status == 'published'
                     ? <Panel eventKey={eventKey++} header="Arguments (0)">
