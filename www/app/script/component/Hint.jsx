@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactIntl = require('react-intl');
 var ReactBootstrap = require('react-bootstrap');
+var ReactCookie = require('react-cookie');
 
 var Page = require('./Page');
 
@@ -15,11 +16,14 @@ var Hint = React.createClass({
 
     getInitialState: function()
     {
-        return {hidden : false};
+        return {
+            hidden : ReactCookie.load('hint/' + this.props.pageSlug)
+        };
     },
 
     buttonClickHandler: function(e)
     {
+        ReactCookie.save('hint/' + this.props.pageSlug, true);
         this.setState({hidden : true});
     },
 

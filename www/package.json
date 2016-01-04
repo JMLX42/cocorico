@@ -20,6 +20,7 @@
     "react-remarkable": "latest",
     "react-intl": "1.2.0",
     "react-document-title": "latest",
+    "react-cookie": "latest",
     "pace": "HubSpot/pace",
     "reflux": "latest",
     "request": "^2.60.0",
