@@ -7,17 +7,26 @@ var ViewText = React.createClass({
 
     getInitialState: function()
     {
-        return {textId: null};
+        return {
+            textId: null,
+            tab: null
+        };
     },
 
-    componentWillReceiveProps: function(props)
+    componentWillReceiveProps: function(nextProps)
     {
-        this.setState({textId : props.params.textId});
+        this.setState({
+            textId : nextProps.params.textId,
+            tab: nextProps.params.tab
+        });
     },
 
     componentDidMount: function()
     {
-        this.setState({textId : this.props.params.textId});
+        this.setState({
+            textId : this.props.params.textId,
+            tab: this.props.params.tab
+        });
     },
 
     render: function()
@@ -26,7 +35,7 @@ var ViewText = React.createClass({
             return null;
 
 		return (
-            <Text textId={this.state.textId} tab={this.props.routeParams.tab}/>
+            <Text textId={this.state.textId} tab={this.state.tab}/>
 		);
 	}
 });

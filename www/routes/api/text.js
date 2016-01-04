@@ -223,7 +223,7 @@ exports.getBySlug = function(req, res)
 		});
 }
 
-function updateTextSources(text, next)
+function updateTextSources(user, text, next)
 {
     var mdLinkRegex = new RegExp(/\[([^\[]+)\]\(([^\)]+)\)/g);
     var ops = [function(callback) { callback(null, []); }];
@@ -253,10 +253,11 @@ function updateTextSources(text, next)
             function(callback)
             {
 				var urls = result.map(function(sourceData) { return sourceData.url; });
-                Source.model.find({text: text, url: {$nin : urls}}).remove(function(err)
-                {
-                    callback(err);
-                });
+                Source.model.find({text: text, auto: true, url: {$nin : urls}})
+					.remove(function(err)
+	                {
+	                    callback(err);
+	                });
             }
         ];
 
@@ -285,8 +286,8 @@ function updateTextSources(text, next)
                                 source = Source.model({
                                     title: sourceData.title,
                                     url: sourceData.url,
-                                    // auto: true,
-                                    // author: bcrypt.hashSync(req.user.sub, 10),
+                                    auto: true,
+                                    author: bcrypt.hashSync(user.sub, 10),
                                     text: text
                                 });
                             }
@@ -330,7 +331,7 @@ exports.save = function(req, res)
 
 			if (!text)
 			{
-				updateTextSources(text, function(err)
+				updateTextSources(req.user, text, function(err)
 				{
 					newText.author = bcrypt.hashSync(req.user.sub, 10);
 					newText.save(function(err, text)
@@ -351,7 +352,7 @@ exports.save = function(req, res)
 				{
 					text.title = newText.title;
 					text.content.md = newText.content.md;
-					updateTextSources(text, function(err)
+					updateTextSources(req.user, text, function(err)
 					{
 						text.save(function(err, text)
 						{

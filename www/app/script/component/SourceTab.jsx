@@ -63,30 +63,6 @@ var SourceTab = React.createClass({
         TextAction.addSource(this.props.text.id, this.state.newSourceURL);
     },
 
-    handleLikeClick: function(event, sourceId)
-    {
-        SourceAction.like(sourceId, true);
-    },
-
-    handleDislikeClick: function(event, sourceId)
-    {
-        SourceAction.like(sourceId, false);
-    },
-
-    getLikeIconClassNames: function(value, source)
-    {
-        if (value)
-            return 'icon-thumb_up icon-btn'
-                + (source.likes.length && source.likes[0].value
-                    ? ' icon-btn-active'
-                    : '');
-
-        return 'icon-thumb_down icon-btn'
-            + (source.likes.length && !source.likes[0].value
-                ? ' icon-btn-active'
-                : '')
-    },
-
     renderSourceList: function(sources)
     {
         return (
@@ -110,10 +86,10 @@ var SourceTab = React.createClass({
 
         var sources = this.state.sources.getSourcesByTextId(this.props.text.id);
         var textSources = sources
-            ? sources.filter((source) => !source.author)
+            ? sources.filter((source) => source.auto)
             : null;
         var communitySources = sources
-            ? sources.filter((source) => !!source.author)
+            ? sources.filter((source) => !source.auto)
             : null;
 
         var sourceError = this.state.sources.getError();

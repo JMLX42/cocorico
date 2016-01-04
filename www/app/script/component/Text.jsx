@@ -59,10 +59,10 @@ var Text = React.createClass({
         });
     },
 
-    componentWillReceiveProps: function(props)
+    componentWillReceiveProps: function(nextProps)
     {
-        if (props.textId != this.props.textId)
-            TextAction.show(props.textId);
+        if (nextProps.textId != this.props.textId)
+            TextAction.show(nextProps.textId);
     },
 
     render: function()
@@ -136,7 +136,7 @@ var Text = React.createClass({
                         ? <ContributionTabs text={text} editable={true} tab={this.props.tab}/>
                         : <div/>}
 
-                    {text.status == 'published'
+                    {text.status == 'vote'
                         ? <div className={this.state.ballots && ballot && !ballot.error && ballot.value ? 'voted-' + ballot.value : ''}>
                             <Grid>
                                 <Row className="section">
