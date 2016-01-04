@@ -47,12 +47,17 @@ var Text = React.createClass({
         return state;
     },
 
-    componentWillMount: function()
+    componentWillReceiveProps: function(nextProps)
     {
-        this.context.history.key = this.getTabSlugByKey(this.state.activeKey);
+        // this.setState({ activeKey : this.getTabKeyBySlug(nextProps.tab) });
     },
 
-    getTabSlugByKey: function(key)
+    componentWillMount: function()
+    {
+        // this.context.history.key = this.getTabSlugByKey(this.state.activeKey);
+    },
+
+    getTabSlugs: function()
     {
         var slugs = [
             this.getIntlMessage('route.VIEW_TEXT_TAB_ARGUMENTS'),
@@ -67,12 +72,22 @@ var Text = React.createClass({
             slugs.unshift();
         }
 
-        return slugs[key - 1];
+        return slugs;
+    },
+
+    getTabKeyBySlug: function(slug)
+    {
+        return this.getTabSlugs().indexOf(slug) + 1;
+    },
+
+    getTabSlugByKey: function(key)
+    {
+        return this.getTabSlugs()[key - 1];
     },
 
     tabSelectHandler: function(key)
     {
-        this.context.history.push(
+        this.context.history.replace(
             this.getIntlMessage('route.VIEW_TEXT')
             + '/' + this.props.text.id
             + '/' + this.props.text.slug
