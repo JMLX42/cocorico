@@ -39,7 +39,7 @@ module.exports = Reflux.createStore({
 
     getSourcesByTextId: function(textId)
     {
-        if (this._sources[textId])
+        if (this._sources[textId] && this._sources[textId] !== true)
             return this._sources[textId];
 
         return null;
