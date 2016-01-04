@@ -65,6 +65,17 @@ var Text = React.createClass({
             TextAction.show(nextProps.textId);
     },
 
+    toTitleCase: function(str)
+    {
+        return str.replace(
+            /\w\S*/g,
+            function(txt)
+            {
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            }
+        );
+    },
+
     render: function()
     {
         var text = this.state.texts
@@ -87,7 +98,7 @@ var Text = React.createClass({
             : null;
 
 		return (
-            <ReactDocumentTitle title={text.title + ' - ' + this.getIntlMessage('site.TITLE')}>
+            <ReactDocumentTitle title={this.toTitleCase(text.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
                 <div className="text">
                     <Grid>
                         <Row className="section">

@@ -45,6 +45,17 @@ var Page = React.createClass({
             return <div dangerouslySetInnerHTML={{__html: this.state.pages.getPageBySlug(this.props.slug).html}}></div>;
     },
 
+    toTitleCase: function(str)
+    {
+        return str.replace(
+            /\w\S*/g,
+            function(txt)
+            {
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            }
+        );
+    },
+
     render: function()
     {
         if (!this.state.pages)
@@ -68,7 +79,7 @@ var Page = React.createClass({
 
 		return (
             this.props.setDocumentTitle
-                ? <ReactDocumentTitle title={page.title + ' - ' + this.getIntlMessage('site.TITLE')}>
+                ? <ReactDocumentTitle title={this.toTitleCase(page.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
                     <Grid>
                         <Row>
                             <Col md={12}>
