@@ -2,17 +2,25 @@ var React = require('react');
 var ReactIntl = require('react-intl');
 var ReactBootstrap = require('react-bootstrap');
 var ReactCookie = require('react-cookie');
+var ReactRouter = require('react-router');
+var Reflux = require('reflux');
 
-var Page = require('./Page');
+var Page = require('./Page'),
+    PageTitle = require('./PageTitle');
+
+var Link = ReactRouter.Link;
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
     Col = ReactBootstrap.Col,
-    Button = ReactBootstrap.Button;
+    Button = ReactBootstrap.Button,
+    ButtonToolbar = ReactBootstrap.ButtonToolbar;
 
 var Hint = React.createClass({
 
-    mixins: [ReactIntl.IntlMixin],
+    mixins: [
+        ReactIntl.IntlMixin
+    ],
 
     getInitialState: function()
     {
@@ -23,27 +31,57 @@ var Hint = React.createClass({
 
     buttonClickHandler: function(e)
     {
-        ReactCookie.save('hint/' + this.props.pageSlug, true);
-        this.setState({hidden : true});
+        var hidden = !this.state.hidden;
+
+        this.setState({hidden : hidden});
+        ReactCookie.save('hint/' + this.props.pageSlug, hidden);
     },
 
     render: function()
     {
+        if (this.state.hidden)
+        {
+            return (
+                <Grid>
+                    <Row>
+                        <Col md={12}>
+                            <a onClick={this.buttonClickHandler}
+                               className="btn-hint-show">
+                                <span className="icon-info"/>
+                                <PageTitle slug={this.props.pageSlug} className="hint-title"/>
+                            </a>
+                        </Col>
+                    </Row>
+                </Grid>
+            );
+        }
+
 		return (
-            !this.state.hidden
-                ? <div className={this.props.className}>
+            <div className={this.props.className}>
+                <div className="hint-content">
                     <Page slug={this.props.pageSlug}/>
-                    <Grid>
+                </div>
+                {this.props.disposable
+                    ? <Grid>
                         <Row>
                             <Col md={12}>
-                                <Button onClick={this.buttonClickHandler}>
-                                    J'ai compris, ne plus afficher ce message
-                                </Button>
+                                <ButtonToolbar>
+                                    <Button onClick={this.buttonClickHandler}>
+                                        J'ai compris, ne plus afficher ce message
+                                    </Button>
+                                    {this.props.morePageSlug
+                                        ? <Link to={'/' + this.props.morePageSlug}>
+                                        <Button bsStyle="link">
+                                            En savoir plus...
+                                        </Button>
+                                    </Link>
+                                    : <span/>}
+                                </ButtonToolbar>
                             </Col>
                         </Row>
                     </Grid>
-                </div>
-                : <div/>
+                    : <div/>}
+            </div>
 		);
 	}
 });
