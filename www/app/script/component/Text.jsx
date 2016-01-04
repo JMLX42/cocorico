@@ -109,32 +109,22 @@ var Text = React.createClass({
                     </Grid>
 
                     {text.status == 'review'
-                        ? <div className="section section-notice-review cocorico-light-grey-background">
-                            <Grid>
-                                <Row>
-                                    <Col md={12}>
-                                        <h3>Ce texte est en cours de révision</h3>
-                                        <p>
-                                            Le texte ci-dessus n'est pas définitif et
-                                            la communauté compte sur vos contributions.
-                                            Vous pouvez contribuer ci-dessous en ajoutant
-                                            des sources d'information complémentaires au
-                                            texte ou en proposant des modifications sur
-                                            le texte lui-même.
-                                        </p>
-                                    </Col>
-                                </Row>
-                            </Grid>
-                        </div>
+                        ? <Hint pageSlug="astuce-etape-revision"
+                                disposable={true}
+                                className="section section-hint cocorico-light-grey-background"/>
                         : <div/>}
 
                     {text.status == 'debate'
-                        ? <Hint pageSlug="astuce-etape-debat" className="section section-hint cocorico-light-grey-background"/>
+                        ? <Hint pageSlug="astuce-etape-debat"
+                                disposable={true}
+                                className="section section-hint cocorico-light-grey-background"/>
                         : <div/>}
 
-                    {text
-                        ? <ContributionTabs text={text} editable={true} tab={this.props.tab}/>
-                        : <div/>}
+                    <Grid>
+                        <Row className="section" style={{border:'none'}}>
+                            <ContributionTabs text={text} editable={true} tab={this.props.tab}/>
+                        </Row>
+                    </Grid>
 
                     {text.status == 'vote'
                         ? <div className={this.state.ballots && ballot && !ballot.error && ballot.value ? 'voted-' + ballot.value : ''}>
