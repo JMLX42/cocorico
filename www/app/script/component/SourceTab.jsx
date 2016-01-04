@@ -85,6 +85,10 @@ var SourceTab = React.createClass({
             return null;
 
         var sources = this.state.sources.getSourcesByTextId(this.props.text.id);
+
+        if (!sources)
+            return null;
+
         var textSources = sources
             ? sources.filter((source) => source.auto)
             : null;
