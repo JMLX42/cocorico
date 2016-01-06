@@ -150,12 +150,16 @@ var Text = React.createClass({
                                                 </p>
                                                 : <div/>
                                             : !!this.state.ballots && (!ballot || ballot.error == 404)
-                                                ? <VoteButtonBar textId={text.id}/>
+                                                ? text.status == 'vote'
+                                                    ? <VoteButtonBar textId={text.id}/>
+                                                    : <p>
+                                                        {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}
+                                                    </p>
                                                 : <div>
                                                     <FormattedMessage message={this.getIntlMessage('text.ALREADY_VOTED')}
                                                         value={ballot && ballot.value ? this.getIntlMessage('text.VOTE_' + ballot.value.toUpperCase()) : ''}
                                                         date={<FormattedTime value={ballot && ballot.time ? ballot.time : Date.now()}/>}/>
-                                                    {text.status != 'published'
+                                                    {text.status == 'vote'
                                                         ? <div>
                                                             <UnvoteButton text={text}/>
                                                         </div>
@@ -168,7 +172,7 @@ var Text = React.createClass({
                         </div>
                         : <div/>}
 
-                        {text.status == 'vote' || text.status == 'published'
+                        {text.status == 'published'
                             ? <div>
                                 <Grid>
                                     <Row className="section">
