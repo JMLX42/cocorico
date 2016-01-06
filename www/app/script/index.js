@@ -3,11 +3,13 @@ require('../style/index.less');
 var React = require('react');
 var ReactRouter = require('react-router');
 var ReactDOM = require('react-dom');
+var History = require('history');
 var messages = require('./intl/intl').messages;
 
 var Router = ReactRouter.Router,
     Route = ReactRouter.Route,
     IndexRoute = ReactRouter.IndexRoute,
+    browserHistory = ReactRouter.browserHistory,
 
     App = require('./App'),
     Page = require('./page/Page'),
@@ -20,7 +22,7 @@ var Router = ReactRouter.Router,
     MyTexts = require('./page/MyTexts');
 
 ReactDOM.render(
-    <Router>
+    <Router history={History.createHistory()}>
         <Route path='/' component={App}>
             <IndexRoute component={Home}/>
             <Route path={messages.route.SIGN_IN + '/(:redirect)'} component={Login}/>

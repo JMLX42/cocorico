@@ -45,7 +45,7 @@ var LoginButton = React.createClass({
         var link = this.getIntlMessage('route.SIGN_IN');
 
         if (this.state.path != '/' && this.getIntlMessage('route.SIGN_IN') != this.state.path)
-            link += '/' + encodeURIComponent('/#' + this.state.path)
+            link += '/' + encodeURIComponent(this.state.path)
 
 		return (
             <Link to={link}>

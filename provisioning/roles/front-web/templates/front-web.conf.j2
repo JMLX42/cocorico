@@ -20,17 +20,18 @@
     ProxyRequests           Off
     ProxyPreserveHost       On
 
-    RewriteEngine           On
-    RewriteRule             ^/([a-z]+)$          /$1/ [L,R=301]
+    <Directory "{{ www_dir }}/home-web/">
+       Options FollowSymLinks Includes
+       AllowOverride All
+    </Directory>
 
     #
     # Endpoints: /
     # Component: Website
     # Role: home-web
     #
-    RewriteRule         ^/(.*) http://{{ home_web_private_host }}:{{ home_web_private_port }}/$1 [P,L]
     ProxyPassReverse    / http://{{ home_web_private_host }}:{{ home_web_private_port }}
-    
+
     # Including all additional rewrite rule configurations set by roles.
     IncludeOptional     /etc/apache2/sites-available/front-web-include/*.conf
 
