@@ -72,7 +72,10 @@ var SourceTab = React.createClass({
                         <a href={source.url} target="_blank">
                             {source.title ? source.title : source.url}
                         </a>
-                        <LikeButtons likeAction={SourceAction.like} resource={source}/>
+                        <LikeButtons likeAction={SourceAction.like}
+                            resource={source}
+                            likeButtonEnabled={this.props.editable}
+                            dislikeButtonEnabled={this.props.editable}/>
                     </li>;
                 })}
             </ul>
