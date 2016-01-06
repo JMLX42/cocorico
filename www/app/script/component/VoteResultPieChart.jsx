@@ -1,0 +1,57 @@
+var React = require('react');
+var ReactD3 = require('react-d3-components');
+var Reflux = require('reflux');
+
+var PieChart = ReactD3.PieChart;
+
+var VoteStore = require('../store/VoteStore');
+
+var VoteAction = require('../action/VoteAction');
+
+var VoteResultPieChart = React.createClass({
+
+    mixins : [
+        Reflux.connect(VoteStore, 'votes')
+    ],
+
+    componentWillMount : function()
+    {
+        VoteAction.showTextVoteResult(this.props.textId);
+    },
+
+    render: function()
+    {
+        var result = this.state.votes
+            ? this.state.votes.getVoteResultByTextId(this.props.textId)
+            : null;
+
+        if (!result)
+            return null;
+
+        var color = {
+            'Pour' : '#4285F4',
+            'Contre' : '#EB6864'
+        }
+
+        var data = {
+            values: [
+                {x: 'Pour', y: result.yes},
+                {x: 'Contre', y: result.no},
+            ]
+        };
+
+        var sort = null;
+
+        return (
+            <PieChart
+                data={data}
+                width={600}
+                height={400}
+                colorScale={(e)=>color[e]}
+                margin={{top: 10, bottom: 10, left: 100, right: 100}}
+                sort={sort}/>
+        );
+    }
+});
+
+module.exports = VoteResultPieChart;
