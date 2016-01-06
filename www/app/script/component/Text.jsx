@@ -23,7 +23,8 @@ var VoteButtonBar = require('./VoteButtonBar'),
     ArgumentTab = require('./ArgumentTab'),
     ContributionTabs = require('./ContributionTabs'),
     LikeButtons = require('./LikeButtons'),
-    Hint = require('./Hint');
+    Hint = require('./Hint'),
+    VoteResultPieChart = require('./VoteResultPieChart');
 
 var BallotStore = require('../store/BallotStore'),
     UserStore = require('../store/UserStore'),
@@ -52,7 +53,6 @@ var Text = React.createClass({
     {
         TextAction.show(this.props.textId);
         TextAction.showCurrentUserVote(this.props.textId);
-        UserAction.requireLogin();
 
         this.listenTo(TextAction.vote, (textId) => {
             TextAction.show(this.props.textId);
@@ -137,34 +137,53 @@ var Text = React.createClass({
                         </Row>
                     </Grid>
 
-                    {text.status == 'vote'
+                    {text.status == 'vote' || (text.status == 'published' && currentUser)
                         ? <div className={this.state.ballots && ballot && !ballot.error && ballot.value ? 'voted-' + ballot.value : ''}>
                             <Grid>
                                 <Row className="section">
                                     <Col md={12}>
                                         <h2 className="section-title">{this.getIntlMessage('text.YOUR_VOTE')}</h2>
-                                        {!!currentUser
-                                            ? !!this.state.ballots && (!ballot || ballot.error == 404)
-                                                ? <div>
-                                                    <VoteButtonBar textId={text.id}/>
-                                                </div>
-                                                : <div>
-                                                    <FormattedMessage message={this.getIntlMessage('text.ALREADY_VOTED')}
-                                                                      value={ballot && ballot.value ? this.getIntlMessage('text.VOTE_' + ballot.value.toUpperCase()) : ''}
-                                                                      date={<FormattedTime value={ballot && ballot.time ? ballot.time : Date.now()}/>}/>
-                                                    <br/>
-                                                    <UnvoteButton text={text}/>
-                                                 </div>
-                                            : <div>
-                                                <p className="hint">
+                                        {!currentUser
+                                            ? text.status != 'published'
+                                                ? <p className="hint">
                                                     {this.getIntlMessage('text.LOGIN_REQUIRED')} <LoginButton />
                                                 </p>
-                                             </div>}
+                                                : <div/>
+                                            : !!this.state.ballots && (!ballot || ballot.error == 404)
+                                                ? <VoteButtonBar textId={text.id}/>
+                                                : <div>
+                                                    <FormattedMessage message={this.getIntlMessage('text.ALREADY_VOTED')}
+                                                        value={ballot && ballot.value ? this.getIntlMessage('text.VOTE_' + ballot.value.toUpperCase()) : ''}
+                                                        date={<FormattedTime value={ballot && ballot.time ? ballot.time : Date.now()}/>}/>
+                                                    {text.status != 'published'
+                                                        ? <div>
+                                                            <UnvoteButton text={text}/>
+                                                        </div>
+                                                        : <div/>}
+                                                </div>
+                                        }
                                     </Col>
                                 </Row>
                             </Grid>
                         </div>
                         : <div/>}
+
+                        {text.status == 'vote' || text.status == 'published'
+                            ? <div>
+                                <Grid>
+                                    <Row className="section">
+                                        <Col md={12}>
+                                            <h2 className="section-title">Résultat du vote</h2>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col md={12}>
+                                            <VoteResultPieChart textId={text.id}/>
+                                        </Col>
+                                    </Row>
+                                </Grid>
+                            </div>
+                            : <div/>}
                 </div>
             </ReactDocumentTitle>
 		);
