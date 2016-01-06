@@ -17,12 +17,18 @@ exports.list = function(req, res)
             if (req.user && req.user.sub)
                 for (var source of sources)
                 {
-                    for (var like of source.likes)
-                        if (!bcrypt.compareSync(req.user.sub, like.author))
-                            source.likes.splice(source.likes.indexOf(like), 1);
+                    var likes = source.likes;
+
+                    source.likes = [];
+                    for (var like of likes)
+                        if (bcrypt.compareSync(req.user.sub, like.author))
+                        {
+                            source.likes = [like];
+                            break;
+                        }
                 }
 
-            res.apiResponse({ sources: sources });
+            res.apiResponse({ sources : sources });
         });
 }
 
