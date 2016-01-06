@@ -151,7 +151,7 @@ var SourceTab = React.createClass({
                         </Col>
                         : <div/>}
                 </Row>
-                {!this.props.editable && !this.isAuthenticated()
+                {this.props.editable && !this.isAuthenticated()
                     ? <p className="hint">
                         {this.renderLoginMessage(this.getIntlMessage('text.LIKE_SOURCE_LOGIN'))}
                     </p>
