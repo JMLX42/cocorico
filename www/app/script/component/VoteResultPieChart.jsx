@@ -34,6 +34,15 @@ var VoteResultPieChart = React.createClass({
         color[this.getIntlMessage('text.VOTE_YES')] = '#4285F4';
         color[this.getIntlMessage('text.VOTE_NO')] = '#EB6864';
 
+        var percentText = result.yes == 0 || result.no == 0
+            ? 100
+            : result.yes >= result.no
+                ? Math.round(result.yes / (result.no + result.yes) * 100)
+                : Math.round(result.no / (result.no + result.yes) * 100);
+        var percentColor = result.yes >= result.no
+            ? color[this.getIntlMessage('text.VOTE_YES')]
+            : color[this.getIntlMessage('text.VOTE_NO')];
+
         var data = {
             values: [
                 {x: this.getIntlMessage('text.VOTE_YES'), y: result.yes},
@@ -44,13 +53,26 @@ var VoteResultPieChart = React.createClass({
         var sort = null;
 
         return (
-            <PieChart
-                data={data}
-                width={600}
-                height={400}
-                colorScale={(e)=>color[e]}
-                margin={{top: 10, bottom: 10, left: 100, right: 100}}
-                sort={sort}/>
+            <div>
+                <PieChart
+                    data={data}
+                    width={600}
+                    height={400}
+                    colorScale={(e)=>color[e]}
+                    outerRadius={150}
+                    innerRadius={130}
+                    sort={sort}/>
+                <div style={{
+                        position    : 'absolute',
+                        top         : 160,
+                        fontSize    : '50px',
+                        left        : 175,
+                        color       : percentColor,
+                        textAlign   : 'center',
+                        width       : '300px'}}>
+                    {percentText}%
+                </div>
+            </div>
         );
     }
 });
