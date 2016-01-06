@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactD3 = require('react-d3-components');
 var Reflux = require('reflux');
+var ReactIntl = require('react-intl');
 
 var PieChart = ReactD3.PieChart;
 
@@ -11,6 +12,7 @@ var VoteAction = require('../action/VoteAction');
 var VoteResultPieChart = React.createClass({
 
     mixins : [
+        ReactIntl.IntlMixin,
         Reflux.connect(VoteStore, 'votes')
     ],
 
@@ -28,15 +30,14 @@ var VoteResultPieChart = React.createClass({
         if (!result)
             return null;
 
-        var color = {
-            'Pour' : '#4285F4',
-            'Contre' : '#EB6864'
-        }
+        var color = {}
+        color[this.getIntlMessage('text.VOTE_YES')] = '#4285F4';
+        color[this.getIntlMessage('text.VOTE_NO')] = '#EB6864';
 
         var data = {
             values: [
-                {x: 'Pour', y: result.yes},
-                {x: 'Contre', y: result.no},
+                {x: this.getIntlMessage('text.VOTE_YES'), y: result.yes},
+                {x: this.getIntlMessage('text.VOTE_NO'), y: result.no},
             ]
         };
 
