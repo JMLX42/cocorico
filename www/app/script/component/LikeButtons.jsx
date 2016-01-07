@@ -36,19 +36,15 @@ var LikeButtons = React.createClass({
     {
         return (
             <span style={{display:'inline-block'}}>
-                {this.isAuthenticated()
-                    ? <span>
-                        {this.props.likeButtonEnabled
-                            ? <span className={this.getLikeIconClassNames(true)}
-                                title={this.getIntlMessage('text.LIKE_BUTTON_TITLE')}
-                                onClick={(e)=>this.props.likeAction(this.props.resource.id, true)}/>
-                            : <span/>}
-                        {this.props.dislikeButtonEnabled
-                            ? <span className={this.getLikeIconClassNames(false)}
-                                title={this.getIntlMessage('text.DISLIKE_BUTTON_TITLE')}
-                                onClick={(e)=>this.props.likeAction(this.props.resource.id, false)}/>
-                            : <span/>}
-                    </span>
+                {this.isAuthenticated() && this.props.likeButtonEnabled
+                    ? <span className={this.getLikeIconClassNames(true)}
+                        title={this.getIntlMessage('text.LIKE_BUTTON_TITLE')}
+                        onClick={(e)=>this.props.likeAction(this.props.resource.id, true)}/>
+                    : <span/>}
+                {this.isAuthenticated() && this.props.dislikeButtonEnabled
+                    ? <span className={this.getLikeIconClassNames(false)}
+                        title={this.getIntlMessage('text.DISLIKE_BUTTON_TITLE')}
+                        onClick={(e)=>this.props.likeAction(this.props.resource.id, false)}/>
                     : <span/>}
                 <span className="like-score">({this.props.resource.score})</span>
             </span>
