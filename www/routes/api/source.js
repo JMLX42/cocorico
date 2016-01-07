@@ -14,19 +14,19 @@ exports.list = function(req, res)
             if (err)
                 return res.apiError('database error', err);
 
-            if (req.user && req.user.sub)
-                for (var source of sources)
-                {
-                    var likes = source.likes;
+            for (var source of sources)
+            {
+                var likes = source.likes;
 
-                    source.likes = [];
+                source.likes = [];
+                if (req.user && req.user.sub)
                     for (var like of likes)
                         if (bcrypt.compareSync(req.user.sub, like.author))
                         {
                             source.likes = [like];
                             break;
                         }
-                }
+            }
 
             res.apiResponse({ sources : sources });
         });

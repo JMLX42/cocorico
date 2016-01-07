@@ -58,19 +58,17 @@ exports.get = function(req, res)
 		if (!textIsReadable(text, req))
 			return res.status(403).send();
 
+		var likes = text.likes;
+
+		text.likes = [];
+
 		if (req.user && req.user.sub)
-		{
-			var likes = text.likes;
-
-			text.likes = [];
-
 			for (var like of likes)
 				if (bcrypt.compareSync(req.user.sub, like.author))
 				{
 					text.likes = [like];
 					break;
 				}
-		}
 
 		res.apiResponse({ text: text });
 	});
