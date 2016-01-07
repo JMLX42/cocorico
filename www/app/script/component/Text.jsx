@@ -137,7 +137,7 @@ var Text = React.createClass({
                         </Row>
                     </Grid>
 
-                    {text.status == 'vote' || (text.status == 'published' && currentUser)
+                    {text.status == 'vote' || text.status == 'published'
                         ? <div className={this.state.ballots && ballot && !ballot.error && ballot.value ? 'voted-' + ballot.value : ''}>
                             <Grid>
                                 <Row className="section">
@@ -148,7 +148,9 @@ var Text = React.createClass({
                                                 ? <p className="hint">
                                                     {this.getIntlMessage('text.LOGIN_REQUIRED')} <LoginButton />
                                                 </p>
-                                                : <div/>
+                                                : <p>
+                                                    {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}
+                                                </p>
                                             : !!this.state.ballots && (!ballot || ballot.error == 404)
                                                 ? text.status == 'vote'
                                                     ? <VoteButtonBar textId={text.id}/>
