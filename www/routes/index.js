@@ -34,7 +34,6 @@ exports = module.exports = function(app) {
 	app.use(passport.initialize());
 	app.use(passport.session());
 
-	app.get('/', routes.views.index);
 
 	app.get('/auth/login', keystone.middleware.api, routes.auth.index.login);
 	app.get('/auth/logout', keystone.middleware.api, routes.auth.index.logout);
@@ -71,4 +70,6 @@ exports = module.exports = function(app) {
 
 	app.get('/api/user/me', keystone.middleware.api, isAuthenticated, routes.api.user.me);
 	app.get('/api/user/texts', keystone.middleware.api, isAuthenticated, routes.api.user.texts);
+
+	app.get('*', routes.views.index);
 };
