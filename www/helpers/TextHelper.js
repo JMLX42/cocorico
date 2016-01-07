@@ -11,7 +11,7 @@ exports.filterReadableTexts = function(texts, req, checkAuthor)
 	var filtered = [];
 
 	for (var text of texts)
-		if (textIsReadable(text, req, checkAuthor))
+		if (exports.textIsReadable(text, req, checkAuthor))
 			filtered.push(text);
 
 	return filtered;
