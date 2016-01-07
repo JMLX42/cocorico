@@ -33,7 +33,7 @@ var Home = React.createClass({
     {
 		return (
             <div className="page-home">
-                <Page slug="accueil"/>
+                <Page slug="accueil" setDocumentTitle={true}/>
                 <Grid>
                     <Row>
                         <Col md={12}>
