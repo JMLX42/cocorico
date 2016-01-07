@@ -1,13 +1,14 @@
 var Reflux = require('reflux');
 var jquery = require('jquery');
 
-var TextAction = require('../action/TextAction');
+var TextAction = require('../action/TextAction'),
+    VoteAction = require('../action/VoteAction');
 
 module.exports = Reflux.createStore({
     init: function()
     {
-        this.listenTo(TextAction.vote, this._vote);
-        this.listenTo(TextAction.unvote, this._unvote);
+        this.listenTo(VoteAction.vote, this._vote);
+        this.listenTo(VoteAction.unvote, this._unvote);
         this.listenTo(TextAction.showCurrentUserVote, this._fetchBallotByTextId);
 
         this._ballots = {};
@@ -48,7 +49,7 @@ module.exports = Reflux.createStore({
     _vote: function(textId, value)
     {
         jquery.get(
-            '/api/text/vote/' + value + '/' + textId,
+            '/api/vote/' + value + '/' + textId,
             (data) => {
                 this._ballots[textId] = data.ballot;
                 this.trigger(this);
@@ -59,7 +60,7 @@ module.exports = Reflux.createStore({
     _unvote: function(textId, value)
     {
         jquery.get(
-            '/api/text/unvote/' + textId,
+            '/api/vote/remove/' + textId,
             (data) => {
                 delete this._ballots[textId];
                 this.trigger(this);

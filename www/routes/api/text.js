@@ -6,24 +6,9 @@ var async = require('async');
 var Text = keystone.list('Text'),
 	Ballot = keystone.list('Ballot'),
 	Source = keystone.list('Source'),
-	Like = keystone.list('Like');
+	Like = keystone.list('Like'),
 
-function textIsReadable(text, req, checkAuthor)
-{
-	return ['draft'].indexOf(text.status) < 0
-		|| (!checkAuthor && req.isAuthenticated() && bcrypt.compareSync(req.user.sub, text.author));
-}
-
-function filterReadableTexts(texts, req, checkAuthor)
-{
-	var filtered = [];
-
-	for (var text of texts)
-		if (textIsReadable(text, req, checkAuthor))
-			filtered.push(text);
-
-	return filtered;
-}
+	TextHelper = require('../../helpers/TextHelper');
 
 /**
  * List Texts
@@ -36,7 +21,7 @@ exports.list = function(req, res)
 			if (err)
 				return res.apiError('database error', err);
 
-			res.apiResponse({ texts: filterReadableTexts(texts, req, true) });
+			res.apiResponse({ texts: TextHelper.filterReadableTexts(texts, req, true) });
 		});
 }
 
@@ -55,7 +40,7 @@ exports.get = function(req, res)
 		if (!text)
 			return res.apiError('not found');
 
-		if (!textIsReadable(text, req))
+		if (!TextHelper.textIsReadable(text, req))
 			return res.status(403).send();
 
 		var likes = text.likes;
@@ -86,7 +71,7 @@ exports.latest = function(req, res)
 			if (!texts)
 				return res.apiError('not found');
 
-			res.apiResponse({ texts: filterReadableTexts(texts, req, true) });
+			res.apiResponse({ texts: TextHelper.filterReadableTexts(texts, req, true) });
 		});
 }
 
@@ -110,112 +95,6 @@ exports.getBallot = function(req, res)
 	);
 }
 
-function vote(req, res, value)
-{
-	Text.model.findById(req.params.id).exec(function(err, text)
-	{
-		if (err)
-			return res.apiError('database error', err);
-		if (!text)
-			return res.apiError('not found');
-
-		if (!textIsReadable(text, req))
-			return res.status(403).send();
-
-		Ballot.getByTextIdAndVoter(
-			req.params.id,
-			req.user.sub,
-			function(err, ballot)
-			{
-				if (err)
-					return res.apiError('database error', err);
-
-				if (ballot)
-					return res.status(403).apiResponse({
-						error: 'user already voted'
-					});
-
-				ballot = Ballot.model({
-					text: text,
-					voter: bcrypt.hashSync(req.user.sub, 10),
-					value: value
-				});
-
-				ballot.save(function(err)
-				{
-					if (err)
-						return res.apiError('database error', err);
-
-					res.apiResponse({ ballot: ballot });
-				});
-			}
-		);
-	});
-}
-
-exports.voteYes = function(req, res)
-{
-	vote(req, res, 'yes');
-}
-
-exports.voteBlank = function(req, res)
-{
-	vote(req, res, 'blank');
-}
-
-exports.voteNo = function(req, res)
-{
-	vote(req, res, 'no');
-}
-
-exports.unvote = function(req, res)
-{
-	Text.model.findById(req.params.id).exec(function(err, text)
-	{
-		if (err)
-			return res.apiError('database error', err);
-		if (!text)
-			return res.apiError('not found');
-
-		if (!textIsReadable(text, req))
-			return res.status(403).send();
-
-		Ballot.getByTextIdAndVoter(
-			req.params.id,
-			req.user.sub,
-			function(err, ballot)
-			{
-				if (err)
-					return res.apiError('database error', err);
-
-				if (!ballot)
-					return res.status(404).apiResponse({
-						error: 'ballot does not exist'
-					});
-
-				Ballot.model.findById(ballot.id).remove(function(err)
-				{
-					var client = redis.createClient();
-					var key = 'ballot/' + req.params.id + '/' + req.user.sub;
-
-					if (err)
-						return res.apiError('database error', err);
-
-					client.on('connect', function()
-					{
-						client.del(key, function(err, reply)
-						{
-							if (err)
-								console.log(err);
-
-							return res.apiResponse({ ballot: 'removed' });
-						});
-					});
-				});
-			});
-	});
-}
-
 /**
  * Get Text by slug
  */
@@ -229,7 +108,7 @@ exports.getBySlug = function(req, res)
 				return res.apiError('database error', err);
 			if (!text)
 				return res.status(404).send();
-			if (!textIsReadable(text, req))
+			if (!TextHelper.textIsReadable(text, req))
 				return res.status(403).send();
 
 			res.apiResponse({ text: text });
@@ -339,7 +218,7 @@ exports.save = function(req, res)
 	    {
 			if (err)
 				return res.apiError('database error', err);
-			if (text && !textIsReadable(text, req))
+			if (text && !TextHelper.textIsReadable(text, req))
 				return res.status(403).send();
 
 			if (!text)

@@ -46,10 +46,6 @@ exports = module.exports = function(app) {
 	app.get('/api/text/:id', keystone.middleware.api, routes.api.text.get);
 	app.get('/api/text/getBySlug/:slug', keystone.middleware.api, routes.api.text.getBySlug);
 	app.get('/api/text/ballot/:id', keystone.middleware.api, isAuthenticated, routes.api.text.getBallot);
-	app.get('/api/text/vote/yes/:id', keystone.middleware.api, isAuthenticated, routes.api.text.voteYes);
-	app.get('/api/text/vote/blank/:id', keystone.middleware.api, isAuthenticated, routes.api.text.voteBlank);
-	app.get('/api/text/vote/no/:id', keystone.middleware.api, isAuthenticated, routes.api.text.voteNo);
-	app.get('/api/text/unvote/:id', keystone.middleware.api, isAuthenticated, routes.api.text.unvote);
 	app.post('/api/text/save', keystone.middleware.api, isAuthenticated, routes.api.text.save);
 	// app.get('/api/text/delete/:id', keystone.middleware.api, isAuthenticated, routes.api.text.delete);
 	app.get('/api/text/status/:id/:status', keystone.middleware.api, isAuthenticated, routes.api.text.status);
@@ -57,6 +53,10 @@ exports = module.exports = function(app) {
 	app.get('/api/text/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.text.removeLike);
 
 	app.get('/api/vote/result/:textId', keystone.middleware.api, routes.api.vote.result);
+	app.get('/api/vote/yes/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteYes);
+	app.get('/api/vote/blank/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteBlank);
+	app.get('/api/vote/no/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteNo);
+	app.get('/api/vote/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.remove);
 
 	app.get('/api/source/list/:textId', keystone.middleware.api, routes.api.source.list);
 	app.post('/api/source/add', keystone.middleware.api, isAuthenticated, routes.api.source.add);

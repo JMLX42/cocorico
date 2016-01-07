@@ -2,7 +2,7 @@ var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 
-var TextAction = require('../action/TextAction');
+var VoteAction = require('../action/VoteAction');
 
 var FormattedMessage = ReactIntl.FormattedMessage;
 
@@ -13,7 +13,7 @@ var VoteButton = React.createClass({
 
     handleClick: function()
     {
-        TextAction.vote(this.props.text, this.props.value);
+        VoteAction.vote(this.props.text, this.props.value);
     },
 
     render: function()

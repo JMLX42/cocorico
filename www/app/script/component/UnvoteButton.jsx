@@ -2,18 +2,18 @@ var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 
-var TextAction = require('../action/TextAction');
+var VoteAction = require('../action/VoteAction');
 
 var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = ReactBootstrap.Button;
 
-var VoteButton = React.createClass({
+var UnvoteButton = React.createClass({
     mixins: [ReactIntl.IntlMixin],
 
     handleClick: function()
     {
-        TextAction.unvote(this.props.text.id);
+        VoteAction.unvote(this.props.text.id);
 
         return false;
     },
@@ -28,4 +28,4 @@ var VoteButton = React.createClass({
 	}
 });
 
-module.exports = VoteButton;
+module.exports = UnvoteButton;

@@ -13,7 +13,8 @@ var FormattedMessage = ReactIntl.FormattedMessage,
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
 var TextAction = require('../action/TextAction'),
-    UserAction = require('../action/UserAction');
+    UserAction = require('../action/UserAction'),
+    VoteAction = require('../action/VoteAction');
 
 var VoteButtonBar = require('./VoteButtonBar'),
     LoginButton = require('./LoginButton'),
@@ -54,7 +55,7 @@ var Text = React.createClass({
         TextAction.show(this.props.textId);
         TextAction.showCurrentUserVote(this.props.textId);
 
-        this.listenTo(TextAction.vote, (textId) => {
+        this.listenTo(VoteAction.vote, (textId) => {
             TextAction.show(this.props.textId);
         });
     },
