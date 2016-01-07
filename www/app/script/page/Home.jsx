@@ -2,14 +2,18 @@ var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var ReactRouter = require('react-router');
 var ReactIntl = require('react-intl');
+var ReactDocumentTitle = require('react-document-title');
 var Reflux = require('reflux');
+
+var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
 var TextStore = require("../store/TextStore");
 
 var TextAction = require("../action/TextAction");
 
 var TextList = require("../component/TextList"),
-    Page = require("../component/Page");
+    Page = require("../component/Page"),
+    PageTitle = require("../component/PageTitle");
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -21,7 +25,8 @@ var Home = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin,
-        Reflux.connect(TextStore, 'texts')
+        Reflux.connect(TextStore, 'texts'),
+        ForceAuthMixin
     ],
 
     componentWillMount: function()
@@ -33,7 +38,7 @@ var Home = React.createClass({
     {
 		return (
             <div className="page-home">
-                <Page slug="accueil" setDocumentTitle={true}/>
+                <Page slug="accueil" setDocumentTitle={true} hideContent={this.isAuthenticated()}/>
                 <Grid>
                     <Row>
                         <Col md={12}>
