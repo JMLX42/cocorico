@@ -1,52 +1,58 @@
 var React = require('react');
 var ReactD3 = require('react-d3-components');
-var Reflux = require('reflux');
 var ReactIntl = require('react-intl');
 
 var PieChart = ReactD3.PieChart;
 
-var VoteStore = require('../store/VoteStore');
-
-var VoteAction = require('../action/VoteAction');
-
 var VoteResultPieChart = React.createClass({
 
     mixins : [
-        ReactIntl.IntlMixin,
-        Reflux.connect(VoteStore, 'votes')
+        ReactIntl.IntlMixin
     ],
-
-    componentWillMount : function()
-    {
-        VoteAction.showTextVoteResult(this.props.textId);
-    },
 
     render: function()
     {
-        var result = this.state.votes
-            ? this.state.votes.getVoteResultByTextId(this.props.textId)
-            : null;
-
-        if (!result)
-            return null;
-
         var color = {}
         color[this.getIntlMessage('text.VOTE_YES')] = '#4285F4';
         color[this.getIntlMessage('text.VOTE_NO')] = '#EB6864';
+        color[this.getIntlMessage('text.VOTE_BLANK')] = '#999';
 
-        var percentText = result.yes == 0 || result.no == 0
-            ? 100
-            : result.yes >= result.no
-                ? Math.round(result.yes / (result.no + result.yes) * 100)
-                : Math.round(result.no / (result.no + result.yes) * 100);
-        var percentColor = result.yes >= result.no
-            ? color[this.getIntlMessage('text.VOTE_YES')]
-            : color[this.getIntlMessage('text.VOTE_NO')];
+        var result = this.props.result;
+        var numVotes = result.no + result.yes + result.blank;
+
+        var percent = {};
+        if (numVotes != 0)
+        {
+            percent[this.getIntlMessage('text.VOTE_YES')] = Math.round(result.yes / numVotes * 100);
+            percent[this.getIntlMessage('text.VOTE_NO')] = Math.round(result.no / numVotes * 100);
+            percent[this.getIntlMessage('text.VOTE_BLANK')] = Math.round(result.blank / numVotes * 100);
+        }
+        else
+        {
+            percent[this.getIntlMessage('text.VOTE_YES')] = 0;
+            percent[this.getIntlMessage('text.VOTE_NO')] = 100;
+            percent[this.getIntlMessage('text.VOTE_BLANK')] = 0;
+        }
+
+        var maxPercent = Math.max(
+            percent[this.getIntlMessage('text.VOTE_YES')],
+            percent[this.getIntlMessage('text.VOTE_NO')],
+            percent[this.getIntlMessage('text.VOTE_BLANK')]
+        );
+
+        var percentColor = '';
+        for (var v in percent)
+            if (percent[v] == maxPercent)
+            {
+                percentColor = color[v];
+                break;
+            }
 
         var data = {
             values: [
-                {x: this.getIntlMessage('text.VOTE_YES'), y: result.yes},
-                {x: this.getIntlMessage('text.VOTE_NO'), y: result.no},
+                {x: this.getIntlMessage('text.VOTE_YES'),   y: result.yes},
+                {x: this.getIntlMessage('text.VOTE_NO'),    y: result.no},
+                {x: this.getIntlMessage('text.VOTE_BLANK'), y: result.blank}
             ]
         };
 
@@ -70,7 +76,7 @@ var VoteResultPieChart = React.createClass({
                         color       : percentColor,
                         textAlign   : 'center',
                         width       : '300px'}}>
-                    {percentText}%
+                    {maxPercent}%
                 </div>
             </div>
         );

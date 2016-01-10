@@ -28,7 +28,8 @@ exports.result = function(req, res)
 
                     var result = {
                         yes : 0,
-                        no : 0
+                        no : 0,
+                        blank : 0
                     };
 
                     for (var ballot of ballots)

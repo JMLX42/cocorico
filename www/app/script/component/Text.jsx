@@ -27,7 +27,7 @@ var VoteButtonBar = require('./VoteButtonBar'),
     ContributionTabs = require('./ContributionTabs'),
     LikeButtons = require('./LikeButtons'),
     Hint = require('./Hint'),
-    VoteResultPieChart = require('./VoteResultPieChart');
+    VoteResult = require('./VoteResult');
 
 var BallotStore = require('../store/BallotStore'),
     UserStore = require('../store/UserStore'),
@@ -154,13 +154,13 @@ var Text = React.createClass({
                                                 ? <p className="hint">
                                                     {this.getIntlMessage('text.LOGIN_REQUIRED')} <LoginButton />
                                                 </p>
-                                                : <p>
+                                                : <p className="hint">
                                                     {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}
                                                 </p>
                                             : !!this.state.ballots && (!ballot || ballot.error == 404)
                                                 ? text.status == 'vote'
                                                     ? <VoteButtonBar textId={text.id}/>
-                                                    : <p>
+                                                    : <p className="hint">
                                                         {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}
                                                     </p>
                                                 : <div>
@@ -181,20 +181,7 @@ var Text = React.createClass({
                         : <div/>}
 
                         {text.status == 'published'
-                            ? <div>
-                                <Grid>
-                                    <Row className="section">
-                                        <Col md={12}>
-                                            <h2 className="section-title">Résultat du vote</h2>
-                                        </Col>
-                                    </Row>
-                                    <Row>
-                                        <Col md={12}>
-                                            <VoteResultPieChart textId={text.id}/>
-                                        </Col>
-                                    </Row>
-                                </Grid>
-                            </div>
+                            ? <VoteResult textId={text.id}/>
                             : <div/>}
                 </div>
             </ReactDocumentTitle>
