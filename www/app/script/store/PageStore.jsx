@@ -16,6 +16,11 @@ module.exports = Reflux.createStore({
         this.fetchNavBar();
     },
 
+    pageIsLoading: function(slug)
+    {
+        return this._loadingPages[slug] === true;
+    },
+
     get: function()
     {
         return this._pages;

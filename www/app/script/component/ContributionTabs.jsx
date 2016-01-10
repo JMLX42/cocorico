@@ -12,7 +12,8 @@ var TextAction = require('../action/TextAction');
 var ArgumentTab = require('./ArgumentTab'),
     SourceTab = require('./SourceTab');
 
-var SourceStore = require('../store/SourceStore');
+var SourceStore = require('../store/SourceStore'),
+    ArgumentStore = require('../store/ArgumentStore');
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -28,7 +29,8 @@ var Text = React.createClass({
     mixins: [
         ForceAuthMixin,
         ReactIntl.IntlMixin,
-        Reflux.connect(SourceStore, 'sources')
+        Reflux.connect(SourceStore, 'sources'),
+        Reflux.connect(ArgumentStore, 'args')
     ],
 
     contextTypes: {
@@ -101,12 +103,16 @@ var Text = React.createClass({
             ? this.state.sources.getSourcesByTextId(text.id)
             : null;
 
+        var args = this.state.args
+            ? this.state.args.getArgumentsByTextId(this.props.text.id)
+            : null;
+
         var eventKey = 1;
 
         return (
             <Tabs animation={false} activeKey={this.state.activeKey} onSelect={this.tabSelectHandler} className="hidden-xs">
                 {text.status == 'debate' || text.status == 'vote' || text.status == 'published'
-                    ? <Tab eventKey={eventKey++} title="Arguments (0)">
+                    ? <Tab eventKey={eventKey++} title={'Arguments (' + (args ? args.length : 0) + ')'}>
                         <ArgumentTab text={text} editable={this.props.editable && text.status == 'debate'}/>
                     </Tab>
                     : <div/>}

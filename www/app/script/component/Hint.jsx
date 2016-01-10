@@ -42,17 +42,11 @@ var Hint = React.createClass({
         if (this.state.hidden)
         {
             return (
-                <Grid>
-                    <Row>
-                        <Col md={12}>
-                            <a onClick={this.buttonClickHandler}
-                               className="btn-hint-show">
-                                <span className="icon-info"/>
-                                <PageTitle slug={this.props.pageSlug} className="hint-title"/>
-                            </a>
-                        </Col>
-                    </Row>
-                </Grid>
+                <a onClick={this.buttonClickHandler}
+                    className="btn-hint-show">
+                    <span className="icon-info"/>
+                    <PageTitle slug={this.props.pageSlug} className="hint-title"/>
+                </a>
             );
         }
 
@@ -62,24 +56,18 @@ var Hint = React.createClass({
                     <Page slug={this.props.pageSlug}/>
                 </div>
                 {this.props.disposable
-                    ? <Grid>
-                        <Row>
-                            <Col md={12}>
-                                <ButtonToolbar>
-                                    <Button onClick={this.buttonClickHandler}>
-                                        J'ai compris, ne plus afficher ce message
-                                    </Button>
-                                    {this.props.morePageSlug
-                                        ? <Link to={'/' + this.props.morePageSlug}>
-                                        <Button bsStyle="link">
-                                            En savoir plus...
-                                        </Button>
-                                    </Link>
-                                    : <span/>}
-                                </ButtonToolbar>
-                            </Col>
-                        </Row>
-                    </Grid>
+                    ? <ButtonToolbar>
+                        <Button onClick={this.buttonClickHandler}>
+                            J'ai compris, ne plus afficher ce message
+                        </Button>
+                        {this.props.morePageSlug
+                            ? <Link to={'/' + this.props.morePageSlug}>
+                            <Button bsStyle="link">
+                                En savoir plus...
+                            </Button>
+                        </Link>
+                        : <span/>}
+                    </ButtonToolbar>
                     : <div/>}
             </div>
 		);

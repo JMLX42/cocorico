@@ -63,6 +63,10 @@ var Intl = {
 			}
 		},
 
+		sort: {
+			SORTED_BY_POPULARITY: "tri{gender, select, male {é} female {ée}}s par popularité"
+		},
+
 		text: {
 			TEXTS: 'Textes',
 			VOTE_YES: 'pour',

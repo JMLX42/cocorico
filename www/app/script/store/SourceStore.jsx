@@ -30,9 +30,10 @@ module.exports = Reflux.createStore({
     getSourceById: function(sourceId)
     {
         for (var textId in this._sources)
-            for (var source of this._sources[textId])
-                if (source.id == sourceId)
-                    return source;
+            if (this._sources[textId] !== true)
+                for (var source of this._sources[textId])
+                    if (source.id == sourceId)
+                        return source;
 
         return null;
     },
@@ -43,6 +44,11 @@ module.exports = Reflux.createStore({
             return this._sources[textId];
 
         return null;
+    },
+
+    textSourceLoading: function(textId)
+    {
+        return this._sources[textId] === true;
     },
 
     _fetchSourcesByTextId: function(textId)
@@ -140,5 +146,5 @@ module.exports = Reflux.createStore({
         ).error((xhr, textStatus, err) => {
             this.trigger(this);
         });
-    },
+    }
 });

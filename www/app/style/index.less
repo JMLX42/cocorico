@@ -11,7 +11,7 @@
 @cocorico-light-grey: #f8f8f8;
 
 @text-color: #444;
-@link-color: @cocorico-blue;
+@link-color: #5B86CF;
 @headings-color: @text-color;
 @component-active-bg: @cocorico-blue;
 @btn-danger-bg: @cocorico-red;
@@ -23,6 +23,16 @@
 
 body {
     background-color: #f8f8f8;
+}
+
+a {
+    // text-decoration: underline;
+}
+
+li.active {
+    a {
+        text-decoration: none;
+    }
 }
 
 #app {
@@ -54,6 +64,11 @@ body {
 }
 
 #header {
+
+    a {
+        text-decoration: none !important;
+    }
+
     .navbar {
         border-radius: 0;
     }
@@ -363,6 +378,7 @@ a.btn-hint-show {
     cursor: pointer;
     border-bottom: 1px dashed @cocorico-dark-grey;
     padding-bottom: 3px;
+    text-decoration: none;
 
     .icon-info {
         vertical-align: middle;
@@ -376,5 +392,29 @@ a.btn-hint-show {
     &:hover {
         text-decoration: none;
         border-bottom-style: solid;
+    }
+}
+
+ul.argument-list {
+    li {
+        padding: 10px;
+
+        &:nth-child(even) {
+            background-color: @cocorico-light-grey;
+            border-top: 1px solid @cocorico-grey;
+            border-bottom: 1px solid @cocorico-grey;
+        }
+
+        h4 {
+            display: inline-block;
+        }
+    }
+}
+
+.argument-editor {
+    margin-top: 20px;
+
+    button {
+        margin-left: 10px; 
     }
 }

@@ -8,7 +8,8 @@ var Text = keystone.list('Text'),
 	Source = keystone.list('Source'),
 	Like = keystone.list('Like'),
 
-	TextHelper = require('../../helpers/TextHelper');
+	TextHelper = require('../../helpers/TextHelper'),
+	LikeHelper = require('../../helpers/LikeHelper');
 
 /**
  * List Texts
@@ -43,17 +44,7 @@ exports.get = function(req, res)
 		if (!TextHelper.textIsReadable(text, req))
 			return res.status(403).send();
 
-		var likes = text.likes;
-
-		text.likes = [];
-
-		if (req.user && req.user.sub)
-			for (var like of likes)
-				if (bcrypt.compareSync(req.user.sub, like.author))
-				{
-					text.likes = [like];
-					break;
-				}
+		text.likes = LikeHelper.filterUserLikes(text.likes, req.user);
 
 		res.apiResponse({ text: text });
 	});
@@ -330,7 +321,7 @@ exports.addArgument = function(req, res)
 
 exports.addLike = function(req, res)
 {
-    Like.addLike(
+    LikeHelper.addLike(
         Text.model, req.params.id, req.user, req.params.value == 'true',
         function(err, resource, like)
         {
@@ -356,7 +347,7 @@ exports.addLike = function(req, res)
 
 exports.removeLike = function(req, res)
 {
-    Like.removeLike(
+    LikeHelper.removeLike(
         Text.model, req.params.id, req.user,
         function(err, resource, like)
         {

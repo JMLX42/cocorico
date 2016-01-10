@@ -5,6 +5,8 @@ var Markdown = require('react-remarkable');
 var ReactDocumentTitle = require('react-document-title');
 var Reflux = require('reflux');
 
+var StringHelper = require('../helper/StringHelper');
+
 var PageStore = require('../store/PageStore');
 var PageAction = require('../action/PageAction');
 var Error404 = require('../page/Error404');
@@ -45,21 +47,15 @@ var Page = React.createClass({
             return <div dangerouslySetInnerHTML={{__html: this.state.pages.getPageBySlug(this.props.slug).html}}></div>;
     },
 
-    toTitleCase: function(str)
-    {
-        return str.replace(
-            /\w\S*/g,
-            function(txt)
-            {
-                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            }
-        );
-    },
-
     render: function()
     {
         if (!this.state.pages)
             return null;
+
+        if (this.state.pages.pageIsLoading(this.props.slug))
+            return (
+                <p>Chargement...</p>
+            );
 
         var page = this.state.pages.getPageBySlug(this.props.slug);
 
@@ -68,37 +64,19 @@ var Page = React.createClass({
 
         if (page.error == 404)
             return (
-                <Grid>
-                    <Row>
-                        <Col md={12}>
-                            <Error404 />
-                        </Col>
-                    </Row>
-                </Grid>
+                <Error404 />
             );
 
 		return (
             this.props.setDocumentTitle
-                ? <ReactDocumentTitle title={this.toTitleCase(page.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
+                ? <ReactDocumentTitle title={StringHelper.toTitleCase(page.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
                     {this.props.hideContent
                         ? <div/>
-                        : <Grid>
-                            <Row>
-                                <Col md={12}>
-                                    {this.getPageContent(page)}
-                                </Col>
-                            </Row>
-                        </Grid>}
+                        : this.getPageContent(page)}
                 </ReactDocumentTitle>
                 : this.props.hideContent
                     ? <div/>
-                    : <Grid>
-                        <Row>
-                            <Col md={12}>
-                                {this.getPageContent(page)}
-                            </Col>
-                        </Row>
-                    </Grid>
+                    : this.getPageContent(page)
 		);
 	}
 });

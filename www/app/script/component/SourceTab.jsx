@@ -53,11 +53,6 @@ var SourceTab = React.createClass({
         this.setState({step: this.STEP_ADD});
     },
 
-    handleNewSourceURLChange: function(event)
-    {
-        this.setState({ newSourceURL: event.target.value });
-    },
-
     submitSourceClickHandler: function(event)
     {
         TextAction.addSource(this.props.text.id, this.state.newSourceURL);
@@ -87,6 +82,18 @@ var SourceTab = React.createClass({
         if (!this.state || !this.state.sources)
             return null;
 
+        if (this.state.sources
+            && this.state.sources.textSourceLoading(this.props.text.id))
+            return (
+                <Grid>
+                    <Row>
+                        <Col md={12}>
+                            Chargement...
+                        </Col>
+                    </Row>
+                </Grid>
+            );
+
         var sources = this.state.sources.getSourcesByTextId(this.props.text.id);
 
         if (!sources)
@@ -107,7 +114,12 @@ var SourceTab = React.createClass({
                     <Col md={12}>
                         <h3>
                             {this.getIntlMessage('text.TEXT_SOURCES')}
-                            <span className="small"> triées par popularité</span>
+                            &nbsp;({textSources ? textSources.length : 0})
+                            <span className="small">
+                                &nbsp;
+                                <FormattedMessage message={this.getIntlMessage('sort.SORTED_BY_POPULARITY')}
+                                    gender="female"/>
+                            </span>
                         </h3>
                         {textSources && textSources.length
                             ? this.renderSourceList(textSources)
@@ -118,7 +130,12 @@ var SourceTab = React.createClass({
                     <Col md={12}>
                         <h3>
                             {this.getIntlMessage('text.COMMUNITY_SOURCES')}
-                            <span className="small"> triées par popularité</span>
+                            &nbsp;({communitySources ? communitySources.length : 0})
+                            <span className="small">
+                                &nbsp;
+                                <FormattedMessage message={this.getIntlMessage('sort.SORTED_BY_POPULARITY')}
+                                    gender="female"/>
+                            </span>
                         </h3>
                         {communitySources && communitySources.length
                             ? this.renderSourceList(communitySources)
@@ -135,9 +152,9 @@ var SourceTab = React.createClass({
                                         <h4>{this.getIntlMessage('text.ADD_SOURCE_FORM_TITLE')}</h4>
                                         <p>{this.getIntlMessage('text.ADD_SOURCE_URL_HINT')}</p>
                                         <Input type="text" placeholder="http://www.exemple.com"
-                                               id="input-source-url" value={this.state.newSourceURL}
-                                               onChange={this.handleNewSourceURLChange}/>
-                                           {sourceError
+                                            id="input-source-url" value={this.state.newSourceURL}
+                                            onChange={(e)=>this.setState({ newSourceURL: e.target.value })}/>
+                                            {sourceError
                                                 ? <p>{this.getIntlMessage(sourceError.error)}</p>
                                                 : <div/>}
                                         <Button bsStyle="primary" onClick={this.submitSourceClickHandler}>
@@ -145,7 +162,7 @@ var SourceTab = React.createClass({
                                         </Button>
                                     </form>
                                     : <Button bsStyle="primary" onClick={this.addSourceClickHandler}
-                                              id="btn-add-source">
+                                          id="btn-add-source">
                                         {this.getIntlMessage('text.ADD_SOURCE_BUTTON')}
                                     </Button>}
                         </Col>

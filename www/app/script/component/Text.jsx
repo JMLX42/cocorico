@@ -10,6 +10,8 @@ var ButtonToolbar = ReactBootstrap.ButtonToolbar;
 var FormattedMessage = ReactIntl.FormattedMessage,
     FormattedTime = ReactIntl.FormattedTime;
 
+var StringHelper = require('../helper/StringHelper');
+
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
 var TextAction = require('../action/TextAction'),
@@ -66,17 +68,6 @@ var Text = React.createClass({
             TextAction.show(nextProps.textId);
     },
 
-    toTitleCase: function(str)
-    {
-        return str.replace(
-            /\w\S*/g,
-            function(txt)
-            {
-                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            }
-        );
-    },
-
     render: function()
     {
         var text = this.state.texts
@@ -99,7 +90,7 @@ var Text = React.createClass({
             : null;
 
 		return (
-            <ReactDocumentTitle title={this.toTitleCase(text.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
+            <ReactDocumentTitle title={StringHelper.toTitleCase(text.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
                 <div className="text">
                     <Grid>
                         <Row className="section">
@@ -121,15 +112,29 @@ var Text = React.createClass({
                     </Grid>
 
                     {text.status == 'review'
-                        ? <Hint pageSlug="astuce-etape-revision"
-                                disposable={true}
-                                className="section section-hint cocorico-light-grey-background"/>
+                        ? <div className="section section-hint cocorico-light-grey-background">
+                            <Grid>
+                                <Row>
+                                    <Col md={12}>
+                                        <Hint pageSlug="astuce-etape-revision"
+                                            disposable={true}/>
+                                    </Col>
+                                </Row>
+                            </Grid>
+                        </div>
                         : <div/>}
 
                     {text.status == 'debate'
-                        ? <Hint pageSlug="astuce-etape-debat"
-                                disposable={true}
-                                className="section section-hint cocorico-light-grey-background"/>
+                        ? <div className="section section-hint cocorico-light-grey-background">
+                            <Grid>
+                                <Row>
+                                    <Col md={12}>
+                                        <Hint pageSlug="astuce-etape-debat"
+                                            disposable={true}/>
+                                    </Col>
+                                </Row>
+                            </Grid>
+                        </div>
                         : <div/>}
 
                     <Grid>

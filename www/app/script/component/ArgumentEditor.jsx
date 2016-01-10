@@ -10,52 +10,88 @@ var Grid = ReactBootstrap.Grid,
     Button = ReactBootstrap.Button,
     Input = ReactBootstrap.Input;
 
-var TextAction = require('../action/TextAction'),
-    UserAction = require('../action/UserAction');
+var FormattedMessage = ReactIntl.FormattedMessage;
 
-var TextStore = require('../store/TextStore'),
-    UserStore = require('../store/UserStore');
+var Hint = require('./Hint');
+
+var ArgumentAction = require('../action/ArgumentAction');
 
 var Text = React.createClass({
 
     mixins: [
-        ReactIntl.IntlMixin,
-        Reflux.connect(TextStore, 'texts'),
-        Reflux.connect(UserStore, 'users')
+        ReactIntl.IntlMixin
     ],
 
     getInitialState: function()
     {
         return {
-            id: null,
-            title: '',
-            content: ''
+            expanded : this.props.expanded,
+            argumentTitle: '',
+            argumentContent: ''
         };
     },
 
-    componentDidMount: function()
+    getDefaultProps: function()
     {
+        return {
+            expanded : false
+        };
     },
 
-    componentWillReceiveProps: function(props)
+    buttonClickHandler: function(e)
     {
+        ArgumentAction.add(
+            this.props.textId,
+            this.props.value,
+            this.state.argumentTitle,
+            this.state.argumentContent
+        );
+
+        this.setState({expanded : false});
     },
 
     render: function()
     {
+        if (!this.state.expanded)
+            return (
+                <div className="argument-editor">
+                    <Button bsStyle={this.props.value ? 'primary' : 'danger'}
+                        onClick={(e)=>this.setState({expanded:true})}
+                        className="btn-add-argument">
+                        <FormattedMessage message={this.getIntlMessage('text.ADD_ARGUMENT')}
+                            value={this.getIntlMessage('text.VOTE_YES')}/>
+                    </Button>
+                </div>
+            );
+
         return (
-            <Grid className="argument-editor">
+            <div className="argument-editor">
                 <Row>
                     <Col md={12}>
-                        <Input type="textarea"/>
+                        <Input type="text"
+                            placeholder="Titre de votre argument"
+                            onChange={(e)=>this.setState({ argumentTitle: e.target.value })}/>
                     </Col>
                 </Row>
                 <Row>
                     <Col md={12}>
-                        <Button bsStyle="primary">Ajouter</Button>
+                        <Input type="textarea"
+                            placeholder="Texte de votre argument"
+                            onChange={(e)=>this.setState({ argumentContent: e.target.value })}/>
                     </Col>
                 </Row>
-            </Grid>
+                <Row>
+                    <Col md={12}>
+                        <Button bsStyle={this.props.value ? 'primary' : 'danger'}
+                            onClick={this.buttonClickHandler}>
+                            Ajouter
+                        </Button>
+                        <Button bsStyle="link" onClick={(e)=>{this.setState({expanded:false})}}>
+                            Annuler
+                        </Button>
+                    </Col>
+                </Row>
+            </div>
         );
 	}
 });

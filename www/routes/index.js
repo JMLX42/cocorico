@@ -63,6 +63,11 @@ exports = module.exports = function(app) {
 	app.get('/api/source/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.source.addLike);
 	app.get('/api/source/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.source.removeLike);
 
+	app.get('/api/argument/list/:textId', keystone.middleware.api, routes.api.argument.list);
+	app.post('/api/argument/add', keystone.middleware.api, isAuthenticated, routes.api.argument.add);
+	app.get('/api/argument/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.argument.addLike);
+	app.get('/api/argument/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.argument.removeLike);
+
 	app.get('/api/page/list', keystone.middleware.api, routes.api.page.list);
 	app.get('/api/page/navbar', keystone.middleware.api, routes.api.page.navbar);
 	app.get('/api/page/:id', keystone.middleware.api, routes.api.page.get);

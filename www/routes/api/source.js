@@ -2,39 +2,45 @@ var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 
 var Source = keystone.list('Source'),
-    Like = keystone.list('Like');
+    Like = keystone.list('Like'),
+    Text = keystone.list('Text');
+
+var TextHelper = require('../../helpers/TextHelper'),
+    LikeHelper = require('../../helpers/LikeHelper');
 
 exports.list = function(req, res)
 {
-    Source.model.find({text : req.params.textId})
-        .populate('likes')
-        .sort('-score')
-        .exec(function(err, sources)
+    Text.model.findOne(req.body.textId)
+        .exec(function(err, text)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            for (var source of sources)
-            {
-                var likes = source.likes;
+            if (!text)
+                return res.status(404).apiResponse();
 
-                source.likes = [];
-                if (req.user && req.user.sub)
-                    for (var like of likes)
-                        if (bcrypt.compareSync(req.user.sub, like.author))
-                        {
-                            source.likes = [like];
-                            break;
-                        }
-            }
+            if (!TextHelper.textIsReadable(text, req))
+    			return res.status(403).send();
 
-            res.apiResponse({ sources : sources });
+            Source.model.find({text : text})
+                .populate('likes')
+                .sort('-score')
+                .exec(function(err, sources)
+                {
+                    if (err)
+                        return res.apiError('database error', err);
+
+                    for (var source of sources)
+                        source.likes = LikeHelper.filterUserLikes(source.likes, req.user);
+
+                    res.apiResponse({ sources : sources });
+                });
         });
 }
 
 exports.addLike = function(req, res)
 {
-    Like.addLike(
+    LikeHelper.addLike(
         Source.model, req.params.id, req.user, req.params.value == 'true',
         function(err, resource, like)
         {
@@ -60,7 +66,7 @@ exports.addLike = function(req, res)
 
 exports.removeLike = function(req, res)
 {
-    Like.removeLike(
+    LikeHelper.removeLike(
         Source.model, req.params.id, req.user,
         function(err, resource, like)
         {
@@ -79,36 +85,50 @@ exports.removeLike = function(req, res)
 
 exports.add = function(req, res)
 {
-    Source.model.findOne({url: req.body.url})
-        .exec(function(err, source)
+    Text.model.findOne(req.body.textId)
+        .exec(function(err, text)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (source)
-                return res.status(400).apiResponse({
-                    error: 'error.ERROR_SOURCE_ALREADY_EXISTS'
+            if (!text)
+                return res.status(404).apiResponse();
+
+            if (!TextHelper.textIsReadable(text, req)
+                || text.status != 'review')
+    			return res.status(403).send();
+
+            Source.model.findOne({url: req.body.url})
+                .exec(function(err, source)
+                {
+                    if (err)
+                        return res.apiError('database error', err);
+
+                    if (source)
+                        return res.status(400).apiResponse({
+                            error: 'error.ERROR_SOURCE_ALREADY_EXISTS'
+                        });
+
+                    Source.fetchPageTitle(
+                        decodeURIComponent(req.body.url),
+                        function(error, result)
+                        {
+                            var newSource = Source.model({
+                                title: error ? '' : result.title,
+                                url: req.body.url,
+                                author: bcrypt.hashSync(req.user.sub, 10),
+                                text: text
+                            });
+
+                            newSource.save(function(err)
+                            {
+                                if (err)
+                                    return res.apiError('database error', err);
+
+                                res.apiResponse({ source: newSource });
+                            });
+                        }
+                    );
                 });
-
-        	Source.fetchPageTitle(
-                decodeURIComponent(req.body.url),
-                function(error, result)
-            	{
-            		var newSource = Source.model({
-            			title: error ? '' : result.title,
-            			url: req.body.url,
-            			author: bcrypt.hashSync(req.user.sub, 10),
-            			text: req.body.textId
-            		});
-
-            		newSource.save(function(err)
-            		{
-            			if (err)
-            				return res.apiError('database error', err);
-
-            			res.apiResponse({ source: newSource });
-            		});
-            	}
-            );
         });
 }
