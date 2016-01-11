@@ -8,38 +8,57 @@ module.exports = Reflux.createStore({
     {
         this.listenTo(VoteAction.showTextVoteResult, this._showTextVoteResultHandler);
 
-        this._texts = {};
+        this._result = {};
+        this._resultPerGender = {};
+        this._resultPerAge = {};
+        this._resultPerDate = {};
     },
 
     getVoteResultByTextId: function(textId)
     {
-        if (this._texts[textId] && this._texts[textId] !== true)
-            return this._texts[textId];
+        if (this._result[textId] && this._result[textId] !== true)
+            return this._result[textId];
+
+        return null;
+    },
+
+    getVoteResultPerDateByTextId: function(textId)
+    {
+        if (this._resultPerDate[textId] && this._resultPerDate[textId] !== true)
+            return this._resultPerDate[textId];
 
         return null;
     },
 
     _showTextVoteResultHandler: function(textId)
     {
-        if (this._texts[textId])
+        this._fetchVoteResult(textId, this._result, '/api/vote/result/');
+        this._fetchVoteResult(textId, this._resultPerGender, '/api/vote/result/per-gender/');
+        this._fetchVoteResult(textId, this._resultPerAge, '/api/vote/result/per-age/');
+        this._fetchVoteResult(textId, this._resultPerDate, '/api/vote/result/per-date/');
+    },
+
+    _fetchVoteResult: function(textId, collection, endpoint)
+    {
+        if (collection[textId])
         {
-            if (this._texts[textId] !== true)
+            if (collection[textId] !== true)
                 this.trigger(this);
 
             return;
         }
 
-        this._texts[textId] = true;
+        collection[textId] = true;
 
         jquery.get(
-            '/api/vote/result/' + textId,
+            endpoint + textId,
             (data) => {
-                this._texts[textId] = data.result;
+                collection[textId] = data.result;
                 this.trigger(this);
             }
         ).error((xhr, textStatus, err) => {
-            this._texts[textId] = { error : xhr.status };
-            this.trigger(this, this._texts[textId]);
+            collection[textId] = { error : xhr.status };
+            this.trigger(this, collection[textId]);
         });
     }
 });
