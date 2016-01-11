@@ -53,6 +53,9 @@ exports = module.exports = function(app) {
 	app.get('/api/text/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.text.removeLike);
 
 	app.get('/api/vote/result/:textId', keystone.middleware.api, routes.api.vote.result);
+	app.get('/api/vote/result/per-gender/:textId', keystone.middleware.api, routes.api.vote.resultPerGender);
+	app.get('/api/vote/result/per-age/:textId', keystone.middleware.api, routes.api.vote.resultPerAge);
+	app.get('/api/vote/result/per-date/:textId', keystone.middleware.api, routes.api.vote.resultPerDate);
 	app.get('/api/vote/yes/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteYes);
 	app.get('/api/vote/blank/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteBlank);
 	app.get('/api/vote/no/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteNo);

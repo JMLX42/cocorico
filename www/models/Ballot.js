@@ -15,7 +15,9 @@ Ballot.add({
 	value: { type: String, default: true, required: true, initial: true },
 	time: { type: Types.Datetime, default: Date.now },
 	voter: { type: String, required: true, initial: true },
-	text: { type: Types.Relationship, ref: 'Text', required: true, initial: true }
+	text: { type: Types.Relationship, ref: 'Text', required: true, initial: true },
+	voterAge: { type: Types.Number, required: true, initial: true },
+	voterGender: { type: String, required: true, initial: true }
 });
 
 Ballot.getByTextIdAndVoter = function(textId, voter, callback)
