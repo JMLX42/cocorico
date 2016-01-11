@@ -10,13 +10,17 @@ var VoteResultPieChart = React.createClass({
         ReactIntl.IntlMixin
     ],
 
+    shouldComponentUpdate: function(newProps)
+    {
+        for (var prop in newProps.result)
+            if (newProps.result[prop] != this.props.result[prop])
+                return true;
+
+        return false;
+    },
+
     render: function()
     {
-        var color = {}
-        color[this.getIntlMessage('text.VOTE_YES')] = '#4285F4';
-        color[this.getIntlMessage('text.VOTE_NO')] = '#EB6864';
-        color[this.getIntlMessage('text.VOTE_BLANK')] = '#999';
-
         var result = this.props.result;
         var numVotes = result.no + result.yes + result.blank;
 
@@ -36,47 +40,61 @@ var VoteResultPieChart = React.createClass({
 
         var maxPercent = Math.max(
             percent[this.getIntlMessage('text.VOTE_YES')],
-            percent[this.getIntlMessage('text.VOTE_NO')],
-            percent[this.getIntlMessage('text.VOTE_BLANK')]
+            percent[this.getIntlMessage('text.VOTE_NO')]
         );
 
+        var labels = {
+            yes : this.getIntlMessage('text.VOTE_YES')
+                + ' (' + percent[this.getIntlMessage('text.VOTE_YES')] + '%)',
+            no : this.getIntlMessage('text.VOTE_NO')
+                + ' (' + percent[this.getIntlMessage('text.VOTE_NO')] + '%)',
+            blank : this.getIntlMessage('text.VOTE_BLANK')
+                + ' (' + percent[this.getIntlMessage('text.VOTE_BLANK')] + '%)'
+        }
+
+        var color = {}
+        color[labels.yes] = '#4285F4';
+        color[labels.no] = '#EB6864';
+        color[labels.blank] = '#999';
+
         var percentColor = '';
+        var percentText = '';
         for (var v in percent)
             if (percent[v] == maxPercent)
             {
-                percentColor = color[v];
+                percentText = v;
+                for (var vv in color)
+                    if (vv.split(' ')[0] == v)
+                        percentColor = color[vv];
                 break;
             }
 
-        var data = {
-            values: [
-                {x: this.getIntlMessage('text.VOTE_YES'),   y: result.yes},
-                {x: this.getIntlMessage('text.VOTE_NO'),    y: result.no},
-                {x: this.getIntlMessage('text.VOTE_BLANK'), y: result.blank}
-            ]
-        };
-
-        var sort = null;
+        var data = {values : [
+            {x : labels.yes,    y : result.yes},
+            {x : labels.no,     y : result.no},
+            {x : labels.blank,  y : result.blank}
+        ]};
 
         return (
             <div>
                 <PieChart
                     data={data}
-                    width={600}
+                    width={670}
                     height={400}
+                    labelRadius={170}
                     colorScale={(e)=>color[e]}
                     outerRadius={150}
                     innerRadius={130}
-                    sort={sort}/>
+                    margin={{top: 0, right: 0, bottom: 0, left: 0}}/>
                 <div style={{
                         position    : 'absolute',
-                        top         : 160,
+                        top         : 120,
                         fontSize    : '50px',
-                        left        : 175,
+                        left        : 200,
                         color       : percentColor,
                         textAlign   : 'center',
                         width       : '300px'}}>
-                    {maxPercent}%
+                    {maxPercent}%<br/>'{percentText}'
                 </div>
             </div>
         );
