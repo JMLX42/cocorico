@@ -7,7 +7,8 @@ var VoteStore = require('../store/VoteStore');
 
 var VoteAction = require('../action/VoteAction');
 
-var VoteResultPieChart = require('./VoteResultPieChart');
+var VoteResultPieChart = require('./VoteResultPieChart'),
+    VoteResultPerDateLineChart = require('./VoteResultPerDateLineChart');
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -34,6 +35,10 @@ module.exports = React.createClass({
             ? this.state.votes.getVoteResultByTextId(this.props.textId)
             : null;
 
+        var resultPerDate = this.state.votes
+            ? this.state.votes.getVoteResultPerDateByTextId(this.props.textId)
+            : null;
+
         if (!result)
             return (
                 <Row>
@@ -44,33 +49,40 @@ module.exports = React.createClass({
             );
 
         return (
-            <Row>
-                <Col md={6}>
-                    <VoteResultPieChart result={result}/>
-                </Col>
-                <Col md={6}>
-                    <ul className="list-unstyled">
-                        <li>
-                            {result.yes + result.no} votes
-                        </li>
-                        <li>
-                            <span className="cocorico-blue">
-                                {result.yes} votes 'pour'
-                            </span>
-                        </li>
-                        <li>
-                            <span className="cocorico-red">
-                                {result.no} votes 'contre'
-                            </span>
-                        </li>
-                        <li>
-                            <span className="cocorico-dark-grey">
-                                {result.blank} votes 'blanc'
-                            </span>
-                        </li>
-                    </ul>
-                </Col>
-            </Row>
+            <div>
+                <Row>
+                    <Col md={12}>
+                        <ul className="list-unstyled list-inline">
+                            <li>
+                                {result.yes + result.no + result.blank} votes
+                            </li>
+                            <li>
+                                <span className="cocorico-blue">
+                                    {result.yes} votes 'pour'
+                                </span>
+                            </li>
+                            <li>
+                                <span className="cocorico-red">
+                                    {result.no} votes 'contre'
+                                </span>
+                            </li>
+                            <li>
+                                <span className="cocorico-dark-grey">
+                                    {result.blank} votes 'blanc'
+                                </span>
+                            </li>
+                        </ul>
+                    </Col>
+                    <Col md={12}>
+                        <VoteResultPieChart result={result}/>
+                    </Col>
+                    <Col md={12}>
+                        {resultPerDate
+                            ? <VoteResultPerDateLineChart result={resultPerDate}/>
+                            : <div/>}
+                    </Col>
+                </Row>
+            </div>
         );
     },
 
