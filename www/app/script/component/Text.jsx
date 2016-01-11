@@ -179,9 +179,9 @@ var Text = React.createClass({
                         </div>
                         : <div/>}
 
-                        {text.status == 'published'
-                            ? <VoteResult textId={text.id}/>
-                            : <div/>}
+                    {text.status == 'published'
+                        ? <VoteResult textId={text.id}/>
+                        : <div/>}
                 </div>
             </ReactDocumentTitle>
 		);
