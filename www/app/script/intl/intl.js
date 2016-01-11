@@ -76,6 +76,8 @@ var Intl = {
 			UNVOTE: 'retirer mon vote',
 			ALREADY_VOTED: 'Vous avez voté \'{ value }\' le { date }.',
 			TOO_LATE_TO_VOTE: 'Vous ne pouvez plus voter pour ce texte.',
+			TOO_LATE_TO_REVIEW: 'Vous ne pouvez plus faire de propositions pour ce texte.',
+			TOO_LATE_TO_DEBATE: 'Vous ne pouvez plus débattre de ce texte.',
 			LOGIN_REQUIRED: 'Vous devez être connecté pour voter.',
 			ADDITIONAL_DATA: 'Données Additionnelles',
 			YOUR_VOTE: 'Votre Vote',

@@ -88,6 +88,15 @@ var Footer = React.createClass({
 
 		return (
             <Grid className="argument-tab">
+                {!this.props.editable
+                    ? <Row>
+                        <Col md={12}>
+                            <p className="hint">
+                                {this.getIntlMessage('text.TOO_LATE_TO_DEBATE')}
+                            </p>
+                        </Col>
+                    </Row>
+                    : <div/>}
                 {this.props.editable && !this.isAuthenticated()
                     ? <Row>
                         <Col md={12}>

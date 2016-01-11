@@ -166,7 +166,11 @@ var SourceTab = React.createClass({
                                         {this.getIntlMessage('text.ADD_SOURCE_BUTTON')}
                                     </Button>}
                         </Col>
-                        : <div/>}
+                        : <Col md={12}>
+                            <p className="hint">
+                                {this.getIntlMessage('text.TOO_LATE_TO_REVIEW')}
+                            </p>
+                        </Col>}
                 </Row>
             </Grid>
 		);
