@@ -8,7 +8,8 @@ var VoteStore = require('../store/VoteStore');
 var VoteAction = require('../action/VoteAction');
 
 var VoteResultPieChart = require('./VoteResultPieChart'),
-    VoteResultPerDateLineChart = require('./VoteResultPerDateLineChart');
+    VoteResultPerDateLineChart = require('./VoteResultPerDateLineChart'),
+    VoteResultPerGenderBarChart = require('./VoteResultPerGenderBarChart');
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -37,6 +38,10 @@ module.exports = React.createClass({
 
         var resultPerDate = this.state.votes
             ? this.state.votes.getVoteResultPerDateByTextId(this.props.textId)
+            : null;
+
+        var resultPerGender = this.state.votes
+            ? this.state.votes.getVoteResultPerGenderByTextId(this.props.textId)
             : null;
 
         if (!result)
@@ -73,15 +78,28 @@ module.exports = React.createClass({
                             </li>
                         </ul>
                     </Col>
-                    <Col md={12}>
-                        <VoteResultPieChart result={result}/>
-                    </Col>
-                    <Col md={12}>
-                        {resultPerDate
-                            ? <VoteResultPerDateLineChart result={resultPerDate}/>
-                            : <div/>}
-                    </Col>
                 </Row>
+                {result
+                    ? <Row>
+                        <Col md={12}>
+                            <VoteResultPieChart result={result}/>
+                        </Col>
+                    </Row>
+                    : <div/>}
+                {resultPerDate
+                    ? <Row>
+                        <Col md={12}>
+                            <VoteResultPerDateLineChart result={resultPerDate}/>
+                        </Col>
+                    </Row>
+                    : <div/>}
+                {resultPerGender
+                    ? <Row>
+                        <Col md={12}>
+                            <VoteResultPerGenderBarChart result={resultPerGender}/>
+                        </Col>
+                    </Row>
+                    : <div/>}
             </div>
         );
     },

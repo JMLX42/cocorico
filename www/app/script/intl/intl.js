@@ -73,6 +73,8 @@ var Intl = {
 			VOTE_BLANK: 'blanc',
 			VOTE_NO: 'contre',
 			VOTE: 'je vote { value }',
+			VOTER_GENDER_MALE: 'homme',
+			VOTER_GENDER_FEMALE: 'femme',
 			UNVOTE: 'retirer mon vote',
 			ALREADY_VOTED: 'Vous avez voté \'{ value }\' le { date }.',
 			TOO_LATE_TO_VOTE: 'Vous ne pouvez plus voter pour ce texte.',

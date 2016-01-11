@@ -45,6 +45,12 @@ module.exports = React.createClass({
                 }
         }
 
+
+        dates.sort().reverse();
+        dates = [dates[0], dates[dates.length - 1]];
+        dates[1].setDate(dates[1].getDate() + 2);
+
+        dateFields.push(dates[1]);
         dateFields.sort();
 
         for (var ballotValue in result)

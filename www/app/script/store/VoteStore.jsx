@@ -30,6 +30,14 @@ module.exports = Reflux.createStore({
         return null;
     },
 
+    getVoteResultPerGenderByTextId: function(textId)
+    {
+        if (this._resultPerGender[textId] && this._resultPerGender[textId] !== true)
+            return this._resultPerGender[textId];
+
+        return null;
+    },
+
     _showTextVoteResultHandler: function(textId)
     {
         this._fetchVoteResult(textId, this._result, '/api/vote/result/');
