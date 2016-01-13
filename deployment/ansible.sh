@@ -36,9 +36,10 @@ if [ ! -x /usr/bin/ansible-playbook ]; then
     export DEBIAN_FRONTEND=noninteractive
     apt-get update -qq
     apt-get install -qq -y software-properties-common apt-transport-https
-    apt-add-repository ppa:ansible/ansible
+    apt-add-repository ppa:fkrull/deadsnakes-python2.7
     apt-get update -qq
-    apt-get install -qq -y ansible
+    apt-get install -qq -y python2.7 python-pip
+    pip install ansible==1.9.4
 fi
 
 # Mark inventory scripts as executable (otherwise Ansible treats them differently).
