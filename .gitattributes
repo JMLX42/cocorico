@@ -1,0 +1,3 @@
+*.conf text eol=lf
+*.j2 text eol=lf
+*.sh text eol=lf
