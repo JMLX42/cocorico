@@ -21,7 +21,7 @@
 
 - name: update node
   npm: name=n global=yes
-  shell: n stable
+- shell: n stable
 
 - name: fix node binary name
   command: update-alternatives --install /usr/bin/node node /usr/bin/nodejs 10
