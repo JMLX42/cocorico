@@ -1,6 +1,5 @@
 #!/usr/bin/env headstone
-
-require('dotenv').load();
+var config = require('/etc/cocorico.json');
 
 var async = require('async');
 var keystone = require('keystone');
@@ -74,7 +73,7 @@ function savePage(slug, next)
 
             process.stdout.write('done\n');
 
-            var uriRegex = new RegExp("\/" + process.env.UPLOAD_DIR + "\/([^\.]*)\.");
+            var uriRegex = new RegExp("\/" + config.uploadDir + "\/([^\.]*)\.");
             var imgRegEx = page.contentType == 'HTML'
                 ? new RegExp(/<img\s[^>]*?src\s*=\s*['\"]([^'\"]*?)['\"][^>]*?>/g)
                 : new RegExp(/(!\[.*?\]\()(.+?)(\))/g);
@@ -154,7 +153,7 @@ function savePage(slug, next)
 module.exports = function(slugs, done)
 {
     if (!slugs)
-        slugs = process.env.SAVED_PAGES;
+        slugs = config.savedPages;
     slugs = slugs.split(',');
 
     var ops = [];

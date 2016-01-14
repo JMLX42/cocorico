@@ -1,10 +1,13 @@
 # Args:
 
-- name: install nodesource key
-  apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
+# - name: install nodesource key
+#   apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
+#
+# - name: install nodesource repository
+#   apt_repository: repo='deb https://deb.nodesource.com/node_0.12 trusty main' state=present
 
-- name: install nodesource repository
-  apt_repository: repo='deb https://deb.nodesource.com/node_0.12 trusty main' state=present
+- name: install node ppa
+  shell: curl --silent --location https://deb.nodesource.com/setup_4.x | sudo bash -
 
 - name: install node
   apt: name={{ item }} state=present
@@ -12,6 +15,13 @@
     - nodejs
     - jq
     - build-essential
+
+- name: update npm
+  npm: name=npm global=yes
+
+- name: update node
+  npm: name=n global=yes
+  shell: n stable
 
 - name: fix node binary name
   command: update-alternatives --install /usr/bin/node node /usr/bin/nodejs 10
