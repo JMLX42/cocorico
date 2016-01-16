@@ -84,7 +84,7 @@ module AutoConfigure
         override.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
       end
 
-      config.vm.synced_folder ".", "/vagrant"
+      config.vm.synced_folder ".", "/vagrant"#, owner: "www-data", group: "www-data"#, :mount_options => ["dmode=775,fmode=664"]
 
       config.vm.provision "shell", inline: "echo 'VM private network: #{params["hosts"][0]} #{params["vars"]["hostname"]}'"
 

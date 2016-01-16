@@ -1,4 +1,4 @@
-var config = require('/etc/cocorico.json');
+var config = require('/opt/cocorico/cocorico.json');
 var keystone = require('keystone');
 
 keystone.init({

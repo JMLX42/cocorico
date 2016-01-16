@@ -1,6 +1,6 @@
 var keystone = require('keystone');
 var transform = require('model-transform');
-var config = require('/etc/cocorico.json');
+var config = require('/opt/cocorico/cocorico.json');
 var Types = keystone.Field.Types;
 
 var Media = new keystone.List('Media', {

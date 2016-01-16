@@ -5,7 +5,7 @@ var User = keystone.list('User');
 var OpenIDConnectStrategy = require('passport-openidconnect').Strategy;
 var passportAuthenticateWithCUstomClaims = require('../../helpers/PassportAuthenticateWithCustomClaims').PassportAuthenticateWithCustomClaims;
 
-var config = require('/etc/cocorico.json');
+var config = require('/opt/cocorico/cocorico.json');
 
 passport.serializeUser(function(user, done)
 {

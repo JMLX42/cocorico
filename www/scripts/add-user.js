@@ -1,6 +1,6 @@
-var config = require('/etc/cocorico.json');
-var keystone = require("../keystone");
-var User = keystone.list("User");
+var config = require('/opt/cocorico/cocorico.json');
+var keystone = require('keystone');
+var User = keystone.list('User');
 
 module.exports = function(userEmail, userPassword, userIsAdmin, userName, done)
 {

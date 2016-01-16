@@ -1,5 +1,5 @@
 #!/usr/bin/env headstone
-var config = require('/etc/cocorico.json');
+var config = require('/opt/cocorico/cocorico.json');
 
 var async = require('async');
 var keystone = require('keystone');
@@ -152,9 +152,10 @@ function savePage(slug, next)
 
 module.exports = function(slugs, done)
 {
-    if (!slugs)
+    if (slugs)
+        slugs = slugs.split(',');
+    else
         slugs = config.savedPages;
-    slugs = slugs.split(',');
 
     var ops = [];
     for (var slug of slugs)
