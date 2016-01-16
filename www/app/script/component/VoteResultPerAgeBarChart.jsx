@@ -14,7 +14,7 @@ module.exports = React.createClass({
     getDefaultProps: function(props)
     {
         return {
-            width   : 550,
+            width   : 950,
             height  : 300
         }
     },
@@ -37,21 +37,24 @@ module.exports = React.createClass({
         };
 
         var result = this.props.result;
-        var genderLabel = {
-            male    : this.getIntlMessage('text.VOTER_GENDER_MALE'),
-            female  : this.getIntlMessage('text.VOTER_GENDER_FEMALE')
-        };
         var data = [];
 
-        for (var ballotValue in result)
+        for (var ballotValue in color)
         {
             var values = [];
 
-            for (var gender in result[ballotValue])
-                values.push({
-                    x : genderLabel[gender],
-                    y : result[ballotValue][gender]
-                });
+            for (var i = 0; i <= 100; ++i)
+            {
+                var voterAge = i.toString();
+
+                if (voterAge in result)
+                {
+                    values.push({
+                        x : voterAge,
+                        y : result[voterAge][ballotValue]
+                    });
+                }
+            }
 
             data.push({label : ballotValue, values : values});
         }
@@ -63,9 +66,7 @@ module.exports = React.createClass({
                height={this.props.height}
                margin={{top: 10, bottom: 50, left: 50, right: 20}}
                colorScale={(e)=>color[e]}
-               yAxis={{
-                   tickFormat   : d3.format("d")
-               }}
+               yAxis={{tickFormat : d3.format("d")}}
             />
         );
     }

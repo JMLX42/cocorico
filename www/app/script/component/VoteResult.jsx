@@ -9,7 +9,8 @@ var VoteAction = require('../action/VoteAction');
 
 var VoteResultPieChart = require('./VoteResultPieChart'),
     VoteResultPerDateLineChart = require('./VoteResultPerDateLineChart'),
-    VoteResultPerGenderBarChart = require('./VoteResultPerGenderBarChart');
+    VoteResultPerGenderBarChart = require('./VoteResultPerGenderBarChart'),
+    VoteResultPerAgeBarChart = require('./VoteResultPerAgeBarChart');
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -42,6 +43,10 @@ module.exports = React.createClass({
 
         var resultPerGender = this.state.votes
             ? this.state.votes.getVoteResultPerGenderByTextId(this.props.textId)
+            : null;
+
+        var resultPerAge = this.state.votes
+            ? this.state.votes.getVoteResultPerAgeByTextId(this.props.textId)
             : null;
 
         if (!result)
@@ -97,6 +102,13 @@ module.exports = React.createClass({
                     ? <Row>
                         <Col md={12}>
                             <VoteResultPerGenderBarChart result={resultPerGender}/>
+                        </Col>
+                    </Row>
+                    : <div/>}
+                {resultPerAge
+                    ? <Row>
+                        <Col md={12}>
+                            <VoteResultPerAgeBarChart result={resultPerAge}/>
                         </Col>
                     </Row>
                     : <div/>}

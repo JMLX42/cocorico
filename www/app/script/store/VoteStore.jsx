@@ -38,6 +38,14 @@ module.exports = Reflux.createStore({
         return null;
     },
 
+    getVoteResultPerAgeByTextId: function(textId)
+    {
+        if (this._resultPerAge[textId] && this._resultPerAge[textId] !== true)
+            return this._resultPerAge[textId];
+
+        return null;
+    },
+
     _showTextVoteResultHandler: function(textId)
     {
         this._fetchVoteResult(textId, this._result, '/api/vote/result/');

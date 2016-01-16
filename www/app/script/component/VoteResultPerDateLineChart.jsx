@@ -11,6 +11,14 @@ module.exports = React.createClass({
         ReactIntl.IntlMixin
     ],
 
+    getDefaultProps: function(props)
+    {
+        return {
+            width   : 580,
+            height  : 300
+        }
+    },
+
     shouldComponentUpdate: function(newProps)
     {
         for (var date in newProps.result)
@@ -72,8 +80,8 @@ module.exports = React.createClass({
         return (
             <LineChart
                data={data}
-               width={650}
-               height={300}
+               width={this.props.width}
+               height={this.props.height}
                margin={{top: 10, bottom: 50, left: 50, right: 20}}
                colorScale={(e)=>color[e]}
                xScale={xScale}
