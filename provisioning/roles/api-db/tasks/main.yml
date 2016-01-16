@@ -1,0 +1,12 @@
+- set_fact: role_name=api-db
+
+- name: install mongodb
+  apt: name={{ item }} state=present
+  with_items:
+    - mongodb
+
+- name: open mongodb to external services
+  lineinfile: dest=/etc/mongodb.conf regexp=^bind_ip line="bind_ip = 0.0.0.0"
+  when: is_development_environment
+  notify:
+    - restart mongodb service

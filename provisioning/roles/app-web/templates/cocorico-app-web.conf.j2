@@ -1,0 +1,14 @@
+<Directory "{{ www_dir }}">
+    Options FollowSymLinks
+
+    RewriteEngine On
+    RewriteBase /
+
+    RewriteRule ^$ app-web/index.html [L,QSA]
+
+    RewriteCond  %{DOCUMENT_ROOT}/app-web/$1 -f
+    RewriteRule  ^(.*)$ /app-web/$1 [L,QSA]
+
+    RewriteCond  %{REQUEST_URI} !^/app-web
+    RewriteRule  ^(.*)$ /app-web/index.html [L,QSA]
+</Directory>

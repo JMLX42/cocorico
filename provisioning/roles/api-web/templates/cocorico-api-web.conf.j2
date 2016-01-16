@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+
+ProxyRequests       Off
+ProxyPreserveHost   On
+
+ProxyPass           /api/ http://127.0.0.1:3000/
+ProxyPassReverse    /api/ http://127.0.0.1:3000/
+
+ProxyPass           /keystone http://127.0.0.1:3000/keystone
+ProxyPassReverse    /keystone http://127.0.0.1:3000/keystone

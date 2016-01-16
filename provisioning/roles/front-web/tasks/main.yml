@@ -42,12 +42,12 @@
   when: environment_name == 'staging'
 
 - name: install site configuration
-  template: src={{ role_name }}.conf.j2 dest=/etc/apache2/sites-available/{{ role_name }}.conf
+  template: src={{ project_name }}-{{ role_name }}.conf.j2 dest=/etc/apache2/sites-available/{{ project_name }}-{{ role_name }}.conf
   notify:
     - restart apache2 service
 
 - name: enable site
-  file: src=/etc/apache2/sites-available/{{ role_name }}.conf dest=/etc/apache2/sites-enabled/{{ role_name }}.conf state=link
+  file: src=/etc/apache2/sites-available/{{ project_name }}-{{ role_name }}.conf dest=/etc/apache2/sites-enabled/{{ project_name }}-{{ role_name }}.conf state=link
   notify:
     - restart apache2 service
 
@@ -56,11 +56,14 @@
   notify:
     - restart apache2 service
 
+- name: delete default html files
+  file: path=/var/www/html state=absent
+
 - name: create ssl directory
   file: path=/etc/apache2/ssl state=directory
 
 - name: create include directory
-  file: path=/etc/apache2/sites-available/{{ role_name }}-include state=directory
+  file: path=/etc/apache2/sites-available/{{ project_name}}-{{ role_name }}-include state=directory
 
 # - name: copy ca certificate
 #   copy: src={{ item }} dest=/etc/apache2/ssl/{{ item }}
@@ -94,6 +97,3 @@
 
 - name: set global server name
   lineinfile: dest=/etc/apache2/apache2.conf line='ServerName localhost'
-
-- name: start apache2 service
-  service: name=apache2 state=started enabled=yes

@@ -55,3 +55,6 @@
 
 - name: create download directory
   file: path={{ download_dir }} state=directory
+
+- name: create project directory
+  file: path={{ project_dir }} state=directory

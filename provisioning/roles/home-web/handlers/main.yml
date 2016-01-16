@@ -1,6 +1,0 @@
----
-- name: restart home-web service
-  service: name=home-web state=restarted
-
-- name: restart apache2 server
-  service: name=apache2 state=restarted

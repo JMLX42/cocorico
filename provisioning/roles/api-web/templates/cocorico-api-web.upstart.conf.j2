@@ -1,0 +1,30 @@
+description "{{ role_name }}"
+
+{% if is_development_environment %}
+start on vagrant-mounted
+{% else %}
+start on startup
+{% endif %}
+stop on shutdown
+
+expect fork
+respawn
+
+env NODE_ENV={{ environment_name }}
+env NODE_PATH="{{ cocorico_api_dir }}/node_modules:/usr/lib/node_modules"
+
+{% if is_development_environment %}
+env NODE_TLS_REJECT_UNAUTHORIZED=0
+{% endif %}
+
+chdir "{{ cocorico_api_dir }}"
+
+script
+    exec forever --pidFile /var/run/{{ project_name }}-{{ role_name }}.pid start --sourceDir {{ cocorico_api_dir }} --workingDir {{ cocorico_api_dir }} keystone.js
+end script
+
+pre-stop script
+    rm /var/run/{{ project_name }}-{{ role_name }}.pid
+
+    exec forever stop {{ cocorico_api_dir }}/keystone.js
+end script

@@ -1,0 +1,32 @@
+{
+  "name": "cocorico-api",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "keystone": "^0.3.13",
+    "model-transform": "^1.1.0",
+    "request": "^2.60.0",
+    "store-prototype": "^1.1.1",
+    "underscore": "^1.8.3",
+    "passport": "0.2.2",
+    "oauth": "~0.9.12",
+    "passport": "~0.2.1",
+    "passport-oauth": "^1.0.0",
+    "passport-openidconnect": "0.0.1",
+    "lodash": "~2.4.1",
+    "client-sessions": "0.7.0",
+    "bcrypt": "0.8.5",
+    "async": "1.5.2",
+    "redis": "2.4.2",
+    "node-metainspector": "1.2.0",
+    "json-stable-stringify": "1.0.0"
+  },
+  "engines": {
+    "node": ">=0.10.22",
+    "npm": ">=1.3.14"
+  },
+  "scripts": {
+    "start": "nodemon -w models -w routes -w templates -w helpers -w keystone.js -w config -d 2 keystone.js"
+  },
+  "main": "keystone.js"
+}
