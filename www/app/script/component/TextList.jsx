@@ -33,7 +33,7 @@ var TextList = React.createClass({
                         ? <li>{this.getIntlMessage('page.myTexts.NO_TEXT')}</li>
                         : filteredTexts.map((text) => {
                             return (
-                                <li>
+                                <li key={text.id}>
                                     <TextLink text={text}/>
                                     {this.props.editable
                                         ? <Link to={this.getIntlMessage('route.EDIT_TEXT') + '/' + text.id + '/' + text.slug} className="pull-right">Modifier</Link>

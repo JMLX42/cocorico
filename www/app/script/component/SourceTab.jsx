@@ -63,7 +63,7 @@ var SourceTab = React.createClass({
         return (
             <ul className="source-list">
                 {sources.sort((a, b)=> b.score - a.score).map((source) => {
-                    return <li className="source-item">
+                    return <li className="source-item" key={source.url}>
                         <a href={source.url} target="_blank">
                             {source.title ? source.title : source.url}
                         </a>
