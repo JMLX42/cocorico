@@ -112,19 +112,18 @@ exports.resultPerAge = function(req, res)
                     if (err)
                         return res.apiError('database error', err);
 
-                    var result = {
-                        yes     : {},
-                        no      : {},
-                        blank   : {}
-                    };
-
+                    var result = {};
                     for (var ballot of ballots)
                         if (ballot.voterAge)
                         {
-                            if (!(ballot.voterAge in result[ballot.value]))
-                                result[ballot.value][ballot.voterAge] = 1;
-                            else
-                                result[ballot.value][ballot.voterAge] += 1;
+                            if (!(ballot.voterAge in result))
+                                result[ballot.voterAge] = {
+                                    yes     : 0,
+                                    no      : 0,
+                                    blank   : 0
+                                };
+
+                            result[ballot.voterAge][ballot.value] += 1;
                         }
 
                     res.apiResponse({result : result});
