@@ -15,7 +15,7 @@ var AccountDropdown = React.createClass({
     render: function()
     {
 		return (
-            <DropdownButton title={this.props.fullName} className="account-dropdown">
+            <DropdownButton title={this.props.fullName} className="account-dropdown" id="account-dropdown">
                 <MenuItem eventKey="1" href="/auth/logout">
                     {this.getIntlMessage('login.SIGN_OUT')}
                 </MenuItem>

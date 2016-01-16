@@ -52,13 +52,13 @@ var Header = React.createClass({
                                 </Link>
                             </div>
                         </NavbarBrand>
-                        <Navbar.Toggle/>                        
+                        <Navbar.Toggle/>
                     </Navbar.Header>
                     <Navbar.Collapse>
                         <Nav>
                             {!this.state.pages ? '' : this.state.pages.navBar().map(function(page) {
                                 return (
-                                    <li>
+                                    <li key={page.slug}>
                                         <Link to={'/' + page.slug} activeClassName="active">
                                             {page.title}
                                         </Link>

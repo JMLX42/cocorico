@@ -31,7 +31,7 @@ var TextStatusSelect = React.createClass({
                     value={this.props.text.status}>
                 {Object.keys(this.options).map((key) => {
                     return (
-                        <option value={key}>
+                        <option value={key} key={key}>
                             {this.options[key]}
                         </option>
                     );

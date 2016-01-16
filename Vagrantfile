@@ -8,7 +8,7 @@ Vagrant.autoconfigure({
   "local" => {
     "hosts" => ["192.168.50.42"],
     "vars" => {
-      "hostname" => "cocorico.cc"
+      "hostname" => "cocorico.cc.test"
     },
     "memory" => 4096,
     "skip_tags" => []

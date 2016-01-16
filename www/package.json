@@ -11,7 +11,6 @@
     "browserify-middleware": "^7.0.0",
     "browserify-incremental": "3.0.1",
     "keystone": "^0.3.13",
-    "dotenv": "1.2.0",
     "model-transform": "^1.1.0",
     "react": "0.14.6",
     "react-bootstrap": "0.28.2",
@@ -51,8 +50,8 @@
   },
   "scripts": {
     "start": "nodemon -w models -w routes -w templates -w helpers -w keystone.js -w config -d 2 keystone.js",
-    "build-app": "browserify -t babelify -t node-lessify --extension=.jsx app/script/index.js -o public/js/app.js",
-    "watch-app": "watchify -v -t babelify -t node-lessify --extension=.jsx app/script/index.js --poll=5000 -o public/js/app.js"
+    "build-app": "browserify -v -t babelify -t node-lessify --extension=.jsx app/script/index.js -o public/app.js",
+    "watch-app": "watchify -v -t babelify -t node-lessify --extension=.jsx app/script/index.js --poll=5000 -o public/app.js"
   },
   "overrides": {
     "react": {

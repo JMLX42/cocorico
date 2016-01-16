@@ -88,19 +88,14 @@ var Text = React.createClass({
             ? this.state.texts.getById(this.props.textId)
             : null;
 
-        if (!text)
-            return null;
-
         return (
             <Grid className="text-editor">
                 <Row>
                     <Col md={12}>
                         <h2>{this.getIntlMessage('textEditor.TITLE')}</h2>
-                        <Input type="texte" name="title" value={this.state.title}
+                        <Input type="text" name="title" value={this.state.title}
                                onChange={this.handleTitleChange}
-                               enabled={this.props.textId && text}
                                placeholder={this.getIntlMessage('textEditor.TITLE_PLACEHOLDER')}>
-                            {!!text ? text.title : ''}
                         </Input>
                     </Col>
                 </Row>
@@ -109,9 +104,7 @@ var Text = React.createClass({
                         <h2>{this.getIntlMessage('textEditor.CONTENT')}</h2>
                         <Input type="textarea" name="content" className="text-content"
                                value={this.state.content} onChange={this.handleContentChange}
-                               enabled={this.props.textId && text}
                                placeholder={this.getIntlMessage('textEditor.CONTENT_PLACEHOLDER')}>
-                            {!!text ? text.content.md : ''}
                         </Input>
                     </Col>
                 </Row>
@@ -121,11 +114,13 @@ var Text = React.createClass({
                             <Button bsSize="large" bsStyle="primary" onClick={this.handleClick}>
                                 {this.getIntlMessage('textEditor.BUTTON_SAVE')}
                             </Button>
-                            <Link to={this.getIntlMessage('route.VIEW_TEXT') + '/' + text.id + '/' + text.slug}>
-                                <Button bsSize="large" bsStyle="link">
-                                    {this.getIntlMessage('textEditor.BUTTON_VIEW')}
-                                </Button>
-                            </Link>
+                            {!!text
+                                ? <Link to={this.getIntlMessage('route.VIEW_TEXT') + '/' + text.id + '/' + text.slug}>
+                                    <Button bsSize="large" bsStyle="link">
+                                        {this.getIntlMessage('textEditor.BUTTON_VIEW')}
+                                    </Button>
+                                </Link>
+                                : <div/>}
                         </ButtonToolbar>
                     </Col>
                 </Row>

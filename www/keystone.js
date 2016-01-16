@@ -1,5 +1,4 @@
-require('dotenv').load();
-
+var config = require('/opt/cocorico/cocorico.json');
 var keystone = require('keystone');
 
 keystone.init({
@@ -17,7 +16,7 @@ keystone.init({
 	'wysiwyg menubar': true,
 	'wysiwyg additional plugins': 'table',
 
-	'mongo' : process.env.MONGO_URI,
+	'mongo' : config.mongo.uri,
 
 	'auto update': true,
 	'session': true,

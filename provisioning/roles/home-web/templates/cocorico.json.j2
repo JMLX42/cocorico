@@ -4,6 +4,11 @@
 {% else %}
     "env": "production",
 {% endif %}
+    "mongo" : {
+      "uri" : "mongodb://{{ home_db_private_host }}/{{ mongodb_database_name }}"
+    },
+    "savedPages" : {{ home_db_saved_pages | to_json }},
+    "uploadDir" : "{{ home_web_upload_dir }}",
     "franceConnect" : {
         "URL": "{{ franceconnect_url }}/",
         "openIDConnectStrategyParameters": {

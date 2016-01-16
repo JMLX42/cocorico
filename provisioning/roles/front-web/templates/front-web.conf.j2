@@ -23,6 +23,12 @@
     <Directory "{{ www_dir }}/home-web/">
        Options FollowSymLinks Includes
        AllowOverride All
+
+       RewriteEngine On
+       RewriteBase /
+       RewriteRule ^/([a-z]+)$ /$1/ [L,R=301]
+       RewriteCond public/%{REQUEST_FILENAME} !-f
+       RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,QSA,L]
     </Directory>
 
     #
@@ -30,7 +36,8 @@
     # Component: Website
     # Role: home-web
     #
-    ProxyPassReverse    / http://{{ home_web_private_host }}:{{ home_web_private_port }}
+    ProxyPass           / http://{{ home_web_private_host }}:{{ home_web_private_port }}/
+    ProxyPassReverse    / http://{{ home_web_private_host }}:{{ home_web_private_port }}/
 
     # Including all additional rewrite rule configurations set by roles.
     IncludeOptional     /etc/apache2/sites-available/front-web-include/*.conf
@@ -47,13 +54,6 @@
     AddOutputFilterByType DEFLATE application/rss+xml
     AddOutputFilterByType DEFLATE application/javascript
     AddOutputFilterByType DEFLATE application/x-javascript
-
-    <Files *.data>
-        SetOutputFilter DEFLATE
-    </Files>
-    <Files *.mem>
-        SetOutputFilter DEFLATE
-    </Files>
 
     #
     # Cache control

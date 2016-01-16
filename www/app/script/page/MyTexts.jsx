@@ -79,6 +79,9 @@ var MyTexts = React.createClass({
             ? this.state.texts.getCurrentUserTexts()
             : null;
 
+        if (!texts)
+          return null;
+
         var filteredTexts = {};
         for (var text of texts)
             if (filteredTexts[text.status])

@@ -214,7 +214,7 @@ exports.save = function(req, res)
 
 			if (!text)
 			{
-				updateTextSources(req.user, text, function(err)
+				updateTextSources(req.user, newText, function(err)
 				{
 					newText.author = bcrypt.hashSync(req.user.sub, 10);
 					newText.save(function(err, text)
