@@ -33,7 +33,4 @@ node_modules
 # Ignore built css files
 *.min.css
 
-public/js/app.js*
-public/js/vendor.js*
-public/css/app.css*
-config
+public/app.js
