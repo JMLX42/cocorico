@@ -60,6 +60,10 @@ var Intl = {
 
 			createText: {
 				TITLE: "Créer un nouveau texte"
+			},
+
+			editText: {
+				TITLE: "Modifier un texte"
 			}
 		},
 

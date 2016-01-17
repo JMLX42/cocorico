@@ -2,6 +2,7 @@ var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var ReactRouter = require('react-router');
 var ReactIntl = require('react-intl');
+var ReactDocumentTitle = require('react-document-title');
 var Reflux = require('reflux');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
@@ -31,17 +32,19 @@ var CreateText = React.createClass({
             return this.renderLoginPage(this.getIntlMessage('login.REQUIRE_LOGIN'));
 
 		return (
-            <div className="page page-create-text">
-                <Grid>
-                    <Row>
-                        <Col md={12}>
-                            <h1>Créer un texte</h1>
-                        </Col>
-                    </Row>
-                </Grid>
+            <ReactDocumentTitle title={this.getIntlMessage('page.createText.TITLE') + ' - ' + this.getIntlMessage('site.TITLE')}>
+                <div className="page page-create-text">
+                    <Grid>
+                        <Row>
+                            <Col md={12}>
+                                <h1>{this.getIntlMessage('page.createText.TITLE')}</h1>
+                            </Col>
+                        </Row>
+                    </Grid>
 
-                <TextEditor />
-            </div>
+                    <TextEditor />
+                </div>
+            </ReactDocumentTitle>
 		);
 	}
 });
