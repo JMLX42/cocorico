@@ -4,7 +4,6 @@ var passport = require('passport');
 var importRoutes = keystone.importer(__dirname);
 
 var routes = {
-	views: importRoutes('./views'),
 	api: importRoutes('./api')
 };
 
