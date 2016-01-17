@@ -13,7 +13,7 @@ Cocorico is a democracy engine.
 
 ## Building and running
 
-All the following procedures are to be executed on the dev environment VM using SSH. To connect to the VM using SSH, use the `vagrant ssh local` in the install directory.
+All the following procedures are to be executed on the dev environment VM using SSH. To connect to the VM using SSH, use the `vagrant ssh local` command in the install directory.
 
 ### Web API
 
