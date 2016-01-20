@@ -5,7 +5,7 @@ Cocorico is a democracy engine.
 ## Install
 
 * Install [VirtualBox 4.3+](https://www.virtualbox.org/wiki/Downloads).
-* Install [Vagrant 1.7+](https://docs.vagrantup.com/v2/installation/).
+* Install [Vagrant 1.8.1+](https://docs.vagrantup.com/v2/installation/).
 * `git clone https://github.com/promethe42/cocorico.git && cd cocorico`
 * `vagrant up local` (run as admin on Windows)
 * Add `192.168.50.42 cocorico.cc.test` to your hosts file.
