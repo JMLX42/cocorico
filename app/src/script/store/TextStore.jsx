@@ -192,18 +192,16 @@ module.exports = Reflux.createStore({
 
     _updateText: function(newText)
     {
-        var updated = false;
-
         for (var texts of [this._texts, this._latest, this._currentUserTexts])
             for (var i in texts)
                 if (texts[i].id == newText.id)
                 {
-                    texts[i] = newText;
-                    updated = true;
-                    break;
+                    for (var propName in newText)
+                        texts[i][propName] = newText[propName];
+                    return true;
                 }
 
-        return updated;
+        return false;
     },
 
     _clearCache: function()

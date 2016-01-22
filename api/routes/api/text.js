@@ -205,6 +205,7 @@ exports.save = function(req, res)
 	});
 
 	Text.model.findOne(req.body.id ? {_id : req.body.id} : {slug: newText.slug})
+		.select('-likes')
 		.exec(function(err, text)
 	    {
 			if (err)
@@ -240,7 +241,9 @@ exports.save = function(req, res)
 						text.save(function(err, text)
 						{
 							if (err)
-							return res.apiError('database error', err);
+								return res.apiError('database error', err);
+
+							delete text.likes;
 
 							return res.apiResponse({
 								action: 'update',
