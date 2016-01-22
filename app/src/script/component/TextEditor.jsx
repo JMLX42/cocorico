@@ -43,28 +43,31 @@ var Text = React.createClass({
 
     componentDidMount: function()
     {
-        if (this.props.textId)
-        {
-            this.listenTo(TextStore, (store) => {
-                var text = store.getById(this.props.textId);
-                if (text && text.id == this.props.textId)
-                {
-                    this.setState({
-                        id: text.id,
-                        title: text.title,
-                        content: text.content.md
-                    });
-                }
-            });
+        this.listenTo(TextStore, (store) => {
+            var text = this.props.textId
+                ? store.getById(this.props.textId)
+                : store.getLastCreated();
 
+            if (text)
+            {
+                this.setState({
+                    id: text.id,
+                    title: text.title,
+                    content: text.content.md
+                });
+            }
+        });
+
+        if (this.props.textId)
             TextAction.show(this.props.textId);
-        }
 
         UserAction.requireLogin();
     },
 
     componentWillReceiveProps: function(props)
     {
+        if (props.textId)
+            this.setState({id : props.textId});
     },
 
     handleClick: function()
@@ -85,7 +88,7 @@ var Text = React.createClass({
     render: function()
     {
         var text = this.state && this.state.texts
-            ? this.state.texts.getById(this.props.textId)
+            ? this.state.texts.getById(this.state.id)
             : null;
 
         return (

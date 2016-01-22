@@ -15,6 +15,7 @@ module.exports = Reflux.createStore({
         this.listenTo(TextAction.like, this._likeHandler);
 
         this._clearCache();
+        this._lastCreated = null;
     },
 
     get: function()
@@ -49,6 +50,11 @@ module.exports = Reflux.createStore({
     getCurrentUserTexts: function()
     {
         return this._currentUserTexts;
+    },
+
+    getLastCreated: function()
+    {
+        return this._lastCreated;
     },
 
     _fetchLatest: function()
@@ -157,6 +163,8 @@ module.exports = Reflux.createStore({
 
     _textSaveHandler: function(id, title, content)
     {
+        this._lastCreated = null;
+
         jquery.post(
             '/api/text/save',
             {
@@ -170,6 +178,7 @@ module.exports = Reflux.createStore({
                     if (!this._currentUserTexts)
                         this._currentUserTexts = [];
                     this._currentUserTexts.push(data.text);
+                    this._lastCreated = data.text;
 
                     this._texts.push(data.text);
 
