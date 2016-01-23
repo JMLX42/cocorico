@@ -1,3 +1,4 @@
+var config = require('../config.json');
 var keystone = require('keystone');
 var passport = require('passport');
 
@@ -33,8 +34,8 @@ exports = module.exports = function(app) {
 	app.get('/auth/login', keystone.middleware.api, routes.api.auth.login);
 	app.get('/auth/logout', keystone.middleware.api, routes.api.auth.logout);
 	app.get('/auth/connectCallback', keystone.middleware.api, routes.api.auth.connectCallback);
-	// FIXME: only in dev environment
-	app.get('/auth/fakeLogin', keystone.middleware.api, routes.api.auth.fakeLogin);
+	if (config.env == 'development')
+		app.get('/auth/fakeLogin', keystone.middleware.api, routes.api.auth.fakeLogin);
 
 	app.get('/text/list', keystone.middleware.api, routes.api.text.list);
 	app.get('/text/latest', keystone.middleware.api, routes.api.text.latest);
