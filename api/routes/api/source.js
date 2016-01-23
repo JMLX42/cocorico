@@ -10,7 +10,7 @@ var TextHelper = require('../../helpers/TextHelper'),
 
 exports.list = function(req, res)
 {
-    Text.model.findOne(req.body.textId)
+    Text.model.findById(req.params.textId)
         .exec(function(err, text)
         {
             if (err)
@@ -85,7 +85,7 @@ exports.removeLike = function(req, res)
 
 exports.add = function(req, res)
 {
-    Text.model.findOne(req.body.textId)
+    Text.model.findById(req.body.textId)
         .exec(function(err, text)
         {
             if (err)

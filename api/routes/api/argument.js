@@ -10,7 +10,7 @@ var TextHelper = require('../../helpers/TextHelper'),
 
 exports.list = function(req, res)
 {
-    Text.model.findOne(req.params.textId)
+    Text.model.findById(req.params.textId)
         .exec(function(err, text)
         {
             if (err)
@@ -44,7 +44,7 @@ exports.add = function(req, res)
     var content = req.body.content;
     var value = req.body.value;
 
-    Text.model.findOne(textId)
+    Text.model.findById(textId)
         .exec(function(err, text)
         {
             if (err)
@@ -52,7 +52,7 @@ exports.add = function(req, res)
 
             if (!text)
                 return res.status(404).apiResponse();
-
+            console.log(text);
             if (!TextHelper.textIsReadable(text, req)
                 || text.status != 'debate')
     			return res.status(403).send();

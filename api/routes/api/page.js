@@ -13,9 +13,7 @@ exports.list = function(req, res)
         {
     		if (err) return res.apiError('database error', err);
 
-    		res.apiResponse({
-    			pages: items
-    		});
+    		res.apiResponse({ pages: items });
     	});
 }
 
@@ -24,17 +22,16 @@ exports.list = function(req, res)
  */
 exports.navbar = function(req, res)
 {
-	Page.model.find()
-        .where('published', true)
-        .where('showInNavBar', true)
+	Page.model.find({
+			published 		: true,
+			showInNavBar 	: true
+		})
 		.sort('sortOrder')
         .exec(function(err, items)
         {
     		if (err) return res.apiError('database error', err);
 
-    		res.apiResponse({
-    			pages: items
-    		});
+    		res.apiResponse({ pages: items });
     	});
 }
 
@@ -48,9 +45,7 @@ exports.get = function(req, res)
 		if (err) return res.apiError('database error', err);
 		if (!item) return res.apiError('not found');
 
-		res.apiResponse({
-			page: item
-		});
+		res.apiResponse({ page : item });
 	});
 }
 
@@ -59,8 +54,7 @@ exports.get = function(req, res)
  */
 exports.getBySlug = function(req, res)
 {
-	Page.model.findOne()
-		.where('slug', req.params.slug)
+	Page.model.findOne({slug : req.params.slug})
 		.exec(function(err, item)
 	    {
 			if (err)
@@ -68,6 +62,6 @@ exports.getBySlug = function(req, res)
 			if (!item)
 				return res.status(404).send();
 
-			res.apiResponse({ page: item });
+			res.apiResponse({ page : item });
 		});
 }

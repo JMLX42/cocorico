@@ -11,7 +11,7 @@ exports.resultPerDate = function(req, res)
 {
     var textId = req.params.textId;
 
-    Text.model.findOne(textId)
+    Text.model.findById(textId)
         .exec(function(err, text)
         {
             if (err)
@@ -55,7 +55,7 @@ exports.resultPerGender = function(req, res)
 {
     var textId = req.params.textId;
 
-    Text.model.findOne(textId)
+    Text.model.findById(textId)
         .exec(function(err, text)
         {
             if (err)
@@ -93,7 +93,7 @@ exports.resultPerAge = function(req, res)
 {
     var textId = req.params.textId;
 
-    Text.model.findOne(textId)
+    Text.model.findById(textId)
         .exec(function(err, text)
         {
             if (err)
@@ -135,7 +135,7 @@ exports.result = function(req, res)
 {
     var textId = req.params.textId;
 
-    Text.model.findOne(textId)
+    Text.model.findById(textId)
         .exec(function(err, text)
         {
             if (err)

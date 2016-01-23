@@ -271,7 +271,7 @@ exports.save = function(req, res)
 
 exports.status = function(req, res)
 {
-	Text.model.findOne({_id : req.params.id})
+	Text.model.findById(req.params.id)
 		.exec(function(err, text)
 	    {
 			if (err)
@@ -293,33 +293,6 @@ exports.status = function(req, res)
 				});
 			});
 		});
-}
-
-exports.listArguments = function(req, res)
-{
-	Arguments.model.find({_id : req.params.id})
-		.exec(function(err, arguments)
-		{
-			if (err)
-				return res.apiError('database error', err);
-
-			res.apiResponse({ arguments: arguments });
-		});
-}
-
-exports.addArgument = function(req, res)
-{
-	var newArgument = Argument.model({
-		title: req.body.title,
-		content: req.body.content,
-		text: req.body.textId,
-		author: bcrypt.hashSync(req.user.sub, 10)
-	});
-
-	newArgument.save(function(err)
-	{
-		return res.apiResponse({ argument: newArgument });
-	});
 }
 
 exports.addLike = function(req, res)
