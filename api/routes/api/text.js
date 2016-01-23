@@ -281,6 +281,9 @@ exports.status = function(req, res)
 			if (!bcrypt.compareSync(req.user.sub, text.author))
 				return res.status(403).send();
 
+			if (req.params.status == 'published' && text.status != 'published')
+				text.publishedAt = Date.now();
+
 			text.status = req.params.status;
 			text.save(function(err)
 			{
