@@ -13,3 +13,6 @@ home_db_private_port: 27017
 
 cocorico_api_dir: /vagrant/api
 cocorico_app_dir: /vagrant/app
+
+ethereum_etherbase_password: "test"
+ethereum_network_id: 424242
