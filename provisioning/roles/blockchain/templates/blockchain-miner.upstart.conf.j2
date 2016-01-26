@@ -11,5 +11,5 @@ respawn
 respawn limit 10 5
 
 script
-    exec geth --mine --genesis_block {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}"
+    exec geth --mine --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}"
 end script
