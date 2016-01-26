@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+
+ProxyRequests       Off
+ProxyPreserveHost   On
+
+ProxyPass           /blockchain/ http://{{ ethereum_rpc_host }}:{{ ethereum_rpc_port }}/
+ProxyPassReverse    /blockchain/ http://{{ ethereum_rpc_host }}:{{ ethereum_rpc_port }}/

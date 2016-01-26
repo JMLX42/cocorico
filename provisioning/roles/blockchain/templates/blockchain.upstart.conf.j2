@@ -11,5 +11,5 @@ respawn
 respawn limit 10 5
 
 script
-    exec geth --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}"
+    exec geth --rpc --rpccorsdomain "http://{{ ethereum_rpc_host }}:{{ ethereum_rpc_port }}" --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}"
 end script

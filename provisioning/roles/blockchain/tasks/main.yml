@@ -34,7 +34,22 @@
   when: ethereum_password_file.changed
 
 - name: install upstart script
-  template: src=blockchain.upstart.conf.j2 dest=/etc/init/blockchain.conf
+  template: src=blockchain.upstart.conf.j2 dest=/etc/init/cocorico-blockchain.conf
 
 - name: install miner upstart script
-  template: src=blockchain-miner.upstart.conf.j2 dest=/etc/init/blockchain-miner.conf
+  template: src=blockchain-miner.upstart.conf.j2 dest=/etc/init/cocorico-blockchain-miner.conf
+
+- name: compile all contracts
+  shell: solc /vagrant/contract/contract.sol --combined-json abi,bin > {{ project_dir}}/{{ role_name }}/contract.json
+  register: result
+  failed_when: result.stderr
+  args:
+    creates: "{{ project_dir}}/{{ role_name }}/contract.json"
+
+- name: start the ethereum blockchain service
+  service: name=blockchain state=started
+
+- name: install apache configuration
+  template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
+  notify:
+    - restart apache2 service
