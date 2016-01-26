@@ -24,7 +24,12 @@
     "reflux": "0.3.0",
     "jquery": "2.1.4",
     "node-lessify": "0.1.1",
-    "d3": "^3.5.3"
+    "d3": "^3.5.3",
+    "web3": "0.15.1",
+    "ethereumjs-accounts": "0.0.15",
+    "hooked-web3-provider": "1.0.0",
+    "qrcode-npm": "0.0.3",
+    "qrcode-reader": "0.1.0"
   },
   "engines": {
     "node": ">=0.10.22",

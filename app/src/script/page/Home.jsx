@@ -13,7 +13,8 @@ var TextAction = require("../action/TextAction");
 
 var TextList = require("../component/TextList"),
     Page = require("../component/Page"),
-    PageTitle = require("../component/PageTitle");
+    PageTitle = require("../component/PageTitle"),
+    BlockchainAccount = require("../component/BlockchainAccount");
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -39,6 +40,11 @@ var Home = React.createClass({
 		return (
             <div className="page-home">
                 <Grid>
+                    <Row>
+                        <Col md={12}>
+                            <BlockchainAccount/>
+                        </Col>
+                    </Row>
                     <Row>
                         <Col md={12}>
                             <Page slug="accueil" setDocumentTitle={true} hideContent={this.isAuthenticated()}/>
