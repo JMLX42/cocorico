@@ -1,6 +1,9 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var Reflux = require('reflux');
+var Web3 = require('web3');
+
+var contract = require('/opt/cocorico/blockchain/contract.json');
 
 var QRCode = require('../component/QRCode'),
     QRCodeReader = require('../component/QRCodeReader');
@@ -22,6 +25,7 @@ var BlockchainAccountTest = React.createClass({
 
     getInitialState: function()
     {
+        console.log(contract);
         return {
             scannedPrivateKey: null
         }
@@ -30,6 +34,37 @@ var BlockchainAccountTest = React.createClass({
     componentWillMount: function()
     {
         BlockchainAccountAction.create('test');
+
+        this.createGreeter();
+    },
+
+    createGreeter: function()
+    {
+        var web3 = new Web3();
+        web3.setProvider(new web3.providers.HttpProvider("http://cocorico.cc.test/blockchain/"));
+
+        var _greeting = "Hello World!"
+        var greeterContract = web3.eth.contract(eval(contract.contracts.greeter.abi));
+        console.log(web3.eth.accounts[0]);
+        var greeter = greeterContract.new(
+            _greeting,
+            {from : web3.eth.accounts[0], data : contract.contracts.greeter.bin, gas : 300000},
+            function(e, contract)
+            {
+                if (!e)
+                {
+                    if (!contract.address)
+                    {
+                        console.log("Contract transaction sent: TransactionHash: " + contract.transactionHash + " waiting to be mined...");
+                    }
+                    else
+                    {
+                        console.log("Contract mined! Address: " + contract.address);
+                        console.log(contract);
+                    }
+                }
+            }
+        );
     },
 
     render: function()
@@ -79,7 +114,9 @@ var BlockchainAccountTest = React.createClass({
                                         </Button>
                                         : <div/>}
                                 </div>
-                                : <QRCodeReader success={(r)=>this.setState({ scannedPrivateKey : r })}/>}
+                                : <div style={{border:'1px solid #999',lineHeight:0}}>
+                                    <QRCodeReader success={(r)=>this.setState({ scannedPrivateKey : r })}/>
+                                </div>}
                         </Col>
                     </Row>
                 </Grid>
