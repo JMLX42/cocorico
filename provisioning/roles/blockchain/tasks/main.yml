@@ -40,11 +40,11 @@
   template: src=blockchain-miner.upstart.conf.j2 dest=/etc/init/cocorico-blockchain-miner.conf
 
 - name: compile all contracts
-  shell: solc /vagrant/contract/contract.sol --combined-json abi,bin > {{ project_dir}}/{{ role_name }}/contract.json
+  shell: solc /vagrant/contract/{{ item }}.sol --combined-json abi,bin > {{ project_dir}}/{{ role_name }}/{{ item }}.json
   register: result
   failed_when: result.stderr
-  args:
-    creates: "{{ project_dir}}/{{ role_name }}/contract.json"
+  with_lines:
+    - find /vagrant/contract/ -name '*.sol' -exec basename {} .sol \;
 
 - name: start the ethereum blockchain service
   service: name=cocorico-blockchain state=started
