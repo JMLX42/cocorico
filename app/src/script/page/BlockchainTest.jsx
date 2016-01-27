@@ -27,7 +27,8 @@ var BlockchainAccountTest = React.createClass({
     {
         console.log(contract);
         return {
-            scannedPrivateKey: null
+            scannedPrivateKey: null,
+            doScan : false
         }
     },
 
@@ -45,7 +46,7 @@ var BlockchainAccountTest = React.createClass({
 
         var _greeting = "Hello World!"
         var greeterContract = web3.eth.contract(eval(contract.contracts.greeter.abi));
-        console.log(web3.eth.accounts[0]);
+        
         var greeter = greeterContract.new(
             _greeting,
             {from : web3.eth.accounts[0], data : contract.contracts.greeter.bin, gas : 300000},
@@ -81,7 +82,7 @@ var BlockchainAccountTest = React.createClass({
                 <Grid>
                     <Row>
                         <Col md={12}>
-                            <h1>Blockchain Account Test</h1>
+                            <h1>Blockchain Test</h1>
                         </Col>
                     </Row>
                     <Row>
@@ -114,9 +115,18 @@ var BlockchainAccountTest = React.createClass({
                                         </Button>
                                         : <div/>}
                                 </div>
-                                : <div style={{border:'1px solid #999',lineHeight:0}}>
-                                    <QRCodeReader success={(r)=>this.setState({ scannedPrivateKey : r })}/>
-                                </div>}
+                                : this.state.doScan
+                                    ? <div>
+                                        <div style={{border:'1px solid #999',lineHeight:0}}>
+                                            <QRCodeReader success={(r)=>this.setState({ scannedPrivateKey : r })}/>
+                                        </div>
+                                        <Button onClick={(e)=>this.setState({ doScan : false })} bsStyle="danger">
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                    : <Button onClick={(e)=>this.setState({ doScan : true })}>
+                                        Scan
+                                    </Button>}
                         </Col>
                     </Row>
                 </Grid>
