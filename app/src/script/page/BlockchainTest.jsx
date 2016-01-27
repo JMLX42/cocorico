@@ -27,8 +27,13 @@ var BlockchainAccountTest = React.createClass({
     {
         console.log(contract);
         return {
-            scannedPrivateKey: null,
-            doScan : false
+            scannedPrivateKey           : null,
+            doScan                      : false,
+            smartContractNode           : false,
+            smartContractStatus         : 'N/A',
+            smartContractAddress        : '',
+            smartContractReturn         : '',
+            smartContractTransaction    : ''
         }
     },
 
@@ -46,23 +51,39 @@ var BlockchainAccountTest = React.createClass({
 
         var _greeting = "Hello World!"
         var greeterContract = web3.eth.contract(eval(contract.contracts.greeter.abi));
-        
+        var connected = web3.isConnected();
+
+        this.setState({
+            smartContractStatus : 'creating',
+            smartContractNode   : connected
+        });
+
+        if (!connected)
+            return;
+
         var greeter = greeterContract.new(
             _greeting,
             {from : web3.eth.accounts[0], data : contract.contracts.greeter.bin, gas : 300000},
-            function(e, contract)
-            {
-                if (!e)
+            (error, contract) => {
+                if (!error)
                 {
                     if (!contract.address)
-                    {
-                        console.log("Contract transaction sent: TransactionHash: " + contract.transactionHash + " waiting to be mined...");
-                    }
+                        this.setState({
+                            smartContractStatus      : 'contract transaction sent',
+                            smartContractTransaction : contract.transactionHash
+                        });
                     else
                     {
-                        console.log("Contract mined! Address: " + contract.address);
-                        console.log(contract);
+                        this.setState({
+                            smartContractStatus     : 'mined',
+                            smartContractAddress    : contract.address,
+                            smartContractReturn     : greeter.greet()
+                        });
                     }
+                }
+                else
+                {
+                    console.error(error);
                 }
             }
         );
@@ -86,6 +107,11 @@ var BlockchainAccountTest = React.createClass({
                         </Col>
                     </Row>
                     <Row>
+                        <Col md={12}>
+                            <h2>Wallet</h2>
+                        </Col>
+                    </Row>
+                    <Row>
                         <Col md={6}>
                             <QRCode type={9} level="Q" text={account.private}/>
                         </Col>
@@ -95,19 +121,19 @@ var BlockchainAccountTest = React.createClass({
                     </Row>
                     <Row>
                         <Col md={12}>
-                            <h2>Your Private Key:</h2>
+                            <h3>Your Private Key:</h3>
                             <p>{account.private}</p>
-                            <h2>Your Address:</h2>
+                            <h3>Your Address:</h3>
                             <p>{account.address}</p>
                         </Col>
                     </Row>
                     <Row>
                         <Col md={6}>
-                            <h2>Scan Your Private Key:</h2>
+                            <h3>Scan Your Private Key:</h3>
                             {this.state.scannedPrivateKey
                                 ? <div>
                                     <p style={{color:this.state.scannedPrivateKey == account.private ? 'green' : 'red'}}>
-                                        Scanned private key: {this.state.scannedPrivateKey}
+                                        {this.state.scannedPrivateKey}
                                     </p>
                                     {this.state.scannedPrivateKey != account.private
                                         ? <Button onClick={(e)=>this.setState({ scannedPrivateKey : null })}>
@@ -127,6 +153,25 @@ var BlockchainAccountTest = React.createClass({
                                     : <Button onClick={(e)=>this.setState({ doScan : true })}>
                                         Scan
                                     </Button>}
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={12}>
+                            <h2>Smart Contract</h2>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={12}>
+                            <p>
+
+                            </p>
+                            <ul>
+                                <li>Connected to node: {this.state.smartContractNode ? 'true' : 'false'}</li>
+                                <li>Status: {this.state.smartContractStatus}</li>
+                                <li>Transaction: {this.state.smartContractTransaction}</li>
+                                <li>Address: {this.state.smartContractAddress}</li>
+                                <li>Return value: {this.state.smartContractReturn}</li>
+                            </ul>
                         </Col>
                     </Row>
                 </Grid>
