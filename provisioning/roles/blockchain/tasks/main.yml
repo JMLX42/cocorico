@@ -47,7 +47,7 @@
     creates: "{{ project_dir}}/{{ role_name }}/contract.json"
 
 - name: start the ethereum blockchain service
-  service: name=blockchain state=started
+  service: name=cocorico-blockchain state=started
 
 - name: install apache configuration
   template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
