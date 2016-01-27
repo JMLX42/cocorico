@@ -24,3 +24,9 @@ home_db_saved_pages:
     - manifeste
     - astuce-etape-debat
     - astuce-etape-revision
+
+ethereum_etherbase_password: "test"
+ethereum_network_id: 424242
+ethereum_rpc_private_host: 127.0.0.1
+ethereum_rpc_private_port: 8545
+ethereum_rpc_public_url: "{{ http_protocol_prefix }}://{{ front_web_public_host }}/blockchain/"

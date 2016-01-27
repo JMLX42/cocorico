@@ -58,3 +58,6 @@
   template: src={{ project_name }}-{{ role_name }}.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
   notify:
     - restart apache2 service
+
+- name: start the service
+  service: name=cocorico-api-web state=started

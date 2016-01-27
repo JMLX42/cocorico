@@ -10,7 +10,7 @@
     "savedPages" : {{ home_db_saved_pages | to_json }},
     "uploadDir" : "{{ home_web_upload_dir }}",
     "blockchain" : {
-        "httpProvider" : "http://{{ ethereum_rpc_host }}:{{ ethereum_rpc_port }}"
+        "httpProvider" : "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}"
     },
     "franceConnect" : {
         "URL": "{{ franceconnect_url }}/",
