@@ -3,7 +3,8 @@ var ReactBootstrap = require('react-bootstrap');
 var Reflux = require('reflux');
 var Web3 = require('web3');
 
-var contract = require('/opt/cocorico/blockchain/contract.json');
+var greeter = require('/opt/cocorico/blockchain/greeter.json'),
+    Ballot = require('/opt/cocorico/blockchain/Ballot.json');
 
 var QRCode = require('../component/QRCode'),
     QRCodeReader = require('../component/QRCodeReader');
@@ -15,7 +16,8 @@ var BlockchainAccountStore = require('../store/BlockchainAccountStore');
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
     Col = ReactBootstrap.Col,
-    Button = ReactBootstrap.Button;
+    Button = ReactBootstrap.Button,
+    Input = ReactBootstrap.Input;
 
 var BlockchainAccountTest = React.createClass({
 
@@ -25,15 +27,20 @@ var BlockchainAccountTest = React.createClass({
 
     getInitialState: function()
     {
-        console.log(contract);
         return {
             scannedPrivateKey           : null,
             doScan                      : false,
-            smartContractNode           : false,
-            smartContractStatus         : 'N/A',
-            smartContractAddress        : '',
-            smartContractReturn         : '',
-            smartContractTransaction    : ''
+            greeterContractNode         : false,
+            greeterContractStatus       : 'N/A',
+            greeterContractAddress      : '',
+            greeterContractReturn       : '',
+            greeterContractTransaction  : '',
+            ballotContractCreated       : false,
+            ballotContractNode          : false,
+            ballotContractStatus        : 'N/A',
+            ballotContractAddress       : '',
+            ballotContractReturn        : '',
+            ballotContractTransaction   : ''
         }
     },
 
@@ -41,43 +48,83 @@ var BlockchainAccountTest = React.createClass({
     {
         BlockchainAccountAction.create('test');
 
-        this.createGreeter();
-    },
-
-    createGreeter: function()
-    {
         var web3 = new Web3();
         web3.setProvider(new web3.providers.HttpProvider("http://cocorico.cc.test/blockchain/"));
+        this._web3 = web3;
 
-        var _greeting = "Hello World!"
-        var greeterContract = web3.eth.contract(eval(contract.contracts.greeter.abi));
+        this.createGreeter();
+        // this.createBallot();
+    },
+
+    createBallot: function()
+    {
+        var web3 = this._web3;
         var connected = web3.isConnected();
 
         this.setState({
-            smartContractStatus : 'creating',
-            smartContractNode   : connected
+            ballotContractCreated   : true,
+            ballotContractStatus    : 'creating',
+            ballotContractNode      : connected
         });
 
         if (!connected)
             return;
 
-        var greeter = greeterContract.new(
+        var ballotContract = web3.eth.contract(eval(Ballot.contracts.Ballot.abi));
+        var ballotInstance = ballotContract.new(
+            3, // num proposals
+            {from : web3.eth.accounts[0], data : Ballot.contracts.Ballot.bin, gas : 300000},
+            (error, contract) => {
+                if (!contract.address)
+                    this.setState({
+                        ballotContractStatus      : 'contract transaction sent',
+                        ballotContractTransaction : contract.transactionHash
+                    });
+                else
+                {
+                    this.setState({
+                        ballotContractStatus     : 'mined',
+                        ballotContractAddress    : contract.address
+                    });
+
+                    this.ballotInstance = ballotInstance;
+                }
+            }
+        );
+    },
+
+    createGreeter: function()
+    {
+        var web3 = this._web3;
+        var _greeting = "Hello World!"
+        var greeterContract = web3.eth.contract(eval(greeter.contracts.greeter.abi));
+        var connected = web3.isConnected();
+
+        this.setState({
+            greeterContractStatus : 'creating',
+            greeterContractNode   : connected
+        });
+
+        if (!connected)
+            return;
+
+        var greeterInstance = greeterContract.new(
             _greeting,
-            {from : web3.eth.accounts[0], data : contract.contracts.greeter.bin, gas : 300000},
+            {from : web3.eth.accounts[0], data : greeter.contracts.greeter.bin, gas : 300000},
             (error, contract) => {
                 if (!error)
                 {
                     if (!contract.address)
                         this.setState({
-                            smartContractStatus      : 'contract transaction sent',
-                            smartContractTransaction : contract.transactionHash
+                            greeterContractStatus      : 'contract transaction sent',
+                            greeterContractTransaction : contract.transactionHash
                         });
                     else
                     {
                         this.setState({
-                            smartContractStatus     : 'mined',
-                            smartContractAddress    : contract.address,
-                            smartContractReturn     : greeter.greet()
+                            greeterContractStatus     : 'mined',
+                            greeterContractAddress    : contract.address,
+                            greeterContractReturn     : greeterInstance.greet()
                         });
                     }
                 }
@@ -87,6 +134,19 @@ var BlockchainAccountTest = React.createClass({
                 }
             }
         );
+    },
+
+    vote: function(proposal)
+    {
+        var account = this.state.blockchainAccounts.getCurrentUserAccount();
+
+        this.ballotInstance.vote.sendTransaction(proposal, {from: account.address}, (err, result) => {
+            console.log(err, result);
+
+            this.ballotInstance.winningProposal.call((err, result) => {
+                console.log('wining:', err, result);
+            });
+        });
     },
 
     render: function()
@@ -162,18 +222,59 @@ var BlockchainAccountTest = React.createClass({
                     </Row>
                     <Row>
                         <Col md={12}>
-                            <p>
-
-                            </p>
+                            <h3>Greeter</h3>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={12}>
                             <ul>
-                                <li>Connected to node: {this.state.smartContractNode ? 'true' : 'false'}</li>
-                                <li>Status: {this.state.smartContractStatus}</li>
-                                <li>Transaction: {this.state.smartContractTransaction}</li>
-                                <li>Address: {this.state.smartContractAddress}</li>
-                                <li>Return value: {this.state.smartContractReturn}</li>
+                                <li>Connected to node: {this.state.greeterContractNode ? 'true' : 'false'}</li>
+                                <li>Status: {this.state.greeterContractStatus}</li>
+                                <li>Transaction: {this.state.greeterContractTransaction}</li>
+                                <li>Address: {this.state.greeterContractAddress}</li>
+                                <li>Return value: {this.state.greeterContractReturn}</li>
                             </ul>
                         </Col>
                     </Row>
+                    <Row>
+                        <Col md={12}>
+                            <h3>Ballot</h3>
+                        </Col>
+                    </Row>
+                    {this.state.ballotContractCreated
+                        ? <div>
+                            <Row>
+                                <Col md={12}>
+                                    <ul>
+                                        <li>Connected to node: {this.state.ballotContractNode ? 'true' : 'false'}</li>
+                                        <li>Status: {this.state.ballotContractStatus}</li>
+                                        <li>Transaction: {this.state.ballotContractTransaction}</li>
+                                        <li>Address: {this.state.ballotContractAddress}</li>
+                                        <li>Return value: {this.state.ballotContractReturn}</li>
+                                    </ul>
+                                </Col>
+                            </Row>
+                            {this.state.ballotContractAddress
+                                ? <Row>
+                                    <Col md={12}>
+                                        <ul className="list-inline list-unstyled">
+                                            <li><Button onClick={(e)=>this.vote(0)}>Yes</Button></li>
+                                            <li><Button onClick={(e)=>this.vote(1)}>No</Button></li>
+                                            <li><Button onClick={(e)=>this.vote(2)}>Blank</Button></li>
+                                        </ul>
+                                    </Col>
+                                </Row>
+                                : <div/>}
+                        </div>
+                        : <div>
+                            <Row>
+                                <Col md={12}>
+                                    <Button onClick={this.createBallot}>Create New Ballot</Button>
+                                    <p>or join an existing ballot:</p>
+                                    <Input type="text" placeholder="address" buttonAfter={<Button onClick={this.createBallot}>Join</Button>}/>
+                                </Col>
+                            </Row>
+                        </div>}
                 </Grid>
             </div>
 		);
