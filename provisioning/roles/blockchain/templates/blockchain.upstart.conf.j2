@@ -10,6 +10,10 @@ stop on shutdown
 respawn
 respawn limit 10 5
 
+pre-start script
+    service {{ project_name }}-blockchain-miner stop || true
+end script
+
 script
-    exec geth --rpc --rpccorsdomain "http://{{ ethereum_rpc_host }}:{{ ethereum_rpc_port }}" --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}"
+    exec geth --rpc --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}" --unlock 0 --password {{ project_dir }}/{{ role_name }}/password
 end script
