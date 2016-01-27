@@ -1,8 +1,6 @@
 var React = require('react');
 var QRCodeReader = require('qrcode-reader');
 
-var zxing = require('zxing');
-
 module.exports = React.createClass({
 
     getDefaultProps: function()
