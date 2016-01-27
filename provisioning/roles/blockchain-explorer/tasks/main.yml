@@ -1,0 +1,31 @@
+- set_fact: role_name=blockchain-explorer
+
+- name: install nodejs
+  include: ../../../tasks/install_node.yml
+
+- name: clone the git repository
+  git: repo=https://github.com/etherparty/explorer.git dest={{ project_dir }}/{{ role_name }}/explorer update=no
+
+- name: install npm packages
+  npm: path={{ project_dir }}/{{ role_name }}/explorer
+
+- name: install bower packages
+  shell: ./node_modules/bower/bin/bower install --allow-root
+  args:
+    chdir: "{{ project_dir }}/{{ role_name }}/explorer"
+  register: result
+  changed_when: result.stdout
+
+- name: update configuration
+  lineinfile: regexp="web3.setProvider" dest={{ project_dir }}/{{ role_name }}/explorer/app/app.js line="        web3.setProvider(new web3.providers.HttpProvider(\"{{ ethereum_rpc_public_url }}\"));"
+
+- name: install upstart script
+  template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
+
+- name: start the service
+  service: name={{ project_name }}-{{ role_name }} state=started
+
+- name: install apache configuration
+  template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
+  notify:
+    - restart apache2 service

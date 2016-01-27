@@ -10,4 +10,5 @@
     - { role: "app-web", tags: ["website"] }
     - { role: "api-db", tags: ["website", "database"] }
     - { role: "api-web", tags: ["website", "api"] }
-    - { role: "blockchain", tags: ["database"] }
+    - { role: "blockchain", tags: ["blockchain", "database"] }
+    - { role: "blockchain-explorer", tags: ["blockchain", "website"] }

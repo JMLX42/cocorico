@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+
+ProxyRequests       Off
+ProxyPreserveHost   On
+
+Timeout             5400
+ProxyTimeout        5400
+
+ProxyPass           /blockchain-explorer/ http://127.0.0.1:8000/
+ProxyPassReverse    /blockchain-explorer/ http://127.0.0.1:8000/
