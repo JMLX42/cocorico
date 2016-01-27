@@ -1,2 +1,3 @@
 .vagrant
 provisioning/generated/hosts.json
+*.log
