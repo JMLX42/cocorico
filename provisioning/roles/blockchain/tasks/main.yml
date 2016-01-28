@@ -1,5 +1,8 @@
 - set_fact: role_name=blockchain
 
+- name: create role directory
+  file: path={{ project_dir}}/{{ role_name }} state=directory
+
 - name: install eth-testrpc dependencies
   when: is_development_environment
   apt: name={{ item }} state=present
@@ -15,7 +18,6 @@
   apt: name=software-properties-common state=present
 
 - name: add ethereum PPAs
-  when: not is_development_environment
   apt_repository: repo={{ item }}
   with_items:
     - ppa:ethereum/ethereum
@@ -23,14 +25,11 @@
     - ppa:ethereum/ethereum-qt
 
 - name: install ethereum
-  when: not is_development_environment
   apt: name={{ item }} update_cache=yes
   with_items:
     - ethereum
     - cpp-ethereum
 
-- file: path={{ project_dir}}/{{ role_name }} state=directory
-  when: not is_development_environment
 - lineinfile: line={{ ethereum_etherbase_password }} dest={{ project_dir}}/{{ role_name }}/password mode=700 state=present create=yes
   when: not is_development_environment
   register: ethereum_password_file
@@ -59,7 +58,6 @@
   template: src=blockchain-miner.upstart.conf.j2 dest=/etc/init/cocorico-blockchain-miner.conf
 
 - name: compile all contracts
-  when: not is_development_environment
   shell: solc /vagrant/contract/{{ item }}.sol --combined-json abi,bin > {{ project_dir}}/{{ role_name }}/{{ item }}.json
   register: result
   failed_when: result.stderr
