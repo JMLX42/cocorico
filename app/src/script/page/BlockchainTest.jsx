@@ -17,7 +17,9 @@ var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
     Col = ReactBootstrap.Col,
     Button = ReactBootstrap.Button,
-    Input = ReactBootstrap.Input;
+    Input = ReactBootstrap.Input,
+    Tabs = ReactBootstrap.Tabs,
+    Tab = ReactBootstrap.Tab;
 
 var BlockchainAccountTest = React.createClass({
 
@@ -30,6 +32,8 @@ var BlockchainAccountTest = React.createClass({
         return {
             scannedPrivateKey           : null,
             doScan                      : false,
+            availableAccounts           : [],
+            createAccount               : false,
             greeterContractNode         : false,
             greeterContractStatus       : 'N/A',
             greeterContractAddress      : '',
@@ -51,6 +55,7 @@ var BlockchainAccountTest = React.createClass({
         var web3 = new Web3();
         web3.setProvider(new web3.providers.HttpProvider("http://cocorico.cc.test/blockchain/"));
         this._web3 = web3;
+        this.setState({availableAccounts:web3.eth.accounts});
 
         this.createGreeter();
         // this.createBallot();
@@ -168,113 +173,146 @@ var BlockchainAccountTest = React.createClass({
                     </Row>
                     <Row>
                         <Col md={12}>
-                            <h2>Wallet</h2>
+                            <Tabs eventKey="1">
+                                <Tab eventKey="1" title="Accounts">
+                                    <Grid>
+                                        <Row>
+                                            <Col md={12}>
+                                                <h3>Available Accounts</h3>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col md={12}>
+                                                <ul>
+                                                    {this.state.availableAccounts.map((account) => {
+                                                        return <li>{account}</li>;
+                                                    })}
+                                                </ul>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col md={12}>
+                                                <h3>New Account</h3>
+                                            </Col>
+                                        </Row>
+                                        {this.state.createAccount
+                                            ? <div>
+                                                <Row>
+                                                    <Col md={6}>
+                                                        <QRCode type={9} level="Q" text={account.private}/>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <QRCode type={9} level="Q" text={account.address}/>
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col md={12}>
+                                                        <h3>Your Private Key:</h3>
+                                                        <p>{account.private}</p>
+                                                        <h3>Your Address:</h3>
+                                                        <p>{account.address}</p>
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col md={6}>
+                                                        <h3>Scan Your Private Key:</h3>
+                                                        {this.state.scannedPrivateKey
+                                                            ? <div>
+                                                                <p style={{color:this.state.scannedPrivateKey == account.private ? 'green' : 'red'}}>
+                                                                    {this.state.scannedPrivateKey}
+                                                                </p>
+                                                                {this.state.scannedPrivateKey != account.private
+                                                                    ? <Button onClick={(e)=>this.setState({ scannedPrivateKey : null })}>
+                                                                        Retry
+                                                                    </Button>
+                                                                    : <div/>}
+                                                            </div>
+                                                            : this.state.doScan
+                                                                ? <div>
+                                                                    <div style={{border:'1px solid #999',lineHeight:0}}>
+                                                                        <QRCodeReader success={(r)=>this.setState({ scannedPrivateKey : r })}/>
+                                                                    </div>
+                                                                    <Button onClick={(e)=>this.setState({ doScan : false })} bsStyle="danger">
+                                                                        Cancel
+                                                                    </Button>
+                                                                </div>
+                                                                : <Button onClick={(e)=>this.setState({ doScan : true })}>
+                                                                    Scan
+                                                                </Button>}
+                                                    </Col>
+                                                </Row>
+                                            </div>
+                                            : <Row>
+                                                <Col md={12}>
+                                                    <Button onClick={(e)=>this.setState({createAccount:true})}>
+                                                        Create New Account
+                                                    </Button>
+                                                </Col>
+                                            </Row>}
+                                    </Grid>
+                                </Tab>
+                                <Tab eventKey="2" title="Contracts">
+                                    <Grid>
+                                        <Row>
+                                            <Col md={12}>
+                                                <h3>Greeter</h3>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col md={12}>
+                                                <ul>
+                                                    <li>Connected to node: {this.state.greeterContractNode ? 'true' : 'false'}</li>
+                                                    <li>Status: {this.state.greeterContractStatus}</li>
+                                                    <li>Transaction: {this.state.greeterContractTransaction}</li>
+                                                    <li>Address: {this.state.greeterContractAddress}</li>
+                                                    <li>Return value: {this.state.greeterContractReturn}</li>
+                                                </ul>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col md={12}>
+                                                <h3>Ballot</h3>
+                                            </Col>
+                                        </Row>
+                                        {this.state.ballotContractCreated
+                                            ? <div>
+                                                <Row>
+                                                    <Col md={12}>
+                                                        <ul>
+                                                            <li>Connected to node: {this.state.ballotContractNode ? 'true' : 'false'}</li>
+                                                            <li>Status: {this.state.ballotContractStatus}</li>
+                                                            <li>Transaction: {this.state.ballotContractTransaction}</li>
+                                                            <li>Address: {this.state.ballotContractAddress}</li>
+                                                            <li>Return value: {this.state.ballotContractReturn}</li>
+                                                        </ul>
+                                                    </Col>
+                                                </Row>
+                                                {this.state.ballotContractAddress
+                                                    ? <Row>
+                                                        <Col md={12}>
+                                                            <ul className="list-inline list-unstyled">
+                                                                <li><Button onClick={(e)=>this.vote(0)}>Yes</Button></li>
+                                                                <li><Button onClick={(e)=>this.vote(1)}>No</Button></li>
+                                                                <li><Button onClick={(e)=>this.vote(2)}>Blank</Button></li>
+                                                            </ul>
+                                                        </Col>
+                                                    </Row>
+                                                    : <div/>}
+                                            </div>
+                                            : <div>
+                                                <Row>
+                                                    <Col md={12}>
+                                                        <Button onClick={this.createBallot}>Create New Ballot</Button>
+                                                        <p>or join an existing ballot:</p>
+                                                        <Input type="text" placeholder="address" buttonAfter={<Button onClick={this.createBallot}>Join</Button>}/>
+                                                    </Col>
+                                                </Row>
+                                            </div>}
+                                    </Grid>
+                                </Tab>
+                            </Tabs>
                         </Col>
                     </Row>
-                    <Row>
-                        <Col md={6}>
-                            <QRCode type={9} level="Q" text={account.private}/>
-                        </Col>
-                        <Col md={6}>
-                            <QRCode type={9} level="Q" text={account.address}/>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={12}>
-                            <h3>Your Private Key:</h3>
-                            <p>{account.private}</p>
-                            <h3>Your Address:</h3>
-                            <p>{account.address}</p>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={6}>
-                            <h3>Scan Your Private Key:</h3>
-                            {this.state.scannedPrivateKey
-                                ? <div>
-                                    <p style={{color:this.state.scannedPrivateKey == account.private ? 'green' : 'red'}}>
-                                        {this.state.scannedPrivateKey}
-                                    </p>
-                                    {this.state.scannedPrivateKey != account.private
-                                        ? <Button onClick={(e)=>this.setState({ scannedPrivateKey : null })}>
-                                            Retry
-                                        </Button>
-                                        : <div/>}
-                                </div>
-                                : this.state.doScan
-                                    ? <div>
-                                        <div style={{border:'1px solid #999',lineHeight:0}}>
-                                            <QRCodeReader success={(r)=>this.setState({ scannedPrivateKey : r })}/>
-                                        </div>
-                                        <Button onClick={(e)=>this.setState({ doScan : false })} bsStyle="danger">
-                                            Cancel
-                                        </Button>
-                                    </div>
-                                    : <Button onClick={(e)=>this.setState({ doScan : true })}>
-                                        Scan
-                                    </Button>}
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={12}>
-                            <h2>Smart Contract</h2>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={12}>
-                            <h3>Greeter</h3>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={12}>
-                            <ul>
-                                <li>Connected to node: {this.state.greeterContractNode ? 'true' : 'false'}</li>
-                                <li>Status: {this.state.greeterContractStatus}</li>
-                                <li>Transaction: {this.state.greeterContractTransaction}</li>
-                                <li>Address: {this.state.greeterContractAddress}</li>
-                                <li>Return value: {this.state.greeterContractReturn}</li>
-                            </ul>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={12}>
-                            <h3>Ballot</h3>
-                        </Col>
-                    </Row>
-                    {this.state.ballotContractCreated
-                        ? <div>
-                            <Row>
-                                <Col md={12}>
-                                    <ul>
-                                        <li>Connected to node: {this.state.ballotContractNode ? 'true' : 'false'}</li>
-                                        <li>Status: {this.state.ballotContractStatus}</li>
-                                        <li>Transaction: {this.state.ballotContractTransaction}</li>
-                                        <li>Address: {this.state.ballotContractAddress}</li>
-                                        <li>Return value: {this.state.ballotContractReturn}</li>
-                                    </ul>
-                                </Col>
-                            </Row>
-                            {this.state.ballotContractAddress
-                                ? <Row>
-                                    <Col md={12}>
-                                        <ul className="list-inline list-unstyled">
-                                            <li><Button onClick={(e)=>this.vote(0)}>Yes</Button></li>
-                                            <li><Button onClick={(e)=>this.vote(1)}>No</Button></li>
-                                            <li><Button onClick={(e)=>this.vote(2)}>Blank</Button></li>
-                                        </ul>
-                                    </Col>
-                                </Row>
-                                : <div/>}
-                        </div>
-                        : <div>
-                            <Row>
-                                <Col md={12}>
-                                    <Button onClick={this.createBallot}>Create New Ballot</Button>
-                                    <p>or join an existing ballot:</p>
-                                    <Input type="text" placeholder="address" buttonAfter={<Button onClick={this.createBallot}>Join</Button>}/>
-                                </Col>
-                            </Row>
-                        </div>}
                 </Grid>
             </div>
 		);
