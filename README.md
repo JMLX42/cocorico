@@ -27,7 +27,7 @@ To debug the API, you can run it directly in your terminal and have the (error) 
 
 ### Web app
 
-The Web app is build during the install. Use the following command to re-build the Web app once:
+The Web app is built during the install. Use the following command to re-build the Web app once:
 
 `cd /vagrant/app && npm run build`
 
