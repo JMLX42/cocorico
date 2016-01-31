@@ -11,15 +11,9 @@ respawn
 respawn limit 10 5
 
 pre-start script
-    {% if not is_development_environment %}
     service {{ project_name }}-blockchain-miner stop || true
-    {% endif %}
 end script
 
 script
-    {% if is_development_environment %}
-    exec testrpc
-    {% else %}
-    exec geth --rpc --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}" --unlock 0 --password {{ project_dir }}/{{ role_name }}/password
-    {% endif %}
+    exec geth --rpc --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}" --unlock 0 --password {{ project_dir }}/{{ role_name }}/password --datadir {{ ethereum_datadir }}
 end script

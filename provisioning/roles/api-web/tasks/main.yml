@@ -47,7 +47,7 @@
   failed_when: result.stderr
 
 - name: install upstart script
-  template: src={{ project_name }}-{{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
+  template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
   notify:
     - restart cocorico-api-web service
 
@@ -55,7 +55,7 @@
   apt: name=redis-server state=present
 
 - name: install site configuration
-  template: src={{ project_name }}-{{ role_name }}.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
+  template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
   notify:
     - restart apache2 service
 
