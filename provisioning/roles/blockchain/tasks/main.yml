@@ -3,17 +3,6 @@
 - name: create role directory
   file: path={{ project_dir}}/{{ role_name }} state=directory
 
-- name: install eth-testrpc dependencies
-  when: is_development_environment
-  apt: name={{ item }} state=present
-  with_items:
-    - libssl-dev
-    - python-dev
-
-- name: install eth-testrpc
-  when: is_development_environment
-  pip: name=eth-testrpc state=present
-
 - name: install ethereum dependencies
   apt: name=software-properties-common state=present
 
@@ -21,7 +10,6 @@
   apt_repository: repo={{ item }}
   with_items:
     - ppa:ethereum/ethereum
-    - ppa:ethereum/ethereum-dev
     - ppa:ethereum/ethereum-qt
 
 - name: install ethereum
@@ -31,22 +19,18 @@
     - cpp-ethereum
 
 - lineinfile: line={{ ethereum_etherbase_password }} dest={{ project_dir}}/{{ role_name }}/password mode=700 state=present create=yes
-  when: not is_development_environment
   register: ethereum_password_file
 
 - name: create ethereum account
-  when: not is_development_environment
-  shell: geth --password {{ project_dir}}/{{ role_name }}/password account new
+  shell: geth --datadir {{ ethereum_datadir }} --password {{ project_dir}}/{{ role_name }}/password account new
   register: result
   when: ethereum_password_file.changed
 
 - name: extract etherbase address
-  when: not is_development_environment
-  set_fact: ethereum_etherbase_address="{{ result.stdout | regex_replace('^Address.*{(.*)}$', '\\1') }}"
+  set_fact: ethereum_etherbase_address="{{ result.stdout | regex_replace('^Mining Beneficiary.* (.*)$', '\\1') }}"
   when: ethereum_password_file.changed
 
 - name: install genesis block
-  when: not is_development_environment
   template: src=genesis_block.json.j2 dest={{ project_dir}}/{{ role_name }}/genesis_block.json
   when: ethereum_password_file.changed
 
@@ -54,7 +38,6 @@
   template: src=blockchain.upstart.conf.j2 dest=/etc/init/cocorico-blockchain.conf
 
 - name: install miner upstart script
-  when: not is_development_environment
   template: src=blockchain-miner.upstart.conf.j2 dest=/etc/init/cocorico-blockchain-miner.conf
 
 - name: compile all contracts

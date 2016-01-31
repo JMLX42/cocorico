@@ -1,11 +1,13 @@
 contract Ballot {
 
-    enum VoteValue { Yes, No, Blank }
+    event Vote (
+        address indexed user,
+        uint8 proposal
+    );
 
     struct Voter {
         bool voted;
         uint8 vote;
-        address delegate;
     }
     struct Proposal {
         uint voteCount;
@@ -28,6 +30,7 @@ contract Ballot {
         sender.voted = true;
         sender.vote = proposal;
         proposals[proposal].voteCount += 1;
+        Vote(msg.sender, proposal);
     }
 
     function winningProposal() constant returns (uint8 winningProposal) {

@@ -33,6 +33,7 @@ var BlockchainAccountTest = React.createClass({
             scannedPrivateKey           : null,
             doScan                      : false,
             availableAccounts           : [],
+            transactionComplete         : false,
             createAccount               : false,
             greeterContractNode         : false,
             greeterContractStatus       : 'N/A',
@@ -48,22 +49,74 @@ var BlockchainAccountTest = React.createClass({
         }
     },
 
-    componentWillMount: function()
+    whenTransactionMined: function(tx, callback)
     {
-        BlockchainAccountAction.create('test');
+        var web3 = new Web3();
+        web3.setProvider(new web3.providers.HttpProvider("http://cocorico.cc.test/blockchain/"));
+
+        var check = setInterval(
+            () => {
+                web3.eth.getTransaction(tx, (e, r) => {
+                    if (e || (r && r.blockHash))
+                    {
+                        clearInterval(check);
+                        callback(e, r);
+                    }
+                })
+            },
+            5000
+        );
+    },
+
+    componentDidMount: function()
+    {
+        BlockchainAccountAction.create();
 
         var web3 = new Web3();
         web3.setProvider(new web3.providers.HttpProvider("http://cocorico.cc.test/blockchain/"));
-        this._web3 = web3;
+        var userAccount = this.state.blockchainAccounts.getCurrentUserAccount();
+
+        var web3 = new Web3();
+        web3.setProvider(new web3.providers.HttpProvider("http://cocorico.cc.test/blockchain/"));
+        web3.eth.sendTransaction(
+            {
+                from    : web3.eth.accounts[0],
+                to      : userAccount.address,
+                value   : web3.toWei(10, "ether")
+            },
+            (error, result) => {
+                this.whenTransactionMined(result, (err, block) => {
+                    if (err)
+                    {
+                        console.log(err);
+                        return;
+                    }
+
+                    console.log(
+                        'tx from: ' + web3.eth.coinbase
+                        + ' to: ' + userAccount.address
+                        + ' mined in block ' + block.blockHash
+                    );
+                    console.log('balance:', web3.fromWei(web3.eth.getBalance(userAccount.address), 'ether').toNumber());
+                    this.setState({transactionComplete:true});
+                });
+            }
+        );
+
+        // this.setState({transactionComplete:true});
+
         this.setState({availableAccounts:web3.eth.accounts});
 
-        this.createGreeter();
-        // this.createBallot();
+        // this.createGreeter();
     },
 
     createBallot: function()
     {
-        var web3 = this._web3;
+        // var web3 = this._web3;
+        // web3.setProvider(this.state.blockchainAccounts.getCurrentUserProvider());
+        var web3 = new Web3();
+        web3.setProvider(new web3.providers.HttpProvider("http://cocorico.cc.test/blockchain/"));
+
         var connected = web3.isConnected();
 
         this.setState({
@@ -72,14 +125,21 @@ var BlockchainAccountTest = React.createClass({
             ballotContractNode      : connected
         });
 
-        if (!connected)
-            return;
+        // if (!connected)
+        //     return;
 
         var ballotContract = web3.eth.contract(eval(Ballot.contracts.Ballot.abi));
         var ballotInstance = ballotContract.new(
             3, // num proposals
-            {from : web3.eth.accounts[0], data : Ballot.contracts.Ballot.bin, gas : 300000},
+            {
+                from    : web3.eth.accounts[0],
+                data    : Ballot.contracts.Ballot.bin,
+                gas     : 300000
+            },
             (error, contract) => {
+                if (!contract)
+                    return;
+
                 if (!contract.address)
                     this.setState({
                         ballotContractStatus      : 'contract transaction sent',
@@ -100,7 +160,12 @@ var BlockchainAccountTest = React.createClass({
 
     createGreeter: function()
     {
-        var web3 = this._web3;
+        var web3 = new Web3();
+        web3.setProvider(new web3.providers.HttpProvider("http://cocorico.cc.test/blockchain/"));
+
+        // web3.setProvider(this.state.blockchainAccounts.getCurrentUserProvider());
+
+        // var web3 = this._web3;
         var _greeting = "Hello World!"
         var greeterContract = web3.eth.contract(eval(greeter.contracts.greeter.abi));
         var connected = web3.isConnected();
@@ -115,7 +180,12 @@ var BlockchainAccountTest = React.createClass({
 
         var greeterInstance = greeterContract.new(
             _greeting,
-            {from : web3.eth.accounts[0], data : greeter.contracts.greeter.bin, gas : 300000},
+            {
+                // from : this.state.blockchainAccounts.getCurrentUserAccount().address,
+                from : web3.eth.accounts[0],
+                data : greeter.contracts.greeter.bin,
+                gas : 300000
+            },
             (error, contract) => {
                 if (!error)
                 {
@@ -143,15 +213,47 @@ var BlockchainAccountTest = React.createClass({
 
     vote: function(proposal)
     {
-        var account = this.state.blockchainAccounts.getCurrentUserAccount();
+        var provider = this.state.blockchainAccounts.getCurrentUserProvider();
+        var web3 = new Web3(provider);
+        web3.setProvider(provider);
 
-        this.ballotInstance.vote.sendTransaction(proposal, {from: account.address}, (err, result) => {
-            console.log(err, result);
+        var userAccount = this.state.blockchainAccounts.getCurrentUserAccount();
+        var ballotContract = web3.eth.contract(eval(Ballot.contracts.Ballot.abi));
+        var ballotInstance = ballotContract.at(this.state.ballotContractAddress);
+        // console.log(ballotInstance);
+
+        var voteEvent = ballotInstance.Vote();
+        voteEvent.watch((err, result) => {
+            console.log('vote event: ', result.args.proposal.toNumber(), result.args.user, result.args);
 
             this.ballotInstance.winningProposal.call((err, result) => {
-                console.log('wining:', err, result);
+                console.log('wining:', err, result.toNumber());
             });
         });
+
+        ballotInstance.vote.sendTransaction(
+            proposal,
+            {
+                from: userAccount.address,
+                gas: 999999
+            },
+            (err, tx) => {
+                this.whenTransactionMined(tx, (err, result) => {
+                    if (err)
+                    {
+                        console.log(err);
+                        return;
+                    }
+
+                    console.log('vote tx mined');
+                    // console.log('vote result:', result.value.toNumber());
+
+                    // this.ballotInstance.winningProposal.call((err, result) => {
+                    //     console.log('wining:', err, result.toNumber());
+                    // });
+                });
+            }
+        );
     },
 
     render: function()
@@ -287,7 +389,7 @@ var BlockchainAccountTest = React.createClass({
                                                         </ul>
                                                     </Col>
                                                 </Row>
-                                                {this.state.ballotContractAddress
+                                                {this.state.ballotContractAddress && this.state.transactionComplete
                                                     ? <Row>
                                                         <Col md={12}>
                                                             <ul className="list-inline list-unstyled">
