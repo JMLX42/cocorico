@@ -10,7 +10,7 @@ Vagrant.autoconfigure({
     "vars" => {
       "hostname" => "cocorico.cc.test"
     },
-    "memory" => 4096,
+    "memory" => 2048,
     "skip_tags" => []
   }
 })
