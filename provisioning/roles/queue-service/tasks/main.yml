@@ -1,0 +1,35 @@
+---
+- set_fact: role_name=queue-service
+
+- name: install rabbitmq
+  apt: name={{ item }} state=present
+  when:
+    - ansible_os_family == 'Debian'
+  with_items:
+    - rabbitmq-server
+
+- name: install rabbitmq
+  yum: name={{ item }} state=present
+  when:
+    - ansible_os_family == 'RedHat'
+  with_items:
+    - https://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm
+    - erlang
+
+- name: install upstart script
+  template: src=rabbitmq.upstart.conf.j2 dest=/etc/init/rabbitmq-server.conf
+
+- name: disable old init rabbitmq scripts
+  shell: update-rc.d rabbitmq-server disable
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: start rabbitmq service
+  service: name=rabbitmq-server state=started
+
+- name: install rabbitmq admin
+  command: rabbitmq-plugins enable rabbitmq_management
+  when:
+    - is_development_environment
+  register: result
+  changed_when: "'The following plugins have been enabled' in result.stdout"
