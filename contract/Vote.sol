@@ -1,6 +1,6 @@
-contract Ballot {
+contract Vote {
 
-    event Vote (
+    event Ballot (
         address indexed user,
         uint8 proposal
     );
@@ -18,7 +18,7 @@ contract Ballot {
     Proposal[] proposals;
 
     // Create a new ballot with $(_numProposals) different proposals.
-    function Ballot(uint8 _numProposals) {
+    function Vote(uint8 _numProposals) {
         chairperson = msg.sender;
         proposals.length = _numProposals;
     }
@@ -26,11 +26,15 @@ contract Ballot {
     // Give a single vote to proposal $(proposal).
     function vote(uint8 proposal) {
         Voter sender = voters[msg.sender];
-        if (sender.voted || proposal >= proposals.length) return;
+
+        if (sender.voted || proposal >= proposals.length)
+            return;
+
         sender.voted = true;
         sender.vote = proposal;
         proposals[proposal].voteCount += 1;
-        Vote(msg.sender, proposal);
+
+        Ballot(msg.sender, proposal);
     }
 
     function winningProposal() constant returns (uint8 winningProposal) {
