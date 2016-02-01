@@ -18,6 +18,7 @@ Ballot.add({
 	text: { type: Types.Relationship, ref: 'Text', required: true, initial: true },
 	voterAge: { type: Types.Number, required: true, initial: true },
 	voterGender: { type: Types.Select, options: ['male', 'female'], initial: true },
+	transactionAddress: { type: String }
 });
 
 Ballot.getByTextIdAndVoter = function(textId, voter, callback)

@@ -19,7 +19,10 @@
     "async": "1.5.2",
     "redis": "2.4.2",
     "node-metainspector": "1.2.0",
-    "json-stable-stringify": "1.0.0"
+    "json-stable-stringify": "1.0.0",
+    "web3": "0.15.1",
+    "ethereumjs-accounts": "https://github.com/promethe42/ethereumjs-accounts",
+    "hooked-web3-provider": "https://github.com/promethe42/hooked-web3-provider"
   },
   "engines": {
     "node": ">=0.10.22",

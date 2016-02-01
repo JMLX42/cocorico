@@ -191,6 +191,42 @@ function updateTextSources(user, text, next)
     });
 }
 
+function mineVoteContract(callback)
+{
+	var Web3 = require('web3');
+	var web3 = new Web3();
+	web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
+
+	var Vote = require('/opt/cocorico/blockchain/Vote.json');
+	var voteContract = web3.eth.contract(eval(Vote.contracts.Vote.abi));
+	var voteInstance = voteContract.new(
+		3, // num proposals
+		{
+			from    : web3.eth.accounts[0],
+			data    : Vote.contracts.Vote.bin,
+			gas     : 300000
+		},
+		function(error, contract)
+		{
+			if (error)
+				return callback(error, null);
+
+			if (!contract)
+				return;
+
+			if (!contract.address)
+			{
+				// tx sent, hash = contract.transactionHash
+			}
+			else
+			{
+				// tx mined
+				callback(null, contract);
+			}
+		}
+	);
+}
+
 exports.save = function(req, res)
 {
 	if (!req.body.title)
@@ -218,15 +254,24 @@ exports.save = function(req, res)
 				updateTextSources(req.user, newText, function(err)
 				{
 					newText.author = bcrypt.hashSync(req.user.sub, 10);
-					newText.save(function(err, text)
-					{
-						if (err)
-							return res.apiError('database error', err);
 
-						return res.apiResponse({
-							action: 'create',
-							text : newText
-						})
+					mineVoteContract(function(error, contract)
+					{
+						if (error)
+							return res.apiError('blockchain error', error);
+
+						newText.voteContractAdress = contract.address;
+
+						newText.save(function(err, text)
+						{
+							if (err)
+								return res.apiError('database error', err);
+
+							return res.apiResponse({
+								action: 'create',
+								text : newText
+							})
+						});
 					});
 				});
 			}

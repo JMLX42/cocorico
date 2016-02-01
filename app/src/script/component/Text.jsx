@@ -54,10 +54,17 @@ var Text = React.createClass({
     componentDidMount: function()
     {
         TextAction.show(this.props.textId);
-        TextAction.showCurrentUserVote(this.props.textId);
+
+        // if (this.isAuthenticated())
+            TextAction.showCurrentUserVote(this.props.textId);
 
         this.listenTo(VoteAction.vote, (textId) => {
             TextAction.show(this.props.textId);
+            this.setState({votePending : true});
+        });
+
+        this.listenTo(VoteAction.unvote, (textId) => {
+            this.setState({votePending : false});
         });
     },
 
@@ -158,7 +165,9 @@ var Text = React.createClass({
                                                 </p>
                                             : !!this.state.ballots && (!ballot || ballot.error == 404)
                                                 ? text.status == 'vote'
-                                                    ? <VoteButtonBar textId={text.id}/>
+                                                    ? this.state.votePending
+                                                        ? <span>Enregistrement de votre vote en cours...</span>
+                                                        : <VoteButtonBar textId={text.id}/>
                                                     : <p className="hint">
                                                         {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}
                                                     </p>
