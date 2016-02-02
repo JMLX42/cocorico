@@ -10,5 +10,6 @@
     - { role: "app-web", tags: ["website"] }
     - { role: "api-db", tags: ["website", "database"] }
     - { role: "api-web", tags: ["website", "api"] }
-    - { role: "blockchain", tags: ["database"] }
-    - { role: "queue-service", tags: ["database", "queue"] }
+    - { role: "queue-service", tags: ["blockchain", "database", "queue"] }
+    - { role: "blockchain", tags: ["blockchain", "database"] }
+    - { role: "blockchain-worker", tags: ["blockchain", "worker"] }

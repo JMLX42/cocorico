@@ -49,6 +49,11 @@
 
 - name: start the ethereum blockchain service
   service: name=cocorico-blockchain state=started
+  when: not ethereum_mine_on_boot
+
+- name: start the ethereum blockchain mining service
+  service: name=cocorico-blockchain-miner state=started
+  when: ethereum_mine_on_boot
 
 - name: install apache configuration
   template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf

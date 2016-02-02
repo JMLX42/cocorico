@@ -22,7 +22,7 @@ Text.add({
     status: { type: Types.Select, options: ['draft', 'review', 'debate', 'vote', 'published'], default: 'draft' },
     likes: { type: Types.Relationship, ref: 'Like', required: true, initial: true, many: true, noedit: true },
     score: { type: Types.Number, required: true, default: 0, format: false },
-    voteContractAdress: { type: String }
+    voteContractAddress: { type: String }
 });
 
 Text.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'text' });

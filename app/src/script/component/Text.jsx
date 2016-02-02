@@ -56,16 +56,37 @@ var Text = React.createClass({
         TextAction.show(this.props.textId);
 
         // if (this.isAuthenticated())
-            TextAction.showCurrentUserVote(this.props.textId);
+        TextAction.showCurrentUserVote(this.props.textId);
 
         this.listenTo(VoteAction.vote, (textId) => {
             TextAction.show(this.props.textId);
-            this.setState({votePending : true});
+            this.startPollingBallot();
         });
+    },
 
-        this.listenTo(VoteAction.unvote, (textId) => {
-            this.setState({votePending : false});
-        });
+    startPollingBallot: function()
+    {
+        if (!!this._ballotPollingInterval)
+            return;
+
+        this._ballotPollingInterval = setInterval(
+            () => {
+                var ballot = this.state.ballots
+                    ? this.state.ballots.getBallotByTextId(this.props.textId)
+                    : null;
+
+                if (ballot && ballot.status == 'complete')
+                {
+                    clearInterval(this._ballotPollingInterval);
+                    this._ballotPollingInterval = false;
+                }
+                else
+                {
+                    TextAction.showCurrentUserVote(this.props.textId, true);
+                }
+            },
+            10000
+        );
     },
 
     componentWillReceiveProps: function(nextProps)
@@ -86,6 +107,9 @@ var Text = React.createClass({
         var ballot = this.state.ballots
             ? this.state.ballots.getBallotByTextId(text.id)
             : null;
+
+        if (ballot && ballot.status == 'pending')
+            this.startPollingBallot(text.id);
 
         var currentUser = this.state.users
             ? this.state.users.getCurrentUser()
@@ -150,7 +174,7 @@ var Text = React.createClass({
                     </Grid>
 
                     {text.status == 'vote' || text.status == 'published'
-                        ? <div className={this.state.ballots && ballot && !ballot.error && ballot.value ? 'voted-' + ballot.value : ''}>
+                        ? <div className={this.state.ballots && ballot && !ballot.error && ballot.status == 'complete' && ballot.value ? 'voted-' + ballot.value : ''}>
                             <Grid>
                                 <Row className="section">
                                     <Col md={12}>
@@ -163,10 +187,13 @@ var Text = React.createClass({
                                                 : <p className="hint">
                                                     {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}
                                                 </p>
-                                            : !!this.state.ballots && (!ballot || ballot.error == 404)
+                                            : !!this.state.ballots && (!ballot || ballot.error == 404 || ballot.status != 'complete')
                                                 ? text.status == 'vote'
-                                                    ? this.state.votePending
-                                                        ? <span>Enregistrement de votre vote en cours...</span>
+                                                    ? !!ballot && ballot.status == 'pending'
+                                                        ? <span>
+                                                            <span className="vote-pending-indicator"/>
+                                                            {this.getIntlMessage('text.VOTE_PENDING')}
+                                                        </span>
                                                         : <VoteButtonBar textId={text.id}/>
                                                     : <p className="hint">
                                                         {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}

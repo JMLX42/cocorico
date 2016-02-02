@@ -1,0 +1,19 @@
+- set_fact: role_name=blockchain-worker
+
+- name: install nodejs
+  include: ../../../tasks/install_node.yml
+
+- name: create role directory
+  file: path={{ project_dir}}/{{ role_name }} state=directory
+
+- file: path={{ project_dir }}/{{ role_name }}/node_modules state=directory recurse=yes
+- file: src={{ project_dir }}/{{ role_name }}/node_modules dest=/vagrant/blockchain-worker/node_modules state=link
+
+- name: install npm modules
+  npm: path=/vagrant/blockchain-worker
+
+- name: install upstart script
+  template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
+
+- name: start the worker service
+  service: name=cocorico-blockchain-worker state=started

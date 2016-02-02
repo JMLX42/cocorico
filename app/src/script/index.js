@@ -19,8 +19,7 @@ var Router = ReactRouter.Router,
     DeleteText = require('./page/DeleteText'),
     Home = require('./page/Home'),
     Login = require('./page/Login'),
-    MyTexts = require('./page/MyTexts'),
-    BlockchainTest = require('./page/BlockchainTest');
+    MyTexts = require('./page/MyTexts');
 
 ReactDOM.render(
     <Router history={History.createHistory()}>
@@ -32,7 +31,6 @@ ReactDOM.render(
             <Route path={messages.route.EDIT_TEXT + '/:textId/:slug'} component={EditText}/>
             <Route path={messages.route.VIEW_TEXT + '/:textId/:slug(/:tab)'} component={ViewText}/>
             <Route path={messages.route.DELETE_TEXT + '/:textId/:slug'} component={DeleteText}/>
-            <Route path='blockchain-test' component={BlockchainTest}/>
             <Route path='page/:slug' component={Page}/>
             <Route path=':slug' component={Page}/>
         </Route>

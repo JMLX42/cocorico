@@ -9,7 +9,8 @@ var Text = keystone.list('Text'),
 	Like = keystone.list('Like'),
 
 	TextHelper = require('../../helpers/TextHelper'),
-	LikeHelper = require('../../helpers/LikeHelper');
+	LikeHelper = require('../../helpers/LikeHelper'),
+	BallotHelper = require('../../helpers/BallotHelper');
 
 /**
  * List Texts
@@ -68,7 +69,7 @@ exports.latest = function(req, res)
 
 exports.getBallot = function(req, res)
 {
-	Ballot.getByTextIdAndVoter(
+	BallotHelper.getByTextIdAndVoter(
 		req.params.id,
 		req.user.sub,
 		function(err, ballot)
@@ -260,7 +261,7 @@ exports.save = function(req, res)
 						if (error)
 							return res.apiError('blockchain error', error);
 
-						newText.voteContractAdress = contract.address;
+						newText.voteContractAddress = contract.address;
 
 						newText.save(function(err, text)
 						{

@@ -1,17 +1,12 @@
 var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 var redis = require('redis');
-var timeout = require('req-timeout');
 
 var Text = keystone.list('Text'),
     Ballot = keystone.list('Ballot'),
 
     TextHelper = require('../../helpers/TextHelper'),
-    BlockchainHelper = require('../../helpers/BlockchainHelper'),
-
-    EthereumAccounts = require('ethereumjs-accounts'),
-    HookedWeb3Provider = require("hooked-web3-provider"),
-    Web3 = require('web3');
+	BallotHelper = require('../../helpers/BallotHelper');
 
 exports.resultPerDate = function(req, res)
 {
@@ -174,96 +169,10 @@ exports.result = function(req, res)
         });
 }
 
-function initializeVoterAccount(address, callback)
-{
-    var web3 = new Web3();
-    web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
-
-    web3.eth.sendTransaction(
-        {
-            from    : web3.eth.accounts[0],
-            to      : address,
-            value   : web3.toWei(10, "ether")
-        },
-        function(error, result)
-        {
-            BlockchainHelper.whenTransactionMined(
-                web3,
-                result,
-                function(err, block)
-                {
-                    if (err)
-                        return callback(err, null);
-
-                    return callback(null, block);
-                }
-            );
-        }
-    );
-}
-
-function blockchainVote(voteContractAdress, proposal, callback)
-{
-    var web3 = new Web3();
-    var accounts = new EthereumAccounts({ web3 : web3});
-    var userAccount = accounts.new(null); // no passphrase
-
-    web3.setProvider(new HookedWeb3Provider({
-        host: "http://127.0.0.1:8545",
-        transaction_signer: accounts
-    }));
-
-    initializeVoterAccount(
-        userAccount.address,
-        function(err, block)
-        {
-            if (err)
-                return callback(err, null);
-
-            var transactionHash = '';
-            var Vote = require('/opt/cocorico/blockchain/Vote.json');
-            var voteContract = web3.eth.contract(eval(Vote.contracts.Vote.abi));
-            var voteInstance = voteContract.at(
-                voteContractAdress,
-                function(err, voteInstance)
-                {
-                    var ballotEvent = voteInstance.Ballot();
-                    ballotEvent.watch(
-                        function(err, result)
-                        {
-                            if (err)
-                                return callback(err, null);
-
-                            console.log('vote event: ', result.args.proposal.toNumber(), result.args.user);
-
-                            return callback(null, transactionHash);
-                        }
-                    );
-
-                    voteInstance.vote.sendTransaction(
-                        proposal,
-                        {
-                            from: userAccount.address,
-                            gas: 999999
-                        },
-                        function(err, tx)
-                        {
-                            if (err)
-                                return console.log(err);
-
-                            transactionHash = tx;
-                        }
-                    );
-                }
-            );
-        }
-    );
-}
-
 function vote(req, res, value)
 {
     res.connection.setTimeout(0);
-    
+
 	Text.model.findById(req.params.id).exec(function(err, text)
 	{
 		if (err)
@@ -274,7 +183,7 @@ function vote(req, res, value)
 		if (!TextHelper.textIsReadable(text, req))
 			return res.status(403).send();
 
-		Ballot.getByTextIdAndVoter(
+		BallotHelper.getByTextIdAndVoter(
 			req.params.id,
 			req.user.sub,
 			function(err, ballot)
@@ -297,28 +206,45 @@ function vote(req, res, value)
 					voter: bcrypt.hashSync(req.user.sub, 10),
 					value: value,
                     voterAge : age,
-                    voterGender : req.user.gender
+                    voterGender : req.user.gender,
+                    status: 'pending'
 				});
 
-                blockchainVote(
-                    text.voteContractAdress,
-                    ['yes', 'no', 'blank'].indexOf(value),
-                    function(err, voteTransactionAddress)
-                    {
-                        if (err)
-                            return res.apiError('blockchain error', err);
-
-                        ballot.transactionAddress = voteTransactionAddress;
-
-                        ballot.save(function(err)
+                ballot.save(function(err, result)
+                {
+                    // send the ballot to the vote queue
+                    require('amqplib/callback_api').connect(
+                        'amqp://localhost',
+                        function(err, conn)
                         {
-                            if (err)
-                                return res.apiError('database error', err);
+                            if (err != null)
+                                return res.apiError('queue error', err);
 
-                            return res.apiResponse({ ballot : ballot });
-                        });
-                    }
-                );
+                            conn.createChannel(function(err, ch)
+                            {
+                                if (err != null)
+                                    return res.apiError('queue error', err);
+
+                                var ballotObj = {
+                                    ballot : {
+                                        id                  : ballot.id,
+                                        voteContractAddress : text.voteContractAddress,
+                                        value               : value
+                                    }
+                                };
+
+                                ch.assertQueue('pending-votes');
+                                ch.sendToQueue(
+                                    'pending-votes',
+                                    new Buffer(JSON.stringify(ballotObj)),
+                                    { persistent : true }
+                                );
+
+                                return res.apiResponse({ ballot : ballot });
+                            });
+                        }
+                    );
+                });
 			}
 		);
 	});
@@ -351,7 +277,7 @@ exports.remove = function(req, res)
 		if (!TextHelper.textIsReadable(text, req))
 			return res.status(403).send();
 
-		Ballot.getByTextIdAndVoter(
+		BallotHelper.getByTextIdAndVoter(
 			req.params.id,
 			req.user.sub,
 			function(err, ballot)
