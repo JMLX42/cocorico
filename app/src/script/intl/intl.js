@@ -33,7 +33,8 @@ var Intl = {
 			VIEW_TEXT_TAB_SOURCES: "sources",
 			VIEW_TEXT_TAB_PROPOSITIONS: "propositions",
 			EDIT_TEXT: "/texte/modifier",
-			DELETE_TEXT: "/texte/supprimer"
+			DELETE_TEXT: "/texte/supprimer",
+			SERVICE_STATUS: "/systeme/etat"
 		},
 
 		login: {
@@ -48,7 +49,8 @@ var Intl = {
 
 		footer: {
 			PRIVACY_POLICY: "Politique de Confidentialité",
-			SOURCE_CODE: "Code Source"
+			SOURCE_CODE: "Code Source",
+			SERVICE_STATUS: "Etat du Système"
 		},
 
 		page: {

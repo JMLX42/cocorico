@@ -74,4 +74,6 @@ exports = module.exports = function(app) {
 
 	app.get('/user/me', keystone.middleware.api, isAuthenticated, routes.api.user.me);
 	app.get('/user/texts', keystone.middleware.api, isAuthenticated, routes.api.user.texts);
+
+	app.get('/service/status', keystone.middleware.api, routes.api.service.getStatus);
 };

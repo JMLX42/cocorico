@@ -31,6 +31,11 @@ var Footer = React.createClass({
                                         {this.getIntlMessage('footer.SOURCE_CODE')}
                                     </a>
                                 </li>
+                                <li>
+                                    <Link to={this.getIntlMessage('route.SERVICE_STATUS')}>
+                                        {this.getIntlMessage('footer.SERVICE_STATUS')}
+                                    </Link>
+                                </li>
                             </ul>
                         </Col>
                     </Row>
