@@ -5,7 +5,7 @@ var Types = keystone.Field.Types;
 
 var Ballot = new keystone.List('Ballot', {
 	defaultSort: '-time',
-	// nodelete: true,
+	nodelete: true,
 	nocreate: true
 });
 
