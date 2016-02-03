@@ -129,30 +129,60 @@ function blockchainVote(voteContractAdress, proposal, callback)
     );
 }
 
+function waitForBlockchain(callback)
+{
+    var errorLogged = false;
+    var i = setInterval(
+        function()
+        {
+            var web3 = new Web3();
+            web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
+
+            if (web3.isConnected())
+            {
+                if (errorLogged)
+                    console.log({log : 'successfully connected to the blockchain'});
+
+                clearInterval(i);
+                return callback();
+            }
+            else if (!errorLogged)
+            {
+                console.log({error : 'unable to connect to the blockchain'});
+                errorLogged = true;
+            }
+        },
+        5000
+    );
+}
+
 function handleBallot(ballot, callback)
 {
-    blockchainVote(
-        ballot.voteContractAddress,
-        ['yes', 'blank', 'no'].indexOf(ballot.value),
-        function(err, tx)
-        {
-            console.log(ballot.id, '@', tx);
-            Ballot.model.findById(ballot.id)
-                .exec(function(err, dbBallot)
-                {
-                    if (err)
-                        return callback(err, null);
-
-                    dbBallot.transactionAddress = tx;
-                    dbBallot.status = 'complete';
-
-                    dbBallot.save(function(err, dbBallot)
+    waitForBlockchain(function()
+    {
+        blockchainVote(
+            ballot.voteContractAddress,
+            ['yes', 'blank', 'no'].indexOf(ballot.value),
+            function(err, tx)
+            {
+                console.log(ballot.id, '@', tx);
+                Ballot.model.findById(ballot.id)
+                    .exec(function(err, dbBallot)
                     {
-                        return callback(null, dbBallot);
+                        if (err)
+                            return callback(err, null);
+
+                        dbBallot.transactionAddress = tx;
+                        dbBallot.status = 'complete';
+
+                        dbBallot.save(function(err, dbBallot)
+                        {
+                            return callback(null, dbBallot);
+                        });
                     });
-                });
-        }
-    );
+            }
+        );
+    });
 }
 
 function handleVoteContract()
