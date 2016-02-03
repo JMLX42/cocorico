@@ -1,11 +1,13 @@
 description "{{ role_name }}"
 
+{% if not ethereum_mine_on_boot %}
 {% if is_development_environment %}
 start on vagrant-mounted
 {% else %}
 start on startup
 {% endif %}
 stop on shutdown
+{% endif %}
 
 respawn
 respawn limit 10 5
