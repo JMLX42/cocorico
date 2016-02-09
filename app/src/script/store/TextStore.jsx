@@ -103,7 +103,7 @@ module.exports = Reflux.createStore({
     {
         var text = this.getById(textId);
 
-        if (text)
+        if (text && text.parts)
         {
             this.trigger(this);
             return;
