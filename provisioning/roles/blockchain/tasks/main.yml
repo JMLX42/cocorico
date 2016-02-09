@@ -49,7 +49,6 @@
 
 - name: start the ethereum blockchain service
   service: name=cocorico-blockchain state=started
-  when: not ethereum_mine_on_boot
 
 - name: start the ethereum blockchain mining service
   service: name=cocorico-blockchain-miner state=started

@@ -1,3 +1,5 @@
+var config = require('../../config.json');
+
 var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 var redis = require('redis');
@@ -169,6 +171,44 @@ exports.result = function(req, res)
         });
 }
 
+function pushBallotOnQueue(text, ballot, callback)
+{
+    if (!config.blockchain.voteEnabled)
+        return callback(null, null);
+
+    require('amqplib/callback_api').connect(
+        'amqp://localhost',
+        function(err, conn)
+        {
+            if (err != null)
+                return callback(err, null);
+
+            conn.createChannel(function(err, ch)
+            {
+                if (err != null)
+                    return callback(err, null);
+
+                var ballotObj = {
+                    ballot : {
+                        id                  : ballot.id,
+                        voteContractAddress : text.voteContractAddress,
+                        value               : ballot.value
+                    }
+                };
+
+                ch.assertQueue('pending-votes');
+                ch.sendToQueue(
+                    'pending-votes',
+                    new Buffer(JSON.stringify(ballotObj)),
+                    { persistent : true }
+                );
+
+                callback(null, ballotObj);
+            });
+        }
+    );
+}
+
 function vote(req, res, value)
 {
     res.connection.setTimeout(0);
@@ -207,43 +247,24 @@ function vote(req, res, value)
 					value: value,
                     voterAge : age,
                     voterGender : req.user.gender,
-                    status: 'pending'
+                    status: config.blockchain.voteEnabled ? 'pending' : 'complete'
 				});
 
                 ballot.save(function(err, result)
                 {
+                    if (err)
+    					return res.apiError('database error', err);
+
                     // send the ballot to the vote queue
-                    require('amqplib/callback_api').connect(
-                        'amqp://localhost',
-                        function(err, conn)
-                        {
-                            if (err != null)
-                                return res.apiError('queue error', err);
+                    // if blockchain voting is disabled, it will simply call
+                    // the callback immediately
+                    pushBallotOnQueue(text, ballot, function(err, ballotMsg)
+                    {
+                        if (err)
+                            return res.apiError('queue error', err);
 
-                            conn.createChannel(function(err, ch)
-                            {
-                                if (err != null)
-                                    return res.apiError('queue error', err);
-
-                                var ballotObj = {
-                                    ballot : {
-                                        id                  : ballot.id,
-                                        voteContractAddress : text.voteContractAddress,
-                                        value               : value
-                                    }
-                                };
-
-                                ch.assertQueue('pending-votes');
-                                ch.sendToQueue(
-                                    'pending-votes',
-                                    new Buffer(JSON.stringify(ballotObj)),
-                                    { persistent : true }
-                                );
-
-                                return res.apiResponse({ ballot : ballot });
-                            });
-                        }
-                    );
+                        return res.apiResponse({ ballot : ballot });
+                    });
                 });
 			}
 		);

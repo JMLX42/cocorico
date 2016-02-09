@@ -10,6 +10,6 @@
     - { role: "app-web", tags: ["website"] }
     - { role: "api-db", tags: ["website", "database"] }
     - { role: "api-web", tags: ["website", "api"] }
-    - { role: "queue-service", tags: ["blockchain", "database", "queue"] }
-    - { role: "blockchain", tags: ["blockchain", "database"] }
-    - { role: "blockchain-worker", tags: ["blockchain", "worker"] }
+    - { role: "queue-service", tags: ["blockchain", "database", "queue"], when: "blockchain_vote" }
+    - { role: "blockchain", tags: ["blockchain", "database"], when: "blockchain_vote" }
+    - { role: "blockchain-worker", tags: ["blockchain", "worker"], when: "blockchain_vote" }

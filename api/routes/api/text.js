@@ -1,3 +1,5 @@
+var config = require('../../config.json');
+
 var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 var redis = require('redis');
@@ -226,6 +228,9 @@ function updateBillSources(user, text, next)
 
 function mineVoteContract(callback)
 {
+	if (!config.blockchain.voteEnabled)
+		return callback(null, null);
+
 	var Web3 = require('web3');
 	var web3 = new Web3();
 	web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
@@ -382,7 +387,8 @@ exports.save = function(req, res)
 						if (error)
 							return res.apiError('blockchain error', error);
 
-						newText.voteContractAddress = contract.address;
+						if (contract)
+							newText.voteContractAddress = contract.address;
 
 						newText.save(function(err, text)
 						{
