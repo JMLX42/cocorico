@@ -8,22 +8,22 @@ exports.filterUserLikes = function(likes, user)
     if (user && user.sub)
         for (var like of likes)
             if (bcrypt.compareSync(user.sub, like.author))
-                return [like];
+                return [{value : like.value}];
 
     return [];
 }
 
-exports.addLike = function(resourceModel, id, user, value, errorCallback, successCallback)
+function addLike(resourceModel, id, user, value, errorCallback, successCallback)
 {
     resourceModel.findById(id)
         .populate('likes')
         .exec(function(err, resource)
         {
             if (err)
-                return res.apiError('database error', err);
+                return errorCallback(err, null, null);
 
             if (!resource)
-                return errorCallback && errorCallback(null, null, null);
+                return errorCallback(null, null, null);
 
             var authorLike = null;
             for (var like of resource.likes)
@@ -54,7 +54,7 @@ exports.addLike = function(resourceModel, id, user, value, errorCallback, succes
         });
 }
 
-exports.removeLike = function(resourceModel, id, user, errorCallback, successCallback)
+function removeLike(resourceModel, id, user, errorCallback, successCallback)
 {
     resourceModel.findById(id)
         .populate('likes')
@@ -93,4 +93,55 @@ exports.removeLike = function(resourceModel, id, user, errorCallback, successCal
                 });
             });
         });
+}
+
+exports.getAddLikeFunc = function(modelClass, notFoundError, alreadyLikedError)
+{
+	return function(req, res)
+	{
+		addLike(
+			modelClass.model, req.params.id, req.user, req.params.value == 'true',
+			function(err, resource, like)
+			{
+				if (err)
+					return res.apiError('database error', err);
+
+				if (!resource)
+					return res.status(404).apiResponse({
+						error: notFoundError
+					});
+
+				if (like)
+					return res.status(400).apiResponse({
+						error: alreadyLikedError
+					});
+			},
+			function(resource, like)
+			{
+				return res.apiResponse({ like : like });
+			}
+		);
+	}
+}
+
+exports.getRemoveLikeFunc = function(modelClass)
+{
+    return function(req, res)
+    {
+        removeLike(
+            modelClass.model, req.params.id, req.user,
+            function(err, resource, like)
+            {
+                if (err)
+                    return res.apiError('database error', err);
+
+                if (!resource || !like)
+                    return res.status(404).apiResponse();
+            },
+            function(resource, like)
+            {
+                res.apiResponse({ like : like });
+            }
+        );
+    };
 }

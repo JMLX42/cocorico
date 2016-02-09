@@ -1,5 +1,4 @@
 var React = require('react');
-var Markdown = require('react-remarkable');
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var ReactDocumentTitle = require('react-document-title');
@@ -26,7 +25,8 @@ var VoteButtonBar = require('./VoteButtonBar'),
     ContributionTabs = require('./ContributionTabs'),
     LikeButtons = require('./LikeButtons'),
     Hint = require('./Hint'),
-    VoteResult = require('./VoteResult');
+    VoteResult = require('./VoteResult'),
+    BillRenderer = require('./BillRenderer');
 
 var BallotStore = require('../store/BallotStore'),
     UserStore = require('../store/UserStore'),
@@ -75,7 +75,7 @@ var Text = React.createClass({
                     ? this.state.ballots.getBallotByTextId(this.props.textId)
                     : null;
 
-                if (ballot && ballot.status == 'complete')
+                if (ballot && (ballot.status == 'complete' || ballot.error == 404))
                 {
                     clearInterval(this._ballotPollingInterval);
                     this._ballotPollingInterval = false;
@@ -133,9 +133,10 @@ var Text = React.createClass({
                         <Row className="section">
                             <Col md={12}>
                                 <div className="text-content">
-                                    <Markdown>
-                                        {text.content.md}
-                                    </Markdown>
+                                    {!!text && !!sources
+                                        ? <BillRenderer bill={text} sources={sources} editable={text.status == 'review'}/>
+                                        : <div/>
+                                    }
                                 </div>
                             </Col>
                         </Row>

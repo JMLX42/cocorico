@@ -2,6 +2,7 @@ var keystone = require('keystone');
 var async = require('async');
 var transform = require('model-transform');
 var bcrypt = require('bcrypt');
+var deepPopulate = require('mongoose-deep-populate')(keystone.mongoose);
 
 var Source = keystone.list('Source');
 
@@ -22,8 +23,11 @@ Text.add({
     status: { type: Types.Select, options: ['draft', 'review', 'debate', 'vote', 'published'], default: 'draft' },
     likes: { type: Types.Relationship, ref: 'Like', required: true, initial: true, many: true, noedit: true },
     score: { type: Types.Number, required: true, default: 0, format: false },
-    voteContractAddress: { type: String }
+    voteContractAddress: { type: String },
+    parts: { type: Types.Relationship, ref: 'BillPart', required: true, initial: true, many: true, noedit: true }
 });
+
+Text.schema.plugin(deepPopulate);
 
 Text.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'text' });
 Text.relationship({ path: 'sources', ref: 'Source', refPath: 'text' });

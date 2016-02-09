@@ -21,9 +21,9 @@
     "node-metainspector": "1.2.0",
     "json-stable-stringify": "1.0.0",
     "web3": "0.15.1",
-    "ethereumjs-accounts": "https://github.com/promethe42/ethereumjs-accounts",
-    "hooked-web3-provider": "https://github.com/promethe42/hooked-web3-provider",
-    "amqplib": "0.4.0"
+    "amqplib": "0.4.0",
+    "markdown": "0.5.0",
+    "mongoose-deep-populate": "2.0.3"
   },
   "engines": {
     "node": ">=0.10.22",

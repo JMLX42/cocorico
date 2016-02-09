@@ -2,15 +2,25 @@ var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 var redis = require('redis');
 var async = require('async');
+var markdown = require('markdown').markdown;
 
 var Text = keystone.list('Text'),
 	Ballot = keystone.list('Ballot'),
 	Source = keystone.list('Source'),
 	Like = keystone.list('Like'),
+	BillPart = keystone.list('BillPart'),
 
 	TextHelper = require('../../helpers/TextHelper'),
 	LikeHelper = require('../../helpers/LikeHelper'),
 	BallotHelper = require('../../helpers/BallotHelper');
+
+exports.addLike = LikeHelper.getAddLikeFunc(Text, 'ERROR_TEXT_NOT_FOUND', 'ERROR_TEXT_ALREADY_LIKED');
+
+exports.removeLike = LikeHelper.getRemoveLikeFunc(Text);
+
+exports.addBillPartLike = LikeHelper.getAddLikeFunc(BillPart, 'ERROR_BILL_PART_NOT_FOUND', 'ERROR_BILl_PART_ALREADY_LIKED');
+
+exports.removeBillPartLike = LikeHelper.getRemoveLikeFunc(BillPart);
 
 /**
  * List Texts
@@ -18,12 +28,18 @@ var Text = keystone.list('Text'),
 exports.list = function(req, res)
 {
 	Text.model.find()
+		.populate('likes')
+		.select('-parts')
 		.exec(function(err, texts)
 	    {
 			if (err)
 				return res.apiError('database error', err);
 
-			res.apiResponse({ texts: TextHelper.filterReadableTexts(texts, req, true) });
+			texts = TextHelper.filterReadableTexts(texts, req, true)
+			for (var i = 0; i < texts.length; ++i)
+				texts[i].likes = LikeHelper.filterUserLikes(texts[i].likes, req.user);
+
+			res.apiResponse({ texts : texts });
 		});
 }
 
@@ -33,7 +49,7 @@ exports.list = function(req, res)
 exports.get = function(req, res)
 {
 	Text.model.findById(req.params.id)
-		.populate('likes')
+		.deepPopulate('likes parts.likes')
 		.exec(function(err, text)
     {
 		if (err)
@@ -46,8 +62,10 @@ exports.get = function(req, res)
 			return res.status(403).send();
 
 		text.likes = LikeHelper.filterUserLikes(text.likes, req.user);
+		for (var part of text.parts)
+			part.likes = LikeHelper.filterUserLikes(part.likes, req.user);
 
-		res.apiResponse({ text: text });
+		res.apiResponse({ text : text });
 	});
 }
 
@@ -56,6 +74,8 @@ exports.latest = function(req, res)
 	Text.model.find()
 		.sort('-publishedAt')
 		.limit(10)
+		.populate('likes')
+		.select('-parts')
 		.exec(function(err, texts)
 	    {
 			if (err)
@@ -63,7 +83,11 @@ exports.latest = function(req, res)
 			if (!texts)
 				return res.apiError('not found');
 
-			res.apiResponse({ texts: TextHelper.filterReadableTexts(texts, req, true) });
+			texts = TextHelper.filterReadableTexts(texts, req, true)
+			for (var i = 0; i < texts.length; ++i)
+				texts[i].likes = LikeHelper.filterUserLikes(texts[i].likes, req.user);
+
+			res.apiResponse({ texts : texts });
 		});
 }
 
@@ -94,20 +118,28 @@ exports.getBySlug = function(req, res)
 {
 	Text.model.findOne()
 		.where('slug', req.params.slug)
+		.populate('likes')
+		.populate('parts')
 		.exec(function(err, text)
 	    {
 			if (err)
 				return res.apiError('database error', err);
+
 			if (!text)
 				return res.status(404).send();
+
 			if (!TextHelper.textIsReadable(text, req))
 				return res.status(403).send();
+
+			text.likes = LikeHelper.filterUserLikes(text.likes, req.user);
+			for (var part of text.parts)
+				part.likes = LikeHelper.filterUserLikes(part.likes, req.user);
 
 			res.apiResponse({ text: text });
 		});
 }
 
-function updateTextSources(user, text, next)
+function updateBillSources(user, text, next)
 {
     var mdLinkRegex = new RegExp(/\[([^\[]+)\]\(([^\)]+)\)/g);
     var ops = [function(callback) { callback(null, []); }];
@@ -156,7 +188,7 @@ function updateTextSources(user, text, next)
             {
                 return function(callback)
                 {
-                    Source.model.findOne({url : sourceData.url})
+                    Source.model.findOne({url : sourceData.url, text : text})
                         .exec(function(err, source)
                         {
                             if (err)
@@ -186,7 +218,7 @@ function updateTextSources(user, text, next)
 
             async.waterfall(saveOps, function(error)
             {
-                next();
+                next(error);
             });
         }
     });
@@ -228,6 +260,91 @@ function mineVoteContract(callback)
 	);
 }
 
+function getBillParts(md)
+{
+	var tree = markdown.parse(md);
+	var order = 0;
+	var part = null;
+	var parts = [];
+	var para = [];
+
+	for (var i = 1; i < tree.length; ++i)
+	{
+		if (tree[i][0] == 'header')
+		{
+			if (part)
+				part.content = JSON.stringify(para);
+
+			part = BillPart.model({
+				title : tree[i][2],
+				level : tree[i][1].level,
+				order : order++,
+				content	: ''
+			});
+			para = [];
+			parts.push(part);
+		}
+		else if (tree[i][0] == 'para')
+		{
+			tree[i].shift();
+			para.push(tree[i]);
+		}
+	}
+
+	if (part && !part.content)
+		part.content = JSON.stringify(para);
+
+	return parts;
+}
+
+function updateBillParts(text, callback)
+{
+	var parts = getBillParts(text.content.md);
+	var removeOps = text.parts.map(function(part)
+	{
+		return function(callback)
+		{
+			part.remove(function(err)
+			{
+				callback(err);
+			});
+		};
+	});
+	var saveOps = parts.map(function(part)
+	{
+		return function(callback)
+		{
+			part.save(function(err, res)
+			{
+				callback(err);
+			});
+		};
+	});
+
+	async.waterfall(
+		removeOps.concat(saveOps),
+		function(error)
+		{
+			text.parts = parts;
+			callback(error);
+		}
+	);
+}
+
+function updateBill(text, user, callback)
+{
+	updateBillSources(user, text, function(error)
+	{
+		if (error)
+			return callback(error);
+
+		updateBillParts(text, function(error)
+		{
+			callback(error);
+		})
+	});
+}
+
 exports.save = function(req, res)
 {
 	if (!req.body.title)
@@ -243,6 +360,7 @@ exports.save = function(req, res)
 
 	Text.model.findOne(req.body.id ? {_id : req.body.id} : {slug: newText.slug})
 		.select('-likes')
+		.populate('parts')
 		.exec(function(err, text)
 	    {
 			if (err)
@@ -252,8 +370,11 @@ exports.save = function(req, res)
 
 			if (!text)
 			{
-				updateTextSources(req.user, newText, function(err)
+				updateBill(newText, req.user, function(err)
 				{
+					if (err)
+						return res.apiError('database error', err);
+
 					newText.author = bcrypt.hashSync(req.user.sub, 10);
 
 					mineVoteContract(function(error, contract)
@@ -282,8 +403,12 @@ exports.save = function(req, res)
 				{
 					text.title = newText.title;
 					text.content.md = newText.content.md;
-					updateTextSources(req.user, text, function(err)
+
+					updateBill(text, req.user, function(err)
 					{
+						if (err)
+							return res.apiError('database error', err);
+
 						text.save(function(err, text)
 						{
 							if (err)
@@ -322,8 +447,10 @@ exports.status = function(req, res)
 	    {
 			if (err)
 				return res.apiError('database error', err);
+
 			if (!text)
 				return res.status(404).send();
+
 			if (!bcrypt.compareSync(req.user.sub, text.author))
 				return res.status(403).send();
 
@@ -342,49 +469,4 @@ exports.status = function(req, res)
 				});
 			});
 		});
-}
-
-exports.addLike = function(req, res)
-{
-    LikeHelper.addLike(
-        Text.model, req.params.id, req.user, req.params.value == 'true',
-        function(err, resource, like)
-        {
-            if (err)
-                return res.apiError('database error', err);
-
-            if (!resource)
-                return res.status(404).apiResponse({
-					error: 'error.ERROR_TEXT_NOT_FOUND'
-				});
-
-            if (like)
-                return res.status(400).apiResponse({
-                    error: 'error.ERROR_TEXT_ALREADY_LIKED'
-                });
-        },
-        function(resource, like)
-        {
-            return res.apiResponse({ like : like });
-        }
-    );
-}
-
-exports.removeLike = function(req, res)
-{
-    LikeHelper.removeLike(
-        Text.model, req.params.id, req.user,
-        function(err, resource, like)
-        {
-            if (err)
-                return res.apiError('database error', err);
-
-            if (!resource || !like)
-                return res.status(404).apiResponse();
-        },
-        function(resource, like)
-        {
-            res.apiResponse({ like : like });
-        }
-    );
 }
