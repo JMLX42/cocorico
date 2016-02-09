@@ -20,7 +20,7 @@ env NODE_TLS_REJECT_UNAUTHORIZED=0
 chdir "{{ cocorico_api_dir }}"
 
 script
-    exec forever --pidFile /var/run/{{ project_name }}-{{ role_name }}.pid start --sourceDir {{ cocorico_api_dir }} --workingDir {{ cocorico_api_dir }} keystone.js
+    exec forever --pidFile /var/run/{{ project_name }}-{{ role_name }}.pid start --watchDirectory {{ cocorico_api_dir }} --sourceDir {{ cocorico_api_dir }} --workingDir {{ cocorico_api_dir }} keystone.js
 end script
 
 pre-stop script
