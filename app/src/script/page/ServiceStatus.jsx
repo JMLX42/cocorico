@@ -45,7 +45,8 @@ module.exports = React.createClass({
 
     render: function()
     {
-        var status = this.state.serviceStatus.getStatus();
+        var system = this.state.serviceStatus.getSystemStatus();
+        var capabilities = this.state.serviceStatus.getSystemCapabilities();
 
 		return (
             <ReactDocumentTitle title={'Service Status - ' + this.getIntlMessage('site.TITLE')}>
@@ -57,32 +58,64 @@ module.exports = React.createClass({
                                     <thead>
                                         <tr>
                                             <th>Service</th>
-                                            <th>Status</th>
+                                            <th style={{width:'25%'}}>Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>Blockchain</td>
-                                            <td className={this.getStatusClassNames(status.blockchain)}>
-                                                {status.blockchain ? 'OK' : 'KO'}
+                                            <td>Blockchain Node</td>
+                                            <td className={this.getStatusClassNames(system.blockchainNode)}>
+                                                {system.blockchainNode ? 'OK' : 'KO'}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Blockchain Miner</td>
-                                            <td className={this.getStatusClassNames(status.blockchainMiner)}>
-                                                {status.blockchainMiner ? 'OK' : 'KO'}
+                                            <td className={this.getStatusClassNames(system.blockchainMiner)}>
+                                                {system.blockchainMiner ? 'OK' : 'KO'}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Queue</td>
-                                            <td className={this.getStatusClassNames(status.queue)}>
-                                                {status.queue ? 'OK' : 'KO'}
+                                            <td className={this.getStatusClassNames(system.queue)}>
+                                                {system.queue ? 'OK' : 'KO'}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Database</td>
-                                            <td className={this.getStatusClassNames(status.database)}>
-                                                {status.database ? 'OK' : 'KO'}
+                                            <td className={this.getStatusClassNames(system.database)}>
+                                                {system.database ? 'OK' : 'KO'}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </Table>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={12}>
+                                <Table style={{width:'100%'}} striped hover responsive>
+                                    <thead>
+                                        <tr>
+                                            <th>Capability</th>
+                                            <th style={{width:'25%'}}>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Vote</td>
+                                            <td className={this.getStatusClassNames(capabilities.vote)}>
+                                                {capabilities.vote ? 'OK' : 'KO'}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Read Bill</td>
+                                            <td className={this.getStatusClassNames(capabilities.readBill)}>
+                                                {capabilities.readBill ? 'OK' : 'KO'}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Create Bill</td>
+                                            <td className={this.getStatusClassNames(capabilities.createBill)}>
+                                                {capabilities.createBill ? 'OK' : 'KO'}
                                             </td>
                                         </tr>
                                     </tbody>

@@ -8,7 +8,8 @@ module.exports = Reflux.createStore({
         this.listenTo(ServiceStatusAction.showStatus, this.fetchStatus);
         this.listenTo(ServiceStatusAction.updateStatus, this.fetchStatus);
 
-        this._status = {};
+        this._system = {};
+        this._capabilities = {};
     },
 
     getInitialState: function()
@@ -16,9 +17,14 @@ module.exports = Reflux.createStore({
         return this;
     },
 
-    getStatus: function()
+    getSystemStatus: function()
     {
-        return this._status;
+        return this._system;
+    },
+
+    getSystemCapabilities: function()
+    {
+        return this._capabilities;
     },
 
     fetchStatus: function()
@@ -26,7 +32,8 @@ module.exports = Reflux.createStore({
         jquery.get(
             '/api/service/status',
             (data) => {
-                this._status = data.status;
+                this._system = data.system;
+                this._capabilities = data.capabilities;
                 this.trigger(this);
             }
         );

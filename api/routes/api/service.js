@@ -1,3 +1,5 @@
+var config = require('../../config.json');
+
 var keystone = require('keystone');
 var Web3 = require('web3');
 
@@ -38,14 +40,27 @@ function getDatabaseStatus()
 
 exports.getStatus = function(req, res)
 {
-    getQueueStatus(function(connected)
+    getQueueStatus(function(queueIsConnected)
     {
+        var blockchainMinerIsConnected = getBlockchainMinerStatus();
+        var databaseIsConnected = getDatabaseStatus();
+
         return res.apiResponse({
-            status : {
-                blockchain      : getBlockchainStatus(),
-                blockchainMiner : getBlockchainMinerStatus(),
-                database        : getDatabaseStatus(),
-                queue           : connected
+            system : {
+                blockchainNode : getBlockchainStatus(),
+                blockchainMiner : blockchainMinerIsConnected,
+                blockchainVote : config.blockchain.voteEnabled,
+                database : databaseIsConnected,
+                queue : queueIsConnected,
+            },
+            capabilities : {
+                vote : config.blockchain.voteEnabled
+                    ? queueIsConnected && blockchainMinerIsConnected
+                    : databaseIsConnected,
+                createBill : config.blockchain.voteEnabled
+                    ? blockchainMinerIsConnected
+                    : databaseIsConnected,
+                readBill : databaseIsConnected
             }
         });
     });
