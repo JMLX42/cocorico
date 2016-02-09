@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+
+ProxyRequests       Off
+ProxyPreserveHost   On
+
+<LocationMatch "/blockchain/">
+    ProxyPass           http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}/
+    ProxyPassReverse    http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}/
+
+    Header              add "Access-Control-Allow-Origin" "{{ front_web_public_host }}"
+</LocationMatch>

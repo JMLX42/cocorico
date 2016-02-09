@@ -5,6 +5,8 @@ hostname: "{{ front_hostname }}-{{ environment_name }}"
 is_development_environment: yes
 http_protocol_prefix: http
 
+blockchain_vote: yes
+
 mongodb_database_name: "{{ project_name }}"
 
 franceconnect_cliend_id: 10e0a74c752107f712b890e6183b03b179146eb682189c3158370cb8f3fe7068
@@ -24,3 +26,14 @@ home_db_saved_pages:
     - manifeste
     - astuce-etape-debat
     - astuce-etape-revision
+
+ethereum_etherbase_password: "test"
+ethereum_etherbase_balance: "10015200000000000000000"
+ethereum_genesis_difficulty: "0x40000"
+ethereum_genesis_gas_limit: "0x4c4b40"
+ethereum_network_id: 424242
+ethereum_rpc_private_host: 127.0.0.1
+ethereum_rpc_private_port: 8545
+ethereum_rpc_public_url: "{{ http_protocol_prefix }}://{{ front_web_public_host }}/blockchain/"
+ethereum_datadir: "{{ project_dir }}/blockchain/data"
+ethereum_mine_on_boot: "{{ blockchain_vote }}"

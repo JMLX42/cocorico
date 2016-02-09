@@ -1,0 +1,21 @@
+description "{{ role_name }}"
+
+{% if ethereum_mine_on_boot %}
+{% if is_development_environment %}
+start on vagrant-mounted
+{% else %}
+start on startup
+{% endif %}
+stop on shutdown
+{% endif %}
+
+respawn
+respawn limit 10 5
+
+pre-start script
+    service {{ project_name }}-blockchain stop || true
+end script
+
+script
+    exec geth --rpc --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" --mine --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}" --unlock 0 --password {{ project_dir }}/{{ role_name }}/password --minerthreads "1" --datadir {{ ethereum_datadir }}
+end script

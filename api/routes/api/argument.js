@@ -8,6 +8,10 @@ var Argument = keystone.list('Argument'),
 var TextHelper = require('../../helpers/TextHelper'),
     LikeHelper = require('../../helpers/LikeHelper');
 
+exports.addLike = LikeHelper.getAddLikeFunc(Argument, 'ERROR_ARGUMENT_NOT_FOUND', 'ERROR_ARGUMENT_ALREADY_LIKED');
+
+exports.removeLike = LikeHelper.getRemoveLikeFunc(Argument);
+
 exports.list = function(req, res)
 {
     Text.model.findById(req.params.textId)
@@ -78,49 +82,4 @@ exports.add = function(req, res)
 exports.remove = function(req, res)
 {
 
-}
-
-exports.addLike = function(req, res)
-{
-    LikeHelper.addLike(
-        Argument.model, req.params.id, req.user, req.params.value == 'true',
-        function(err, argument, like)
-        {
-            if (err)
-                return res.apiError('database error', err);
-
-            if (!argument)
-                return res.status(404).apiResponse({
-                    error: 'ERROR_ARGUMENT_NOT_FOUND'
-                });
-
-            if (like)
-                return res.status(400).apiResponse({
-                    error: 'ERROR_ARGUMENT_ALREADY_LIKED'
-                });
-        },
-        function(argument, like)
-        {
-            return res.apiResponse({ like : like });
-        }
-    );
-}
-
-exports.removeLike = function(req, res)
-{
-    LikeHelper.removeLike(
-        Argument.model, req.params.id, req.user,
-        function(err, argument, like)
-        {
-            if (err)
-                return res.apiError('database error', err);
-
-            if (!argument || !authorLike)
-                return res.status(404).apiResponse();
-        },
-        function(argument, like)
-        {
-            res.apiResponse({ like : like });
-        }
-    );
 }

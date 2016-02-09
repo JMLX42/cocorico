@@ -9,6 +9,8 @@ var TextStore = require("../store/TextStore");
 var TextLink = require("../component/TextLink"),
     TextStatusSelect = require("../component/TextStatusSelect");
 
+var LikeButtons = require('./LikeButtons');
+
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row;
 
@@ -35,6 +37,7 @@ var TextList = React.createClass({
                             return (
                                 <li key={text.id}>
                                     <TextLink text={text}/>
+                                    <LikeButtons likeAction={TextAction.like} resource={text}/>
                                     {this.props.editable
                                         ? <Link to={this.getIntlMessage('route.EDIT_TEXT') + '/' + text.id + '/' + text.slug} className="pull-right">Modifier</Link>
                                         : ''}

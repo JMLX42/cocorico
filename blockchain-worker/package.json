@@ -1,0 +1,19 @@
+{
+  "name": "cocorico-queue",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "keystone": "^0.3.13",
+    "web3": "0.15.0",
+    "ethereumjs-accounts": "https://github.com/promethe42/ethereumjs-accounts",
+    "hooked-web3-provider": "https://github.com/promethe42/hooked-web3-provider",
+    "amqplib": "0.4.0"
+  },
+  "engines": {
+    "node": ">=0.10.22",
+    "npm": ">=1.3.14"
+  },
+  "scripts": {
+      "start": "nodemon -w index.js -d 2 index.js"
+  }
+}

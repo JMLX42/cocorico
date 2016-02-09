@@ -1,15 +1,28 @@
+var config = require('../../config.json');
+
 var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 var redis = require('redis');
 var async = require('async');
+var markdown = require('markdown').markdown;
 
 var Text = keystone.list('Text'),
 	Ballot = keystone.list('Ballot'),
 	Source = keystone.list('Source'),
 	Like = keystone.list('Like'),
+	BillPart = keystone.list('BillPart'),
 
 	TextHelper = require('../../helpers/TextHelper'),
-	LikeHelper = require('../../helpers/LikeHelper');
+	LikeHelper = require('../../helpers/LikeHelper'),
+	BallotHelper = require('../../helpers/BallotHelper');
+
+exports.addLike = LikeHelper.getAddLikeFunc(Text, 'ERROR_TEXT_NOT_FOUND', 'ERROR_TEXT_ALREADY_LIKED');
+
+exports.removeLike = LikeHelper.getRemoveLikeFunc(Text);
+
+exports.addBillPartLike = LikeHelper.getAddLikeFunc(BillPart, 'ERROR_BILL_PART_NOT_FOUND', 'ERROR_BILl_PART_ALREADY_LIKED');
+
+exports.removeBillPartLike = LikeHelper.getRemoveLikeFunc(BillPart);
 
 /**
  * List Texts
@@ -17,12 +30,18 @@ var Text = keystone.list('Text'),
 exports.list = function(req, res)
 {
 	Text.model.find()
+		.populate('likes')
+		.select('-parts')
 		.exec(function(err, texts)
 	    {
 			if (err)
 				return res.apiError('database error', err);
 
-			res.apiResponse({ texts: TextHelper.filterReadableTexts(texts, req, true) });
+			texts = TextHelper.filterReadableTexts(texts, req, true)
+			for (var i = 0; i < texts.length; ++i)
+				texts[i].likes = LikeHelper.filterUserLikes(texts[i].likes, req.user);
+
+			res.apiResponse({ texts : texts });
 		});
 }
 
@@ -32,7 +51,7 @@ exports.list = function(req, res)
 exports.get = function(req, res)
 {
 	Text.model.findById(req.params.id)
-		.populate('likes')
+		.deepPopulate('likes parts.likes')
 		.exec(function(err, text)
     {
 		if (err)
@@ -45,8 +64,10 @@ exports.get = function(req, res)
 			return res.status(403).send();
 
 		text.likes = LikeHelper.filterUserLikes(text.likes, req.user);
+		for (var part of text.parts)
+			part.likes = LikeHelper.filterUserLikes(part.likes, req.user);
 
-		res.apiResponse({ text: text });
+		res.apiResponse({ text : text });
 	});
 }
 
@@ -55,6 +76,8 @@ exports.latest = function(req, res)
 	Text.model.find()
 		.sort('-publishedAt')
 		.limit(10)
+		.populate('likes')
+		.select('-parts')
 		.exec(function(err, texts)
 	    {
 			if (err)
@@ -62,13 +85,17 @@ exports.latest = function(req, res)
 			if (!texts)
 				return res.apiError('not found');
 
-			res.apiResponse({ texts: TextHelper.filterReadableTexts(texts, req, true) });
+			texts = TextHelper.filterReadableTexts(texts, req, true)
+			for (var i = 0; i < texts.length; ++i)
+				texts[i].likes = LikeHelper.filterUserLikes(texts[i].likes, req.user);
+
+			res.apiResponse({ texts : texts });
 		});
 }
 
 exports.getBallot = function(req, res)
 {
-	Ballot.getByTextIdAndVoter(
+	BallotHelper.getByTextIdAndVoter(
 		req.params.id,
 		req.user.sub,
 		function(err, ballot)
@@ -93,20 +120,28 @@ exports.getBySlug = function(req, res)
 {
 	Text.model.findOne()
 		.where('slug', req.params.slug)
+		.populate('likes')
+		.populate('parts')
 		.exec(function(err, text)
 	    {
 			if (err)
 				return res.apiError('database error', err);
+
 			if (!text)
 				return res.status(404).send();
+
 			if (!TextHelper.textIsReadable(text, req))
 				return res.status(403).send();
+
+			text.likes = LikeHelper.filterUserLikes(text.likes, req.user);
+			for (var part of text.parts)
+				part.likes = LikeHelper.filterUserLikes(part.likes, req.user);
 
 			res.apiResponse({ text: text });
 		});
 }
 
-function updateTextSources(user, text, next)
+function updateBillSources(user, text, next)
 {
     var mdLinkRegex = new RegExp(/\[([^\[]+)\]\(([^\)]+)\)/g);
     var ops = [function(callback) { callback(null, []); }];
@@ -155,7 +190,7 @@ function updateTextSources(user, text, next)
             {
                 return function(callback)
                 {
-                    Source.model.findOne({url : sourceData.url})
+                    Source.model.findOne({url : sourceData.url, text : text})
                         .exec(function(err, source)
                         {
                             if (err)
@@ -185,10 +220,134 @@ function updateTextSources(user, text, next)
 
             async.waterfall(saveOps, function(error)
             {
-                next();
+                next(error);
             });
         }
     });
+}
+
+function mineVoteContract(callback)
+{
+	if (!config.blockchain.voteEnabled)
+		return callback(null, null);
+
+	var Web3 = require('web3');
+	var web3 = new Web3();
+	web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
+
+	var Vote = require('/opt/cocorico/blockchain/Vote.json');
+	var voteContract = web3.eth.contract(eval(Vote.contracts.Vote.abi));
+	var voteInstance = voteContract.new(
+		3, // num proposals
+		{
+			from    : web3.eth.accounts[0],
+			data    : Vote.contracts.Vote.bin,
+			gas     : 300000
+		},
+		function(error, contract)
+		{
+			if (error)
+				return callback(error, null);
+
+			if (!contract)
+				return;
+
+			if (!contract.address)
+			{
+				// tx sent, hash = contract.transactionHash
+			}
+			else
+			{
+				// tx mined
+				callback(null, contract);
+			}
+		}
+	);
+}
+
+function getBillParts(md)
+{
+	var tree = markdown.parse(md);
+	var order = 0;
+	var part = null;
+	var parts = [];
+	var para = [];
+
+	for (var i = 1; i < tree.length; ++i)
+	{
+		if (tree[i][0] == 'header')
+		{
+			if (part)
+				part.content = JSON.stringify(para);
+
+			part = BillPart.model({
+				title : tree[i][2],
+				level : tree[i][1].level,
+				order : order++,
+				content	: ''
+			});
+			para = [];
+			parts.push(part);
+		}
+		else if (tree[i][0] == 'para')
+		{
+			tree[i].shift();
+			para.push(tree[i]);
+		}
+	}
+
+	if (part && !part.content)
+		part.content = JSON.stringify(para);
+
+	return parts;
+}
+
+function updateBillParts(text, callback)
+{
+	var parts = getBillParts(text.content.md);
+	var removeOps = text.parts.map(function(part)
+	{
+		return function(callback)
+		{
+			part.remove(function(err)
+			{
+				callback(err);
+			});
+		};
+	});
+	var saveOps = parts.map(function(part)
+	{
+		return function(callback)
+		{
+			part.save(function(err, res)
+			{
+				callback(err);
+			});
+		};
+	});
+
+	async.waterfall(
+		removeOps.concat(saveOps),
+		function(error)
+		{
+			text.parts = parts;
+			callback(error);
+		}
+	);
+}
+
+function updateBill(text, user, callback)
+{
+	updateBillSources(user, text, function(error)
+	{
+		if (error)
+			return callback(error);
+
+		updateBillParts(text, function(error)
+		{
+			callback(error);
+		})
+	});
 }
 
 exports.save = function(req, res)
@@ -206,6 +365,7 @@ exports.save = function(req, res)
 
 	Text.model.findOne(req.body.id ? {_id : req.body.id} : {slug: newText.slug})
 		.select('-likes')
+		.populate('parts')
 		.exec(function(err, text)
 	    {
 			if (err)
@@ -215,18 +375,31 @@ exports.save = function(req, res)
 
 			if (!text)
 			{
-				updateTextSources(req.user, newText, function(err)
+				updateBill(newText, req.user, function(err)
 				{
-					newText.author = bcrypt.hashSync(req.user.sub, 10);
-					newText.save(function(err, text)
-					{
-						if (err)
-							return res.apiError('database error', err);
+					if (err)
+						return res.apiError('database error', err);
 
-						return res.apiResponse({
-							action: 'create',
-							text : newText
-						})
+					newText.author = bcrypt.hashSync(req.user.sub, 10);
+
+					mineVoteContract(function(error, contract)
+					{
+						if (error)
+							return res.apiError('blockchain error', error);
+
+						if (contract)
+							newText.voteContractAddress = contract.address;
+
+						newText.save(function(err, text)
+						{
+							if (err)
+								return res.apiError('database error', err);
+
+							return res.apiResponse({
+								action: 'create',
+								text : newText
+							})
+						});
 					});
 				});
 			}
@@ -236,8 +409,12 @@ exports.save = function(req, res)
 				{
 					text.title = newText.title;
 					text.content.md = newText.content.md;
-					updateTextSources(req.user, text, function(err)
+
+					updateBill(text, req.user, function(err)
 					{
+						if (err)
+							return res.apiError('database error', err);
+
 						text.save(function(err, text)
 						{
 							if (err)
@@ -276,8 +453,10 @@ exports.status = function(req, res)
 	    {
 			if (err)
 				return res.apiError('database error', err);
+
 			if (!text)
 				return res.status(404).send();
+
 			if (!bcrypt.compareSync(req.user.sub, text.author))
 				return res.status(403).send();
 
@@ -296,49 +475,4 @@ exports.status = function(req, res)
 				});
 			});
 		});
-}
-
-exports.addLike = function(req, res)
-{
-    LikeHelper.addLike(
-        Text.model, req.params.id, req.user, req.params.value == 'true',
-        function(err, resource, like)
-        {
-            if (err)
-                return res.apiError('database error', err);
-
-            if (!resource)
-                return res.status(404).apiResponse({
-					error: 'error.ERROR_TEXT_NOT_FOUND'
-				});
-
-            if (like)
-                return res.status(400).apiResponse({
-                    error: 'error.ERROR_TEXT_ALREADY_LIKED'
-                });
-        },
-        function(resource, like)
-        {
-            return res.apiResponse({ like : like });
-        }
-    );
-}
-
-exports.removeLike = function(req, res)
-{
-    LikeHelper.removeLike(
-        Text.model, req.params.id, req.user,
-        function(err, resource, like)
-        {
-            if (err)
-                return res.apiError('database error', err);
-
-            if (!resource || !like)
-                return res.status(404).apiResponse();
-        },
-        function(resource, like)
-        {
-            res.apiResponse({ like : like });
-        }
-    );
 }

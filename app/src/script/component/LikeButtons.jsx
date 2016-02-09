@@ -1,5 +1,6 @@
 var React = require('react');
 var ReactIntl = require('react-intl');
+var classNames = require('classnames');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
@@ -28,25 +29,42 @@ var LikeButtons = React.createClass({
     {
         return {
             likeButtonEnabled: true,
-            dislikeButtonEnabled: true
+            dislikeButtonEnabled: true,
+            editable: true,
+            scoreFormat: (score) => '(' + (score > 0 ? '+' + score : score) + ')'
         };
+    },
+
+    displayLikeButton: function()
+    {
+        return this.isAuthenticated() && this.props.likeButtonEnabled
+            && (this.props.editable || (this.props.resource.likes.length && this.props.resource.likes[0].value));
+    },
+
+    displayDislikeButton: function()
+    {
+        return this.isAuthenticated() && this.props.dislikeButtonEnabled
+            && (this.props.editable || (this.props.resource.likes.length && !this.props.resource.likes[0].value));
     },
 
     render: function()
     {
         return (
-            <span style={{display:'inline-block'}}>
-                {this.isAuthenticated() && this.props.likeButtonEnabled
+            <span style={{display:'inline-block'}} className={classNames({
+                    'like-buttons' : true,
+                    'like-buttons-active' : this.props.resource.likes.length > 0
+                })}>
+                {this.displayLikeButton()
                     ? <span className={this.getLikeIconClassNames(true)}
                         title={this.getIntlMessage('text.LIKE_BUTTON_TITLE')}
-                        onClick={(e)=>this.props.likeAction(this.props.resource.id, true)}/>
+                        onClick={(e)=>this.props.editable && this.props.likeAction(this.props.resource, true)}/>
                     : <span/>}
-                {this.isAuthenticated() && this.props.dislikeButtonEnabled
+                {this.displayDislikeButton()
                     ? <span className={this.getLikeIconClassNames(false)}
                         title={this.getIntlMessage('text.DISLIKE_BUTTON_TITLE')}
-                        onClick={(e)=>this.props.likeAction(this.props.resource.id, false)}/>
+                        onClick={(e)=>this.props.editable && this.props.likeAction(this.props.resource, false)}/>
                     : <span/>}
-                <span className="like-score">({this.props.resource.score})</span>
+                <span className="like-score">{this.props.scoreFormat(this.props.resource.score)}</span>
             </span>
         );
 	}

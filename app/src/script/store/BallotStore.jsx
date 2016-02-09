@@ -22,9 +22,9 @@ module.exports = Reflux.createStore({
         return null;
     },
 
-    _fetchBallotByTextId: function(textId)
+    _fetchBallotByTextId: function(textId, noCache)
     {
-        if (this._ballots[textId])
+        if (this._ballots[textId] && !noCache)
         {
             this.trigger(this);
             return false;

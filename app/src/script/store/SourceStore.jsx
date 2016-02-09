@@ -102,24 +102,20 @@ module.exports = Reflux.createStore({
         });
     },
 
-    _likeHandler: function(sourceId, value)
+    _likeHandler: function(source, value)
     {
-        var source = this.getSourceById(sourceId);
-
         if (source.likes && source.likes.length)
         {
             var oldValue = source.likes[0].value;
 
             jquery.get(
-                '/api/source/like/remove/' + sourceId,
+                '/api/source/like/remove/' + source.id,
                 (data) => {
-                    var source = this.getSourceById(sourceId);
-
                     source.likes = [];
                     source.score += data.like.value ? -1 : 1;
 
                     if (value != oldValue)
-                        this._addLike(sourceId, value);
+                        this._addLike(source, value);
 
                     this.trigger(this);
                 }
@@ -128,16 +124,14 @@ module.exports = Reflux.createStore({
             });
         }
         else
-            this._addLike(sourceId, value);
+            this._addLike(source, value);
     },
 
-    _addLike: function(sourceId, value)
+    _addLike: function(source, value)
     {
         jquery.get(
-            '/api/source/like/add/' + sourceId + '/' + value,
+            '/api/source/like/add/' + source.id + '/' + value,
             (data) => {
-                var source = this.getSourceById(sourceId);
-
                 source.likes = [data.like];
                 source.score += data.like.value ? 1 : -1;
 

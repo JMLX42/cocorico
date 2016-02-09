@@ -5,6 +5,7 @@ var ReactRouter = require('react-router');
 var ReactIntl = require('react-intl');
 var ReactDocumentTitle = require('react-document-title');
 var Reflux = require('reflux');
+var Markdown = require('react-remarkable');
 
 var FormattedMessage = ReactIntl.FormattedMessage,
     FormattedTime = ReactIntl.FormattedTime;
@@ -125,6 +126,14 @@ var Text = React.createClass({
                                 </Link>
                                 : <div/>}
                         </ButtonToolbar>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col md={12}>
+                        <h1>{this.state.title}</h1>
+                        <Markdown>
+                           {this.state.content}
+                        </Markdown>
                     </Col>
                 </Row>
             </Grid>

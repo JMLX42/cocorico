@@ -13,6 +13,7 @@ module.exports = Reflux.createStore({
         this.listenTo(TextAction.delete, this._deleteTextById);
         this.listenTo(TextAction.changeStatus, this._changeTextStatus);
         this.listenTo(TextAction.like, this._likeHandler);
+        this.listenTo(TextAction.likeBillPart, this._billPartlikeHandler);
 
         this._clearCache();
         this._lastCreated = null;
@@ -43,6 +44,11 @@ module.exports = Reflux.createStore({
         for (var text of this._texts)
             if (text.id == id)
                 return text;
+
+        // if (this._latest && this._latest !== true)
+        //     for (var text of this._latest)
+        //         if (text.id == id)
+        //             return text;
 
         return null;
     },
@@ -96,6 +102,7 @@ module.exports = Reflux.createStore({
     _fetchTextById: function(textId)
     {
         var text = this.getById(textId);
+
         if (text)
         {
             this.trigger(this);
@@ -241,24 +248,20 @@ module.exports = Reflux.createStore({
         });
     },
 
-    _likeHandler: function(textId, value)
+    _likeHandler: function(text, value)
     {
-        var text = this.getById(textId);
-
         if (text.likes && text.likes.length)
         {
             var oldValue = text.likes[0].value;
 
             jquery.get(
-                '/api/text/like/remove/' + textId,
+                '/api/text/like/remove/' + text.id,
                 (data) => {
-                    var text = this.getById(textId);
-
                     text.likes = [];
                     text.score += data.like.value ? -1 : 1;
 
                     if (value != oldValue)
-                        this._addLike(textId, value);
+                        this._addLike(text, value);
 
                     this.trigger(this);
                 }
@@ -267,16 +270,14 @@ module.exports = Reflux.createStore({
             });
         }
         else
-            this._addLike(textId, value);
+            this._addLike(text, value);
     },
 
-    _addLike: function(textId, value)
+    _addLike: function(text, value)
     {
         jquery.get(
-            '/api/text/like/add/' + textId + '/' + value,
+            '/api/text/like/add/' + text.id + '/' + value,
             (data) => {
-                var text = this.getById(textId);
-
                 text.likes = [data.like];
                 text.score += data.like.value ? 1 : -1;
 
@@ -286,4 +287,45 @@ module.exports = Reflux.createStore({
             this.trigger(this);
         });
     },
+
+    _billPartlikeHandler: function(part, value)
+    {
+        if (part.likes && part.likes.length)
+        {
+            var oldValue = part.likes[0].value;
+
+            jquery.get(
+                '/api/text/part/like/remove/' + part.id,
+                (data) => {
+                    part.likes = [];
+                    part.score += data.like.value ? -1 : 1;
+
+                    if (value != oldValue)
+                        this._addBillPartLike(part, value);
+
+                    this.trigger(this);
+                }
+            ).error((xhr, textStatus, err) => {
+                this.trigger(this);
+            });
+        }
+        else
+            this._addBillPartLike(part, value);
+    },
+
+    _addBillPartLike: function(part, value)
+    {
+        jquery.get(
+            '/api/text/part/like/add/' + part.id + '/' + value,
+            (data) => {
+                part.likes = [data.like];
+                part.score += data.like.value ? 1 : -1;
+
+                this.trigger(this);
+            }
+        ).error((xhr, textStatus, err) => {
+            this.trigger(this);
+        });
+    },
+
 });

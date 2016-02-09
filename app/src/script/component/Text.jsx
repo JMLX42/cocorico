@@ -1,5 +1,4 @@
 var React = require('react');
-var Markdown = require('react-remarkable');
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var ReactDocumentTitle = require('react-document-title');
@@ -26,7 +25,8 @@ var VoteButtonBar = require('./VoteButtonBar'),
     ContributionTabs = require('./ContributionTabs'),
     LikeButtons = require('./LikeButtons'),
     Hint = require('./Hint'),
-    VoteResult = require('./VoteResult');
+    VoteResult = require('./VoteResult'),
+    BillRenderer = require('./BillRenderer');
 
 var BallotStore = require('../store/BallotStore'),
     UserStore = require('../store/UserStore'),
@@ -54,11 +54,39 @@ var Text = React.createClass({
     componentDidMount: function()
     {
         TextAction.show(this.props.textId);
+
+        // if (this.isAuthenticated())
         TextAction.showCurrentUserVote(this.props.textId);
 
         this.listenTo(VoteAction.vote, (textId) => {
             TextAction.show(this.props.textId);
+            this.startPollingBallot();
         });
+    },
+
+    startPollingBallot: function()
+    {
+        if (!!this._ballotPollingInterval)
+            return;
+
+        this._ballotPollingInterval = setInterval(
+            () => {
+                var ballot = this.state.ballots
+                    ? this.state.ballots.getBallotByTextId(this.props.textId)
+                    : null;
+
+                if (ballot && (ballot.status == 'complete' || ballot.error == 404))
+                {
+                    clearInterval(this._ballotPollingInterval);
+                    this._ballotPollingInterval = false;
+                }
+                else
+                {
+                    TextAction.showCurrentUserVote(this.props.textId, true);
+                }
+            },
+            10000
+        );
     },
 
     componentWillReceiveProps: function(nextProps)
@@ -79,6 +107,9 @@ var Text = React.createClass({
         var ballot = this.state.ballots
             ? this.state.ballots.getBallotByTextId(text.id)
             : null;
+
+        if (ballot && ballot.status == 'pending')
+            this.startPollingBallot(text.id);
 
         var currentUser = this.state.users
             ? this.state.users.getCurrentUser()
@@ -102,9 +133,10 @@ var Text = React.createClass({
                         <Row className="section">
                             <Col md={12}>
                                 <div className="text-content">
-                                    <Markdown>
-                                        {text.content.md}
-                                    </Markdown>
+                                    {!!text && !!sources
+                                        ? <BillRenderer bill={text} sources={sources} editable={text.status == 'review'}/>
+                                        : <div/>
+                                    }
                                 </div>
                             </Col>
                         </Row>
@@ -143,7 +175,7 @@ var Text = React.createClass({
                     </Grid>
 
                     {text.status == 'vote' || text.status == 'published'
-                        ? <div className={this.state.ballots && ballot && !ballot.error && ballot.value ? 'voted-' + ballot.value : ''}>
+                        ? <div className={this.state.ballots && ballot && !ballot.error && ballot.status == 'complete' && ballot.value ? 'voted-' + ballot.value : ''}>
                             <Grid>
                                 <Row className="section">
                                     <Col md={12}>
@@ -156,9 +188,14 @@ var Text = React.createClass({
                                                 : <p className="hint">
                                                     {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}
                                                 </p>
-                                            : !!this.state.ballots && (!ballot || ballot.error == 404)
+                                            : !!this.state.ballots && (!ballot || ballot.error == 404 || ballot.status != 'complete')
                                                 ? text.status == 'vote'
-                                                    ? <VoteButtonBar textId={text.id}/>
+                                                    ? !!ballot && ballot.status == 'pending'
+                                                        ? <span>
+                                                            <span className="vote-pending-indicator"/>
+                                                            {this.getIntlMessage('text.VOTE_PENDING')}
+                                                        </span>
+                                                        : <VoteButtonBar textId={text.id}/>
                                                     : <p className="hint">
                                                         {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}
                                                     </p>

@@ -1,0 +1,60 @@
+- set_fact: role_name=blockchain
+
+- name: create role directory
+  file: path={{ project_dir}}/{{ role_name }} state=directory
+
+- name: install ethereum dependencies
+  apt: name=software-properties-common state=present
+
+- name: add ethereum PPAs
+  apt_repository: repo={{ item }}
+  with_items:
+    - ppa:ethereum/ethereum
+    - ppa:ethereum/ethereum-qt
+
+- name: install ethereum
+  apt: name={{ item }} update_cache=yes
+  with_items:
+    - ethereum
+    - cpp-ethereum
+
+- lineinfile: line={{ ethereum_etherbase_password }} dest={{ project_dir}}/{{ role_name }}/password mode=700 state=present create=yes
+  register: ethereum_password_file
+
+- name: create ethereum account
+  shell: geth --datadir {{ ethereum_datadir }} --password {{ project_dir}}/{{ role_name }}/password account new
+  register: result
+  when: ethereum_password_file.changed
+
+- name: extract etherbase address
+  set_fact: ethereum_etherbase_address="{{ result.stdout | regex_replace('^Mining Beneficiary.* (.*)$', '\\1') }}"
+  when: ethereum_password_file.changed
+
+- name: install genesis block
+  template: src=genesis_block.json.j2 dest={{ project_dir}}/{{ role_name }}/genesis_block.json
+  when: ethereum_password_file.changed
+
+- name: install upstart script
+  template: src=blockchain.upstart.conf.j2 dest=/etc/init/cocorico-blockchain.conf
+
+- name: install miner upstart script
+  template: src=blockchain-miner.upstart.conf.j2 dest=/etc/init/cocorico-blockchain-miner.conf
+
+- name: compile all contracts
+  shell: solc /vagrant/contract/{{ item }}.sol --combined-json abi,bin > {{ project_dir}}/{{ role_name }}/{{ item }}.json
+  register: result
+  failed_when: result.stderr
+  with_lines:
+    - find /vagrant/contract/ -name '*.sol' -exec basename {} .sol \;
+
+- name: start the ethereum blockchain service
+  service: name=cocorico-blockchain state=started
+
+- name: start the ethereum blockchain mining service
+  service: name=cocorico-blockchain-miner state=started
+  when: ethereum_mine_on_boot
+
+- name: install apache configuration
+  template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
+  notify:
+    - restart apache2 service

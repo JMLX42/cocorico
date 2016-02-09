@@ -321,6 +321,10 @@ li.active {
     select {
         margin: 0 10px;
     }
+
+    .like-buttons {
+        margin-left: 10px;
+    }
 }
 
 .tabs-my-texts {
@@ -415,6 +419,63 @@ ul.argument-list {
     margin-top: 20px;
 
     button {
-        margin-left: 10px; 
+        margin-left: 10px;
+    }
+}
+
+.vote-pending-indicator {
+    background-image: url(/img/ripple.gif);
+    background-repeat: no-repeat;
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+    margin-bottom: 4px;
+}
+
+.bill-part {
+    transition: opacity .25s ease-in-out;
+    position: relative;
+
+    .like-buttons-active {
+        opacity: 1.0 !important;
+    }
+
+    .like-buttons {
+        opacity: 0.25;
+        position: absolute;
+        left: 100%;
+        padding-left: 20px;
+
+        .icon-btn {
+            margin: 3px 0;
+            display: block;
+        }
+
+        .like-score {
+            margin-left: 0;
+        }
+    }
+}
+
+@media(max-width: @screen-md-max) {
+    .bill-part {
+        margin-right: 50px;
+    }
+}
+
+.bill-part-inactive {
+    opacity: 0.25;
+    transition: opacity .25s ease-in-out;
+    transition-delay: 0.1s;
+}
+
+.bill-part-active {
+    cursor: pointer;
+
+    .like-buttons {
+        opacity: 1.0;
+        transition: opacity .25s ease-in-out;
     }
 }

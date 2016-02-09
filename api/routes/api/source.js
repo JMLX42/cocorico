@@ -8,6 +8,10 @@ var Source = keystone.list('Source'),
 var TextHelper = require('../../helpers/TextHelper'),
     LikeHelper = require('../../helpers/LikeHelper');
 
+exports.addLike = LikeHelper.getAddLikeFunc(Source, 'ERROR_SOURCE_NOT_FOUND', 'ERROR_SOURCE_ALREADY_LIKED');
+
+exports.removeLike = LikeHelper.getRemoveLikeFunc(Source);
+
 exports.list = function(req, res)
 {
     Text.model.findById(req.params.textId)
@@ -36,51 +40,6 @@ exports.list = function(req, res)
                     res.apiResponse({ sources : sources });
                 });
         });
-}
-
-exports.addLike = function(req, res)
-{
-    LikeHelper.addLike(
-        Source.model, req.params.id, req.user, req.params.value == 'true',
-        function(err, resource, like)
-        {
-            if (err)
-                return res.apiError('database error', err);
-
-            if (!resource)
-                return res.status(404).apiResponse({
-                    error: 'error.ERROR_SOURCE_NOT_FOUND'
-                });
-
-            if (like)
-                return res.status(400).apiResponse({
-                    error: 'error.ERROR_SOURCE_ALREADY_LIKED'
-                });
-        },
-        function(resource, like)
-        {
-            return res.apiResponse({ like : like });
-        }
-    );
-}
-
-exports.removeLike = function(req, res)
-{
-    LikeHelper.removeLike(
-        Source.model, req.params.id, req.user,
-        function(err, resource, like)
-        {
-            if (err)
-                return res.apiError('database error', err);
-
-            if (!resource || !authorLike)
-                return res.status(404).apiResponse();
-        },
-        function(resource, like)
-        {
-            res.apiResponse({ like : like });
-        }
-    );
 }
 
 exports.add = function(req, res)

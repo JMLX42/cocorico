@@ -1,3 +1,5 @@
+var config = require('../../config.json');
+
 var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 var redis = require('redis');
@@ -5,7 +7,8 @@ var redis = require('redis');
 var Text = keystone.list('Text'),
     Ballot = keystone.list('Ballot'),
 
-    TextHelper = require('../../helpers/TextHelper');
+    TextHelper = require('../../helpers/TextHelper'),
+	BallotHelper = require('../../helpers/BallotHelper');
 
 exports.resultPerDate = function(req, res)
 {
@@ -168,8 +171,48 @@ exports.result = function(req, res)
         });
 }
 
+function pushBallotOnQueue(text, ballot, callback)
+{
+    if (!config.blockchain.voteEnabled)
+        return callback(null, null);
+
+    require('amqplib/callback_api').connect(
+        'amqp://localhost',
+        function(err, conn)
+        {
+            if (err != null)
+                return callback(err, null);
+
+            conn.createChannel(function(err, ch)
+            {
+                if (err != null)
+                    return callback(err, null);
+
+                var ballotObj = {
+                    ballot : {
+                        id                  : ballot.id,
+                        voteContractAddress : text.voteContractAddress,
+                        value               : ballot.value
+                    }
+                };
+
+                ch.assertQueue('pending-votes');
+                ch.sendToQueue(
+                    'pending-votes',
+                    new Buffer(JSON.stringify(ballotObj)),
+                    { persistent : true }
+                );
+
+                callback(null, ballotObj);
+            });
+        }
+    );
+}
+
 function vote(req, res, value)
 {
+    res.connection.setTimeout(0);
+
 	Text.model.findById(req.params.id).exec(function(err, text)
 	{
 		if (err)
@@ -180,7 +223,7 @@ function vote(req, res, value)
 		if (!TextHelper.textIsReadable(text, req))
 			return res.status(403).send();
 
-		Ballot.getByTextIdAndVoter(
+		BallotHelper.getByTextIdAndVoter(
 			req.params.id,
 			req.user.sub,
 			function(err, ballot)
@@ -203,16 +246,26 @@ function vote(req, res, value)
 					voter: bcrypt.hashSync(req.user.sub, 10),
 					value: value,
                     voterAge : age,
-                    voterGender : req.user.gender
+                    voterGender : req.user.gender,
+                    status: config.blockchain.voteEnabled ? 'pending' : 'complete'
 				});
 
-				ballot.save(function(err)
-				{
-					if (err)
-						return res.apiError('database error', err);
+                ballot.save(function(err, result)
+                {
+                    if (err)
+    					return res.apiError('database error', err);
 
-					res.apiResponse({ ballot: ballot });
-				});
+                    // send the ballot to the vote queue
+                    // if blockchain voting is disabled, it will simply call
+                    // the callback immediately
+                    pushBallotOnQueue(text, ballot, function(err, ballotMsg)
+                    {
+                        if (err)
+                            return res.apiError('queue error', err);
+
+                        return res.apiResponse({ ballot : ballot });
+                    });
+                });
 			}
 		);
 	});
@@ -245,7 +298,7 @@ exports.remove = function(req, res)
 		if (!TextHelper.textIsReadable(text, req))
 			return res.status(403).send();
 
-		Ballot.getByTextIdAndVoter(
+		BallotHelper.getByTextIdAndVoter(
 			req.params.id,
 			req.user.sub,
 			function(err, ballot)
