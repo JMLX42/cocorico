@@ -9,7 +9,7 @@ keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
 keystone.import('../api/models');
 
-var Text = keystone.list('Text');
+var Bill = keystone.list('Bill');
 
 function whenTransactionMined(web3, tx, callback)
 {
@@ -99,7 +99,7 @@ function handleVote(vote, callback)
 {
     mineVoteContract(function(err, res)
     {
-        Text.model.findById(vote.id)
+        Bill.model.findById(vote.id)
             .exec(function(err, bill)
             {
                 if (err)

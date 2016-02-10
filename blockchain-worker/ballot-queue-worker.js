@@ -197,7 +197,7 @@ require('amqplib/callback_api').connect(
             if (err != null)
                 return console.error(err);
 
-            ch.assertQueue('pending-votes');
+            ch.assertQueue('pending-ballots');
             ch.consume(
                 'pending-ballots',
                 function(msg)
