@@ -1,0 +1,18 @@
+description "{{ project_name }}-{{ role_name }}"
+
+{% if is_development_environment %}
+start on vagrant-mounted
+{% else %}
+start on startup
+{% endif %}
+stop on shutdown
+
+start on started {{ project_name }}-blockchain-miner
+stop on stopped {{ project_name }}-blockchain-miner
+
+expect fork
+respawn
+
+script
+    # nothing
+end script

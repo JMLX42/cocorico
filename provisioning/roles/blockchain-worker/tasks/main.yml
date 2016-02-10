@@ -12,14 +12,14 @@
 - name: install npm modules
   npm: path=/vagrant/blockchain-worker
 
-- name: install upstart scripts
+- name: install leader upstrart script
+  template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
+
+- name: install follower upstart scripts
   template: src={{ role_name }}-{{ item }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}-{{ item }}.conf
   with_items:
     - ballot
     - vote
 
-- name: start the worker service
-  service: name=cocorico-blockchain-worker-{{ item }} state=started
-  with_items:
-    - ballot
-    - vote
+- name: start the worker services
+  service: name=cocorico-blockchain-worker state=started
