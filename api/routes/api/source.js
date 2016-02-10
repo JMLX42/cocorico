@@ -6,7 +6,8 @@ var Source = keystone.list('Source'),
     Bill = keystone.list('Bill');
 
 var BillHelper = require('../../helpers/BillHelper'),
-    LikeHelper = require('../../helpers/LikeHelper');
+    LikeHelper = require('../../helpers/LikeHelper'),
+    SourceHelper = require('../../helpers/SourceHelper');
 
 exports.addLike = LikeHelper.getAddLikeFunc(Source, 'ERROR_SOURCE_NOT_FOUND', 'ERROR_SOURCE_ALREADY_LIKED');
 
@@ -65,15 +66,17 @@ exports.add = function(req, res)
 
                     if (source)
                         return res.status(400).apiResponse({
-                            error: 'error.ERROR_SOURCE_ALREADY_EXISTS'
+                            error: 'ERROR_SOURCE_ALREADY_EXISTS'
                         });
 
-                    Source.fetchPageTitle(
+                    SourceHelper.fetchPageTitle(
                         decodeURIComponent(req.body.url),
                         function(error, result)
                         {
+                            console.log(error, result);
+
                             var newSource = Source.model({
-                                title: error ? '' : result.title,
+                                title: error ? '' : result,
                                 url: req.body.url,
                                 author: bcrypt.hashSync(req.user.sub, 10),
                                 bill: bill

@@ -14,7 +14,8 @@ var Bill = keystone.list('Bill'),
 
 	BillHelper = require('../../helpers/BillHelper'),
 	LikeHelper = require('../../helpers/LikeHelper'),
-	BallotHelper = require('../../helpers/BallotHelper');
+	BallotHelper = require('../../helpers/BallotHelper'),
+	SourceHelper = require('../../helpers/SourceHelper');
 
 exports.addLike = LikeHelper.getAddLikeFunc(Bill, 'ERROR_bill_NOT_FOUND', 'ERROR_bill_ALREADY_LIKED');
 
@@ -152,7 +153,7 @@ function updateBillSources(user, bill, next)
             ops.push(function(result, callback)
             {
                 // FIXME: do not fetch pages that are already listed in the bill sources
-                Source.fetchPageTitle(url, function(err, title)
+                SourceHelper.fetchPageTitle(url, function(err, title)
                 {
                     if (err)
                         result.push({url: url, title: ''});

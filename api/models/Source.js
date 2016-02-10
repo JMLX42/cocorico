@@ -1,6 +1,5 @@
 var keystone = require('keystone');
 var transform = require('model-transform');
-var MetaInspector = require('node-metainspector');
 
 var Types = keystone.Field.Types;
 
@@ -18,23 +17,6 @@ Source.add({
 	likes: { type: Types.Relationship, ref: 'Like', required: true, initial: true, many: true, noedit: true },
 	score: { type: Types.Number, required: true, default: 0, format: false }
 });
-
-Source.fetchPageTitle = function(url, callback)
-{
-    var client = new MetaInspector(url, { timeout: 5000 });
-
-    client.on("fetch", function()
-    {
-        callback(null, client.title);
-    });
-
-    client.on("error", function(err)
-    {
-        callback(err, null);
-    });
-
-    client.fetch();
-};
 
 transform.toJSON(Source);
 

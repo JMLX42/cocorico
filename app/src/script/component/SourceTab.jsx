@@ -56,6 +56,7 @@ var SourceTab = React.createClass({
     submitSourceClickHandler: function(event)
     {
         BillAction.addSource(this.props.bill.id, this.state.newSourceURL);
+        this.setState({step: this.STEP_READ});
     },
 
     renderSourceList: function(sources)
