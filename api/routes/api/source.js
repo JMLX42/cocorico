@@ -58,7 +58,7 @@ exports.add = function(req, res)
                 || bill.status != 'review')
     			return res.status(403).send();
 
-            Source.model.findOne({url: req.body.url})
+            Source.model.findOne({url: req.body.url, bill: bill})
                 .exec(function(err, source)
                 {
                     if (err)
