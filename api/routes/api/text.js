@@ -267,7 +267,6 @@ function getBillParts(md)
 function updateBillParts(text, callback)
 {
 	var parts = getBillParts(text.content.md);
-	console.log(parts);
 	var removeOps = text.parts.map(function(part)
 	{
 		return function(callback)
