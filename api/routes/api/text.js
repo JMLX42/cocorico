@@ -226,45 +226,6 @@ function updateBillSources(user, text, next)
     });
 }
 
-function mineVoteContract(callback)
-{
-	if (!config.blockchain.voteEnabled)
-		return callback(null, null);
-
-	var Web3 = require('web3');
-	var web3 = new Web3();
-	web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
-
-	var Vote = require('/opt/cocorico/blockchain/Vote.json');
-	var voteContract = web3.eth.contract(eval(Vote.contracts.Vote.abi));
-	var voteInstance = voteContract.new(
-		3, // num proposals
-		{
-			from    : web3.eth.accounts[0],
-			data    : Vote.contracts.Vote.bin,
-			gas     : 300000
-		},
-		function(error, contract)
-		{
-			if (error)
-				return callback(error, null);
-
-			if (!contract)
-				return;
-
-			if (!contract.address)
-			{
-				// tx sent, hash = contract.transactionHash
-			}
-			else
-			{
-				// tx mined
-				callback(null, contract);
-			}
-		}
-	);
-}
-
 function getBillParts(md)
 {
 	var tree = markdown.parse(md);
@@ -350,6 +311,38 @@ function updateBill(text, user, callback)
 	});
 }
 
+function pushVoteOnQueue(bill, callback)
+{
+	if (!config.blockchain.voteEnabled)
+		return callback(null, null);
+
+	require('amqplib/callback_api').connect(
+		'amqp://localhost',
+		function(err, conn)
+		{
+			if (err != null)
+				return callback(err, null);
+
+			conn.createChannel(function(err, ch)
+			{
+				if (err != null)
+					return callback(err, null);
+
+				var voteMsg = { vote : { id : bill.id } };
+
+				ch.assertQueue('pending-votes');
+				ch.sendToQueue(
+					'pending-votes',
+					new Buffer(JSON.stringify(voteMsg)),
+					{ persistent : true }
+				);
+
+				callback(null, voteMsg);
+			});
+		}
+	);
+}
+
 exports.save = function(req, res)
 {
 	if (!req.body.title)
@@ -382,25 +375,23 @@ exports.save = function(req, res)
 
 					newText.author = bcrypt.hashSync(req.user.sub, 10);
 
-					mineVoteContract(function(error, contract)
+					newText.save(function(err, text)
 					{
-						if (error)
-							return res.apiError('blockchain error', error);
+						if (err)
+							return res.apiError('database error', err);
 
-						if (contract)
-							newText.voteContractAddress = contract.address;
-
-						newText.save(function(err, text)
+						pushVoteOnQueue(text, function(error, voteMsg)
 						{
-							if (err)
-								return res.apiError('database error', err);
+							if (error)
+								return res.apiError('queue error', error);
 
 							return res.apiResponse({
 								action: 'create',
 								text : newText
-							})
+							});
 						});
 					});
+
 				});
 			}
 			else

@@ -185,11 +185,6 @@ function handleBallot(ballot, callback)
     });
 }
 
-function handleVoteContract()
-{
-    // TODO
-}
-
 require('amqplib/callback_api').connect(
     'amqp://localhost',
     function(err, conn)
@@ -204,23 +199,20 @@ require('amqplib/callback_api').connect(
 
             ch.assertQueue('pending-votes');
             ch.consume(
-                'pending-votes',
+                'pending-ballots',
                 function(msg)
                 {
-                    // ch.ack(msg);
-
                     if (msg !== null)
                     {
                         var obj = JSON.parse(msg.content.toString());
 
-                        console.log('consume', obj);
-
                         if (obj.ballot)
+                        {
                             handleBallot(obj.ballot, function(err, ballot)
                             {
-                                console.log('produce', ballot);
                                 ch.ack(msg);
                             });
+                        }
                     }
                 });
         });

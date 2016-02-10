@@ -196,9 +196,9 @@ function pushBallotOnQueue(text, ballot, callback)
                     }
                 };
 
-                ch.assertQueue('pending-votes');
+                ch.assertQueue('pending-ballots');
                 ch.sendToQueue(
-                    'pending-votes',
+                    'pending-ballots',
                     new Buffer(JSON.stringify(ballotObj)),
                     { persistent : true }
                 );
