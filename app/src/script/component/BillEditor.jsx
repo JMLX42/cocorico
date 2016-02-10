@@ -115,7 +115,7 @@ var Bill = React.createClass({
                 <Row>
                     <Col md={12}>
                         <ButtonToolbar>
-                            <Button bsSize="large" bsStyle="primary" onClick={this.handleClick}>
+                            <Button bsSize="large" bsStyle="primary" onClick={this.handleClick} disabled={!this.state.content || !this.state.title}>
                                 {this.getIntlMessage('billEditor.BUTTON_SAVE')}
                             </Button>
                             {!!bill
