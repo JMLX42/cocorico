@@ -13,7 +13,7 @@ Source.add({
 	url: { type: String, default: '', required: true, initial: true },
 	time: { type: Types.Datetime, default: Date.now },
 	author: { type: String, required: false, default: '', initial: true },
-	text: { type: Types.Relationship, ref: 'Text', required: true, initial: true },
+	bill: { type: Types.Relationship, ref: 'Bill', required: true, initial: true },
 	auto: { type: Types.Boolean, required: true, default: false },
 	likes: { type: Types.Relationship, ref: 'Like', required: true, initial: true, many: true, noedit: true },
 	score: { type: Types.Number, required: true, default: 0, format: false }

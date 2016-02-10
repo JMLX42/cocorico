@@ -35,7 +35,7 @@ var Footer = React.createClass({
 
     componentWillMount: function()
     {
-        ArgumentAction.showTextArguments(this.props.text.id);
+        ArgumentAction.showBillArguments(this.props.bill.id);
     },
 
     renderArgumentList: function(args)
@@ -43,7 +43,7 @@ var Footer = React.createClass({
         return (
             <ul className="list-unstyled argument-list">
                 {!args || args.length == 0
-                    ? <li>{this.getIntlMessage('text.NO_ARGUMENT')}</li>
+                    ? <li>{this.getIntlMessage('bill.NO_ARGUMENT')}</li>
                     : args.sort((a, b)=> b.score - a.score).map((arg) => {
                         return (
                             <li>
@@ -63,11 +63,11 @@ var Footer = React.createClass({
     render: function()
     {
         var args = this.state.args
-            ? this.state.args.getArgumentsByTextId(this.props.text.id)
+            ? this.state.args.getArgumentsByBillId(this.props.bill.id)
             : null;
 
         if (this.state.args
-            && this.state.args.textArgumentLoading(this.props.text.id))
+            && this.state.args.billArgumentLoading(this.props.bill.id))
             return (
                 <Grid className="argument-tab">
                     <Row>
@@ -92,7 +92,7 @@ var Footer = React.createClass({
                     ? <Row>
                         <Col md={12}>
                             <p className="hint">
-                                {this.getIntlMessage('text.TOO_LATE_TO_DEBATE')}
+                                {this.getIntlMessage('bill.TOO_LATE_TO_DEBATE')}
                             </p>
                         </Col>
                     </Row>
@@ -101,7 +101,7 @@ var Footer = React.createClass({
                     ? <Row>
                         <Col md={12}>
                             <p className="hint">
-                                {this.renderLoginMessage(this.getIntlMessage('text.ADD_ARGUMENT_LOGIN'))}
+                                {this.renderLoginMessage(this.getIntlMessage('bill.ADD_ARGUMENT_LOGIN'))}
                             </p>
                         </Col>
                     </Row>
@@ -117,7 +117,7 @@ var Footer = React.createClass({
                             </span>
                         </h3>
                         {this.props.editable && this.isAuthenticated()
-                            ? <ArgumentEditor textId={this.props.text.id}
+                            ? <ArgumentEditor billId={this.props.bill.id}
                                 value={true}/>
                             : <div/>}
                         {this.renderArgumentList(pros)}
@@ -132,7 +132,7 @@ var Footer = React.createClass({
                             </span>
                         </h3>
                         {this.props.editable && this.isAuthenticated()
-                            ? <ArgumentEditor textId={this.props.text.id}
+                            ? <ArgumentEditor billId={this.props.bill.id}
                                 value={false}/>
                             : <div/>}
                         {this.renderArgumentList(cons)}

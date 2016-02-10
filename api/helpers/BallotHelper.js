@@ -4,10 +4,10 @@ var bcrypt = require('bcrypt');
 
 var	Ballot = keystone.list('Ballot');
 
-exports.getByTextIdAndVoter = function(textId, voter, callback)
+exports.getByBillIdAndVoter = function(billId, voter, callback)
 {
 	// var client = redis.createClient();
-	var key = 'ballot/' + textId + '/' + voter;
+	var key = 'ballot/' + billId + '/' + voter;
 
 	// client.on('connect', function()
 	// {
@@ -17,7 +17,7 @@ exports.getByTextIdAndVoter = function(textId, voter, callback)
 	// 			return callback(null, JSON.parse(reply));
 
 			Ballot.model.find()
-				.where('text', textId)
+				.where('bill', billId)
 				.exec(function(err, ballots)
 				{
 					if (err)

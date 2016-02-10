@@ -26,14 +26,14 @@ var Intl = {
 			SIGN_IN: "/connexion",
 			PRIVACY_POLICY: "/politique-de-confidentialite",
 			POLL: "/vote",
-			MY_TEXTS: "/mes-textes",
-			CREATE_TEXT: "/texte/nouveau",
-			VIEW_TEXT: "/texte",
-			VIEW_TEXT_TAB_ARGUMENTS: "arguments",
-			VIEW_TEXT_TAB_SOURCES: "sources",
-			VIEW_TEXT_TAB_PROPOSITIONS: "propositions",
-			EDIT_TEXT: "/texte/modifier",
-			DELETE_TEXT: "/texte/supprimer",
+			MY_BILLS: "/mes-textes",
+			CREATE_BILL: "/texte/nouveau",
+			VIEW_BILL: "/texte",
+			VIEW_BILL_TAB_ARGUMENTS: "arguments",
+			VIEW_BILL_TAB_SOURCES: "sources",
+			VIEW_BILL_TAB_PROPOSITIONS: "propositions",
+			EDIT_BILL: "/texte/modifier",
+			DELETE_BILL: "/texte/supprimer",
 			SERVICE_STATUS: "/systeme/etat"
 		},
 
@@ -54,17 +54,17 @@ var Intl = {
 		},
 
 		page: {
-			myTexts : {
+			myBills : {
 				TITLE: "Mes Textes",
-				NO_TEXT: "Aucun texte.",
-				NEW_TEXT: 'Créer un texte'
+				NO_BILL: "Aucun texte.",
+				NEW_BILL: 'Créer un texte'
 			},
 
-			createText: {
+			createBill: {
 				TITLE: "Créer un nouveau texte"
 			},
 
-			editText: {
+			editBill: {
 				TITLE: "Modifier un texte"
 			}
 		},
@@ -73,8 +73,8 @@ var Intl = {
 			SORTED_BY_POPULARITY: "tri{gender, select, male {é} female {ée}}s par popularité"
 		},
 
-		text: {
-			TEXTS: 'Textes',
+		bill: {
+			BILLS: 'Textes',
 			VOTE_YES: 'pour',
 			VOTE_BLANK: 'blanc',
 			VOTE_NO: 'contre',
@@ -96,7 +96,7 @@ var Intl = {
 			NO_ARGUMENT: 'Aucun argument.',
 			ADD_ARGUMENT: 'Ajouter un argument \'{ value }\'',
 			ADD_ARGUMENT_LOGIN: 'Vous devez être connecté pour noter ou proposer un argument.',
-			TEXT_SOURCES: 'Sources mentionnées dans le texte',
+			BILL_SOURCES: 'Sources mentionnées dans le texte',
 			COMMUNITY_SOURCES: 'Sources ajoutées par la communauté',
 			NO_SOURCE: 'Aucune source.',
 			ADD_SOURCE_BUTTON: 'Ajouter une source',
@@ -108,7 +108,7 @@ var Intl = {
 			DISLIKE_BUTTON_TITLE: "Je désapprouve"
 		},
 
-		textEditor: {
+		billEditor: {
 			BUTTON_SAVE: 'Enregistrer',
 			BUTTON_VIEW: 'Voir le texte',
 			TITLE: 'Titre',

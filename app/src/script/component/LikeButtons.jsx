@@ -56,12 +56,12 @@ var LikeButtons = React.createClass({
                 })}>
                 {this.displayLikeButton()
                     ? <span className={this.getLikeIconClassNames(true)}
-                        title={this.getIntlMessage('text.LIKE_BUTTON_TITLE')}
+                        title={this.getIntlMessage('bill.LIKE_BUTTON_TITLE')}
                         onClick={(e)=>this.props.editable && this.props.likeAction(this.props.resource, true)}/>
                     : <span/>}
                 {this.displayDislikeButton()
                     ? <span className={this.getLikeIconClassNames(false)}
-                        title={this.getIntlMessage('text.DISLIKE_BUTTON_TITLE')}
+                        title={this.getIntlMessage('bill.DISLIKE_BUTTON_TITLE')}
                         onClick={(e)=>this.props.editable && this.props.likeAction(this.props.resource, false)}/>
                     : <span/>}
                 <span className="like-score">{this.props.scoreFormat(this.props.resource.score)}</span>

@@ -4,30 +4,30 @@ var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 var redis = require('redis');
 
-var Text = keystone.list('Text'),
+var Bill = keystone.list('Bill'),
     Ballot = keystone.list('Ballot'),
 
-    TextHelper = require('../../helpers/TextHelper'),
+    BillHelper = require('../../helpers/BillHelper'),
 	BallotHelper = require('../../helpers/BallotHelper');
 
 exports.resultPerDate = function(req, res)
 {
-    var textId = req.params.textId;
+    var billId = req.params.billId;
 
-    Text.model.findById(textId)
-        .exec(function(err, text)
+    Bill.model.findById(billId)
+        .exec(function(err, bill)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!text)
+            if (!bill)
                 return res.status(404).send();
 
-            if (!TextHelper.textIsReadable(text, req)
-                || text.status != 'published')
+            if (!BillHelper.billIsReadable(bill, req)
+                || bill.status != 'published')
                 return res.status(403).send();
 
-            Ballot.model.find({text : text})
+            Ballot.model.find({bill : bill})
                 .exec(function(err, ballots)
                 {
                     if (err)
@@ -56,22 +56,22 @@ exports.resultPerDate = function(req, res)
 
 exports.resultPerGender = function(req, res)
 {
-    var textId = req.params.textId;
+    var billId = req.params.billId;
 
-    Text.model.findById(textId)
-        .exec(function(err, text)
+    Bill.model.findById(billId)
+        .exec(function(err, bill)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!text)
+            if (!bill)
                 return res.status(404).send();
 
-            if (!TextHelper.textIsReadable(text, req)
-                || text.status != 'published')
+            if (!BillHelper.billIsReadable(bill, req)
+                || bill.status != 'published')
                 return res.status(403).send();
 
-            Ballot.model.find({text : text})
+            Ballot.model.find({bill : bill})
                 .exec(function(err, ballots)
                 {
                     if (err)
@@ -94,22 +94,22 @@ exports.resultPerGender = function(req, res)
 
 exports.resultPerAge = function(req, res)
 {
-    var textId = req.params.textId;
+    var billId = req.params.billId;
 
-    Text.model.findById(textId)
-        .exec(function(err, text)
+    Bill.model.findById(billId)
+        .exec(function(err, bill)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!text)
+            if (!bill)
                 return res.status(404).send();
 
-            if (!TextHelper.textIsReadable(text, req)
-                || text.status != 'published')
+            if (!BillHelper.billIsReadable(bill, req)
+                || bill.status != 'published')
                 return res.status(403).send();
 
-            Ballot.model.find({text : text})
+            Ballot.model.find({bill : bill})
                 .exec(function(err, ballots)
                 {
                     if (err)
@@ -136,22 +136,22 @@ exports.resultPerAge = function(req, res)
 
 exports.result = function(req, res)
 {
-    var textId = req.params.textId;
+    var billId = req.params.billId;
 
-    Text.model.findById(textId)
-        .exec(function(err, text)
+    Bill.model.findById(billId)
+        .exec(function(err, bill)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!text)
+            if (!bill)
                 return res.status(404).send();
 
-            if (!TextHelper.textIsReadable(text, req)
-                || text.status != 'published')
+            if (!BillHelper.billIsReadable(bill, req)
+                || bill.status != 'published')
                 return res.status(403).send();
 
-            Ballot.model.find({text : text})
+            Ballot.model.find({bill : bill})
                 .exec(function(err, ballots)
                 {
                     if (err)
@@ -171,7 +171,7 @@ exports.result = function(req, res)
         });
 }
 
-function pushBallotOnQueue(text, ballot, callback)
+function pushBallotOnQueue(bill, ballot, callback)
 {
     if (!config.blockchain.voteEnabled)
         return callback(null, null);
@@ -191,7 +191,7 @@ function pushBallotOnQueue(text, ballot, callback)
                 var ballotObj = {
                     ballot : {
                         id                  : ballot.id,
-                        voteContractAddress : text.voteContractAddress,
+                        voteContractAddress : bill.voteContractAddress,
                         value               : ballot.value
                     }
                 };
@@ -213,17 +213,17 @@ function vote(req, res, value)
 {
     res.connection.setTimeout(0);
 
-	Text.model.findById(req.params.id).exec(function(err, text)
+	Bill.model.findById(req.params.id).exec(function(err, bill)
 	{
 		if (err)
 			return res.apiError('database error', err);
-		if (!text)
+		if (!bill)
 			return res.apiError('not found');
 
-		if (!TextHelper.textIsReadable(text, req))
+		if (!BillHelper.billIsReadable(bill, req))
 			return res.status(403).send();
 
-		BallotHelper.getByTextIdAndVoter(
+		BallotHelper.getByBillIdAndVoter(
 			req.params.id,
 			req.user.sub,
 			function(err, ballot)
@@ -242,7 +242,7 @@ function vote(req, res, value)
                 );
 
 				ballot = Ballot.model({
-					text: text,
+					bill: bill,
 					voter: bcrypt.hashSync(req.user.sub, 10),
 					value: value,
                     voterAge : age,
@@ -258,7 +258,7 @@ function vote(req, res, value)
                     // send the ballot to the vote queue
                     // if blockchain voting is disabled, it will simply call
                     // the callback immediately
-                    pushBallotOnQueue(text, ballot, function(err, ballotMsg)
+                    pushBallotOnQueue(bill, ballot, function(err, ballotMsg)
                     {
                         if (err)
                             return res.apiError('queue error', err);
@@ -288,17 +288,17 @@ exports.voteNo = function(req, res)
 
 exports.remove = function(req, res)
 {
-	Text.model.findById(req.params.id).exec(function(err, text)
+	Bill.model.findById(req.params.id).exec(function(err, bill)
 	{
 		if (err)
 			return res.apiError('database error', err);
-		if (!text)
+		if (!bill)
 			return res.apiError('not found');
 
-		if (!TextHelper.textIsReadable(text, req))
+		if (!BillHelper.billIsReadable(bill, req))
 			return res.status(403).send();
 
-		BallotHelper.getByTextIdAndVoter(
+		BallotHelper.getByBillIdAndVoter(
 			req.params.id,
 			req.user.sub,
 			function(err, ballot)

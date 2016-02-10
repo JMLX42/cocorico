@@ -2,10 +2,10 @@ var Reflux = require('reflux');
 
 module.exports = Reflux.createActions({
     'list': {sync: false},
-    'showLatestTexts': {sync: false},
+    'showLatestBills': {sync: false},
     'show': {sync: false},
     'showCurrentUserVote': {sync: false},
-    'listCurrentUserTexts': {sync: false},
+    'listCurrentUserBills': {sync: false},
     'save': {sync: false},
     'delete': {sync: false},
     'changeStatus': {sync: false},

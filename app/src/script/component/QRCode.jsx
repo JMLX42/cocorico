@@ -7,7 +7,7 @@ module.exports = React.createClass({
     {
         var qr = qrcode.qrcode(this.props.type, this.props.level);
 
-        qr.addData(this.props.text);
+        qr.addData(this.props.bill);
         qr.make();
 
         var imgTag = qr.createImgTag(4);

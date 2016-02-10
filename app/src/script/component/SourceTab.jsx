@@ -7,7 +7,7 @@ var $ = require('jquery');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
-var TextAction = require('../action/TextAction'),
+var BillAction = require('../action/BillAction'),
     SourceAction = require('../action/SourceAction');
 
 var SourceStore = require('../store/SourceStore');
@@ -45,7 +45,7 @@ var SourceTab = React.createClass({
 
     componentWillMount: function()
     {
-        TextAction.showSources(this.props.text.id);
+        BillAction.showSources(this.props.bill.id);
     },
 
     addSourceClickHandler: function(event)
@@ -55,7 +55,7 @@ var SourceTab = React.createClass({
 
     submitSourceClickHandler: function(event)
     {
-        TextAction.addSource(this.props.text.id, this.state.newSourceURL);
+        BillAction.addSource(this.props.bill.id, this.state.newSourceURL);
     },
 
     renderSourceList: function(sources)
@@ -83,7 +83,7 @@ var SourceTab = React.createClass({
             return null;
 
         if (this.state.sources
-            && this.state.sources.textSourceLoading(this.props.text.id))
+            && this.state.sources.billSourceLoading(this.props.bill.id))
             return (
                 <Grid>
                     <Row>
@@ -94,12 +94,12 @@ var SourceTab = React.createClass({
                 </Grid>
             );
 
-        var sources = this.state.sources.getSourcesByTextId(this.props.text.id);
+        var sources = this.state.sources.getSourcesByBillId(this.props.bill.id);
 
         if (!sources)
             return null;
 
-        var textSources = sources
+        var billSources = sources
             ? sources.filter((source) => source.auto)
             : null;
         var communitySources = sources
@@ -113,23 +113,23 @@ var SourceTab = React.createClass({
                 <Row>
                     <Col md={12}>
                         <h3>
-                            {this.getIntlMessage('text.TEXT_SOURCES')}
-                            &nbsp;({textSources ? textSources.length : 0})
+                            {this.getIntlMessage('bill.BILL_SOURCES')}
+                            &nbsp;({billSources ? billSources.length : 0})
                             <span className="small">
                                 &nbsp;
                                 <FormattedMessage message={this.getIntlMessage('sort.SORTED_BY_POPULARITY')}
                                     gender="female"/>
                             </span>
                         </h3>
-                        {textSources && textSources.length
-                            ? this.renderSourceList(textSources)
-                            : <p>{this.getIntlMessage('text.NO_SOURCE')}</p>}
+                        {billSources && billSources.length
+                            ? this.renderSourceList(billSources)
+                            : <p>{this.getIntlMessage('bill.NO_SOURCE')}</p>}
                     </Col>
                 </Row>
                 <Row>
                     <Col md={12}>
                         <h3>
-                            {this.getIntlMessage('text.COMMUNITY_SOURCES')}
+                            {this.getIntlMessage('bill.COMMUNITY_SOURCES')}
                             &nbsp;({communitySources ? communitySources.length : 0})
                             <span className="small">
                                 &nbsp;
@@ -139,36 +139,36 @@ var SourceTab = React.createClass({
                         </h3>
                         {communitySources && communitySources.length
                             ? this.renderSourceList(communitySources)
-                            : <p>{this.getIntlMessage('text.NO_SOURCE')}</p>}
+                            : <p>{this.getIntlMessage('bill.NO_SOURCE')}</p>}
                     </Col>
                     {this.props.editable
                         ? <Col md={12}>
                             {!this.isAuthenticated()
                                 ? <p className="hint">
-                                    {this.renderLoginMessage(this.getIntlMessage('text.ADD_SOURCE_LOGIN'))}
+                                    {this.renderLoginMessage(this.getIntlMessage('bill.ADD_SOURCE_LOGIN'))}
                                 </p>
                                 : this.state.step == this.STEP_ADD
                                     ? <form id="form-add-source">
-                                        <h4>{this.getIntlMessage('text.ADD_SOURCE_FORM_TITLE')}</h4>
-                                        <p>{this.getIntlMessage('text.ADD_SOURCE_URL_HINT')}</p>
-                                        <Input type="text" placeholder="http://www.exemple.com"
+                                        <h4>{this.getIntlMessage('bill.ADD_SOURCE_FORM_TITLE')}</h4>
+                                        <p>{this.getIntlMessage('bill.ADD_SOURCE_URL_HINT')}</p>
+                                        <Input type="bill" placeholder="http://www.exemple.com"
                                             id="input-source-url" value={this.state.newSourceURL}
                                             onChange={(e)=>this.setState({ newSourceURL: e.target.value })}/>
                                             {sourceError
                                                 ? <p>{this.getIntlMessage(sourceError.error)}</p>
                                                 : <div/>}
                                         <Button bsStyle="primary" onClick={this.submitSourceClickHandler}>
-                                            {this.getIntlMessage('text.ADD_SOURCE_SUBMIT_BUTTON')}
+                                            {this.getIntlMessage('bill.ADD_SOURCE_SUBMIT_BUTTON')}
                                         </Button>
                                     </form>
                                     : <Button bsStyle="primary" onClick={this.addSourceClickHandler}
                                           id="btn-add-source">
-                                        {this.getIntlMessage('text.ADD_SOURCE_BUTTON')}
+                                        {this.getIntlMessage('bill.ADD_SOURCE_BUTTON')}
                                     </Button>}
                         </Col>
                         : <Col md={12}>
                             <p className="hint">
-                                {this.getIntlMessage('text.TOO_LATE_TO_REVIEW')}
+                                {this.getIntlMessage('bill.TOO_LATE_TO_REVIEW')}
                             </p>
                         </Col>}
                 </Row>

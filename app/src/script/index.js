@@ -13,13 +13,13 @@ var Router = ReactRouter.Router,
 
     App = require('./App'),
     Page = require('./page/Page'),
-    ViewText = require('./page/ViewText'),
-    CreateText = require('./page/CreateText'),
-    EditText = require('./page/EditText'),
-    DeleteText = require('./page/DeleteText'),
+    ViewBill = require('./page/ViewBill'),
+    CreateBill = require('./page/CreateBill'),
+    EditBill = require('./page/EditBill'),
+    DeleteBill = require('./page/DeleteBill'),
     Home = require('./page/Home'),
     Login = require('./page/Login'),
-    MyTexts = require('./page/MyTexts'),
+    MyBills = require('./page/MyBills'),
     ServiceStatus = require('./page/ServiceStatus');
 
 ReactDOM.render(
@@ -27,11 +27,11 @@ ReactDOM.render(
         <Route path='/' component={App}>
             <IndexRoute component={Home}/>
             <Route path={messages.route.SIGN_IN + '/(:redirect)'} component={Login}/>
-            <Route path={messages.route.MY_TEXTS} component={MyTexts}/>
-            <Route path={messages.route.CREATE_TEXT} component={CreateText}/>
-            <Route path={messages.route.EDIT_TEXT + '/:textId/:slug'} component={EditText}/>
-            <Route path={messages.route.VIEW_TEXT + '/:textId/:slug(/:tab)'} component={ViewText}/>
-            <Route path={messages.route.DELETE_TEXT + '/:textId/:slug'} component={DeleteText}/>
+            <Route path={messages.route.MY_BILLS} component={MyBills}/>
+            <Route path={messages.route.CREATE_BILL} component={CreateBill}/>
+            <Route path={messages.route.EDIT_BILL + '/:billId/:slug'} component={EditBill}/>
+            <Route path={messages.route.VIEW_BILL + '/:billId/:slug(/:tab)'} component={ViewBill}/>
+            <Route path={messages.route.DELETE_BILL + '/:billId/:slug'} component={DeleteBill}/>
             <Route path={messages.route.SERVICE_STATUS} component={ServiceStatus}/>
             <Route path='page/:slug' component={Page}/>
             <Route path=':slug' component={Page}/>

@@ -6,11 +6,11 @@ var Reflux = require('reflux');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
-var TextStore = require("../store/TextStore");
+var BillStore = require("../store/BillStore");
 
-var TextAction = require("../action/TextAction");
+var BillAction = require("../action/BillAction");
 
-var TextLink = require("../component/TextLink");
+var BillLink = require("../component/BillLink");
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -20,27 +20,27 @@ var Grid = ReactBootstrap.Grid,
 
 var Link = ReactRouter.Link;
 
-var EditText = React.createClass({
+var EditBill = React.createClass({
 
     mixins: [
-        Reflux.connect(TextStore, 'texts'),
+        Reflux.connect(BillStore, 'bills'),
         ReactIntl.IntlMixin,
         ForceAuthMixin
     ],
 
     componentWillReceiveProps: function(props)
     {
-        TextAction.show(props.params.textId);
+        BillAction.show(props.params.billId);
     },
 
     componentDidMount: function()
     {
-        TextAction.show(this.props.params.textId);
+        BillAction.show(this.props.params.billId);
     },
 
     deleteClickHandler: function(event)
     {
-        TextAction.delete(this.props.params.textId);
+        BillAction.delete(this.props.params.billId);
     },
 
     render: function()
@@ -48,26 +48,26 @@ var EditText = React.createClass({
         if (!this.isAuthenticated())
             return this.renderLoginPage(this.getIntlMessage('login.REQUIRE_LOGIN'));
 
-        var text = this.state && this.state.texts
-            ? this.state.texts.getById(this.props.params.textId)
+        var bill = this.state && this.state.bills
+            ? this.state.bills.getById(this.props.params.billId)
             : null;
 
-        if (!text)
+        if (!bill)
             return null;
 
 		return (
-            <div className="page page-delete-text">
+            <div className="page page-delete-bill">
                 <Grid>
                     <Row>
                         <Col md={12}>
                             <p>
-                                Êtes-vous sûr de vouloir supprimer le texte "
-                                    <TextLink textId={text.id}/>
+                                Êtes-vous sûr de vouloir supprimer le bille "
+                                    <BillLink billId={bill.id}/>
                                 " ?
                                 <br />
                                 Cette opération ne pourra pas être annulée !
                             </p>
-                            <ButtonToolbar className="text-center">
+                            <ButtonToolbar className="bill-center">
                                 <Button bsStyle="danger" bsSize="large" onClick={this.deleteClickHandler}>Supprimer</Button>
                                 <Button bsSize="large">Annuler</Button>
                             </ButtonToolbar>
@@ -79,4 +79,4 @@ var EditText = React.createClass({
 	}
 });
 
-module.exports = EditText;
+module.exports = EditBill;

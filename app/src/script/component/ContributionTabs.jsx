@@ -7,7 +7,7 @@ var Reflux = require('reflux');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
-var TextAction = require('../action/TextAction');
+var BillAction = require('../action/BillAction');
 
 var ArgumentTab = require('./ArgumentTab'),
     SourceTab = require('./SourceTab');
@@ -24,7 +24,7 @@ var Grid = ReactBootstrap.Grid,
     Accordion = ReactBootstrap.Accordion,
     Panel = ReactBootstrap.Panel;
 
-var Text = React.createClass({
+var Bill = React.createClass({
 
     mixins: [
         ForceAuthMixin,
@@ -58,14 +58,14 @@ var Text = React.createClass({
     getTabSlugs: function()
     {
         var slugs = [
-            this.getIntlMessage('route.VIEW_TEXT_TAB_ARGUMENTS'),
-            this.getIntlMessage('route.VIEW_TEXT_TAB_SOURCES'),
-            this.getIntlMessage('route.VIEW_TEXT_TAB_PROPOSITIONS')
+            this.getIntlMessage('route.VIEW_BILL_TAB_ARGUMENTS'),
+            this.getIntlMessage('route.VIEW_BILL_TAB_SOURCES'),
+            this.getIntlMessage('route.VIEW_BILL_TAB_PROPOSITIONS')
         ];
 
-        if (this.props.text.status != 'debate'
-            && this.props.text.status != 'vote'
-            && this.props.text.status != 'published')
+        if (this.props.bill.status != 'debate'
+            && this.props.bill.status != 'vote'
+            && this.props.bill.status != 'published')
         {
             slugs.shift();
         }
@@ -86,9 +86,9 @@ var Text = React.createClass({
     tabSelectHandler: function(key)
     {
         this.context.history.replace(
-            this.getIntlMessage('route.VIEW_TEXT')
-            + '/' + this.props.text.id
-            + '/' + this.props.text.slug
+            this.getIntlMessage('route.VIEW_BILL')
+            + '/' + this.props.bill.id
+            + '/' + this.props.bill.slug
             + '/' + this.getTabSlugByKey(key)
         );
 
@@ -97,40 +97,40 @@ var Text = React.createClass({
 
     renderTabs: function()
     {
-        var text = this.props.text;
+        var bill = this.props.bill;
 
         var sources = this.state.sources
-            ? this.state.sources.getSourcesByTextId(text.id)
+            ? this.state.sources.getSourcesByBillId(bill.id)
             : null;
 
         var args = this.state.args
-            ? this.state.args.getArgumentsByTextId(this.props.text.id)
+            ? this.state.args.getArgumentsByBillId(this.props.bill.id)
             : null;
 
         var eventKey = 1;
 
         return (
             <Tabs animation={false} activeKey={this.state.activeKey} onSelect={this.tabSelectHandler} className="hidden-xs">
-                {text.status == 'debate' || text.status == 'vote' || text.status == 'published'
+                {bill.status == 'debate' || bill.status == 'vote' || bill.status == 'published'
                     ? <Tab eventKey={eventKey++} title={'Arguments (' + (args ? args.length : 0) + ')'}>
-                        <ArgumentTab text={text} editable={this.props.editable && text.status == 'debate'}/>
+                        <ArgumentTab bill={bill} editable={this.props.editable && bill.status == 'debate'}/>
                     </Tab>
                     : <div/>}
                 <Tab eventKey={eventKey++} title={'Sources (' + (sources ? sources.length : 0) + ')'}>
-                    <SourceTab text={text} editable={this.props.editable && text.status == 'review'}/>
+                    <SourceTab bill={bill} editable={this.props.editable && bill.status == 'review'}/>
                 </Tab>
                 <Tab eventKey={eventKey++} title="Propositions (0)">
                     <Grid>
                         <Row>
                             <Col md={12}>
-                                <p>{this.getIntlMessage('text.NO_PROPOSAL')}</p>
-                                {this.props.editable && text.status == 'review'
+                                <p>{this.getIntlMessage('bill.NO_PROPOSAL')}</p>
+                                {this.props.editable && bill.status == 'review'
                                     ? !this.isAuthenticated()
                                         ? <p className="hint">
-                                            {this.renderLoginMessage(this.getIntlMessage('text.ADD_PROPOSAL_LOGIN'))}
+                                            {this.renderLoginMessage(this.getIntlMessage('bill.ADD_PROPOSAL_LOGIN'))}
                                         </p>
                                         : <Button bsStyle="primary">
-                                            {this.getIntlMessage('text.ADD_PROPOSAL')}
+                                            {this.getIntlMessage('bill.ADD_PROPOSAL')}
                                         </Button>
                                     : <div/>}
                             </Col>
@@ -143,10 +143,10 @@ var Text = React.createClass({
 
     renderAccordion: function()
     {
-        var text = this.props.text;
+        var bill = this.props.bill;
 
         var sources = this.state.sources
-            ? this.state.sources.getSourcesByTextId(text.id)
+            ? this.state.sources.getSourcesByBillId(bill.id)
             : null;
 
         var eventKey = 1;
@@ -155,26 +155,26 @@ var Text = React.createClass({
             <Accordion className="hidden-sm hidden-md hidden-lg"
                 activeKey={this.state.activeKey}
                 onSelect={this.tabSelectHandler}>
-                {text.status == 'debate' || text.status == 'vote' || text.status == 'published'
+                {bill.status == 'debate' || bill.status == 'vote' || bill.status == 'published'
                     ? <Panel eventKey={eventKey++} header="Arguments (0)">
-                        <ArgumentTab text={text} editable={this.props.editable && text.status == 'debate'}/>
+                        <ArgumentTab bill={bill} editable={this.props.editable && bill.status == 'debate'}/>
                     </Panel>
                     : <div/>}
                 <Panel eventKey={eventKey++} header={'Sources (' + (sources ? sources.length : 0) + ')'}>
-                    <SourceTab text={text} editable={this.props.editable && text.status == 'review'}/>
+                    <SourceTab bill={bill} editable={this.props.editable && bill.status == 'review'}/>
                 </Panel>
                 <Panel eventKey={eventKey++} header="Propositions (0)">
                     <Grid>
                         <Row>
                             <Col md={12}>
-                                <p>{this.getIntlMessage('text.NO_PROPOSAL')}</p>
-                                {this.props.editable && text.status == 'review'
+                                <p>{this.getIntlMessage('bill.NO_PROPOSAL')}</p>
+                                {this.props.editable && bill.status == 'review'
                                     ? !this.isAuthenticated()
                                         ? <p className="hint">
-                                            {this.renderLoginMessage(this.getIntlMessage('text.ADD_PROPOSAL_LOGIN'))}
+                                            {this.renderLoginMessage(this.getIntlMessage('bill.ADD_PROPOSAL_LOGIN'))}
                                         </p>
                                         : <Button bsStyle="primary">
-                                            {this.getIntlMessage('text.ADD_PROPOSAL')}
+                                            {this.getIntlMessage('bill.ADD_PROPOSAL')}
                                         </Button>
                                     : <div/>}
                             </Col>
@@ -196,4 +196,4 @@ var Text = React.createClass({
     }
 });
 
-module.exports = Text;
+module.exports = Bill;

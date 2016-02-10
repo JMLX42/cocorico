@@ -1,14 +1,14 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 
-var Text = require('../component/Text');
+var Bill = require('../component/Bill');
 
-var ViewText = React.createClass({
+var ViewBill = React.createClass({
 
     getInitialState: function()
     {
         return {
-            textId: null,
+            billId: null,
             tab: null
         };
     },
@@ -16,7 +16,7 @@ var ViewText = React.createClass({
     componentWillReceiveProps: function(nextProps)
     {
         this.setState({
-            textId : nextProps.params.textId,
+            billId : nextProps.params.billId,
             tab: nextProps.params.tab
         });
     },
@@ -24,20 +24,20 @@ var ViewText = React.createClass({
     componentDidMount: function()
     {
         this.setState({
-            textId : this.props.params.textId,
+            billId : this.props.params.billId,
             tab: this.props.params.tab
         });
     },
 
     render: function()
     {
-        if (!this.state.textId)
+        if (!this.state.billId)
             return null;
 
 		return (
-            <Text textId={this.state.textId} tab={this.state.tab}/>
+            <Bill billId={this.state.billId} tab={this.state.tab}/>
 		);
 	}
 });
 
-module.exports = ViewText;
+module.exports = ViewBill;

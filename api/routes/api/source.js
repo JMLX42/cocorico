@@ -3,9 +3,9 @@ var bcrypt = require('bcrypt');
 
 var Source = keystone.list('Source'),
     Like = keystone.list('Like'),
-    Text = keystone.list('Text');
+    Bill = keystone.list('Bill');
 
-var TextHelper = require('../../helpers/TextHelper'),
+var BillHelper = require('../../helpers/BillHelper'),
     LikeHelper = require('../../helpers/LikeHelper');
 
 exports.addLike = LikeHelper.getAddLikeFunc(Source, 'ERROR_SOURCE_NOT_FOUND', 'ERROR_SOURCE_ALREADY_LIKED');
@@ -14,19 +14,19 @@ exports.removeLike = LikeHelper.getRemoveLikeFunc(Source);
 
 exports.list = function(req, res)
 {
-    Text.model.findById(req.params.textId)
-        .exec(function(err, text)
+    Bill.model.findById(req.params.billId)
+        .exec(function(err, bill)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!text)
+            if (!bill)
                 return res.status(404).apiResponse();
 
-            if (!TextHelper.textIsReadable(text, req))
+            if (!BillHelper.billIsReadable(bill, req))
     			return res.status(403).send();
 
-            Source.model.find({text : text})
+            Source.model.find({bill : bill})
                 .populate('likes')
                 .sort('-score')
                 .exec(function(err, sources)
@@ -44,17 +44,17 @@ exports.list = function(req, res)
 
 exports.add = function(req, res)
 {
-    Text.model.findById(req.body.textId)
-        .exec(function(err, text)
+    Bill.model.findById(req.body.billId)
+        .exec(function(err, bill)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!text)
+            if (!bill)
                 return res.status(404).apiResponse();
 
-            if (!TextHelper.textIsReadable(text, req)
-                || text.status != 'review')
+            if (!BillHelper.billIsReadable(bill, req)
+                || bill.status != 'review')
     			return res.status(403).send();
 
             Source.model.findOne({url: req.body.url})
@@ -76,7 +76,7 @@ exports.add = function(req, res)
                                 title: error ? '' : result.title,
                                 url: req.body.url,
                                 author: bcrypt.hashSync(req.user.sub, 10),
-                                text: text
+                                bill: bill
                             });
 
                             newSource.save(function(err)

@@ -37,34 +37,34 @@ exports = module.exports = function(app) {
 	if (config.env == 'development')
 		app.get('/auth/fakeLogin', keystone.middleware.api, routes.api.auth.fakeLogin);
 
-	app.get('/text/list', keystone.middleware.api, routes.api.text.list);
-	app.get('/text/latest', keystone.middleware.api, routes.api.text.latest);
-	app.get('/text/:id', keystone.middleware.api, routes.api.text.get);
-	app.get('/text/getBySlug/:slug', keystone.middleware.api, routes.api.text.getBySlug);
-	app.get('/text/ballot/:id', keystone.middleware.api, isAuthenticated, routes.api.text.getBallot);
-	app.post('/text/save', keystone.middleware.api, isAuthenticated, routes.api.text.save);
-	// app.get('/text/delete/:id', keystone.middleware.api, isAuthenticated, routes.api.text.delete);
-	app.get('/text/status/:id/:status', keystone.middleware.api, isAuthenticated, routes.api.text.status);
-	app.get('/text/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.text.addLike);
-	app.get('/text/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.text.removeLike);
-	app.get('/text/part/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.text.addBillPartLike);
-	app.get('/text/part/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.text.removeBillPartLike);
+	app.get('/bill/list', keystone.middleware.api, routes.api.bill.list);
+	app.get('/bill/latest', keystone.middleware.api, routes.api.bill.latest);
+	app.get('/bill/:id', keystone.middleware.api, routes.api.bill.get);
+	app.get('/bill/getBySlug/:slug', keystone.middleware.api, routes.api.bill.getBySlug);
+	app.get('/bill/ballot/:id', keystone.middleware.api, isAuthenticated, routes.api.bill.getBallot);
+	app.post('/bill/save', keystone.middleware.api, isAuthenticated, routes.api.bill.save);
+	// app.get('/bill/delete/:id', keystone.middleware.api, isAuthenticated, routes.api.bill.delete);
+	app.get('/bill/status/:id/:status', keystone.middleware.api, isAuthenticated, routes.api.bill.status);
+	app.get('/bill/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.bill.addLike);
+	app.get('/bill/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.bill.removeLike);
+	app.get('/bill/part/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.bill.addBillPartLike);
+	app.get('/bill/part/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.bill.removeBillPartLike);
 
-	app.get('/vote/result/:textId', keystone.middleware.api, routes.api.vote.result);
-	app.get('/vote/result/per-gender/:textId', keystone.middleware.api, routes.api.vote.resultPerGender);
-	app.get('/vote/result/per-age/:textId', keystone.middleware.api, routes.api.vote.resultPerAge);
-	app.get('/vote/result/per-date/:textId', keystone.middleware.api, routes.api.vote.resultPerDate);
+	app.get('/vote/result/:billId', keystone.middleware.api, routes.api.vote.result);
+	app.get('/vote/result/per-gender/:billId', keystone.middleware.api, routes.api.vote.resultPerGender);
+	app.get('/vote/result/per-age/:billId', keystone.middleware.api, routes.api.vote.resultPerAge);
+	app.get('/vote/result/per-date/:billId', keystone.middleware.api, routes.api.vote.resultPerDate);
 	app.get('/vote/yes/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteYes);
 	app.get('/vote/blank/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteBlank);
 	app.get('/vote/no/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteNo);
 	app.get('/vote/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.remove);
 
-	app.get('/source/list/:textId', keystone.middleware.api, routes.api.source.list);
+	app.get('/source/list/:billId', keystone.middleware.api, routes.api.source.list);
 	app.post('/source/add', keystone.middleware.api, isAuthenticated, routes.api.source.add);
 	app.get('/source/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.source.addLike);
 	app.get('/source/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.source.removeLike);
 
-	app.get('/argument/list/:textId', keystone.middleware.api, routes.api.argument.list);
+	app.get('/argument/list/:billId', keystone.middleware.api, routes.api.argument.list);
 	app.post('/argument/add', keystone.middleware.api, isAuthenticated, routes.api.argument.add);
 	app.get('/argument/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.argument.addLike);
 	app.get('/argument/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.argument.removeLike);
@@ -75,7 +75,7 @@ exports = module.exports = function(app) {
 	app.get('/page/getBySlug/:slug', keystone.middleware.api, routes.api.page.getBySlug);
 
 	app.get('/user/me', keystone.middleware.api, isAuthenticated, routes.api.user.me);
-	app.get('/user/texts', keystone.middleware.api, isAuthenticated, routes.api.user.texts);
+	app.get('/user/bills', keystone.middleware.api, isAuthenticated, routes.api.user.bills);
 
 	app.get('/service/status', keystone.middleware.api, routes.api.service.getStatus);
 };

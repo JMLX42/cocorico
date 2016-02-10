@@ -4,7 +4,7 @@ var ReactRouter = require('react-router');
 
 var Link = ReactRouter.Link;
 
-var Text = React.createClass({
+var Bill = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin
@@ -13,11 +13,11 @@ var Text = React.createClass({
     render: function()
     {
 		return (
-            <Link to={this.getIntlMessage('route.VIEW_TEXT') + '/' + this.props.text.id + '/' + this.props.text.slug}>
-                {this.props.text.title}
+            <Link to={this.getIntlMessage('route.VIEW_BILL') + '/' + this.props.bill.id + '/' + this.props.bill.slug}>
+                {this.props.bill.title}
             </Link>
 		);
 	}
 });
 
-module.exports = Text;
+module.exports = Bill;

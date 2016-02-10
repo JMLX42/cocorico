@@ -6,7 +6,7 @@ var VoteAction = require('../action/VoteAction');
 module.exports = Reflux.createStore({
     init: function()
     {
-        this.listenTo(VoteAction.showTextVoteResult, this._showTextVoteResultHandler);
+        this.listenTo(VoteAction.showBillVoteResult, this._showBillVoteResultHandler);
 
         this._result = {};
         this._resultPerGender = {};
@@ -14,67 +14,67 @@ module.exports = Reflux.createStore({
         this._resultPerDate = {};
     },
 
-    getVoteResultByTextId: function(textId)
+    getVoteResultByBillId: function(billId)
     {
-        if (this._result[textId] && this._result[textId] !== true)
-            return this._result[textId];
+        if (this._result[billId] && this._result[billId] !== true)
+            return this._result[billId];
 
         return null;
     },
 
-    getVoteResultPerDateByTextId: function(textId)
+    getVoteResultPerDateByBillId: function(billId)
     {
-        if (this._resultPerDate[textId] && this._resultPerDate[textId] !== true)
-            return this._resultPerDate[textId];
+        if (this._resultPerDate[billId] && this._resultPerDate[billId] !== true)
+            return this._resultPerDate[billId];
 
         return null;
     },
 
-    getVoteResultPerGenderByTextId: function(textId)
+    getVoteResultPerGenderByBillId: function(billId)
     {
-        if (this._resultPerGender[textId] && this._resultPerGender[textId] !== true)
-            return this._resultPerGender[textId];
+        if (this._resultPerGender[billId] && this._resultPerGender[billId] !== true)
+            return this._resultPerGender[billId];
 
         return null;
     },
 
-    getVoteResultPerAgeByTextId: function(textId)
+    getVoteResultPerAgeByBillId: function(billId)
     {
-        if (this._resultPerAge[textId] && this._resultPerAge[textId] !== true)
-            return this._resultPerAge[textId];
+        if (this._resultPerAge[billId] && this._resultPerAge[billId] !== true)
+            return this._resultPerAge[billId];
 
         return null;
     },
 
-    _showTextVoteResultHandler: function(textId)
+    _showBillVoteResultHandler: function(billId)
     {
-        this._fetchVoteResult(textId, this._result, '/api/vote/result/');
-        this._fetchVoteResult(textId, this._resultPerGender, '/api/vote/result/per-gender/');
-        this._fetchVoteResult(textId, this._resultPerAge, '/api/vote/result/per-age/');
-        this._fetchVoteResult(textId, this._resultPerDate, '/api/vote/result/per-date/');
+        this._fetchVoteResult(billId, this._result, '/api/vote/result/');
+        this._fetchVoteResult(billId, this._resultPerGender, '/api/vote/result/per-gender/');
+        this._fetchVoteResult(billId, this._resultPerAge, '/api/vote/result/per-age/');
+        this._fetchVoteResult(billId, this._resultPerDate, '/api/vote/result/per-date/');
     },
 
-    _fetchVoteResult: function(textId, collection, endpoint)
+    _fetchVoteResult: function(billId, collection, endpoint)
     {
-        if (collection[textId])
+        if (collection[billId])
         {
-            if (collection[textId] !== true)
+            if (collection[billId] !== true)
                 this.trigger(this);
 
             return;
         }
 
-        collection[textId] = true;
+        collection[billId] = true;
 
         jquery.get(
-            endpoint + textId,
+            endpoint + billId,
             (data) => {
-                collection[textId] = data.result;
+                collection[billId] = data.result;
                 this.trigger(this);
             }
-        ).error((xhr, textStatus, err) => {
-            collection[textId] = { error : xhr.status };
-            this.trigger(this, collection[textId]);
+        ).error((xhr, billStatus, err) => {
+            collection[billId] = { error : xhr.status };
+            this.trigger(this, collection[billId]);
         });
     }
 });

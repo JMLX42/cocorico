@@ -6,96 +6,96 @@ var redis = require('redis');
 var async = require('async');
 var markdown = require('markdown').markdown;
 
-var Text = keystone.list('Text'),
+var Bill = keystone.list('Bill'),
 	Ballot = keystone.list('Ballot'),
 	Source = keystone.list('Source'),
 	Like = keystone.list('Like'),
 	BillPart = keystone.list('BillPart'),
 
-	TextHelper = require('../../helpers/TextHelper'),
+	BillHelper = require('../../helpers/BillHelper'),
 	LikeHelper = require('../../helpers/LikeHelper'),
 	BallotHelper = require('../../helpers/BallotHelper');
 
-exports.addLike = LikeHelper.getAddLikeFunc(Text, 'ERROR_TEXT_NOT_FOUND', 'ERROR_TEXT_ALREADY_LIKED');
+exports.addLike = LikeHelper.getAddLikeFunc(Bill, 'ERROR_bill_NOT_FOUND', 'ERROR_bill_ALREADY_LIKED');
 
-exports.removeLike = LikeHelper.getRemoveLikeFunc(Text);
+exports.removeLike = LikeHelper.getRemoveLikeFunc(Bill);
 
 exports.addBillPartLike = LikeHelper.getAddLikeFunc(BillPart, 'ERROR_BILL_PART_NOT_FOUND', 'ERROR_BILl_PART_ALREADY_LIKED');
 
 exports.removeBillPartLike = LikeHelper.getRemoveLikeFunc(BillPart);
 
 /**
- * List Texts
+ * List Bills
  */
 exports.list = function(req, res)
 {
-	Text.model.find()
+	Bill.model.find()
 		.populate('likes')
 		.select('-parts')
-		.exec(function(err, texts)
+		.exec(function(err, bills)
 	    {
 			if (err)
 				return res.apiError('database error', err);
 
-			texts = TextHelper.filterReadableTexts(texts, req, true)
-			for (var i = 0; i < texts.length; ++i)
-				texts[i].likes = LikeHelper.filterUserLikes(texts[i].likes, req.user);
+			bills = BillHelper.filterReadableBills(bills, req, true)
+			for (var i = 0; i < bills.length; ++i)
+				bills[i].likes = LikeHelper.filterUserLikes(bills[i].likes, req.user);
 
-			res.apiResponse({ texts : texts });
+			res.apiResponse({ bills : bills });
 		});
 }
 
 /**
- * Get Text by ID
+ * Get Bill by ID
  */
 exports.get = function(req, res)
 {
-	Text.model.findById(req.params.id)
+	Bill.model.findById(req.params.id)
 		.deepPopulate('likes parts.likes')
-		.exec(function(err, text)
+		.exec(function(err, bill)
     {
 		if (err)
 			return res.apiError('database error', err);
 
-		if (!text)
+		if (!bill)
 			return res.apiError('not found');
 
-		if (!TextHelper.textIsReadable(text, req))
+		if (!BillHelper.billIsReadable(bill, req))
 			return res.status(403).send();
 
-		text.likes = LikeHelper.filterUserLikes(text.likes, req.user);
-		for (var part of text.parts)
+		bill.likes = LikeHelper.filterUserLikes(bill.likes, req.user);
+		for (var part of bill.parts)
 			part.likes = LikeHelper.filterUserLikes(part.likes, req.user);
 
-		res.apiResponse({ text : text });
+		res.apiResponse({ bill : bill });
 	});
 }
 
 exports.latest = function(req, res)
 {
-	Text.model.find()
+	Bill.model.find()
 		.sort('-publishedAt')
 		.limit(10)
 		.populate('likes')
 		.select('-parts')
-		.exec(function(err, texts)
+		.exec(function(err, bills)
 	    {
 			if (err)
 				return res.apiError('database error', err);
-			if (!texts)
+			if (!bills)
 				return res.apiError('not found');
 
-			texts = TextHelper.filterReadableTexts(texts, req, true)
-			for (var i = 0; i < texts.length; ++i)
-				texts[i].likes = LikeHelper.filterUserLikes(texts[i].likes, req.user);
+			bills = BillHelper.filterReadableBills(bills, req, true)
+			for (var i = 0; i < bills.length; ++i)
+				bills[i].likes = LikeHelper.filterUserLikes(bills[i].likes, req.user);
 
-			res.apiResponse({ texts : texts });
+			res.apiResponse({ bills : bills });
 		});
 }
 
 exports.getBallot = function(req, res)
 {
-	BallotHelper.getByTextIdAndVoter(
+	BallotHelper.getByBillIdAndVoter(
 		req.params.id,
 		req.user.sub,
 		function(err, ballot)
@@ -114,44 +114,44 @@ exports.getBallot = function(req, res)
 }
 
 /**
- * Get Text by slug
+ * Get Bill by slug
  */
 exports.getBySlug = function(req, res)
 {
-	Text.model.findOne()
+	Bill.model.findOne()
 		.where('slug', req.params.slug)
 		.populate('likes')
 		.populate('parts')
-		.exec(function(err, text)
+		.exec(function(err, bill)
 	    {
 			if (err)
 				return res.apiError('database error', err);
 
-			if (!text)
+			if (!bill)
 				return res.status(404).send();
 
-			if (!TextHelper.textIsReadable(text, req))
+			if (!BillHelper.billIsReadable(bill, req))
 				return res.status(403).send();
 
-			text.likes = LikeHelper.filterUserLikes(text.likes, req.user);
-			for (var part of text.parts)
+			bill.likes = LikeHelper.filterUserLikes(bill.likes, req.user);
+			for (var part of bill.parts)
 				part.likes = LikeHelper.filterUserLikes(part.likes, req.user);
 
-			res.apiResponse({ text: text });
+			res.apiResponse({ bill: bill });
 		});
 }
 
-function updateBillSources(user, text, next)
+function updateBillSources(user, bill, next)
 {
     var mdLinkRegex = new RegExp(/\[([^\[]+)\]\(([^\)]+)\)/g);
     var ops = [function(callback) { callback(null, []); }];
 
-    while (match = mdLinkRegex.exec(text.content.md))
+    while (match = mdLinkRegex.exec(bill.content.md))
     {
         (function(url) {
             ops.push(function(result, callback)
             {
-                // FIXME: do not fetch pages that are already listed in the text sources
+                // FIXME: do not fetch pages that are already listed in the bill sources
                 Source.fetchPageTitle(url, function(err, title)
                 {
                     if (err)
@@ -171,7 +171,7 @@ function updateBillSources(user, text, next)
             function(callback)
             {
 				var urls = result.map(function(sourceData) { return sourceData.url; });
-                Source.model.find({text: text, auto: true, url: {$nin : urls}})
+                Source.model.find({bill: bill, auto: true, url: {$nin : urls}})
 					.remove(function(err)
 	                {
 	                    callback(err);
@@ -190,7 +190,7 @@ function updateBillSources(user, text, next)
             {
                 return function(callback)
                 {
-                    Source.model.findOne({url : sourceData.url, text : text})
+                    Source.model.findOne({url : sourceData.url, bill : bill})
                         .exec(function(err, source)
                         {
                             if (err)
@@ -206,7 +206,7 @@ function updateBillSources(user, text, next)
                                     url: sourceData.url,
                                     auto: true,
                                     author: bcrypt.hashSync(user.sub, 10),
-                                    text: text
+                                    bill: bill
                                 });
                             }
 
@@ -264,10 +264,10 @@ function getBillParts(md)
 	return parts;
 }
 
-function updateBillParts(text, callback)
+function updateBillParts(bill, callback)
 {
-	var parts = getBillParts(text.content.md);
-	var removeOps = text.parts.map(function(part)
+	var parts = getBillParts(bill.content.md);
+	var removeOps = bill.parts.map(function(part)
 	{
 		return function(callback)
 		{
@@ -292,20 +292,20 @@ function updateBillParts(text, callback)
 		removeOps.concat(saveOps),
 		function(error)
 		{
-			text.parts = parts;
+			bill.parts = parts;
 			callback(error);
 		}
 	);
 }
 
-function updateBill(text, user, callback)
+function updateBill(bill, user, callback)
 {
-	updateBillSources(user, text, function(error)
+	updateBillSources(user, bill, function(error)
 	{
 		if (error)
 			return callback(error);
 
-		updateBillParts(text, function(error)
+		updateBillParts(bill, function(error)
 		{
 			callback(error);
 		})
@@ -352,43 +352,43 @@ exports.save = function(req, res)
 	if (!req.body.content)
 		return res.status(400).apiResponse({ error : 'missing content' });
 
-	var newText = Text.model({
+	var newBill = Bill.model({
 		title: req.body.title,
 		content: { md: req.body.content }
 	});
 
-	Text.model.findOne(req.body.id ? {_id : req.body.id} : {slug: newText.slug})
+	Bill.model.findOne(req.body.id ? {_id : req.body.id} : {slug: newBill.slug})
 		.select('-likes')
 		.populate('parts')
-		.exec(function(err, text)
+		.exec(function(err, bill)
 	    {
 			if (err)
 				return res.apiError('database error', err);
-			if (text && !TextHelper.textIsReadable(text, req))
+			if (bill && !BillHelper.billIsReadable(bill, req))
 				return res.status(403).send();
 
-			if (!text)
+			if (!bill)
 			{
-				updateBill(newText, req.user, function(err)
+				updateBill(newBill, req.user, function(err)
 				{
 					if (err)
 						return res.apiError('database error', err);
 
-					newText.author = bcrypt.hashSync(req.user.sub, 10);
+					newBill.author = bcrypt.hashSync(req.user.sub, 10);
 
-					newText.save(function(err, text)
+					newBill.save(function(err, bill)
 					{
 						if (err)
 							return res.apiError('database error', err);
 
-						pushVoteOnQueue(text, function(error, voteMsg)
+						pushVoteOnQueue(bill, function(error, voteMsg)
 						{
 							if (error)
 								return res.apiError('queue error', error);
 
 							return res.apiResponse({
 								action: 'create',
-								text : newText
+								bill : newBill
 							});
 						});
 					});
@@ -397,26 +397,26 @@ exports.save = function(req, res)
 			}
 			else
 			{
-				if (bcrypt.compareSync(req.user.sub, text.author))
+				if (bcrypt.compareSync(req.user.sub, bill.author))
 				{
-					text.title = newText.title;
-					text.content.md = newText.content.md;
+					bill.title = newBill.title;
+					bill.content.md = newBill.content.md;
 
-					updateBill(text, req.user, function(err)
+					updateBill(bill, req.user, function(err)
 					{
 						if (err)
 							return res.apiError('database error', err);
 
-						text.save(function(err, text)
+						bill.save(function(err, bill)
 						{
 							if (err)
 								return res.apiError('database error', err);
 
-							delete text.likes;
+							delete bill.likes;
 
 							return res.apiResponse({
 								action: 'update',
-								text : text
+								bill : bill
 							});
 						});
 					});
@@ -429,7 +429,7 @@ exports.save = function(req, res)
 
 // exports.delete = function(req, res)
 // {
-// 	Text.model.findById(req.params.id).remove(function(err)
+// 	Bill.model.findById(req.params.id).remove(function(err)
 // 	{
 // 		if (err)
 // 			return res.apiError('database error', err);
@@ -440,30 +440,30 @@ exports.save = function(req, res)
 
 exports.status = function(req, res)
 {
-	Text.model.findById(req.params.id)
-		.exec(function(err, text)
+	Bill.model.findById(req.params.id)
+		.exec(function(err, bill)
 	    {
 			if (err)
 				return res.apiError('database error', err);
 
-			if (!text)
+			if (!bill)
 				return res.status(404).send();
 
-			if (!bcrypt.compareSync(req.user.sub, text.author))
+			if (!bcrypt.compareSync(req.user.sub, bill.author))
 				return res.status(403).send();
 
-			if (req.params.status == 'published' && text.status != 'published')
-				text.publishedAt = Date.now();
+			if (req.params.status == 'published' && bill.status != 'published')
+				bill.publishedAt = Date.now();
 
-			text.status = req.params.status;
-			text.save(function(err)
+			bill.status = req.params.status;
+			bill.save(function(err)
 			{
 				if (err)
 					return res.apiError('database error', err);
 
 				return res.apiResponse({
 					action: 'update',
-					text : text
+					bill : bill
 				});
 			});
 		});

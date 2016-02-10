@@ -6,7 +6,7 @@ var ArgumentAction = require('../action/ArgumentAction');
 module.exports = Reflux.createStore({
     init: function()
     {
-        this.listenTo(ArgumentAction.showTextArguments, this._fetchArgumentsByTextId);
+        this.listenTo(ArgumentAction.showBillArguments, this._fetchArgumentsByBillId);
         this.listenTo(ArgumentAction.like, this._likeHandler);
         this.listenTo(ArgumentAction.add, this._addHandler);
 
@@ -15,47 +15,47 @@ module.exports = Reflux.createStore({
 
     getArgumentById: function(argumentId)
     {
-        for (var textId in this._arguments)
-            if (this._arguments[textId] !== true)
-                for (var arg of this._arguments[textId])
+        for (var billId in this._arguments)
+            if (this._arguments[billId] !== true)
+                for (var arg of this._arguments[billId])
                     if (arg.id == argumentId)
                         return arg;
 
         return null;
     },
 
-    getArgumentsByTextId: function(textId)
+    getArgumentsByBillId: function(billId)
     {
-        if (this._arguments[textId] && this._arguments[textId] !== true)
-            return this._arguments[textId];
+        if (this._arguments[billId] && this._arguments[billId] !== true)
+            return this._arguments[billId];
 
         return null;
     },
 
-    textArgumentLoading: function(textId)
+    billArgumentLoading: function(billId)
     {
-        return this._arguments[textId] === true;
+        return this._arguments[billId] === true;
     },
 
-    _fetchArgumentsByTextId: function(textId)
+    _fetchArgumentsByBillId: function(billId)
     {
-        if (this._arguments[textId])
+        if (this._arguments[billId])
         {
             this.trigger(this);
             return false;
         }
 
-        this._arguments[textId] = true;
+        this._arguments[billId] = true;
 
         jquery.get(
-            '/api/argument/list/' + textId,
+            '/api/argument/list/' + billId,
             (data) => {
-                this._arguments[textId] = data.arguments;
+                this._arguments[billId] = data.arguments;
                 this.trigger(this);
             }
-        ).error((xhr, textStatus, err) => {
-            this._arguments[textId] = { error: xhr.status };
-            this.trigger(this, this._arguments[textId]);
+        ).error((xhr, billStatus, err) => {
+            this._arguments[billId] = { error: xhr.status };
+            this.trigger(this, this._arguments[billId]);
         });
 
         return true;
@@ -78,7 +78,7 @@ module.exports = Reflux.createStore({
 
                     this.trigger(this);
                 }
-            ).error((xhr, textStatus, err) => {
+            ).error((xhr, billStatus, err) => {
                 this.trigger(this);
             });
         }
@@ -96,27 +96,27 @@ module.exports = Reflux.createStore({
 
                 this.trigger(this);
             }
-        ).error((xhr, textStatus, err) => {
+        ).error((xhr, billStatus, err) => {
             this.trigger(this);
         });
     },
 
-    _addHandler: function(textId, value, title, content)
+    _addHandler: function(billId, value, title, content)
     {
         jquery.post(
             '/api/argument/add',
             {
-                textId  : textId,
+                billId  : billId,
                 value   : value,
                 title   : title,
                 content : content
             },
             (data) => {
-                this._arguments[textId].push(data.argument);
+                this._arguments[billId].push(data.argument);
 
                 this.trigger(this);
             }
-        ).error((xhr, textStatus, err) => {
+        ).error((xhr, billStatus, err) => {
             this.trigger(this);
         });
     }

@@ -19,17 +19,17 @@ var Grid = ReactBootstrap.Grid,
 
 var Link = ReactRouter.Link;
 
-var TextAction = require('../action/TextAction'),
+var BillAction = require('../action/BillAction'),
     UserAction = require('../action/UserAction');
 
-var TextStore = require('../store/TextStore'),
+var BillStore = require('../store/BillStore'),
     UserStore = require('../store/UserStore');
 
-var Text = React.createClass({
+var Bill = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin,
-        Reflux.connect(TextStore, 'texts'),
+        Reflux.connect(BillStore, 'bills'),
         Reflux.connect(UserStore, 'users')
     ],
 
@@ -44,36 +44,36 @@ var Text = React.createClass({
 
     componentDidMount: function()
     {
-        this.listenTo(TextStore, (store) => {
-            var text = this.props.textId
-                ? store.getById(this.props.textId)
+        this.listenTo(BillStore, (store) => {
+            var bill = this.props.billId
+                ? store.getById(this.props.billId)
                 : store.getLastCreated();
 
-            if (text)
+            if (bill)
             {
                 this.setState({
-                    id: text.id,
-                    title: text.title,
-                    content: text.content.md
+                    id: bill.id,
+                    title: bill.title,
+                    content: bill.content.md
                 });
             }
         });
 
-        if (this.props.textId)
-            TextAction.show(this.props.textId);
+        if (this.props.billId)
+            BillAction.show(this.props.billId);
 
         UserAction.requireLogin();
     },
 
     componentWillReceiveProps: function(props)
     {
-        if (props.textId)
-            this.setState({id : props.textId});
+        if (props.billId)
+            this.setState({id : props.billId});
     },
 
     handleClick: function()
     {
-        TextAction.save(this.state.id, this.state.title, this.state.content);
+        BillAction.save(this.state.id, this.state.title, this.state.content);
     },
 
     handleTitleChange: function(event)
@@ -88,27 +88,27 @@ var Text = React.createClass({
 
     render: function()
     {
-        var text = this.state && this.state.texts
-            ? this.state.texts.getById(this.state.id)
+        var bill = this.state && this.state.bills
+            ? this.state.bills.getById(this.state.id)
             : null;
 
         return (
-            <Grid className="text-editor">
+            <Grid className="bill-editor">
                 <Row>
                     <Col md={12}>
-                        <h2>{this.getIntlMessage('textEditor.TITLE')}</h2>
-                        <Input type="text" name="title" value={this.state.title}
+                        <h2>{this.getIntlMessage('billEditor.TITLE')}</h2>
+                        <Input type="bill" name="title" value={this.state.title}
                                onChange={this.handleTitleChange}
-                               placeholder={this.getIntlMessage('textEditor.TITLE_PLACEHOLDER')}>
+                               placeholder={this.getIntlMessage('billEditor.TITLE_PLACEHOLDER')}>
                         </Input>
                     </Col>
                 </Row>
                 <Row>
                     <Col md={12}>
-                        <h2>{this.getIntlMessage('textEditor.CONTENT')}</h2>
-                        <Input type="textarea" name="content" className="text-content"
+                        <h2>{this.getIntlMessage('billEditor.CONTENT')}</h2>
+                        <Input type="textarea" name="content" className="bill-content"
                                value={this.state.content} onChange={this.handleContentChange}
-                               placeholder={this.getIntlMessage('textEditor.CONTENT_PLACEHOLDER')}>
+                               placeholder={this.getIntlMessage('billEditor.CONTENT_PLACEHOLDER')}>
                         </Input>
                     </Col>
                 </Row>
@@ -116,12 +116,12 @@ var Text = React.createClass({
                     <Col md={12}>
                         <ButtonToolbar>
                             <Button bsSize="large" bsStyle="primary" onClick={this.handleClick}>
-                                {this.getIntlMessage('textEditor.BUTTON_SAVE')}
+                                {this.getIntlMessage('billEditor.BUTTON_SAVE')}
                             </Button>
-                            {!!text
-                                ? <Link to={this.getIntlMessage('route.VIEW_TEXT') + '/' + text.id + '/' + text.slug}>
+                            {!!bill
+                                ? <Link to={this.getIntlMessage('route.VIEW_BILL') + '/' + bill.id + '/' + bill.slug}>
                                     <Button bsSize="large" bsStyle="link">
-                                        {this.getIntlMessage('textEditor.BUTTON_VIEW')}
+                                        {this.getIntlMessage('billEditor.BUTTON_VIEW')}
                                     </Button>
                                 </Link>
                                 : <div/>}
@@ -141,4 +141,4 @@ var Text = React.createClass({
 	}
 });
 
-module.exports = Text;
+module.exports = Bill;

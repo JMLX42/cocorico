@@ -1,15 +1,15 @@
 var Reflux = require('reflux');
 var jquery = require('jquery');
 
-var TextAction = require('../action/TextAction'),
+var BillAction = require('../action/BillAction'),
     SourceAction = require('../action/SourceAction');
 
 module.exports = Reflux.createStore({
     init: function()
     {
-        this.listenTo(TextAction.showSources, this._fetchSourcesByTextId);
-        this.listenTo(TextAction.save, this._textSaveHandler);
-        this.listenTo(TextAction.addSource, this._addSourceHandler);
+        this.listenTo(BillAction.showSources, this._fetchSourcesByBillId);
+        this.listenTo(BillAction.save, this._billSaveHandler);
+        this.listenTo(BillAction.addSource, this._addSourceHandler);
         this.listenTo(SourceAction.like, this._likeHandler);
 
         this._sources = {};
@@ -29,74 +29,74 @@ module.exports = Reflux.createStore({
 
     getSourceById: function(sourceId)
     {
-        for (var textId in this._sources)
-            if (this._sources[textId] !== true)
-                for (var source of this._sources[textId])
+        for (var billId in this._sources)
+            if (this._sources[billId] !== true)
+                for (var source of this._sources[billId])
                     if (source.id == sourceId)
                         return source;
 
         return null;
     },
 
-    getSourcesByTextId: function(textId)
+    getSourcesByBillId: function(billId)
     {
-        if (this._sources[textId] && this._sources[textId] !== true)
-            return this._sources[textId];
+        if (this._sources[billId] && this._sources[billId] !== true)
+            return this._sources[billId];
 
         return null;
     },
 
-    textSourceLoading: function(textId)
+    billSourceLoading: function(billId)
     {
-        return this._sources[textId] === true;
+        return this._sources[billId] === true;
     },
 
-    _fetchSourcesByTextId: function(textId)
+    _fetchSourcesByBillId: function(billId)
     {
         this.clearError();
 
-        if (this._sources[textId])
+        if (this._sources[billId])
         {
             this.trigger(this);
             return false;
         }
 
-        this._sources[textId] = true;
+        this._sources[billId] = true;
 
         jquery.get(
-            '/api/source/list/' + textId,
+            '/api/source/list/' + billId,
             (data) => {
-                this._sources[textId] = data.sources;
+                this._sources[billId] = data.sources;
                 this.trigger(this);
             }
-        ).error((xhr, textStatus, err) => {
-            this._sources[textId] = { error: xhr.status };
+        ).error((xhr, billStatus, err) => {
+            this._sources[billId] = { error: xhr.status };
             this.trigger(this);
         });
 
         return true;
     },
 
-    _textSaveHandler: function(textId, title, content)
+    _billSaveHandler: function(billId, title, content)
     {
-        delete this._sources[textId];
+        delete this._sources[billId];
     },
 
-    _addSourceHandler: function(textId, url)
+    _addSourceHandler: function(billId, url)
     {
         this.clearError();
 
         jquery.post(
             '/api/source/add/',
             {
-                textId: textId,
+                billId: billId,
                 url: url
             },
             (data) => {
-                this._sources[textId].push(data.source);
+                this._sources[billId].push(data.source);
                 this.trigger(this);
             }
-        ).error((xhr, textStatus, err) => {
+        ).error((xhr, billStatus, err) => {
             this._error = xhr.responseJSON;
             this.trigger(this);
         });
@@ -119,7 +119,7 @@ module.exports = Reflux.createStore({
 
                     this.trigger(this);
                 }
-            ).error((xhr, textStatus, err) => {
+            ).error((xhr, billStatus, err) => {
                 this.trigger(this);
             });
         }
@@ -137,7 +137,7 @@ module.exports = Reflux.createStore({
 
                 this.trigger(this);
             }
-        ).error((xhr, textStatus, err) => {
+        ).error((xhr, billStatus, err) => {
             this.trigger(this);
         });
     }

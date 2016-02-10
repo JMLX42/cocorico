@@ -16,7 +16,7 @@ var Hint = require('./Hint');
 
 var ArgumentAction = require('../action/ArgumentAction');
 
-var Text = React.createClass({
+var Bill = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin
@@ -41,7 +41,7 @@ var Text = React.createClass({
     buttonClickHandler: function(e)
     {
         ArgumentAction.add(
-            this.props.textId,
+            this.props.billId,
             this.props.value,
             this.state.argumentTitle,
             this.state.argumentContent
@@ -58,8 +58,8 @@ var Text = React.createClass({
                     <Button bsStyle={this.props.value ? 'primary' : 'danger'}
                         onClick={(e)=>this.setState({expanded:true})}
                         className="btn-add-argument">
-                        <FormattedMessage message={this.getIntlMessage('text.ADD_ARGUMENT')}
-                            value={this.getIntlMessage('text.VOTE_YES')}/>
+                        <FormattedMessage message={this.getIntlMessage('bill.ADD_ARGUMENT')}
+                            value={this.getIntlMessage('bill.VOTE_YES')}/>
                     </Button>
                 </div>
             );
@@ -68,7 +68,7 @@ var Text = React.createClass({
             <div className="argument-editor">
                 <Row>
                     <Col md={12}>
-                        <Input type="text"
+                        <Input type="bill"
                             placeholder="Titre de votre argument"
                             onChange={(e)=>this.setState({ argumentTitle: e.target.value })}/>
                     </Col>
@@ -76,7 +76,7 @@ var Text = React.createClass({
                 <Row>
                     <Col md={12}>
                         <Input type="textarea"
-                            placeholder="Texte de votre argument"
+                            placeholder="Bille de votre argument"
                             onChange={(e)=>this.setState({ argumentContent: e.target.value })}/>
                     </Col>
                 </Row>
@@ -96,4 +96,4 @@ var Text = React.createClass({
 	}
 });
 
-module.exports = Text;
+module.exports = Bill;

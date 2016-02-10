@@ -7,11 +7,11 @@ var Reflux = require('reflux');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
-var TextStore = require('../store/TextStore');
+var BillStore = require('../store/BillStore');
 
-var TextAction = require('../action/TextAction');
+var BillAction = require('../action/BillAction');
 
-var TextEditor = require('../component/TextEditor');
+var BillEditor = require('../component/BillEditor');
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -19,7 +19,7 @@ var Grid = ReactBootstrap.Grid,
 
 var Link = ReactRouter.Link;
 
-var CreateText = React.createClass({
+var CreateBill = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin,
@@ -32,21 +32,21 @@ var CreateText = React.createClass({
             return this.renderLoginPage(this.getIntlMessage('login.REQUIRE_LOGIN'));
 
 		return (
-            <ReactDocumentTitle title={this.getIntlMessage('page.createText.TITLE') + ' - ' + this.getIntlMessage('site.TITLE')}>
-                <div className="page page-create-text">
+            <ReactDocumentTitle title={this.getIntlMessage('page.createBill.TITLE') + ' - ' + this.getIntlMessage('site.TITLE')}>
+                <div className="page page-create-bill">
                     <Grid>
                         <Row>
                             <Col md={12}>
-                                <h1>{this.getIntlMessage('page.createText.TITLE')}</h1>
+                                <h1>{this.getIntlMessage('page.createBill.TITLE')}</h1>
                             </Col>
                         </Row>
                     </Grid>
 
-                    <TextEditor />
+                    <BillEditor />
                 </div>
             </ReactDocumentTitle>
 		);
 	}
 });
 
-module.exports = CreateText;
+module.exports = CreateBill;

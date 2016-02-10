@@ -13,7 +13,7 @@ var VoteButton = React.createClass({
 
     handleClick: function()
     {
-        VoteAction.vote(this.props.text, this.props.value);
+        VoteAction.vote(this.props.bill, this.props.value);
     },
 
     render: function()
@@ -22,7 +22,7 @@ var VoteButton = React.createClass({
             <Button bsSize="large"
                     className={this.props.className}
                     onClick={this.handleClick}>
-                <FormattedMessage message={this.getIntlMessage('text.VOTE')}
+                <FormattedMessage message={this.getIntlMessage('bill.VOTE')}
                                   value={this.getIntlMessage(this.props.message)}/>
             </Button>
 		);

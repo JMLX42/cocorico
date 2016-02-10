@@ -4,17 +4,15 @@ var transform = require('model-transform');
 var bcrypt = require('bcrypt');
 var deepPopulate = require('mongoose-deep-populate')(keystone.mongoose);
 
-var Source = keystone.list('Source');
-
 var Types = keystone.Field.Types;
 
-var Text = new keystone.List('Text', {
+var Bill = new keystone.List('Bill', {
     autokey: { path: 'slug', from: 'title', unique: true },
     map: { name: 'title' },
     defaultSort: '-createdAt'
 });
 
-Text.add({
+Bill.add({
 	title: { type: String, required: true },
 	createdAt: { type: Date, default: Date.now },
     publishedAt: Date,
@@ -27,12 +25,12 @@ Text.add({
     parts: { type: Types.Relationship, ref: 'BillPart', required: true, initial: true, many: true, noedit: true }
 });
 
-Text.schema.plugin(deepPopulate);
+Bill.schema.plugin(deepPopulate);
 
-Text.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'text' });
-Text.relationship({ path: 'sources', ref: 'Source', refPath: 'text' });
+Bill.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'bill' });
+Bill.relationship({ path: 'sources', ref: 'Source', refPath: 'bill' });
 
-transform.toJSON(Text);
+transform.toJSON(Bill);
 
-Text.defaultColumns = 'title, state|20%, author, publishedAt|15%';
-Text.register();
+Bill.defaultColumns = 'title, state|20%, author, publishedAt|15%';
+Bill.register();

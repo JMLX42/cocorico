@@ -48,7 +48,7 @@ module.exports = Reflux.createStore({
                 this._currentUser = data.user;
                 this.trigger(this);
             }
-        ).error((xhr, textStatus, err) => {
+        ).error((xhr, billStatus, err) => {
             this._currentUser = {error: xhr.status};
             this.trigger(this);
         });

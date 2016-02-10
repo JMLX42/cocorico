@@ -13,7 +13,7 @@ var StringHelper = require('../helper/StringHelper');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
-var TextAction = require('../action/TextAction'),
+var BillAction = require('../action/BillAction'),
     UserAction = require('../action/UserAction'),
     VoteAction = require('../action/VoteAction');
 
@@ -30,7 +30,7 @@ var VoteButtonBar = require('./VoteButtonBar'),
 
 var BallotStore = require('../store/BallotStore'),
     UserStore = require('../store/UserStore'),
-    TextStore = require('../store/TextStore'),
+    BillStore = require('../store/BillStore'),
     SourceStore = require('../store/SourceStore');
 
 var Grid = ReactBootstrap.Grid,
@@ -40,12 +40,12 @@ var Grid = ReactBootstrap.Grid,
     Tab = ReactBootstrap.Tab,
     Button = ReactBootstrap.Button;
 
-var Text = React.createClass({
+var Bill = React.createClass({
 
     mixins: [
         ForceAuthMixin,
         ReactIntl.IntlMixin,
-        Reflux.connect(TextStore, 'texts'),
+        Reflux.connect(BillStore, 'bills'),
         Reflux.connect(BallotStore, 'ballots'),
         Reflux.connect(UserStore, 'users'),
         Reflux.connect(SourceStore, 'sources')
@@ -53,13 +53,13 @@ var Text = React.createClass({
 
     componentDidMount: function()
     {
-        TextAction.show(this.props.textId);
+        BillAction.show(this.props.billId);
 
         // if (this.isAuthenticated())
-        TextAction.showCurrentUserVote(this.props.textId);
+        BillAction.showCurrentUserVote(this.props.billId);
 
-        this.listenTo(VoteAction.vote, (textId) => {
-            TextAction.show(this.props.textId);
+        this.listenTo(VoteAction.vote, (billId) => {
+            BillAction.show(this.props.billId);
             this.startPollingBallot();
         });
     },
@@ -72,7 +72,7 @@ var Text = React.createClass({
         this._ballotPollingInterval = setInterval(
             () => {
                 var ballot = this.state.ballots
-                    ? this.state.ballots.getBallotByTextId(this.props.textId)
+                    ? this.state.ballots.getBallotByBillId(this.props.billId)
                     : null;
 
                 if (ballot && (ballot.status == 'complete' || ballot.error == 404))
@@ -82,7 +82,7 @@ var Text = React.createClass({
                 }
                 else
                 {
-                    TextAction.showCurrentUserVote(this.props.textId, true);
+                    BillAction.showCurrentUserVote(this.props.billId, true);
                 }
             },
             10000
@@ -91,50 +91,50 @@ var Text = React.createClass({
 
     componentWillReceiveProps: function(nextProps)
     {
-        if (nextProps.textId != this.props.textId)
-            TextAction.show(nextProps.textId);
+        if (nextProps.billId != this.props.billId)
+            BillAction.show(nextProps.billId);
     },
 
     render: function()
     {
-        var text = this.state.texts
-            ? this.state.texts.getById(this.props.textId)
+        var bill = this.state.bills
+            ? this.state.bills.getById(this.props.billId)
             : null;
 
-        if (!text)
+        if (!bill)
             return null;
 
         var ballot = this.state.ballots
-            ? this.state.ballots.getBallotByTextId(text.id)
+            ? this.state.ballots.getBallotByBillId(bill.id)
             : null;
 
         if (ballot && ballot.status == 'pending')
-            this.startPollingBallot(text.id);
+            this.startPollingBallot(bill.id);
 
         var currentUser = this.state.users
             ? this.state.users.getCurrentUser()
             : null;
 
         var sources = this.state.sources
-            ? this.state.sources.getSourcesByTextId(text.id)
+            ? this.state.sources.getSourcesByBillId(bill.id)
             : null;
 
 		return (
-            <ReactDocumentTitle title={StringHelper.toTitleCase(text.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
-                <div className="text">
+            <ReactDocumentTitle title={StringHelper.toTitleCase(bill.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
+                <div className="bill">
                     <Grid>
                         <Row className="section">
                             <Col md={12}>
-                                <h1 className="text-title">{text.title}</h1>
-                                <LikeButtons likeAction={TextAction.like} resource={text}/>
+                                <h1 className="bill-title">{bill.title}</h1>
+                                <LikeButtons likeAction={BillAction.like} resource={bill}/>
                             </Col>
                         </Row>
 
                         <Row className="section">
                             <Col md={12}>
-                                <div className="text-content">
-                                    {!!text && !!sources
-                                        ? <BillRenderer bill={text} sources={sources} editable={text.status == 'review'}/>
+                                <div className="bill-content">
+                                    {!!bill && !!sources
+                                        ? <BillRenderer bill={bill} sources={sources} editable={bill.status == 'review'}/>
                                         : <div/>
                                     }
                                 </div>
@@ -142,7 +142,7 @@ var Text = React.createClass({
                         </Row>
                     </Grid>
 
-                    {text.status == 'review'
+                    {bill.status == 'review'
                         ? <div className="section section-hint cocorico-light-grey-background">
                             <Grid>
                                 <Row>
@@ -155,7 +155,7 @@ var Text = React.createClass({
                         </div>
                         : <div/>}
 
-                    {text.status == 'debate'
+                    {bill.status == 'debate'
                         ? <div className="section section-hint cocorico-light-grey-background">
                             <Grid>
                                 <Row>
@@ -170,42 +170,42 @@ var Text = React.createClass({
 
                     <Grid>
                         <Row className="section" style={{border:'none'}}>
-                            <ContributionTabs text={text} editable={true} tab={this.props.tab}/>
+                            <ContributionTabs bill={bill} editable={true} tab={this.props.tab}/>
                         </Row>
                     </Grid>
 
-                    {text.status == 'vote' || text.status == 'published'
+                    {bill.status == 'vote' || bill.status == 'published'
                         ? <div className={this.state.ballots && ballot && !ballot.error && ballot.status == 'complete' && ballot.value ? 'voted-' + ballot.value : ''}>
                             <Grid>
                                 <Row className="section">
                                     <Col md={12}>
-                                        <h2 className="section-title">{this.getIntlMessage('text.YOUR_VOTE')}</h2>
+                                        <h2 className="section-title">{this.getIntlMessage('bill.YOUR_VOTE')}</h2>
                                         {!currentUser
-                                            ? text.status != 'published'
+                                            ? bill.status != 'published'
                                                 ? <p className="hint">
-                                                    {this.getIntlMessage('text.LOGIN_REQUIRED')} <LoginButton />
+                                                    {this.getIntlMessage('bill.LOGIN_REQUIRED')} <LoginButton />
                                                 </p>
                                                 : <p className="hint">
-                                                    {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}
+                                                    {this.getIntlMessage('bill.TOO_LATE_TO_VOTE')}
                                                 </p>
                                             : !!this.state.ballots && (!ballot || ballot.error == 404 || ballot.status != 'complete')
-                                                ? text.status == 'vote'
+                                                ? bill.status == 'vote'
                                                     ? !!ballot && ballot.status == 'pending'
                                                         ? <span>
                                                             <span className="vote-pending-indicator"/>
-                                                            {this.getIntlMessage('text.VOTE_PENDING')}
+                                                            {this.getIntlMessage('bill.VOTE_PENDING')}
                                                         </span>
-                                                        : <VoteButtonBar textId={text.id}/>
+                                                        : <VoteButtonBar billId={bill.id}/>
                                                     : <p className="hint">
-                                                        {this.getIntlMessage('text.TOO_LATE_TO_VOTE')}
+                                                        {this.getIntlMessage('bill.TOO_LATE_TO_VOTE')}
                                                     </p>
                                                 : <div>
-                                                    <FormattedMessage message={this.getIntlMessage('text.ALREADY_VOTED')}
-                                                        value={ballot && ballot.value ? this.getIntlMessage('text.VOTE_' + ballot.value.toUpperCase()) : ''}
+                                                    <FormattedMessage message={this.getIntlMessage('bill.ALREADY_VOTED')}
+                                                        value={ballot && ballot.value ? this.getIntlMessage('bill.VOTE_' + ballot.value.toUpperCase()) : ''}
                                                         date={<FormattedTime value={ballot && ballot.time ? ballot.time : Date.now()}/>}/>
-                                                    {text.status == 'vote'
+                                                    {bill.status == 'vote'
                                                         ? <div>
-                                                            <UnvoteButton text={text}/>
+                                                            <UnvoteButton bill={bill}/>
                                                         </div>
                                                         : <div/>}
                                                 </div>
@@ -216,8 +216,8 @@ var Text = React.createClass({
                         </div>
                         : <div/>}
 
-                    {text.status == 'published'
-                        ? <VoteResult textId={text.id}/>
+                    {bill.status == 'published'
+                        ? <VoteResult billId={bill.id}/>
                         : <div/>}
                 </div>
             </ReactDocumentTitle>
@@ -225,4 +225,4 @@ var Text = React.createClass({
 	}
 });
 
-module.exports = Text;
+module.exports = Bill;

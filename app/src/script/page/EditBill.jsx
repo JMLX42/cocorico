@@ -7,11 +7,11 @@ var Reflux = require('reflux');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
-var TextStore = require("../store/TextStore");
+var BillStore = require("../store/BillStore");
 
-var TextAction = require("../action/TextAction");
+var BillAction = require("../action/BillAction");
 
-var TextEditor = require("../component/TextEditor");
+var BillEditor = require("../component/BillEditor");
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -19,7 +19,7 @@ var Grid = ReactBootstrap.Grid,
 
 var Link = ReactRouter.Link;
 
-var EditText = React.createClass({
+var EditBill = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin,
@@ -28,17 +28,17 @@ var EditText = React.createClass({
 
     getInitialState: function()
     {
-        return {textId: null};
+        return {billId: null};
     },
 
     componentWillReceiveProps: function(props)
     {
-        this.setState({textId: props.params.textId});
+        this.setState({billId: props.params.billId});
     },
 
     componentDidMount: function()
     {
-        this.setState({textId: this.props.params.textId});
+        this.setState({billId: this.props.params.billId});
     },
 
     render: function()
@@ -46,25 +46,25 @@ var EditText = React.createClass({
         if (!this.isAuthenticated())
             return this.renderLoginPage(this.getIntlMessage('login.REQUIRE_LOGIN'));
 
-        if (!this.state.textId)
+        if (!this.state.billId)
             return null;
 
 		return (
-            <ReactDocumentTitle title={this.getIntlMessage('page.editText.TITLE') + ' - ' + this.getIntlMessage('site.TITLE')}>
-                <div className="page page-create-text">
+            <ReactDocumentTitle title={this.getIntlMessage('page.editBill.TITLE') + ' - ' + this.getIntlMessage('site.TITLE')}>
+                <div className="page page-create-bill">
                     <Grid>
                         <Row>
                             <Col md={12}>
-                                <h1>{this.getIntlMessage('page.editText.TITLE')}</h1>
+                                <h1>{this.getIntlMessage('page.editBill.TITLE')}</h1>
                             </Col>
                         </Row>
                     </Grid>
 
-                    <TextEditor textId={this.state.textId}/>
+                    <BillEditor billId={this.state.billId}/>
                 </div>
             </ReactDocumentTitle>
 		);
 	}
 });
 
-module.exports = EditText;
+module.exports = EditBill;

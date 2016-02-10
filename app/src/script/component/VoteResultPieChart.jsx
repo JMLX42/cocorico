@@ -27,29 +27,29 @@ var VoteResultPieChart = React.createClass({
         var percent = {};
         if (numVotes != 0)
         {
-            percent[this.getIntlMessage('text.VOTE_YES')] = Math.round(result.yes / numVotes * 100);
-            percent[this.getIntlMessage('text.VOTE_NO')] = Math.round(result.no / numVotes * 100);
-            percent[this.getIntlMessage('text.VOTE_BLANK')] = Math.round(result.blank / numVotes * 100);
+            percent[this.getIntlMessage('bill.VOTE_YES')] = Math.round(result.yes / numVotes * 100);
+            percent[this.getIntlMessage('bill.VOTE_NO')] = Math.round(result.no / numVotes * 100);
+            percent[this.getIntlMessage('bill.VOTE_BLANK')] = Math.round(result.blank / numVotes * 100);
         }
         else
         {
-            percent[this.getIntlMessage('text.VOTE_YES')] = 0;
-            percent[this.getIntlMessage('text.VOTE_NO')] = 100;
-            percent[this.getIntlMessage('text.VOTE_BLANK')] = 0;
+            percent[this.getIntlMessage('bill.VOTE_YES')] = 0;
+            percent[this.getIntlMessage('bill.VOTE_NO')] = 100;
+            percent[this.getIntlMessage('bill.VOTE_BLANK')] = 0;
         }
 
         var maxPercent = Math.max(
-            percent[this.getIntlMessage('text.VOTE_YES')],
-            percent[this.getIntlMessage('text.VOTE_NO')]
+            percent[this.getIntlMessage('bill.VOTE_YES')],
+            percent[this.getIntlMessage('bill.VOTE_NO')]
         );
 
         var labels = {
-            yes : this.getIntlMessage('text.VOTE_YES')
-                + ' (' + percent[this.getIntlMessage('text.VOTE_YES')] + '%)',
-            no : this.getIntlMessage('text.VOTE_NO')
-                + ' (' + percent[this.getIntlMessage('text.VOTE_NO')] + '%)',
-            blank : this.getIntlMessage('text.VOTE_BLANK')
-                + ' (' + percent[this.getIntlMessage('text.VOTE_BLANK')] + '%)'
+            yes : this.getIntlMessage('bill.VOTE_YES')
+                + ' (' + percent[this.getIntlMessage('bill.VOTE_YES')] + '%)',
+            no : this.getIntlMessage('bill.VOTE_NO')
+                + ' (' + percent[this.getIntlMessage('bill.VOTE_NO')] + '%)',
+            blank : this.getIntlMessage('bill.VOTE_BLANK')
+                + ' (' + percent[this.getIntlMessage('bill.VOTE_BLANK')] + '%)'
         }
 
         var color = {}
@@ -58,11 +58,11 @@ var VoteResultPieChart = React.createClass({
         color[labels.blank] = '#999';
 
         var percentColor = '';
-        var percentText = '';
+        var percentBill = '';
         for (var v in percent)
             if (percent[v] == maxPercent)
             {
-                percentText = v;
+                percentBill = v;
                 for (var vv in color)
                     if (vv.split(' ')[0] == v)
                         percentColor = color[vv];
@@ -92,9 +92,9 @@ var VoteResultPieChart = React.createClass({
                         fontSize    : '50px',
                         left        : 200,
                         color       : percentColor,
-                        textAlign   : 'center',
+                        billAlign   : 'center',
                         width       : '300px'}}>
-                    {maxPercent}%<br/>'{percentText}'
+                    {maxPercent}%<br/>'{percentBill}'
                 </div>
             </div>
         );

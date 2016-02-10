@@ -5,15 +5,15 @@ var ReactRouter = require('react-router');
 
 var Link = ReactRouter.Link;
 
-var TextAction = require('../action/TextAction');
+var BillAction = require('../action/BillAction');
 
-var TextStatusSelect = React.createClass({
+var BillStatusSelect = React.createClass({
 
     mixins: [ReactIntl.IntlMixin],
 
     changeHandler: function(event)
     {
-        TextAction.changeStatus(this.props.text.id, event.target.value);
+        BillAction.changeStatus(this.props.bill.id, event.target.value);
     },
 
     options: {
@@ -28,7 +28,7 @@ var TextStatusSelect = React.createClass({
     {
 		return (
             <select className={this.props.className} onChange={this.changeHandler}
-                    value={this.props.text.status}>
+                    value={this.props.bill.status}>
                 {Object.keys(this.options).map((key) => {
                     return (
                         <option value={key} key={key}>
@@ -41,4 +41,4 @@ var TextStatusSelect = React.createClass({
 	}
 });
 
-module.exports = TextStatusSelect;
+module.exports = BillStatusSelect;

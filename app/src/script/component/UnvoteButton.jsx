@@ -13,7 +13,7 @@ var UnvoteButton = React.createClass({
 
     handleClick: function()
     {
-        VoteAction.unvote(this.props.text.id);
+        VoteAction.unvote(this.props.bill.id);
 
         return false;
     },
@@ -22,7 +22,7 @@ var UnvoteButton = React.createClass({
     {
 		return (
             <Button onClick={this.handleClick} className="btn-unvote">
-                <FormattedMessage message={this.getIntlMessage('text.UNVOTE')}/>
+                <FormattedMessage message={this.getIntlMessage('bill.UNVOTE')}/>
             </Button>
 		);
 	}

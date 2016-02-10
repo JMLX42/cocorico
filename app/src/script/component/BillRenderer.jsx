@@ -3,7 +3,7 @@ var classNames = require('classnames');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
-var TextAction = require('../action/TextAction');
+var BillAction = require('../action/BillAction');
 
 var LinkWithTooltip = require('./LinkWithTooltip'),
     LikeButtons = require('./LikeButtons');
@@ -92,7 +92,7 @@ module.exports = React.createClass({
                     'bill-part-inactive' : !!this.state.activePart && this.state.activePart != part
                 })}>
                 {this.renderHeader(part.title, part.level)}
-                <LikeButtons likeAction={TextAction.likeBillPart} resource={part} editable={this.props.editable}
+                <LikeButtons likeAction={BillAction.likeBillPart} resource={part} editable={this.props.editable}
                     scoreFormat={(score) => score > 0 ? '+' + score : score}/>
                 {this.renderContent(JSON.parse(part.content))}
             </div>

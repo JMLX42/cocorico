@@ -7,11 +7,11 @@ var Reflux = require('reflux');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
-var TextStore = require("../store/TextStore");
+var BillStore = require("../store/BillStore");
 
-var TextAction = require("../action/TextAction");
+var BillAction = require("../action/BillAction");
 
-var TextList = require("../component/TextList"),
+var BillList = require("../component/BillList"),
     Page = require("../component/Page"),
     PageTitle = require("../component/PageTitle");
 
@@ -25,13 +25,13 @@ var Home = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin,
-        Reflux.connect(TextStore, 'texts'),
+        Reflux.connect(BillStore, 'bills'),
         ForceAuthMixin
     ],
 
     componentWillMount: function()
     {
-        TextAction.showLatestTexts();
+        BillAction.showLatestBills();
     },
 
     render: function()
@@ -46,13 +46,13 @@ var Home = React.createClass({
                         </Row>
                     <Row>
                         <Col md={12}>
-                            <h2>{this.getIntlMessage('text.TEXTS')}</h2>
+                            <h2>{this.getIntlMessage('bill.BILLS')}</h2>
                         </Col>
                     </Row>
                     <Row>
                         <Col md={12}>
-                            {this.state && this.state.texts
-                                ? <TextList texts={this.state.texts.getLatestTexts()} />
+                            {this.state && this.state.bills
+                                ? <BillList bills={this.state.bills.getLatestBills()} />
                                 : <div/>}
                         </Col>
                     </Row>

@@ -92,7 +92,7 @@ module.exports = React.createClass({
 
     capture: function()
     {
-        var context = this.refs.qrCanvas.getContext('2d');
+        var context = this.refs.qrCanvas.getConbill('2d');
         var w = this.refs.qrCanvas.width;
         var h = this.refs.qrCanvas.height;
 
