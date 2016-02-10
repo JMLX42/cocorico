@@ -230,7 +230,7 @@ function getBillParts(md)
 {
 	var tree = markdown.parse(md);
 	var order = 0;
-	var part = null;
+	var part = BillPart.model({level:0,order:order});
 	var parts = [];
 	var para = [];
 
@@ -238,17 +238,15 @@ function getBillParts(md)
 	{
 		if (tree[i][0] == 'header')
 		{
-			if (part)
-				part.content = JSON.stringify(para);
-
-			part = BillPart.model({
-				title : tree[i][2],
-				level : tree[i][1].level,
-				order : order++,
-				content	: ''
-			});
-			para = [];
+			part.content = JSON.stringify(para);
 			parts.push(part);
+
+			part = BillPart.model();
+			part.title = tree[i][2];
+			part.level = tree[i][1].level;
+			part.order = order++;
+
+			para = [];
 		}
 		else if (tree[i][0] == 'para')
 		{
@@ -257,8 +255,11 @@ function getBillParts(md)
 		}
 	}
 
-	if (part && !part.content)
+	if (para.length != 0)
 		part.content = JSON.stringify(para);
+
+	if (parts.indexOf(part) < 0)
+		parts.push(part);
 
 	return parts;
 }
@@ -266,6 +267,7 @@ function getBillParts(md)
 function updateBillParts(text, callback)
 {
 	var parts = getBillParts(text.content.md);
+	console.log(parts);
 	var removeOps = text.parts.map(function(part)
 	{
 		return function(callback)
