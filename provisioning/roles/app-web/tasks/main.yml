@@ -16,13 +16,23 @@
 - name: install npm modules
   npm: path={{ cocorico_app_dir }}
 
-- name: build app
+- name: build debug app
   shell: npm run build
   args:
     chdir: "{{ cocorico_app_dir }}/"
     creates: "{{ cocorico_app_dir }}/public/app.js"
   register: result
   failed_when: result.stderr
+  when: is_development_environment
+
+- name: build release app
+  shell: npm run build-release
+  args:
+    chdir: "{{ cocorico_app_dir }}/"
+    creates: "{{ cocorico_app_dir }}/public/app.js"
+  register: result
+  failed_when: result.stderr
+  when: not is_development_environment
 
 - name: install site configuration
   template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf

@@ -37,7 +37,8 @@
     "npm": ">=1.3.14"
   },
   "scripts": {
-    "build": "browserify -v -t babelify -t node-lessify --extension=.jsx src/script/index.js -o public/app.js",
-    "watch": "watchify -v -t babelify -t node-lessify --extension=.jsx src/script/index.js --poll=5000 -o public/app.js"
+    "build": "browserify -v --debug -t babelify -t node-lessify --extension=.jsx src/script/index.js -o public/app.js",
+    "build-release": "browserify -v -t babelify -t node-lessify --extension=.jsx src/script/index.js -o public/app.js",
+    "watch": "watchify -v --debug -t babelify -t node-lessify --extension=.jsx src/script/index.js --poll=5000 -o public/app.js"
   }
 }
