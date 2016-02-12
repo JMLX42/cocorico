@@ -28,7 +28,7 @@ module.exports = React.createClass({
         };
     },
 
-    renderHeader: function(title, level)
+    renderHeaderTag : function(title, level)
     {
         switch (level) {
             case 1:
@@ -44,6 +44,18 @@ module.exports = React.createClass({
             case 6:
                 return (<h6>{title}</h6>);
         }
+    },
+
+    renderHeader: function(title, level)
+    {
+        return (
+            <div>
+                <a name={title} className="bill-part-header-anchor"></a>
+                <a href={location.pathname + '#' + title}>
+                    {this.renderHeaderTag(title, level)}
+                </a>
+            </div>
+        );
     },
 
     getSourceByURL: function(url)
