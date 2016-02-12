@@ -360,7 +360,7 @@ exports.save = function(req, res)
 
 	Bill.model.findOne(req.body.id ? {_id : req.body.id} : {slug: newBill.slug})
 		.select('-likes')
-		.populate('parts')
+		.select('-parts')
 		.exec(function(err, bill)
 	    {
 			if (err)
@@ -386,6 +386,9 @@ exports.save = function(req, res)
 						{
 							if (error)
 								return res.apiError('queue error', error);
+
+							bill.likes = undefined;
+							bill.parts = undefined;
 
 							return res.apiResponse({
 								action: 'create',
@@ -413,7 +416,8 @@ exports.save = function(req, res)
 							if (err)
 								return res.apiError('database error', err);
 
-							delete bill.likes;
+							// delete bill.likes;
+							// delete bill.parts;
 
 							return res.apiResponse({
 								action: 'update',

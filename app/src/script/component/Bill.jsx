@@ -101,7 +101,7 @@ var Bill = React.createClass({
             ? this.state.bills.getById(this.props.billId)
             : null;
 
-        if (!bill)
+        if (!bill || !bill.likes || !bill.parts)
             return null;
 
         var ballot = this.state.ballots

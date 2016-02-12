@@ -17,6 +17,7 @@ var ViewBill = React.createClass({
     {
         this.setState({
             billId : nextProps.params.billId,
+            billSlug : nextProps.params.billSlug,
             tab: nextProps.params.tab
         });
     },
@@ -25,6 +26,7 @@ var ViewBill = React.createClass({
     {
         this.setState({
             billId : this.props.params.billId,
+            billSlug : this.props.params.billSlug,
             tab: this.props.params.tab
         });
     },
@@ -35,7 +37,7 @@ var ViewBill = React.createClass({
             return null;
 
 		return (
-            <Bill billId={this.state.billId} tab={this.state.tab}/>
+            <Bill billId={this.state.billId} slug={this.state.billSlug} tab={this.state.tab}/>
 		);
 	}
 });

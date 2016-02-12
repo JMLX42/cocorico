@@ -103,7 +103,7 @@ module.exports = Reflux.createStore({
     {
         var bill = this.getById(billId);
 
-        if (bill && bill.parts)
+        if (bill && bill.parts && bill.likes)
         {
             this.trigger(this);
             return;
@@ -112,7 +112,7 @@ module.exports = Reflux.createStore({
         jquery.get(
             '/api/bill/' + billId,
             (data) => {
-                this._bills.push(data.bill);
+                this._insertOrUpdateBill(data.bill);
                 this.trigger(this);
             }
         ).error((xhr, billStatus, err) => {
@@ -126,6 +126,7 @@ module.exports = Reflux.createStore({
     _fetchBillBySlug: function(slug)
     {
         var bill = this.getBySlug(slug);
+
         if (bill)
         {
             this.trigger(this);
@@ -135,7 +136,7 @@ module.exports = Reflux.createStore({
         jquery.get(
             '/api/bill/getBySlug/' + slug,
             (data) => {
-                this._bills.push(data.bill);
+                this._insertOrUpdateBill(data.bill);
                 this.trigger(this);
             }
         ).error((xhr, billStatus, err) => {
@@ -195,6 +196,12 @@ module.exports = Reflux.createStore({
                 this.trigger(this);
             }
         );
+    },
+
+    _insertOrUpdateBill: function(newBill)
+    {
+        if (!this._updateBill(newBill))
+            this._bills.push(newBill);
     },
 
     _updateBill: function(newBill)
