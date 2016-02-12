@@ -1,6 +1,8 @@
 var keystone = require('keystone');
 var async = require('async');
 
+var fs = require('fs');
+
 var Page = keystone.list('Page');
 var Media = keystone.list('Media');
 
@@ -30,7 +32,7 @@ module.exports = function(done) {
 				{
 					"contentType": "HTML",
 					"createdAt": "2015-10-24T10:30:18.000Z",
-					"html": "<p style=\"text-align: center;\"><a href=\"../../api/auth/login\" id=\"link-login\"> <img src=\"../../upload/franceconnect-button.png\" alt=\"\" /> </a></p>",
+					"html": fs.readFileSync('./updates/pages/connexion.html', 'utf8'),
 					"published": true,
 					"publishedAt": "2015-10-24T10:32:31.000Z",
 					"showInNavBar": false,

@@ -5,6 +5,7 @@ var async = require('async');
 var keystone = require('keystone');
 var stringify = require('json-stable-stringify');
 var fs = require('fs');
+var beautify_html = require('js-beautify').html;
 
 var Page = keystone.list('Page'),
     Media = keystone.list('Media');
@@ -51,8 +52,6 @@ function savePage(slug, next)
 {
     var output = getOutputFilename(slug);
 
-    console.log('output file:', output);
-
     process.stdout.write('loading page \'' + slug + '\'... ');
 
     Page.model.findOne()
@@ -78,13 +77,12 @@ function savePage(slug, next)
                 ? new RegExp(/<img\s[^>]*?src\s*=\s*['\"]([^'\"]*?)['\"][^>]*?>/g)
                 : new RegExp(/(!\[.*?\]\()(.+?)(\))/g);
             var content = page.contentType == 'HTML'
-                ? page.html
-                : page.markdown;
+                ? beautify_html(page.html, {indent:4})
+                : page.markdown.md;
             var imgs = [];
 
             while (match = imgRegEx.exec(content))
             {
-                console.log(match[1].match(uriRegex));
                 match = match[1].match(uriRegex)[1];
 
                 if (match)
@@ -120,6 +118,7 @@ function savePage(slug, next)
                     process.stdout.write('writing page \'' + slug + '\'... ');
                     var migrationScript = "var keystone = require('keystone');\n"
                         + "var async = require('async');\n\n"
+                        + "var fs = require('fs');\n\n"
                         + "var Page = keystone.list('Page');\n"
                         + "var Media = keystone.list('Media');\n\n"
                         + "module.exports = function(done) {\n"
@@ -129,10 +128,25 @@ function savePage(slug, next)
                         + "\t\t\tPage.model.update(\n"
                         + "\t\t\t\t{slug: '" + slug + "'},";
 
-                    stringify(page, {space : '\t'}).split('\n').map(function(v, i, t)
+                    var filename = page.contentType == 'HTML'
+                        ? page.slug + '.html'
+                        : page.slug + '.md'
+                    fs.writeFileSync("./updates/pages/" + filename, content, 'utf8');
+
+                    if (page.contentType == 'HTML')
+                        page.html = 'fs.readFileSync(\'./updates/pages/' + filename + '\', \'utf8\')'
+                    else
                     {
-                        migrationScript += "\n\t\t\t\t" + v;
-                    });
+                        page.markdown = { 'md' : 'fs.readFileSync(\'./updates/pages/' + filename + '\', \'utf8\')' };
+                        page.markdown.html = undefined;
+                    }
+
+                    stringify(page, {space : '\t'})
+                        .replace(/"(fs.readFileSync\(.*\))"/, "$1")
+                        .split('\n').map(function(v, i, t)
+                        {
+                            migrationScript += "\n\t\t\t\t" + v;
+                        });
 
                     migrationScript += ",\n"
                         + "\t\t\t\t{upsert: true},\n"
@@ -152,6 +166,11 @@ function savePage(slug, next)
 
 module.exports = function(slugs, done)
 {
+    if (!fs.existsSync('./updates'))
+        fs.mkdirSync('./updates');
+    if (!fs.existsSync('./updates/pages'))
+        fs.mkdirSync('./updates/pages');
+
     if (slugs)
         slugs = slugs.split(',');
     else

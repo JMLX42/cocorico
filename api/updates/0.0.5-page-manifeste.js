@@ -1,6 +1,8 @@
 var keystone = require('keystone');
 var async = require('async');
 
+var fs = require('fs');
+
 var Page = keystone.list('Page');
 var Media = keystone.list('Media');
 
@@ -13,8 +15,7 @@ module.exports = function(done) {
 					"contentType": "Markdown",
 					"createdAt": "2015-10-26T21:58:48.000Z",
 					"markdown": {
-						"html": "<h1 id=\"manifeste\">Manifeste</h1>\n",
-						"md": "# Manifeste\r\n"
+						"md": fs.readFileSync('./updates/pages/manifeste.md', 'utf8')
 					},
 					"published": true,
 					"publishedAt": "2015-10-26T21:59:03.000Z",
