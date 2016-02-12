@@ -26,7 +26,7 @@ ReactDOM.render(
     <Router history={History.createHistory()}>
         <Route path='/' component={App}>
             <IndexRoute component={Home}/>
-            <Route path={messages.route.SIGN_IN + '/(:redirect)'} component={Login}/>
+            <Route path={messages.route.SIGN_IN + '(/:redirect)'} component={Login}/>
             <Route path={messages.route.MY_BILLS} component={MyBills}/>
             <Route path={messages.route.CREATE_BILL} component={CreateBill}/>
             <Route path={messages.route.EDIT_BILL + '/:billId/:slug'} component={EditBill}/>

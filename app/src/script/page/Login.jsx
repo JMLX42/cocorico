@@ -30,13 +30,15 @@ var Login = React.createClass({
 
     updateLoginLink: function()
     {
-        if (!this.state.redirect)
-            return;
-
         var link = document.getElementById('link-login');
 
-        if (link)
+        if (!link)
+            return;
+
+        if (this.state.redirect)
             link.href = '/api/auth/login?redirect=' + encodeURIComponent(this.state.redirect);
+        else
+            link.href = '/api/auth/login';
     },
 
     componentDidUpdate: function()
