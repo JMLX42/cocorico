@@ -93,8 +93,10 @@ module.exports = React.createClass({
         });
     },
 
-    renderPart: function(part)
+    renderPart: function(part, neg, pos)
     {
+        var relScore = part.score < 0 ? part.score / neg : part.score / pos;
+
         return (
             <div onMouseEnter={(e)=>this.isAuthenticated() && this.props.editable && this.setState({activePart:part})}
                 onMouseLeave={(e)=>this.isAuthenticated() && this.props.editable && this.setState({activePart:null})}
@@ -103,9 +105,21 @@ module.exports = React.createClass({
                     'bill-part-active'   : !this.props.editable || this.state.activePart == part,
                     'bill-part-inactive' : !!this.state.activePart && this.state.activePart != part
                 })}>
+                {part.content != '[]' && !this.props.editable
+                    ? <div className="bill-part-relative-score">
+                        <div style={{
+                            position: 'absolute',
+                            left: (relScore * -100) + 'px',
+                            height: '100%',
+                            backgroundColor: part.score > 0 ? '#4285F4' : '#EB6864',
+                            width: (relScore * 100) + 'px',
+                        }}/>
+                    </div>
+                    : <div/>}
                 {this.renderHeader(part.title, part.level)}
                 {part.content != '[]'
-                    ? <LikeButtons likeAction={BillAction.likeBillPart} resource={part} editable={this.props.editable}
+                    ? <LikeButtons likeAction={BillAction.likeBillPart} resource={part}
+                        editable={this.props.editable} showScore={!this.props.editable}
                         scoreFormat={(score) => score > 0 ? '+' + score : score}/>
                     : <div/>}
                 {this.renderContent(JSON.parse(part.content))}
@@ -115,9 +129,20 @@ module.exports = React.createClass({
 
     render: function()
     {
+        var neg = 0;
+        var pos = 0;
+        for (var part of this.props.bill.parts)
+        {
+            if (part.score < 0)
+                neg += part.score;
+            if (part.score > 0)
+                pos += part.score;
+        }
+        console.log(neg, pos);
+
 		return (
             <div>
-                {this.props.bill.parts.map((part) => this.renderPart(part))}
+                {this.props.bill.parts.map((part) => this.renderPart(part, neg, pos))}
             </div>
         );
 	}

@@ -30,6 +30,7 @@ var LikeButtons = React.createClass({
         return {
             likeButtonEnabled: true,
             dislikeButtonEnabled: true,
+            showScore: true,
             editable: true,
             scoreFormat: (score) => '(' + (score > 0 ? '+' + score : score) + ')'
         };
@@ -64,7 +65,9 @@ var LikeButtons = React.createClass({
                         title={this.getIntlMessage('bill.DISLIKE_BUTTON_TITLE')}
                         onClick={(e)=>this.props.editable && this.props.likeAction(this.props.resource, false)}/>
                     : <span/>}
-                <span className="like-score">{this.props.scoreFormat(this.props.resource.score)}</span>
+                {this.props.showScore
+                    ? <span className="like-score">{this.props.scoreFormat(this.props.resource.score)}</span>
+                    : <span/>}
             </span>
         );
 	}

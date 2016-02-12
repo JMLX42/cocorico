@@ -448,6 +448,21 @@ ul.argument-list {
         position: absolute;
     }
 
+    .bill-part-relative-score {
+        opacity: 0.1;
+        transition: opacity .25s ease-in-out;
+        padding-right: 30px;
+        left: -30px;
+        position: absolute;
+        height: 100%;
+    }
+
+    &:hover {
+        .bill-part-relative-score {
+            opacity: 1.0;
+        }
+    }
+
     .like-buttons-active {
         opacity: 1.0 !important;
     }
