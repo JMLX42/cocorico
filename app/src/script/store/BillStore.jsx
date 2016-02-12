@@ -45,10 +45,10 @@ module.exports = Reflux.createStore({
             if (bill.id == id)
                 return bill;
 
-        // if (this._latest && this._latest !== true)
-        //     for (var bill of this._latest)
-        //         if (bill.id == id)
-        //             return bill;
+        if (this._latest && this._latest !== true)
+            for (var bill of this._latest)
+                if (bill.id == id)
+                    return bill;
 
         return null;
     },
