@@ -439,6 +439,10 @@ ul.argument-list {
     transition: opacity .25s ease-in-out;
     position: relative;
 
+    @media (max-width: (@screen-md-max + 100)) {
+        margin-right: 50px;
+    }
+
     .bill-part-header-anchor {
         margin-top: -@navbar-height - 20;
         position: absolute;
@@ -462,12 +466,6 @@ ul.argument-list {
         .like-score {
             margin-left: 0;
         }
-    }
-}
-
-@media(max-width: @screen-md-max) {
-    .bill-part {
-        margin-right: 50px;
     }
 }
 
