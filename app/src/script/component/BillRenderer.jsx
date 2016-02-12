@@ -92,8 +92,10 @@ module.exports = React.createClass({
                     'bill-part-inactive' : !!this.state.activePart && this.state.activePart != part
                 })}>
                 {this.renderHeader(part.title, part.level)}
-                <LikeButtons likeAction={BillAction.likeBillPart} resource={part} editable={this.props.editable}
-                    scoreFormat={(score) => score > 0 ? '+' + score : score}/>
+                {part.content != '[]'
+                    ? <LikeButtons likeAction={BillAction.likeBillPart} resource={part} editable={this.props.editable}
+                        scoreFormat={(score) => score > 0 ? '+' + score : score}/>
+                    : <div/>}
                 {this.renderContent(JSON.parse(part.content))}
             </div>
         );

@@ -8,7 +8,7 @@ var BillPart = new keystone.List('BillPart', {
 });
 
 BillPart.add({
-	title: { type: String, },
+	title: { type: String },
 	level: { type: Types.Number, required: true, initial: true },
     order: { type: Types.Number, required: true, initial: true },
 	content: { type: String, required: true, initial: true },

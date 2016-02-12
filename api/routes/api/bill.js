@@ -231,7 +231,7 @@ function getBillParts(md)
 {
 	var tree = markdown.parse(md);
 	var order = 0;
-	var part = BillPart.model({level:0,order:order});
+	var part = BillPart.model({level:0,order:order,title:''});
 	var parts = [];
 	var para = [];
 
@@ -239,8 +239,13 @@ function getBillParts(md)
 	{
 		if (tree[i][0] == 'header')
 		{
-			part.content = JSON.stringify(para);
-			parts.push(part);
+			if (para.length != 0 || part.title != '')
+			{
+				console.log(para);
+				console.log(part.title);
+				part.content = JSON.stringify(para);
+				parts.push(part);
+			}
 
 			part = BillPart.model();
 			part.title = tree[i][2];
@@ -259,7 +264,7 @@ function getBillParts(md)
 	if (para.length != 0)
 		part.content = JSON.stringify(para);
 
-	if (parts.indexOf(part) < 0)
+	if (parts.indexOf(part) < 0 && (part.content != '[]' || part.title != ''))
 		parts.push(part);
 
 	return parts;
@@ -267,34 +272,41 @@ function getBillParts(md)
 
 function updateBillParts(bill, callback)
 {
-	var parts = getBillParts(bill.content.md);
-	var removeOps = bill.parts.map(function(part)
-	{
-		return function(callback)
-		{
-			part.remove(function(err)
-			{
-				callback(err);
-			});
-		};
-	});
-	var saveOps = parts.map(function(part)
-	{
-		return function(callback)
-		{
-			part.save(function(err, res)
-			{
-				callback(err);
-			});
-		};
-	});
-
 	async.waterfall(
-		removeOps.concat(saveOps),
+		bill.parts.map(function(part)
+		{
+			return function(callback)
+			{
+				part.remove(function(err)
+				{
+					callback(err);
+				});
+			};
+		}),
 		function(error)
 		{
-			bill.parts = parts;
-			callback(error);
+			if (error)
+				callback(error);
+
+			var billParts = getBillParts(bill.content.md);
+
+			async.waterfall(
+				billParts.map(function(part)
+				{
+					return function(callback)
+					{
+						part.save(function(err, res)
+						{
+							callback(err);
+						});
+					};
+				}),
+				function(error)
+				{
+					bill.parts = billParts;
+					callback(error);
+				}
+			)
 		}
 	);
 }
@@ -360,7 +372,7 @@ exports.save = function(req, res)
 
 	Bill.model.findOne(req.body.id ? {_id : req.body.id} : {slug: newBill.slug})
 		.select('-likes')
-		.select('-parts')
+		.populate('parts')
 		.exec(function(err, bill)
 	    {
 			if (err)
