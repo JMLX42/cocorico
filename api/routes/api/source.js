@@ -73,7 +73,8 @@ exports.add = function(req, res)
                         decodeURIComponent(req.body.url),
                         function(error, result)
                         {
-                            console.log(error, result);
+                            if (error)
+                                return res.apiError('invalid source URL');
 
                             var newSource = Source.model({
                                 title: error ? '' : result,
