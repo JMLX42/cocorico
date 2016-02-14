@@ -138,7 +138,6 @@ module.exports = React.createClass({
             if (part.score > 0)
                 pos += part.score;
         }
-        console.log(neg, pos);
 
 		return (
             <div>
