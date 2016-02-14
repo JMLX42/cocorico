@@ -113,16 +113,16 @@ var MyBills = React.createClass({
                                         <BillList bills={filteredBills['draft']} editable={true}/>
                                     </Tab>
                                     <Tab eventKey={2} title={"Révision (" + (filteredBills['review'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['review']} editable={true} />
+                                        <BillList bills={filteredBills['review']} editable={['bill-status']} />
                                     </Tab>
                                     <Tab eventKey={3} title={"Débat (" + (filteredBills['debate'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['debate']} editable={true} />
+                                        <BillList bills={filteredBills['debate']} editable={['bill-status']} />
                                     </Tab>
                                     <Tab eventKey={4} title={"Vote (" + (filteredBills['vote'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['vote']} editable={true} />
+                                        <BillList bills={filteredBills['vote']} editable={['bill-status']} />
                                     </Tab>
                                     <Tab eventKey={5} title={"Publié (" + (filteredBills['published'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['published']} editable={true} />
+                                        <BillList bills={filteredBills['published']} editable={['bill-status']} />
                                     </Tab>
                                 </Tabs>
                             </Col>

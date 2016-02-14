@@ -14,13 +14,6 @@ module.exports = React.createClass({
         ForceAuthMixin
     ],
 
-    getInitialState: function()
-    {
-        return {
-            activePart : null
-        };
-    },
-
     getDefaultProps: function()
     {
         return {
@@ -98,13 +91,7 @@ module.exports = React.createClass({
         var relScore = part.score < 0 ? part.score / neg : part.score / pos;
 
         return (
-            <div onMouseEnter={(e)=>this.isAuthenticated() && this.props.editable && this.setState({activePart:part})}
-                onMouseLeave={(e)=>this.isAuthenticated() && this.props.editable && this.setState({activePart:null})}
-                className={classNames({
-                    'bill-part'          : true,
-                    'bill-part-active'   : !this.props.editable || this.state.activePart == part,
-                    'bill-part-inactive' : !!this.state.activePart && this.state.activePart != part
-                })}>
+            <div className="bill-part">
                 {part.content != '[]' && !this.props.editable
                     ? <div className="bill-part-relative-score">
                         <div style={{

@@ -20,6 +20,12 @@ var BillList = React.createClass({
 
     mixins: [ReactIntl.IntlMixin],
 
+    editable: function(feature)
+    {
+        return this.props.editable === true || !feature
+            || Array.isArray(this.props.editable) && this.props.editable.indexOf(feature) >= 0;
+    },
+
 	render: function()
     {
         var bills = this.props.bills || [];
@@ -38,10 +44,10 @@ var BillList = React.createClass({
                                 <li key={bill.id}>
                                     <BillLink bill={bill}/>
                                     <LikeButtons likeAction={BillAction.like} resource={bill}/>
-                                    {this.props.editable
+                                    {this.editable('bill-content')
                                         ? <Link to={this.getIntlMessage('route.EDIT_BILL') + '/' + bill.id + '/' + bill.slug} className="pull-right">Modifier</Link>
                                         : ''}
-                                    {this.props.editable
+                                    {this.editable('bill-status')
                                         ? <BillStatusSelect bill={bill} className="pull-right"/>
                                         : ''}
                                 </li>
