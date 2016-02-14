@@ -11,20 +11,6 @@ var LikeButtons = React.createClass({
         ForceAuthMixin
     ],
 
-    getLikeIconClassNames: function(value)
-    {
-        if (value)
-            return 'icon-thumb_up icon-btn'
-                + (this.props.resource.likes.length && this.props.resource.likes[0].value
-                    ? ' icon-btn-active'
-                    : '');
-
-        return 'icon-thumb_down icon-btn'
-            + (this.props.resource.likes.length && !this.props.resource.likes[0].value
-                ? ' icon-btn-active'
-                : '')
-    },
-
     getDefaultProps: function()
     {
         return {
@@ -53,15 +39,24 @@ var LikeButtons = React.createClass({
         return (
             <span style={{display:'inline-block'}} className={classNames({
                     'like-buttons' : true,
-                    'like-buttons-active' : this.props.resource.likes.length > 0
+                    'like-buttons-active' : this.props.resource.likes.length > 0,
+                    'like-buttons-editable' : this.props.editable
                 })}>
                 {this.displayLikeButton()
-                    ? <span className={this.getLikeIconClassNames(true)}
+                    ? <span className={classNames({
+                            'icon-thumb_up' : true,
+                            'icon-btn-active' : this.props.resource.likes.length && this.props.resource.likes[0].value,
+                            'icon-btn' : this.props.editable
+                        })}
                         title={this.getIntlMessage('bill.LIKE_BUTTON_TITLE')}
                         onClick={(e)=>this.props.editable && this.props.likeAction(this.props.resource, true)}/>
                     : <span/>}
                 {this.displayDislikeButton()
-                    ? <span className={this.getLikeIconClassNames(false)}
+                    ? <span className={classNames({
+                            'icon-thumb_down' : true,
+                            'icon-btn-active' : this.props.resource.likes.length && !this.props.resource.likes[0].value,
+                            'icon-btn' : this.props.editable
+                        })}
                         title={this.getIntlMessage('bill.DISLIKE_BUTTON_TITLE')}
                         onClick={(e)=>this.props.editable && this.props.likeAction(this.props.resource, false)}/>
                     : <span/>}

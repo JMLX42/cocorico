@@ -353,19 +353,25 @@ li.active {
     color: @cocorico-dark-grey;
 }
 
-.icon-btn {
-    cursor: pointer;
-    margin: 0 5px;
+.like-buttons {
+    .icon-thumb_up, .icon-thumb_down {
+        margin: 0 5px;
+        cursor: default;
+    }
 }
 
-.icon-btn.icon-thumb_up {
+.icon-btn {
+    cursor: pointer !important;
+}
+
+.icon-thumb_up {
     &.icon-btn-active,
     &:hover {
         color: @cocorico-blue;
     }
 }
 
-.icon-btn.icon-thumb_down {
+.icon-thumb_down {
     &.icon-btn-active,
     &:hover {
         color: @cocorico-red;
@@ -436,7 +442,7 @@ ul.argument-list {
 }
 
 .bill-part {
-    transition: opacity .25s ease-in-out;
+    // transition: opacity .25s ease-in-out;
     position: relative;
 
     @media (max-width: (@screen-md-max + 100)) {
@@ -467,6 +473,11 @@ ul.argument-list {
         .bill-part-relative-score {
             opacity: 1.0;
         }
+
+        .like-buttons {
+            opacity: 1.0;
+            transition: opacity .25s ease-in-out;
+        }
     }
 
     .like-buttons-active {
@@ -479,7 +490,7 @@ ul.argument-list {
         left: 100%;
         padding-left: 30px;
 
-        .icon-btn {
+        .icon-thumb_up, .icon-thumb_down {
             margin: 3px 0;
             display: block;
         }
@@ -487,18 +498,5 @@ ul.argument-list {
         .like-score {
             margin-left: 0;
         }
-    }
-}
-
-.bill-part-inactive {
-    opacity: 0.25;
-    transition: opacity .25s ease-in-out;
-    transition-delay: 0.1s;
-}
-
-.bill-part-active {
-    .like-buttons {
-        opacity: 1.0;
-        transition: opacity .25s ease-in-out;
     }
 }
