@@ -57,18 +57,6 @@ var VoteResultPieChart = React.createClass({
         color[labels.no] = '#EB6864';
         color[labels.blank] = '#999';
 
-        var percentColor = '';
-        var percentBill = '';
-        for (var v in percent)
-            if (percent[v] == maxPercent)
-            {
-                percentBill = v;
-                for (var vv in color)
-                    if (vv.split(' ')[0] == v)
-                        percentColor = color[vv];
-                break;
-            }
-
         var data = {values : [
             {x : labels.yes,    y : result.yes},
             {x : labels.no,     y : result.no},
@@ -86,16 +74,6 @@ var VoteResultPieChart = React.createClass({
                     outerRadius={150}
                     innerRadius={130}
                     margin={{top: 0, right: 0, bottom: 0, left: 0}}/>
-                <div style={{
-                        position    : 'absolute',
-                        top         : 120,
-                        fontSize    : '50px',
-                        left        : 200,
-                        color       : percentColor,
-                        billAlign   : 'center',
-                        width       : '300px'}}>
-                    {maxPercent}%<br/>'{percentBill}'
-                </div>
             </div>
         );
     }

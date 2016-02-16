@@ -33,7 +33,9 @@ module.exports = Reflux.createStore({
 
     getAuthProviders: function()
     {
-        return this._authProviders;
+        return this._authProviders && this._authProviders !== true
+            ? this._authProviders
+            : null;
     },
 
     _requireLoginHandler: function()

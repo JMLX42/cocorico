@@ -41,14 +41,11 @@ module.exports = Reflux.createStore({
 
     getById: function(id)
     {
-        for (var bill of this._bills)
-            if (bill.id == id)
-                return bill;
-
-        if (this._latest && this._latest !== true)
-            for (var bill of this._latest)
-                if (bill.id == id)
-                    return bill;
+        for (var list of [this._bills, this._latest, this._currentUserBills])
+            if (list && list !== true)
+                for (var bill of list)
+                    if (bill.id == id)
+                        return bill;
 
         return null;
     },
@@ -112,7 +109,7 @@ module.exports = Reflux.createStore({
         jquery.get(
             '/api/bill/' + billId,
             (data) => {
-                this._insertOrUpdateBill(data.bill);
+                this._bills.push(data.bill);
                 this.trigger(this);
             }
         ).error((xhr, billStatus, err) => {
@@ -127,7 +124,7 @@ module.exports = Reflux.createStore({
     {
         var bill = this.getBySlug(slug);
 
-        if (bill)
+        if (bill && bill.parts && bill.likes)
         {
             this.trigger(this);
             return;
@@ -136,7 +133,7 @@ module.exports = Reflux.createStore({
         jquery.get(
             '/api/bill/getBySlug/' + slug,
             (data) => {
-                this._insertOrUpdateBill(data.bill);
+                this._bills.push(data.bill);
                 this.trigger(this);
             }
         ).error((xhr, billStatus, err) => {

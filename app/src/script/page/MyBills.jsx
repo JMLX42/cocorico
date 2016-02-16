@@ -110,19 +110,19 @@ var MyBills = React.createClass({
                             <Col md={12}>
                                 <Tabs activeKey={this.state.activeKey} onSelect={this.tabSelectHandler} className="tabs-my-bills">
                                     <Tab eventKey={1} title={"Brouillon (" + (filteredBills['draft'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['draft']} editable={true}/>
+                                        <BillList bills={filteredBills['draft']} showLikeButtons={false} editable={true}/>
                                     </Tab>
                                     <Tab eventKey={2} title={"Révision (" + (filteredBills['review'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['review']} editable={['bill-status']} />
+                                        <BillList bills={filteredBills['review']} showLikeButtons={false} editable={['bill-status']} />
                                     </Tab>
                                     <Tab eventKey={3} title={"Débat (" + (filteredBills['debate'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['debate']} editable={['bill-status']} />
+                                        <BillList bills={filteredBills['debate']} showLikeButtons={false} editable={['bill-status']} />
                                     </Tab>
                                     <Tab eventKey={4} title={"Vote (" + (filteredBills['vote'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['vote']} editable={['bill-status']} />
+                                        <BillList bills={filteredBills['vote']} showLikeButtons={false} editable={['bill-status']} />
                                     </Tab>
                                     <Tab eventKey={5} title={"Publié (" + (filteredBills['published'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['published']} editable={['bill-status']} />
+                                        <BillList bills={filteredBills['published']} showLikeButtons={false} editable={['bill-status']} />
                                     </Tab>
                                 </Tabs>
                             </Col>

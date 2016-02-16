@@ -43,7 +43,9 @@ var BillList = React.createClass({
                             return (
                                 <li key={bill.id}>
                                     <BillLink bill={bill}/>
-                                    <LikeButtons likeAction={BillAction.like} resource={bill}/>
+                                    {this.props.showLikeButtons
+                                        ? <LikeButtons likeAction={BillAction.like} resource={bill}/>
+                                        : <span/>}
                                     {this.editable('bill-content')
                                         ? <Link to={this.getIntlMessage('route.EDIT_BILL') + '/' + bill.id + '/' + bill.slug} className="pull-right">Modifier</Link>
                                         : ''}

@@ -17,6 +17,8 @@ exports.bills = function(req, res)
 {
 	Bill.model.find()
         .sort('-publishedAt')
+        .select('-parts')
+        .select('-likes')
 		.exec(function(err, bills)
 		{
 			if (err)
