@@ -5,13 +5,16 @@ hostname: "{{ front_hostname }}-{{ environment_name }}"
 is_development_environment: yes
 http_protocol_prefix: http
 
-blockchain_vote: yes
+blockchain_vote: no
 
 mongodb_database_name: "{{ project_name }}"
 
-franceconnect_cliend_id: 10e0a74c752107f712b890e6183b03b179146eb682189c3158370cb8f3fe7068
+franceconnect_client_id: 10e0a74c752107f712b890e6183b03b179146eb682189c3158370cb8f3fe7068
 franceconnect_client_secret: 9ecc4856675778548fae7c3042b07df78a5134f3ab9ae09b91543965b24f04a3
 franceconnect_url: https://fcp.integ01.dev-franceconnect.fr
+
+facebook_client_id: 142422522809982
+facebook_client_secret: 8f0812597bdc510a32f27e79b77f4b21
 
 home_web_admin_email: "admin@{{ front_hostname }}"
 home_web_admin_password: admin
@@ -19,7 +22,6 @@ home_web_admin_name: Admin
 home_web_upload_dir: upload
 
 home_db_saved_pages:
-    - connexion
     - accueil
     - aide
     - politique-de-confidentialite

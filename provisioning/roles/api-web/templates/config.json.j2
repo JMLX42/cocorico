@@ -16,13 +16,14 @@
         "voteEnabled" : false,
         {% endif %}
         "httpProvider" : "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}"
-    },
-    "franceConnect" : {
+    }
+{% if franceconnect_client_id and franceconnect_client_secret %}
+    , "franceConnect" : {
         "URL": "{{ franceconnect_url }}/",
         "openIDConnectStrategyParameters": {
-            "clientID": "{{ franceconnect_cliend_id }}",
+            "clientID": "{{ franceconnect_client_id }}",
             "clientSecret": "{{ franceconnect_client_secret }}",
-            "callbackURL": "http://{{ front_web_public_host }}/api/auth/connectCallback",
+            "callbackURL": "http://{{ front_web_public_host }}/api/auth/france-connect/callback",
             "authorizationURL": "{{ franceconnect_url }}/api/v1/authorize",
             "tokenURL": "{{ franceconnect_url }}/api/v1/token",
             "userInfoURL": "{{ franceconnect_url }}/api/v1/userinfo",
@@ -32,13 +33,16 @@
         "oauth": {
             "authorizationURL": "{{ franceconnect_url }}/api/v1/authorize",
             "tokenURL": "{{ franceconnect_url }}/api/v1/token",
-            "callbackURL": "http://{{ front_web_public_host }}/api/auth/connectCallback",
+            "callbackURL": "http://{{ front_web_public_host }}/api/auth/france-connect/callback",
             "scope": ["openid", "profile"]
         }
-    },
-    "facebook" : {
+    }
+{% endif %}
+{% if facebook_client_id and facebook_client_secret %}
+    , "facebook" : {
         "clientID" : "{{ facebook_client_id }}",
         "clientSecret" : "{{ facebook_client_secret }}",
         "callbackURL" : "http://{{ front_web_public_host }}/api/auth/facebook/callback"
     }
+{% endif %}
 }

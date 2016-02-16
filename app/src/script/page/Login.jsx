@@ -2,62 +2,60 @@ var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var ReactRouter = require('react-router');
 var ReactIntl = require('react-intl');
+var ReactDocumentTitle = require('react-document-title');
 var Reflux = require('reflux');
-var $ = require('jquery');
 
 var Page = require('../component/Page');
 
+var UserAction = require('../action/UserAction');
+
+var UserStore = require('../store/UserStore');
+
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
-    Col = ReactBootstrap.Col;
+    Col = ReactBootstrap.Col,
+    Button = ReactBootstrap.Button;
 
 var Link = ReactRouter.Link;
 
 var Login = React.createClass({
 
     mixins: [
-        ReactIntl.IntlMixin
+        ReactIntl.IntlMixin,
+        Reflux.connect(UserStore, 'users')
     ],
 
     getInitialState: function()
     {
         return {
-            redirect: this.props.params && this.props.params.redirect
-                ? this.props.params.redirect
+            redirect: this.props.location && this.props.location.query.redirect
+                ? this.props.location.query.redirect
                 : this.props.redirect
         };
     },
 
-    updateLoginLink: function()
+    componentWillMount: function()
     {
-        var link = document.getElementById('link-login');
-
-        if (!link)
-            return;
-
-        if (this.state.redirect)
-            link.href = '/api/auth/login?redirect=' + encodeURIComponent(this.state.redirect);
-        else
-            link.href = '/api/auth/login';
-    },
-
-    componentDidUpdate: function()
-    {
-        this.updateLoginLink();
-    },
-
-    componentDidMount: function()
-    {
-        this.updateLoginLink();
+        UserAction.listAuthProviders();
     },
 
     render: function()
     {
+        var authProviders = this.state.users.getAuthProviders();
+        var redirect = this.state.redirect
+            ? '?redirect=' + encodeURIComponent(this.state.redirect)
+            : '';
+        var displayName = {
+            'facebook' : 'Facebook',
+            'france-connect' : 'France Connect'
+        };
+
 		return (
-            <div className="page">
-                <Grid>
-                    {this.props.message
-                        ? <Row>
+            <ReactDocumentTitle title={this.getIntlMessage('login.SIGN_IN') + ' - ' + this.getIntlMessage('site.TITLE')}>
+                <div className="page page-login">
+                    <Grid>
+                        {this.props.message
+                            ? <Row>
                             <Col md={12}>
                                 <p>
                                     {this.props.message}
@@ -65,15 +63,27 @@ var Login = React.createClass({
                             </Col>
                         </Row>
                         : <div/>}
-                    <Row>
-                        <Col md={12}>
-                            <div>
-                                <Page slug="connexion" componentDidUpdate={this.updateLoginLink}/>
-                            </div>
-                        </Col>
-                    </Row>
-                </Grid>
-            </div>
+                        <Row>
+                            <Col md={12}>
+                                <ul className="list-unstyled">
+                                    {authProviders && authProviders.map((provider) => {
+                                        return (
+                                            <li>
+                                                <a href={provider.url + redirect}>
+                                                    <Button className={"btn-login btn-login-" + provider.name}>
+                                                        <span className={"icon-" + provider.name}/>
+                                                        {this.getIntlMessage('login.SIGN_IN_WITH') + ' ' + displayName[provider.name]}
+                                                    </Button>
+                                                </a>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </Col>
+                        </Row>
+                    </Grid>
+                </div>
+            </ReactDocumentTitle>
 		);
 	}
 });

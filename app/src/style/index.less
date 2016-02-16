@@ -21,6 +21,12 @@
 
 @import "./bootswatch-journal.less";
 
+@import "./icons.less";
+
+[class^="icon-"], [class*=" icon-"] {
+    color: @cocorico-dark-grey;
+}
+
 body {
     background-color: #f8f8f8;
 }
@@ -253,7 +259,27 @@ li.active {
 }
 
 .btn-login {
-    height: 50px
+    height: 50px;
+    margin: 10px 0;
+}
+
+[class^="btn-login-"], [class*=" btn-login-"] {
+    font-size: 22px;
+    border: none;
+    min-width: 200px;
+
+    [class^="icon-"], [class*=" icon-"] {
+        vertical-align: sub;
+        margin-right: 10px;
+    }
+}
+
+.btn-login-facebook {
+    background-color: #4e69a2;
+
+    &:hover {
+        background-color: #3f5585
+    }
 }
 
 .btn-create-bill {
@@ -345,12 +371,6 @@ li.active {
     background-color: @cocorico-light-grey;
     padding: 10px 20px;
     display: inline-block;
-}
-
-@import "./font-icomoon.less";
-
-[class^="icon-"], [class*=" icon-"] {
-    color: @cocorico-dark-grey;
 }
 
 .like-buttons {

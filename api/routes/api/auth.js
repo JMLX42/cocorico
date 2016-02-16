@@ -17,47 +17,6 @@ passport.deserializeUser(function(user, done)
     done(null, user);
 });
 
-var strat = function() {
-    var strategy = new OpenIDConnectStrategy(
-        {
-            authorizationURL: config.franceConnect.oauth.authorizationURL,
-            tokenURL: config.franceConnect.oauth.tokenURL,
-            clientID: config.franceConnect.openIDConnectStrategyParameters.clientID,
-            clientSecret: config.franceConnect.openIDConnectStrategyParameters.clientSecret,
-            callbackURL: config.franceConnect.oauth.callbackURL,
-            userInfoURL: config.franceConnect.openIDConnectStrategyParameters.userInfoURL,
-            scope: config.franceConnect.oauth.scopes
-        },
-        function (iss, sub, profile, accessToken, refreshToken, done)
-        {
-            done(null, profile);
-        });
-
-    var alternateAuthenticate = new passportAuthenticateWithCUstomClaims(
-        config.franceConnect.openIDConnectStrategyParameters.userInfoURL,
-        config.franceConnect.openIDConnectStrategyParameters.acr_values,
-        1
-    );
-    strategy.authenticate = alternateAuthenticate.authenticate;
-
-    return strategy;
-};
-
-passport.use('provider', strat());
-
-exports.login = function(req, res)
-{
-    if (req.query.redirect)
-        req.session.redirectAfterLogin = req.query.redirect;
-
-    passport.authenticate(
-        'provider',
-        {
-            scope: config.franceConnect.oauth.scope
-        }
-    )(req, res);
-}
-
 exports.logout = function(req, res)
 {
     req.logout();
@@ -80,7 +39,52 @@ exports.fakeLogin = function(req, res)
     });
 }
 
-exports.connectCallback = function(req, res, next)
+if (config.franceConnect)
+{
+    var strat = function()
+    {
+        var strategy = new OpenIDConnectStrategy(
+            {
+                authorizationURL: config.franceConnect.oauth.authorizationURL,
+                tokenURL: config.franceConnect.oauth.tokenURL,
+                clientID: config.franceConnect.openIDConnectStrategyParameters.clientID,
+                clientSecret: config.franceConnect.openIDConnectStrategyParameters.clientSecret,
+                callbackURL: config.franceConnect.oauth.callbackURL,
+                userInfoURL: config.franceConnect.openIDConnectStrategyParameters.userInfoURL,
+                scope: config.franceConnect.oauth.scopes
+            },
+            function (iss, sub, profile, accessToken, refreshToken, done)
+            {
+                done(null, profile);
+            });
+
+        var alternateAuthenticate = new passportAuthenticateWithCUstomClaims(
+            config.franceConnect.openIDConnectStrategyParameters.userInfoURL,
+            config.franceConnect.openIDConnectStrategyParameters.acr_values,
+            1
+        );
+        strategy.authenticate = alternateAuthenticate.authenticate;
+
+        return strategy;
+    };
+
+    passport.use('provider', strat());
+}
+
+exports.franceConnectLogin = function(req, res)
+{
+    if (req.query.redirect)
+        req.session.redirectAfterLogin = req.query.redirect;
+
+    passport.authenticate(
+        'provider',
+        {
+            scope: config.franceConnect.oauth.scope
+        }
+    )(req, res);
+}
+
+exports.franceConnectCallback = function(req, res, next)
 {
     if (req.query && req.query.state && !req.query.error && req.session.state !== req.query.state)
         return res.status(404).apiResponse({error: {'name': 'invalid_state', 'message': 'invalid state'}});
@@ -126,27 +130,30 @@ exports.connectCallback = function(req, res, next)
     )(req, res);
 }
 
-var FacebookStrategy = require('passport-facebook').Strategy;
+if (config.facebook)
+{
+    var FacebookStrategy = require('passport-facebook').Strategy;
 
-passport.use(new FacebookStrategy(
-    {
-        clientID: config.facebook.clientID,
-        clientSecret: config.facebook.clientSecret,
-        callbackURL: config.facebook.callbackURL,
-        profileFields: ["id", "birthday", "email", "first_name", "gender", "last_name"],
-    },
-    function(accessToken, refreshToken, profile, cb)
-    {
-        var user = {
-            sub : 'facebook:' + profile.id,
-            firstName: profile.name.givenName,
-            lastName: profile.name.familyName,
-            gender: profile.gender,
-            birthdate: profile._json.birthday
-        };
-        cb(null, user);
-    }
-));
+    passport.use(new FacebookStrategy(
+        {
+            clientID: config.facebook.clientID,
+            clientSecret: config.facebook.clientSecret,
+            callbackURL: config.facebook.callbackURL,
+            profileFields: ["id", "birthday", "email", "first_name", "gender", "last_name"],
+        },
+        function(accessToken, refreshToken, profile, cb)
+        {
+            var user = {
+                sub : 'facebook:' + profile.id,
+                firstName: profile.name.givenName,
+                lastName: profile.name.familyName,
+                gender: profile.gender,
+                birthdate: profile._json.birthday
+            };
+            cb(null, user);
+        }
+    ));
+}
 
 exports.facebookLogin = function(req, res)
 {
@@ -165,7 +172,6 @@ exports.facebookCallback = function(req, res)
         'facebook',
         function(err, user)
         {
-            console.log('facebookCallback', err, req.user);
             if (err)
                 return res.apiResponse({error: err});
 
@@ -194,4 +200,17 @@ exports.facebookCallback = function(req, res)
 
         }
     )(req, res);
+}
+
+exports.providers = function(req, res)
+{
+    var providers = [];
+
+    if (config.facebook)
+        providers.push({name: 'facebook', url: '/api/auth/facebook/login'});
+
+    if (config.franceConnect)
+        providers.push({name: 'france-connect', url: '/api/auth/france-connect/login'});
+
+    res.apiResponse({ providers : providers });
 }

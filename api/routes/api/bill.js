@@ -15,7 +15,8 @@ var Bill = keystone.list('Bill'),
 	BillHelper = require('../../helpers/BillHelper'),
 	LikeHelper = require('../../helpers/LikeHelper'),
 	BallotHelper = require('../../helpers/BallotHelper'),
-	SourceHelper = require('../../helpers/SourceHelper');
+	SourceHelper = require('../../helpers/SourceHelper'),
+	UserProfileHelper = require('../../helpers/UserProfileHelper');
 
 exports.addLike = LikeHelper.getAddLikeFunc(Bill, 'ERROR_bill_NOT_FOUND', 'ERROR_bill_ALREADY_LIKED');
 
@@ -112,6 +113,24 @@ exports.getBallot = function(req, res)
 			return res.apiResponse({ ballot: ballot });
 		}
 	);
+
+	// if (!req.user || !req.user.sub)
+	// 	return res.status(401).apiResponse({error: 'NOT_LOGGED_IN'});
+	//
+	// Ballot.model.findOne({bill:req.params.id})
+	// 	.$where(UserProfileHelper.getWhereUserFunction(req.user))
+	// 	.exec(function(err, ballot)
+	// 	{
+	// 		if (err)
+	// 			return res.apiError('database error', err);
+	//
+	// 		if (!ballot)
+	// 			return res.status(404).apiResponse({
+	// 				error: 'ballot does not exist'
+	// 			});
+	//
+	// 		return res.apiResponse({ ballot: ballot });
+	// 	});
 }
 
 /**

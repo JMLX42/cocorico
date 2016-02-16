@@ -7,8 +7,15 @@ module.exports = Reflux.createStore({
     init: function()
     {
         this.listenTo(UserAction.requireLogin, this._requireLoginHandler);
+        this.listenTo(UserAction.listAuthProviders, this._fetchAuthProviders);
 
         this._currentUser = null;
+        this._authProviders = null;
+    },
+
+    getInitialState: function()
+    {
+        return this;
     },
 
     getCurrentUser: function()
@@ -22,6 +29,11 @@ module.exports = Reflux.createStore({
     {
         return typeof(this._currentUser) == 'object' && !!this._currentUser
             && !this._currentUser.error;
+    },
+
+    getAuthProviders: function()
+    {
+        return this._authProviders;
     },
 
     _requireLoginHandler: function()
@@ -50,6 +62,28 @@ module.exports = Reflux.createStore({
             }
         ).error((xhr, billStatus, err) => {
             this._currentUser = {error: xhr.status};
+            this.trigger(this);
+        });
+    },
+
+    _fetchAuthProviders: function()
+    {
+        if (this._authProviders === true)
+            return;
+
+        if (this._authProviders)
+            return this.trigger(this);
+
+        this._authProviders = true;
+
+        jquery.get(
+            '/api/auth/providers',
+            (data) => {
+                this._authProviders = data.providers;
+                this.trigger(this);
+            }
+        ).error((xhr, billStatus, err) => {
+            this._authProviders = {error: xhr.status};
             this.trigger(this);
         });
     }

@@ -31,11 +31,18 @@ exports = module.exports = function(app) {
 	app.use(passport.initialize());
 	app.use(passport.session());
 
-	app.get('/auth/login', keystone.middleware.api, routes.api.auth.login);
+	app.get('/auth/providers', keystone.middleware.api, routes.api.auth.providers);
 	app.get('/auth/logout', keystone.middleware.api, routes.api.auth.logout);
-	app.get('/auth/connectCallback', keystone.middleware.api, routes.api.auth.connectCallback);
-	app.get('/auth/facebook/login',  keystone.middleware.api, routes.api.auth.facebookLogin);
-	app.get('/auth/facebook/callback', keystone.middleware.api, routes.api.auth.facebookCallback);
+	if (config.franceConnect)
+	{
+		app.get('/auth/france-connect/login', keystone.middleware.api, routes.api.auth.franceConnectLogin);
+		app.get('/auth/france-connect/callback', keystone.middleware.api, routes.api.auth.franceConnectCallback);
+	}
+	if (config.facebook)
+	{
+		app.get('/auth/facebook/login',  keystone.middleware.api, routes.api.auth.facebookLogin);
+		app.get('/auth/facebook/callback', keystone.middleware.api, routes.api.auth.facebookCallback);
+	}
 	if (config.env == 'development')
 		app.get('/auth/fakeLogin', keystone.middleware.api, routes.api.auth.fakeLogin);
 
