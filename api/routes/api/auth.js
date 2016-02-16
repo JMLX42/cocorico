@@ -47,7 +47,6 @@ passport.use('provider', strat());
 
 exports.login = function(req, res)
 {
-    console.log('redirect', req.query.redirect);
     if (req.query.redirect)
         req.session.redirectAfterLogin = req.query.redirect;
 
@@ -109,14 +108,8 @@ exports.connectCallback = function(req, res, next)
                 birthdate: user._json.birthdate
             };
 
-            req.login(user, function(err) {
-                // if (err)
-                // {
-                //     req.logout();
-                //
-                //     return res.redirect(302, '/');
-                // }
-
+            req.login(user, function(err)
+            {
                 if (req.session.redirectAfterLogin)
                 {
                     var redirect = req.session.redirectAfterLogin;
@@ -129,6 +122,76 @@ exports.connectCallback = function(req, res, next)
                     return res.redirect(302, '/');
                 }
             });
+        }
+    )(req, res);
+}
+
+var FacebookStrategy = require('passport-facebook').Strategy;
+
+passport.use(new FacebookStrategy(
+    {
+        clientID: config.facebook.clientID,
+        clientSecret: config.facebook.clientSecret,
+        callbackURL: config.facebook.callbackURL,
+        profileFields: ["id", "birthday", "email", "first_name", "gender", "last_name"],
+    },
+    function(accessToken, refreshToken, profile, cb)
+    {
+        var user = {
+            sub : 'facebook:' + profile.id,
+            firstName: profile.name.givenName,
+            lastName: profile.name.familyName,
+            gender: profile.gender,
+            birthdate: profile._json.birthday
+        };
+        cb(null, user);
+    }
+));
+
+exports.facebookLogin = function(req, res)
+{
+    if (req.query.redirect)
+        req.session.redirectAfterLogin = req.query.redirect;
+
+    passport.authenticate(
+        'facebook',
+        { scope: [ 'public_profile', 'user_birthday' ] }
+    )(req, res);
+}
+
+exports.facebookCallback = function(req, res)
+{
+    passport.authenticate(
+        'facebook',
+        function(err, user)
+        {
+            console.log('facebookCallback', err, req.user);
+            if (err)
+                return res.apiResponse({error: err});
+
+            if (!user)
+            {
+                var errorName = res.req.query.error;
+                var errorDescription = res.req.query.error_description;
+
+                return res.send({error: {'name': errorName, 'message': errorDescription}});
+            }
+
+            req.login(user, function(err)
+            {
+                if (req.session.redirectAfterLogin)
+                {
+                    var redirect = req.session.redirectAfterLogin;
+
+                    delete req.session.redirectAfterLogin;
+                    return res.redirect(302, redirect);
+                }
+                else
+                {
+                    return res.redirect(302, '/');
+                }
+            });
+
         }
     )(req, res);
 }
