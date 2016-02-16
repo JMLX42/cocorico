@@ -47,7 +47,7 @@ var Bill = React.createClass({
         ReactIntl.IntlMixin,
         Reflux.connect(BillStore, 'bills'),
         Reflux.connect(BallotStore, 'ballots'),
-        Reflux.connect(UserStore, 'users'),
+        // Reflux.connect(UserStore, 'users'),
         Reflux.connect(SourceStore, 'sources')
     ],
 
