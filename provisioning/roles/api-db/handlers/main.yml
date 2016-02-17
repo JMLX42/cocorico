@@ -1,2 +1,4 @@
 - name: restart mongodb service
   service: name=mongodb state=restarted
+  when:
+    - provider != 'docker'

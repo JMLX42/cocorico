@@ -1,6 +1,7 @@
 ---
 - hosts:
     - local
+    - image
     - staging
     - prod
   gather_facts: yes

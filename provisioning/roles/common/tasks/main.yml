@@ -6,6 +6,8 @@
 
 - name: set hostname
   hostname: name={{ hostname }}
+  when:
+    - provider != 'docker'
 
 - name: enable multiverse
   apt_repository: repo="deb http://archive.ubuntu.com/ubuntu trusty multiverse" state=present update_cache=yes
@@ -48,7 +50,10 @@
 
 - name: switch to root when running "vagrant ssh"
   lineinfile: dest=/home/vagrant/.bashrc line="sudo -i"
-  when: is_development_environment
+  when:
+    - is_development_environment
+    - ansible_os_family == 'Debian'
+    - provider != 'docker'
 
 - name: create backup directory
   file: path={{ backup_dir }} state=directory
@@ -58,3 +63,8 @@
 
 - name: create project directory
   file: path={{ project_dir }} state=directory
+
+- name: install docker boot script
+  template: src=run.sh.j2 dest={{ project_dir }}/run.sh mode=0755
+  when:
+    - provider == 'docker'

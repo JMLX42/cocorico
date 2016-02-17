@@ -10,3 +10,21 @@
   when: is_development_environment
   notify:
     - restart mongodb service
+
+- name: test if mongo is locked
+  stat: path=/var/lib/mongo/mongod.lock
+  register: result
+
+# - name: start mongodb service
+#   service: name={{ mongodb_daemon }} state=started
+#   when:
+#     - not result.stat.exists
+#     - provider != 'docker'
+
+- name: start mongodb service
+  shell: /etc/init.d/mongodb start
+  args:
+    creates: /var/lib/mongo/mongod.lock
+  when:
+    - not result.stat.exists
+    - provider == 'docker'

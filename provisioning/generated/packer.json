@@ -1,0 +1,37 @@
+{
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "{{ pwd }}/./",
+      "destination": "/vagrant"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+        "PLAYBOOK=provisioning/provision.yml",
+        "INVENTORY=provisioning/inventory",
+        "LIMIT=image",
+        "SKIP_TAGS=",
+        "VERBOSE=vvv",
+        "PROVIDER=docker"
+      ],
+      "script": "deployment/ansible.sh"
+    }
+  ],
+  "builders": [
+    {
+      "name": "cocorico",
+      "type": "docker",
+      "image": "ansible/ubuntu14.04-ansible:stable",
+      "export_path": "../docker-export/cocorico.tar"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "docker-import",
+      "repository": "cocorico",
+      "tag": "latest",
+      "keep_input_artifact": true
+    }
+  ]
+}

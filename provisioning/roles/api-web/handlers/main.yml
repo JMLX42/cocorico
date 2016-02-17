@@ -1,6 +1,10 @@
 ---
 - name: restart apache2 service
   service: name=apache2 state=restarted
+  when:
+    - provider != 'docker'
 
 - name: restart cocorico-api-web service
   service: name={{ project_name }}-api-web state=restarted
+  when:
+    - provider != 'docker'

@@ -8,7 +8,7 @@
   "builders": [
     {
       "type": "docker",
-      "image": "ubuntu:14.04",
+      "image": "ansible/ubuntu14.04-ansible:stable",
       "export_path": "bin/minko-cloud-ubuntu-docker.tar"
     }
   ]
