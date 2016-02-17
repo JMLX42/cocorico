@@ -13,6 +13,7 @@
     "passport-oauth": "^1.0.0",
     "passport-openidconnect": "0.0.1",
     "passport-facebook": "2.1.0",
+    "passport-google-oauth20": "1.0.0",
     "lodash": "~2.4.1",
     "client-sessions": "0.7.0",
     "bcrypt": "0.8.5",

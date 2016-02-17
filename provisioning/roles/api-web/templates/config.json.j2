@@ -45,4 +45,11 @@
         "callbackURL" : "http://{{ front_web_public_host }}/api/auth/facebook/callback"
     }
 {% endif %}
+{% if google_client_id and google_client_secret %}
+    , "google" : {
+        "clientID" : "{{ google_client_id }}",
+        "clientSecret" : "{{ google_client_secret }}",
+        "callbackURL" : "http://{{ front_web_public_host }}/api/auth/google/callback"
+    }
+{% endif %}
 }

@@ -1,6 +1,6 @@
 environment_name: local
 front_hostname: cocorico.cc
-front_web_public_host: "{{ front_hostname }}.test"
+front_web_public_host: "local.{{ front_hostname }}"
 hostname: "{{ front_hostname }}-{{ environment_name }}"
 is_development_environment: yes
 http_protocol_prefix: http
@@ -15,6 +15,9 @@ franceconnect_url: https://fcp.integ01.dev-franceconnect.fr
 
 facebook_client_id: 142422522809982
 facebook_client_secret: 8f0812597bdc510a32f27e79b77f4b21
+
+google_client_id: 1048827102701-6gbl2i586oqoj9a9p1u620u0pom399gu.apps.googleusercontent.com
+google_client_secret:  U5YibRB5qJn1tvJ-C_3M_I8b
 
 home_web_admin_email: "admin@{{ front_hostname }}"
 home_web_admin_password: admin

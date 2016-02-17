@@ -43,6 +43,11 @@ exports = module.exports = function(app) {
 		app.get('/auth/facebook/login',  keystone.middleware.api, routes.api.auth.facebookLogin);
 		app.get('/auth/facebook/callback', keystone.middleware.api, routes.api.auth.facebookCallback);
 	}
+	if (config.google)
+	{
+		app.get('/auth/google/login',  keystone.middleware.api, routes.api.auth.googleLogin);
+		app.get('/auth/google/callback', keystone.middleware.api, routes.api.auth.googleCallback);
+	}
 	if (config.env == 'development')
 		app.get('/auth/fakeLogin', keystone.middleware.api, routes.api.auth.fakeLogin);
 

@@ -47,7 +47,8 @@ var Login = React.createClass({
             : '';
         var displayName = {
             'facebook' : 'Facebook',
-            'france-connect' : 'France Connect'
+            'france-connect' : 'France Connect',
+            'google' : 'Google'
         };
 
 		return (

@@ -17,6 +17,22 @@ passport.deserializeUser(function(user, done)
     done(null, user);
 });
 
+exports.providers = function(req, res)
+{
+    var providers = [];
+
+    if (config.facebook)
+        providers.push({name: 'facebook', url: '/api/auth/facebook/login'});
+
+    if (config.franceConnect)
+        providers.push({name: 'france-connect', url: '/api/auth/france-connect/login'});
+
+    if (config.google)
+        providers.push({name: 'google', url: '/api/auth/google/login'});
+
+    res.apiResponse({ providers : providers });
+}
+
 exports.logout = function(req, res)
 {
     req.logout();
@@ -39,9 +55,61 @@ exports.fakeLogin = function(req, res)
     });
 }
 
+function getLoginFunction(provider, options)
+{
+    return function(req, res)
+    {
+        if (req.query.redirect)
+            req.session.redirectAfterLogin = req.query.redirect;
+
+        passport.authenticate(provider, options)(req, res);
+    };
+}
+
+function getLoginCallbackFunction(provider)
+{
+    return function(req, res)
+    {
+        if (req.query && req.query.state && !req.query.error && req.session.state !== req.query.state)
+            return res.status(404).apiResponse({error: {'name': 'invalid_state', 'message': 'invalid state'}});
+
+        passport.authenticate(
+            provider,
+            function(err, user)
+            {
+                if (err)
+                    return res.apiResponse({error: err});
+
+                if (!user)
+                {
+                    var errorName = res.req.query.error;
+                    var errorDescription = res.req.query.error_description;
+
+                    return res.send({error: {'name': errorName, 'message': errorDescription}});
+                }
+
+                req.login(user, function(err)
+                {
+                    if (req.session.redirectAfterLogin)
+                    {
+                        var redirect = req.session.redirectAfterLogin;
+
+                        delete req.session.redirectAfterLogin;
+                        return res.redirect(302, redirect);
+                    }
+                    else
+                    {
+                        return res.redirect(302, '/');
+                    }
+                });
+            }
+        )(req, res);
+    }
+}
+
 if (config.franceConnect)
 {
-    var strat = function()
+    var FranceConnectStrategy = function()
     {
         var strategy = new OpenIDConnectStrategy(
             {
@@ -55,7 +123,15 @@ if (config.franceConnect)
             },
             function (iss, sub, profile, accessToken, refreshToken, done)
             {
-                done(null, profile);
+                var user = {
+                    sub: profile._json.sub,
+                    firstName: profile._json.given_name,
+                    lastName: profile._json.family_name,
+                    gender: profile._json.gender,
+                    birthdate: profile._json.birthdate
+                };
+
+                done(null, user);
             });
 
         var alternateAuthenticate = new passportAuthenticateWithCUstomClaims(
@@ -68,66 +144,11 @@ if (config.franceConnect)
         return strategy;
     };
 
-    passport.use('provider', strat());
-}
+    passport.use('france-connect', FranceConnectStrategy());
 
-exports.franceConnectLogin = function(req, res)
-{
-    if (req.query.redirect)
-        req.session.redirectAfterLogin = req.query.redirect;
+    exports.franceConnectLogin = getLoginFunction('france-connect', {scope: config.franceConnect.oauth.scope});
 
-    passport.authenticate(
-        'provider',
-        {
-            scope: config.franceConnect.oauth.scope
-        }
-    )(req, res);
-}
-
-exports.franceConnectCallback = function(req, res, next)
-{
-    if (req.query && req.query.state && !req.query.error && req.session.state !== req.query.state)
-        return res.status(404).apiResponse({error: {'name': 'invalid_state', 'message': 'invalid state'}});
-
-    passport.authenticate(
-        'provider',
-        function(err, user)
-        {
-            if (err)
-                return res.apiResponse({error: err});
-
-            if (!user)
-            {
-                var errorName = res.req.query.error;
-                var errorDescription = res.req.query.error_description;
-
-                return res.send({error: {'name': errorName, 'message': errorDescription}});
-            }
-
-            user = {
-                sub: user._json.sub,
-                firstName: user._json.given_name,
-                lastName: user._json.family_name,
-                gender: user._json.gender,
-                birthdate: user._json.birthdate
-            };
-
-            req.login(user, function(err)
-            {
-                if (req.session.redirectAfterLogin)
-                {
-                    var redirect = req.session.redirectAfterLogin;
-
-                    delete req.session.redirectAfterLogin;
-                    return res.redirect(302, redirect);
-                }
-                else
-                {
-                    return res.redirect(302, '/');
-                }
-            });
-        }
-    )(req, res);
+    exports.franceConnectCallback = getLoginCallbackFunction('france-connect');
 }
 
 if (config.facebook)
@@ -153,64 +174,39 @@ if (config.facebook)
             cb(null, user);
         }
     ));
+
+    exports.facebookLogin = getLoginFunction('facebook', { scope: [ 'public_profile', 'user_birthday' ] });
+
+    exports.facebookCallback = getLoginCallbackFunction('facebook');
 }
 
-exports.facebookLogin = function(req, res)
+if (config.google)
 {
-    if (req.query.redirect)
-        req.session.redirectAfterLogin = req.query.redirect;
+    var GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-    passport.authenticate(
-        'facebook',
-        { scope: [ 'public_profile', 'user_birthday' ] }
-    )(req, res);
-}
-
-exports.facebookCallback = function(req, res)
-{
-    passport.authenticate(
-        'facebook',
-        function(err, user)
+    passport.use(new GoogleStrategy(
         {
-            if (err)
-                return res.apiResponse({error: err});
+            clientID: config.google.clientID,
+            clientSecret: config.google.clientSecret,
+            callbackURL: config.google.callbackURL,
+        },
+        function(accessToken, refreshToken, profile, cb)
+        {
+            var user = {
+                sub : 'google:' + profile.id,
+                firstName: profile.name.givenName,
+                lastName: profile.name.familyName,
+                gender: profile.gender,
+            };
 
-            if (!user)
-            {
-                var errorName = res.req.query.error;
-                var errorDescription = res.req.query.error_description;
+            if (profile._json.birthday)
+                user.birthday = profile._json.birthday;
 
-                return res.send({error: {'name': errorName, 'message': errorDescription}});
-            }
-
-            req.login(user, function(err)
-            {
-                if (req.session.redirectAfterLogin)
-                {
-                    var redirect = req.session.redirectAfterLogin;
-
-                    delete req.session.redirectAfterLogin;
-                    return res.redirect(302, redirect);
-                }
-                else
-                {
-                    return res.redirect(302, '/');
-                }
-            });
-
+            cb(null, user);
         }
-    )(req, res);
-}
+    ));
 
-exports.providers = function(req, res)
-{
-    var providers = [];
+    exports.googleLogin = getLoginFunction('google', { scope: [ 'profile' ] });
 
-    if (config.facebook)
-        providers.push({name: 'facebook', url: '/api/auth/facebook/login'});
-
-    if (config.franceConnect)
-        providers.push({name: 'france-connect', url: '/api/auth/france-connect/login'});
-
-    res.apiResponse({ providers : providers });
+    exports.googleCallback = getLoginCallbackFunction('google');
 }
