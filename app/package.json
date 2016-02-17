@@ -25,11 +25,6 @@
     "jquery": "2.1.4",
     "node-lessify": "0.1.1",
     "d3": "^3.5.3",
-    "web3": "0.15.0",
-    "ethereumjs-accounts": "https://github.com/promethe42/ethereumjs-accounts",
-    "hooked-web3-provider": "https://github.com/promethe42/hooked-web3-provider",
-    "qrcode-npm": "0.0.3",
-    "qrcode-reader": "0.1.0",
     "classnames": "2.2.3"
   },
   "engines": {
