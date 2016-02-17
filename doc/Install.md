@@ -10,8 +10,8 @@ The local install is the best way to test the platform and start developing/modi
 * Install [Vagrant 1.8.1+](https://docs.vagrantup.com/v2/installation/).
 * `git clone https://github.com/promethe42/cocorico.git && cd cocorico`
 * `vagrant up local` (run as admin on Windows)
-* Add `192.168.50.42 cocorico.cc.test` to [your hosts file](https://www.rackspace.com/knowledge_center/article/modify-your-hosts-file).
-* Go to [http://cocorico.cc.test](http://cocorico.cc.test) to test the platform.
+* Add `192.168.50.42 local.cocorico.cc` to [your hosts file](https://www.rackspace.com/knowledge_center/article/modify-your-hosts-file).
+* Go to [http://local.cocorico.cc](http://local.cocorico.cc) to test the platform.
 
 ### VM Management
 
