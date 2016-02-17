@@ -15,12 +15,6 @@
   stat: path=/var/lib/mongo/mongod.lock
   register: result
 
-# - name: start mongodb service
-#   service: name={{ mongodb_daemon }} state=started
-#   when:
-#     - not result.stat.exists
-#     - provider != 'docker'
-
 - name: start mongodb service
   shell: /etc/init.d/mongodb start
   args:
