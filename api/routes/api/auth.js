@@ -2,8 +2,6 @@ var passport = require('passport');
 var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 var User = keystone.list('User');
-var OpenIDConnectStrategy = require('passport-openidconnect').Strategy;
-var passportAuthenticateWithCUstomClaims = require('../../helpers/PassportAuthenticateWithCustomClaims').PassportAuthenticateWithCustomClaims;
 
 var config = require('../../config.json');
 
@@ -109,42 +107,32 @@ function getLoginCallbackFunction(provider)
 
 if (config.franceConnect)
 {
-    var FranceConnectStrategy = function()
-    {
-        var strategy = new OpenIDConnectStrategy(
-            {
-                authorizationURL: config.franceConnect.oauth.authorizationURL,
-                tokenURL: config.franceConnect.oauth.tokenURL,
-                clientID: config.franceConnect.openIDConnectStrategyParameters.clientID,
-                clientSecret: config.franceConnect.openIDConnectStrategyParameters.clientSecret,
-                callbackURL: config.franceConnect.oauth.callbackURL,
-                userInfoURL: config.franceConnect.openIDConnectStrategyParameters.userInfoURL,
-                scope: config.franceConnect.oauth.scopes
-            },
-            function (iss, sub, profile, accessToken, refreshToken, done)
-            {
-                var user = {
-                    sub: profile._json.sub,
-                    firstName: profile._json.given_name,
-                    lastName: profile._json.family_name,
-                    gender: profile._json.gender,
-                    birthdate: profile._json.birthdate
-                };
+    var FranceConnectStrategy = require('passport-franceconnect').Strategy;
 
-                done(null, user);
-            });
+    passport.use('france-connect', new FranceConnectStrategy(
+        {
+            // authorizationURL: config.franceConnect.oauth.authorizationURL,
+            // tokenURL: config.franceConnect.oauth.tokenURL,
+            clientID: config.franceConnect.openIDConnectStrategyParameters.clientID,
+            clientSecret: config.franceConnect.openIDConnectStrategyParameters.clientSecret,
+            callbackURL: config.franceConnect.oauth.callbackURL,
+            // userInfoURL: config.franceConnect.openIDConnectStrategyParameters.userInfoURL,
+            scope: config.franceConnect.oauth.scopes,
+            acrValues: config.franceConnect.openIDConnectStrategyParameters.acr_values
+        },
+        function (iss, sub, profile, accessToken, refreshToken, done)
+        {
+            var user = {
+                sub: profile._json.sub,
+                firstName: profile._json.given_name,
+                lastName: profile._json.family_name,
+                gender: profile._json.gender,
+                birthdate: profile._json.birthdate
+            };
 
-        var alternateAuthenticate = new passportAuthenticateWithCUstomClaims(
-            config.franceConnect.openIDConnectStrategyParameters.userInfoURL,
-            config.franceConnect.openIDConnectStrategyParameters.acr_values,
-            1
-        );
-        strategy.authenticate = alternateAuthenticate.authenticate;
-
-        return strategy;
-    };
-
-    passport.use('france-connect', FranceConnectStrategy());
+            done(null, user);
+        }
+    ));
 
     exports.franceConnectLogin = getLoginFunction('france-connect', {scope: config.franceConnect.oauth.scope});
 
