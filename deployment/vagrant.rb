@@ -97,6 +97,17 @@ module Vagrant
     end
 
     def self.define_virtualbox(config, name, params)
+
+      require 'rbconfig'
+
+      is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+      if is_windows
+        is_admin = system('reg query "HKU\S-1-5-19" >nul 2>nul')
+        if !is_admin
+          raise "You must have administrator privileges."
+        end
+      end
+
       config.vm.define name, primary: true do |config|
         config.vm.box = params[:box]
 
