@@ -9,7 +9,7 @@ Vagrant.autoconfigure({
     :vars => {
       :hostname => "local.cocorico.cc"
     },
-    :memory => 1024
+    :memory => 2048
   },
   :image => {
     :provider => "docker",
