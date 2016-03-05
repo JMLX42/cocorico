@@ -4,12 +4,11 @@ var ReactIntl = require('react-intl');
 var ReactRouter = require('react-router');
 var Reflux = require('reflux');
 
-var StringHelper = require('../helper/StringHelper');
-
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
 var ArgumentEditor = require('./ArgumentEditor'),
-    LikeButtons = require('./LikeButtons');
+    LikeButtons = require('./LikeButtons'),
+    Title = require('./Title');
 
 var ArgumentAction = require('../action/ArgumentAction');
 
@@ -47,7 +46,7 @@ var Footer = React.createClass({
                     : args.sort((a, b)=> b.score - a.score).map((arg) => {
                         return (
                             <li>
-                                <h4>{StringHelper.toTitleCase(arg.title)}</h4>
+                                <h4><Title text={arg.title}/></h4>
                                 <LikeButtons likeAction={ArgumentAction.like}
                                     resource={arg}
                                     likeButtonEnabled={this.props.editable}
