@@ -106,7 +106,13 @@ var Intl = {
 			ADD_SOURCE_URL_HINT: 'Adresse Web de la source que vous désirez ajouter :',
 			ADD_SOURCE_SUBMIT_BUTTON: 'Ajouter',
 			LIKE_BUTTON_TITLE: "J'approuve",
-			DISLIKE_BUTTON_TITLE: "Je désapprouve"
+			DISLIKE_BUTTON_TITLE: "Je désapprouve",
+			STATUS_DRAFT: 'Brouillon',
+			STATUS_REVIEW: 'Révision',
+			STATUS_DEBATE: 'Débat',
+			STATUS_VOTE: 'Vote',
+			STATUS_PUBLISHED: 'Publié',
+			BLOCKCHAIN_SECURED: 'Vote sécurisé sur la blockchain'
 		},
 
 		billEditor: {
