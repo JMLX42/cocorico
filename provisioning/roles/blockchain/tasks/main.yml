@@ -1,46 +1,60 @@
 - set_fact: role_name=blockchain
 
 - name: create role directory
+  when: blockchain_vote
   file: path={{ project_dir}}/{{ role_name }} state=directory
 
 - name: install ethereum dependencies
+  when: blockchain_vote
   apt: name=software-properties-common state=present
 
 - name: add ethereum PPAs
+  when: blockchain_vote
   apt_repository: repo={{ item }}
   with_items:
     - ppa:ethereum/ethereum
     - ppa:ethereum/ethereum-qt
 
 - name: install ethereum
+  when: blockchain_vote
   apt: name={{ item }} update_cache=yes
   with_items:
     - ethereum
     - cpp-ethereum
 
 - lineinfile: line={{ ethereum_etherbase_password }} dest={{ project_dir}}/{{ role_name }}/password mode=700 state=present create=yes
+  when: blockchain_vote
   register: ethereum_password_file
 
 - name: create ethereum account
   shell: geth --datadir {{ ethereum_datadir }} --password {{ project_dir}}/{{ role_name }}/password account new
   register: result
-  when: ethereum_password_file.changed
+  when:
+    - blockchain_vote
+    - ethereum_password_file.changed
 
 - name: extract etherbase address
   set_fact: ethereum_etherbase_address="{{ result.stdout | regex_replace('^Mining Beneficiary.* (.*)$', '\\1') }}"
-  when: ethereum_password_file.changed
+  when:
+    - blockchain_vote
+    - ethereum_password_file.changed
 
 - name: install genesis block
   template: src=genesis_block.json.j2 dest={{ project_dir}}/{{ role_name }}/genesis_block.json
-  when: ethereum_password_file.changed
+  when:
+    - blockchain_vote
+    - ethereum_password_file.changed
 
 - name: install upstart script
+  when: blockchain_vote
   template: src=blockchain.upstart.conf.j2 dest=/etc/init/cocorico-blockchain.conf
 
 - name: install miner upstart script
+  when: blockchain_vote
   template: src=blockchain-miner.upstart.conf.j2 dest=/etc/init/cocorico-blockchain-miner.conf
 
 - name: compile all contracts
+  when: blockchain_vote
   shell: solc /vagrant/contract/{{ item }}.sol --combined-json abi,bin > {{ project_dir}}/{{ role_name }}/{{ item }}.json
   register: result
   failed_when: result.stderr
@@ -48,13 +62,25 @@
     - find /vagrant/contract/ -name '*.sol' -exec basename {} .sol \;
 
 - name: start the ethereum blockchain service
+  when: blockchain_vote
   service: name=cocorico-blockchain state=started
+
+- name: stop the ethereum blockchain service
+  when: not blockchain_vote
+  service: name=cocorico-blockchain state=stopped
 
 - name: start the ethereum blockchain mining service
   service: name=cocorico-blockchain-miner state=started
-  when: ethereum_mine_on_boot
+  when:
+    - blockchain_vote
+    - ethereum_mine_on_boot
+
+- name: stop the ethereum blockchain mining service
+  when: not blockchain_vote
+  service: name=cocorico-blockchain-miner state=stopped
 
 - name: install apache configuration
+  when: blockchain_vote
   template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
   notify:
     - restart apache2 service
