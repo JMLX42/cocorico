@@ -16,6 +16,9 @@
 - name: install npm modules
   npm: path={{ cocorico_app_dir }}
 
+- name: generate app configuration
+  template: src=config.json.j2 dest={{ project_dir }}/{{ role_name }}/config.json
+
 - name: build debug app
   shell: npm run build
   args:

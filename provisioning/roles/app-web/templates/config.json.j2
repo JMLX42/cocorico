@@ -1,0 +1,8 @@
+{
+{% if is_development_environment %}
+    "env": "development",
+{% else %}
+    "env": "production",
+{% endif %}
+    "capabilities" : {{ capabilities | to_json }}
+}
