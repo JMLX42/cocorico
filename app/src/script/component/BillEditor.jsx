@@ -19,6 +19,8 @@ var Grid = ReactBootstrap.Grid,
 
 var Link = ReactRouter.Link;
 
+var Title = require('./Title');
+
 var BillAction = require('../action/BillAction'),
     UserAction = require('../action/UserAction');
 
@@ -130,7 +132,7 @@ var Bill = React.createClass({
                 </Row>
                 <Row>
                     <Col md={12}>
-                        <h1>{this.state.title}</h1>
+                        <h1><Title text={this.state.title}/></h1>
                         <Markdown>
                            {this.state.content}
                         </Markdown>
