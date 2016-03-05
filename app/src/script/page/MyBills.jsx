@@ -6,7 +6,8 @@ var Reflux = require('reflux');
 var ReactDocumentTitle = require('react-document-title');
 
 var BillAction = require("../action/BillAction");
-var BillStore = require("../store/BillStore");
+var BillStore = require("../store/BillStore"),
+    ConfigStore = require("../store/ConfigStore");
 
 var BillList = require("../component/BillList");
 
@@ -25,6 +26,7 @@ var MyBills = React.createClass({
 
     mixins: [
         Reflux.connect(BillStore, 'bills'),
+        Reflux.connect(ConfigStore, 'config'),
         Reflux.ListenerMixin,
         ReactIntl.IntlMixin,
         ForceAuthMixin
@@ -109,21 +111,31 @@ var MyBills = React.createClass({
                         <Row>
                             <Col md={12}>
                                 <Tabs activeKey={this.state.activeKey} onSelect={this.tabSelectHandler} className="tabs-my-bills">
-                                    <Tab eventKey={1} title={"Brouillon (" + (filteredBills['draft'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['draft']} showLikeButtons={false} editable={true}/>
-                                    </Tab>
-                                    <Tab eventKey={2} title={"Révision (" + (filteredBills['review'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['review']} showLikeButtons={false} editable={['bill-status']} />
-                                    </Tab>
-                                    <Tab eventKey={3} title={"Débat (" + (filteredBills['debate'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['debate']} showLikeButtons={false} editable={['bill-status']} />
-                                    </Tab>
-                                    <Tab eventKey={4} title={"Vote (" + (filteredBills['vote'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['vote']} showLikeButtons={false} editable={['bill-status']} />
-                                    </Tab>
-                                    <Tab eventKey={5} title={"Publié (" + (filteredBills['published'] || []).length + ")"}>
-                                        <BillList bills={filteredBills['published']} showLikeButtons={false} editable={['bill-status']} />
-                                    </Tab>
+                                    {this.state.config.capabilities.step.draft
+                                        ? <Tab eventKey={1} title={"Brouillon (" + (filteredBills['draft'] || []).length + ")"}>
+                                            <BillList bills={filteredBills['draft']} showLikeButtons={false} editable={true}/>
+                                        </Tab>
+                                        : <div/>}
+                                    {this.state.config.capabilities.step.review
+                                        ? <Tab eventKey={2} title={"Révision (" + (filteredBills['review'] || []).length + ")"}>
+                                            <BillList bills={filteredBills['review']} showLikeButtons={false} editable={['bill-status']} />
+                                        </Tab>
+                                        : <div/>}
+                                    {this.state.config.capabilities.step.debate
+                                        ? <Tab eventKey={3} title={"Débat (" + (filteredBills['debate'] || []).length + ")"}>
+                                            <BillList bills={filteredBills['debate']} showLikeButtons={false} editable={['bill-status']} />
+                                        </Tab>
+                                        : <div/>}
+                                    {this.state.config.capabilities.step.vote
+                                        ? <Tab eventKey={4} title={"Vote (" + (filteredBills['vote'] || []).length + ")"}>
+                                            <BillList bills={filteredBills['vote']} showLikeButtons={false} editable={['bill-status']} />
+                                        </Tab>
+                                        : <div/>}
+                                    {this.state.config.capabilities.step.published
+                                        ? <Tab eventKey={5} title={"Publié (" + (filteredBills['published'] || []).length + ")"}>
+                                            <BillList bills={filteredBills['published']} showLikeButtons={false} editable={['bill-status']} />
+                                        </Tab>
+                                        : <div/>}
                                 </Tabs>
                             </Col>
                         </Row>
