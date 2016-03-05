@@ -1,9 +1,12 @@
 var React = require('react');
 var classNames = require('classnames');
+var Reflux = require('reflux');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
 var BillAction = require('../action/BillAction');
+
+var ConfigStore = require('../store/ConfigStore');
 
 var LinkWithTooltip = require('./LinkWithTooltip'),
     LikeButtons = require('./LikeButtons'),
@@ -12,7 +15,8 @@ var LinkWithTooltip = require('./LinkWithTooltip'),
 module.exports = React.createClass({
 
     mixins: [
-        ForceAuthMixin
+        ForceAuthMixin,
+        Reflux.connect(ConfigStore, 'config')
     ],
 
     getDefaultProps: function()
@@ -93,7 +97,7 @@ module.exports = React.createClass({
 
         return (
             <div className="bill-part">
-                {part.content != '[]' && !this.props.editable
+                {part.content != '[]' && !this.props.editable && this.state.config.capabilities.article.vote
                     ? <div className="bill-part-relative-score">
                         <div style={{
                             position: 'absolute',
@@ -105,7 +109,7 @@ module.exports = React.createClass({
                     </div>
                     : <div/>}
                 {this.renderHeader(part.title, part.level)}
-                {part.content != '[]'
+                {part.content != '[]' && this.state.config.capabilities.article.vote
                     ? <LikeButtons likeAction={BillAction.likeBillPart} resource={part}
                         editable={this.props.editable} showScore={!this.props.editable}
                         scoreFormat={(score) => score > 0 ? '+' + score : score}/>
