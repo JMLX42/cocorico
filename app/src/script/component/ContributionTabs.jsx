@@ -13,7 +13,8 @@ var ArgumentTab = require('./ArgumentTab'),
     SourceTab = require('./SourceTab');
 
 var SourceStore = require('../store/SourceStore'),
-    ArgumentStore = require('../store/ArgumentStore');
+    ArgumentStore = require('../store/ArgumentStore'),
+    ConfigStore = require('../store/ConfigStore');
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -30,7 +31,8 @@ var Bill = React.createClass({
         ForceAuthMixin,
         ReactIntl.IntlMixin,
         Reflux.connect(SourceStore, 'sources'),
-        Reflux.connect(ArgumentStore, 'args')
+        Reflux.connect(ArgumentStore, 'args'),
+        Reflux.connect(ConfigStore, 'config')
     ],
 
     contextTypes: {
@@ -111,32 +113,36 @@ var Bill = React.createClass({
 
         return (
             <Tabs animation={false} activeKey={this.state.activeKey} onSelect={this.tabSelectHandler} className="hidden-xs">
-                {bill.status == 'debate' || bill.status == 'vote' || bill.status == 'published'
+                {this.state.config.capabilities.argument.read && bill.status == 'debate' || bill.status == 'vote' || bill.status == 'published'
                     ? <Tab eventKey={eventKey++} title={'Arguments (' + (args ? args.length : 0) + ')'}>
                         <ArgumentTab bill={bill} editable={this.props.editable && bill.status == 'debate'}/>
                     </Tab>
                     : <div/>}
-                <Tab eventKey={eventKey++} title={'Sources (' + (sources ? sources.length : 0) + ')'}>
-                    <SourceTab bill={bill} editable={this.props.editable && bill.status == 'review'}/>
-                </Tab>
-                <Tab eventKey={eventKey++} title="Propositions (0)">
-                    <Grid>
-                        <Row>
-                            <Col md={12}>
-                                <p>{this.getIntlMessage('bill.NO_PROPOSAL')}</p>
-                                {this.props.editable && bill.status == 'review'
-                                    ? !this.isAuthenticated()
-                                        ? <p className="hint">
+                {this.state.config.capabilities.source.read
+                    ? <Tab eventKey={eventKey++} title={'Sources (' + (sources ? sources.length : 0) + ')'}>
+                        <SourceTab bill={bill} editable={this.props.editable && bill.status == 'review'}/>
+                    </Tab>
+                    : <div/>}
+                {this.state.config.capabilities.proposal.read
+                    ? <Tab eventKey={eventKey++} title="Propositions (0)">
+                        <Grid>
+                            <Row>
+                                <Col md={12}>
+                                    <p>{this.getIntlMessage('bill.NO_PROPOSAL')}</p>
+                                    {this.props.editable && bill.status == 'review'
+                                        ? !this.isAuthenticated()
+                                            ? <p className="hint">
                                             {this.renderLoginMessage(this.getIntlMessage('bill.ADD_PROPOSAL_LOGIN'))}
-                                        </p>
-                                        : <Button bsStyle="primary">
+                                            </p>
+                                            : <Button bsStyle="primary">
                                             {this.getIntlMessage('bill.ADD_PROPOSAL')}
                                         </Button>
-                                    : <div/>}
-                            </Col>
-                        </Row>
-                    </Grid>
-                </Tab>
+                                        : <div/>}
+                                </Col>
+                            </Row>
+                        </Grid>
+                    </Tab>
+                    : <div/>}
             </Tabs>
         );
     },
