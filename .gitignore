@@ -1,3 +1,4 @@
 .vagrant
 provisioning/generated/hosts.json
 *.log
+npm-debug*
