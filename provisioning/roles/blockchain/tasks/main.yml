@@ -46,11 +46,9 @@
     - ethereum_password_file.changed
 
 - name: install upstart script
-  when: blockchain_vote
   template: src=blockchain.upstart.conf.j2 dest=/etc/init/cocorico-blockchain.conf
 
 - name: install miner upstart script
-  when: blockchain_vote
   template: src=blockchain-miner.upstart.conf.j2 dest=/etc/init/cocorico-blockchain-miner.conf
 
 - name: compile all contracts

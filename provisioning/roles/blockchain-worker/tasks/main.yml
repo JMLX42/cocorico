@@ -18,11 +18,9 @@
   npm: path=/vagrant/blockchain-worker
 
 - name: install leader upstrart script
-  when: blockchain_vote
   template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
 
 - name: install follower upstart scripts
-  when: blockchain_vote
   template: src={{ role_name }}-{{ item }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}-{{ item }}.conf
   with_items:
     - ballot

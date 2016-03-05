@@ -19,7 +19,6 @@
     - erlang
 
 - name: install upstart script
-  when: blockchain_vote
   template: src=rabbitmq.upstart.conf.j2 dest=/etc/init/rabbitmq-server.conf
 
 - name: disable old init rabbitmq scripts
