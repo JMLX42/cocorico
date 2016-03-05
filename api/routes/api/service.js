@@ -57,10 +57,12 @@ exports.getStatus = function(req, res)
                 vote : config.blockchain.voteEnabled
                     ? queueIsConnected && blockchainMinerIsConnected
                     : databaseIsConnected,
-                createBill : config.blockchain.voteEnabled
+                createBill : config.capabilities.bill.create
+                  && (config.blockchain.voteEnabled
                     ? blockchainMinerIsConnected
-                    : databaseIsConnected,
-                readBill : databaseIsConnected
+                    : databaseIsConnected),
+                readBill : config.capabilities.bill.read
+                  && databaseIsConnected
             }
         });
     });

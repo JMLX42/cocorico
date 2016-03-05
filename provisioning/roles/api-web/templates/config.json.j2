@@ -9,6 +9,7 @@
     },
     "savedPages" : {{ home_db_saved_pages | to_json }},
     "uploadDir" : "{{ home_web_upload_dir }}",
+    "capabilities" : {{ capabilities | to_json }},
     "blockchain" : {
         {% if blockchain_vote %}
         "voteEnabled" : true,

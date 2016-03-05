@@ -6,6 +6,24 @@ is_development_environment: yes
 http_protocol_prefix: http
 
 blockchain_vote: no
+capabilities:
+  bill:
+    create: yes
+    edit: yes
+    read: yes
+    favorite: yes
+  steps:
+    draft: yes
+    review: yes
+    debate: yes
+    vote: yes
+    published: yes
+  article:
+    vote: yes
+  argument:
+    create: yes
+    read: yes
+    vote: yes
 
 mongodb_database_name: "{{ project_name }}"
 
