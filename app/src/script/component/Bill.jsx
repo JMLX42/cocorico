@@ -176,16 +176,31 @@ var Bill = React.createClass({
                         </div>
                         : <div/>}
 
-                    <Grid>
-                        <Row className="section" style={{border:'none'}}>
-                            <ContributionTabs bill={bill} editable={true} tab={this.props.tab}/>
-                        </Row>
-                    </Grid>
+                    {showContributionTab
+                        ? <Grid>
+                            <Row className="section" style={{border:'none'}}>
+                                <ContributionTabs bill={bill} editable={true} tab={this.props.tab}/>
+                            </Row>
+                        </Grid>
+                        : <div/>}
+
+                    {bill.status == 'vote'
+                        ? <div className="section section-hint cocorico-light-grey-background">
+                            <Grid>
+                                <Row>
+                                    <Col md={12}>
+                                        <Hint pageSlug="astuce-etape-vote"
+                                            disposable={true}/>
+                                    </Col>
+                                </Row>
+                            </Grid>
+                        </div>
+                        : <div/>}
 
                     {bill.status == 'vote' || bill.status == 'published'
                         ? <div className={this.state.ballots && ballot && !ballot.error && ballot.status == 'complete' && ballot.value ? 'voted-' + ballot.value : ''}>
                             <Grid>
-                                <Row className="section">
+                                <Row className="section section-no-border section-vote">
                                     <Col md={12}>
                                         <h2 className="section-title">
                                             {this.getIntlMessage('bill.YOUR_VOTE')}
