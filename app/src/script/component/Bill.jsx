@@ -32,7 +32,8 @@ var VoteButtonBar = require('./VoteButtonBar'),
 var BallotStore = require('../store/BallotStore'),
     UserStore = require('../store/UserStore'),
     BillStore = require('../store/BillStore'),
-    SourceStore = require('../store/SourceStore');
+    SourceStore = require('../store/SourceStore'),
+    ConfigStore = require('../store/ConfigStore');
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -48,8 +49,8 @@ var Bill = React.createClass({
         ReactIntl.IntlMixin,
         Reflux.connect(BillStore, 'bills'),
         Reflux.connect(BallotStore, 'ballots'),
-        // Reflux.connect(UserStore, 'users'),
-        Reflux.connect(SourceStore, 'sources')
+        Reflux.connect(SourceStore, 'sources'),
+        Reflux.connect(ConfigStore, 'config')
     ],
 
     componentDidMount: function()
@@ -102,12 +103,8 @@ var Bill = React.createClass({
             ? this.state.bills.getById(this.props.billId)
             : null;
 
-        console.log('ok 0', bill);
-
         if (!bill || !bill.likes || !bill.parts)
             return null;
-
-        console.log('ok 1');
 
         var ballot = this.state.ballots
             ? this.state.ballots.getBallotByBillId(bill.id)
@@ -122,7 +119,11 @@ var Bill = React.createClass({
 
         var sources = this.state.sources
             ? this.state.sources.getSourcesByBillId(bill.id)
-            : null;
+            : [];
+
+        var showContributionTab = this.state.config.capabilities.source.read
+            || this.state.config.capabilities.argument.read
+            || this.state.config.capabilities.proposal.read;
 
 		return (
             <ReactDocumentTitle title={StringHelper.toTitleCase(bill.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
@@ -131,7 +132,9 @@ var Bill = React.createClass({
                         <Row className="section">
                             <Col md={12}>
                                 <h1 className="bill-title"><Title text={bill.title}/></h1>
-                                <LikeButtons likeAction={BillAction.like} resource={bill}/>
+                                {this.state.config.capabilities.bill.favorite
+                                    ? <LikeButtons likeAction={BillAction.like} resource={bill}/>
+                                    : <span/>}
                             </Col>
                         </Row>
 
@@ -184,7 +187,15 @@ var Bill = React.createClass({
                             <Grid>
                                 <Row className="section">
                                     <Col md={12}>
-                                        <h2 className="section-title">{this.getIntlMessage('bill.YOUR_VOTE')}</h2>
+                                        <h2 className="section-title">
+                                            {this.getIntlMessage('bill.YOUR_VOTE')}
+                                            {!!bill.voteContractAddress
+                                                ? <span className="small">
+                                                    <span className="icon-secured"/>
+                                                    {this.getIntlMessage('bill.BLOCKCHAIN_SECURED')}
+                                                </span>
+                                                : <span/>}
+                                        </h2>
                                         {!currentUser
                                             ? bill.status != 'published'
                                                 ? <p className="hint">
