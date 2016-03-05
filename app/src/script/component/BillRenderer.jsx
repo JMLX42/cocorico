@@ -6,7 +6,8 @@ var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 var BillAction = require('../action/BillAction');
 
 var LinkWithTooltip = require('./LinkWithTooltip'),
-    LikeButtons = require('./LikeButtons');
+    LikeButtons = require('./LikeButtons'),
+    Title = require('./Title');
 
 module.exports = React.createClass({
 
@@ -25,17 +26,17 @@ module.exports = React.createClass({
     {
         switch (level) {
             case 1:
-                return (<h1>{title}</h1>);
+                return (<h1><Title text={title}/></h1>);
             case 2:
-                return (<h2>{title}</h2>);
+                return (<h2><Title text={title}/></h2>);
             case 3:
-                return (<h3>{title}</h3>);
+                return (<h3><Title text={title}/></h3>);
             case 4:
-                return (<h4>{title}</h4>);
+                return (<h4><Title text={title}/></h4>);
             case 5:
-                return (<h5>{title}</h5>);
+                return (<h5><Title text={title}/></h5>);
             case 6:
-                return (<h6>{title}</h6>);
+                return (<h6><Title text={title}/></h6>);
         }
     },
 
