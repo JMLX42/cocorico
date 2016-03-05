@@ -35,6 +35,12 @@ a {
     // text-decoration: underline;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    .small {
+        margin-left: 10px;
+    }
+}
+
 li.active {
     a {
         text-decoration: none;
@@ -183,8 +189,8 @@ li.active {
         background-color: @cocorico-red;
         color: white;
 
-        h2 {
-            color: white;
+        h2, h2 .small, h2 .icon-secured {
+            color: white !important;
         }
 
         .btn-unvote {
@@ -306,6 +312,10 @@ li.active {
 
     .section-title {
         margin-bottom: 20px;
+    }
+
+    &.section-no-border {
+        border: none;
     }
 }
 
