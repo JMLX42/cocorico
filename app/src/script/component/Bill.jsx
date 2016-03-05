@@ -26,7 +26,8 @@ var VoteButtonBar = require('./VoteButtonBar'),
     LikeButtons = require('./LikeButtons'),
     Hint = require('./Hint'),
     VoteResult = require('./VoteResult'),
-    BillRenderer = require('./BillRenderer');
+    BillRenderer = require('./BillRenderer'),
+    Title = require('./Title');
 
 var BallotStore = require('../store/BallotStore'),
     UserStore = require('../store/UserStore'),
@@ -129,7 +130,7 @@ var Bill = React.createClass({
                     <Grid>
                         <Row className="section">
                             <Col md={12}>
-                                <h1 className="bill-title">{bill.title}</h1>
+                                <h1 className="bill-title"><Title text={bill.title}/></h1>
                                 <LikeButtons likeAction={BillAction.like} resource={bill}/>
                             </Col>
                         </Row>
