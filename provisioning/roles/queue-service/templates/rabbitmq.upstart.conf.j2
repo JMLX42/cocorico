@@ -1,7 +1,9 @@
 description "RabbitMQ Server"
 author  "RabbitMQ"
 
+{% if blockchain_vote %}
 start on runlevel [2345]
+{% endif %}
 stop on runlevel [016]
 respawn
 
