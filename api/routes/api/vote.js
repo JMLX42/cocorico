@@ -211,6 +211,9 @@ function pushBallotOnQueue(bill, ballot, callback)
 
 function vote(req, res, value)
 {
+    if (!config.capabilities.bill.vote)
+        return res.status(403).send();
+
     res.connection.setTimeout(0);
 
 	Bill.model.findById(req.params.id).exec(function(err, bill)
@@ -288,6 +291,9 @@ exports.voteNo = function(req, res)
 
 exports.remove = function(req, res)
 {
+    if (!config.capabilities.bill.vote)
+        return res.status(403).send();
+
 	Bill.model.findById(req.params.id).exec(function(err, bill)
 	{
 		if (err)
