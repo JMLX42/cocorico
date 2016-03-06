@@ -99,13 +99,15 @@ var MyBills = React.createClass({
                             <Col md={10}>
                                 <h1>{this.getIntlMessage('page.myBills.TITLE')}</h1>
                             </Col>
-                            <Col md={2}>
-                                <Link to={this.getIntlMessage('route.CREATE_BILL')} className="pull-right">
-                                    <Button bsSize="large" bsStyle="primary" className="btn-create-bill">
-                                        {this.getIntlMessage('page.myBills.NEW_BILL')}
-                                    </Button>
-                                </Link>
-                            </Col>
+                            {this.state.config.capabilities.bill.create
+                                ? <Col md={2}>
+                                    <Link to={this.getIntlMessage('route.CREATE_BILL')} className="pull-right">
+                                        <Button bsSize="large" bsStyle="primary" className="btn-create-bill">
+                                            {this.getIntlMessage('page.myBills.NEW_BILL')}
+                                        </Button>
+                                    </Link>
+                                </Col>
+                                : <span/>}
                         </Row>
 
                         <Row>
