@@ -5,7 +5,8 @@ var Reflux = require('reflux');
 var ReactRouter = require('react-router');
 
 var PageStore = require('../store/PageStore'),
-    UserStore = require('../store/UserStore');
+    UserStore = require('../store/UserStore'),
+    ConfigStore = require('../store/ConfigStore');
 
 var PageAction = require('../action/PageAction'),
     UserAction = require('../action/UserAction');
@@ -25,6 +26,7 @@ var Header = React.createClass({
     mixins: [
         Reflux.connect(PageStore, 'pages'),
         Reflux.connect(UserStore, 'users'),
+        Reflux.connect(ConfigStore, 'config'),
         ReactIntl.IntlMixin
     ],
 
@@ -68,7 +70,7 @@ var Header = React.createClass({
         			    </Nav>
                         <Nav pullRight>
                             <li>
-                                {!!currentUser
+                                {!!currentUser && (this.state.config.capabilities.bill.create || this.state.config.capabilities.bill.edit)
                                     ? <Link to={this.getIntlMessage('route.MY_BILLS')} activeClassName="active">
                                         {this.getIntlMessage('page.myBills.TITLE')}
                                     </Link>
