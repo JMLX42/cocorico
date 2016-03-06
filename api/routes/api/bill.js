@@ -31,6 +31,9 @@ exports.removeBillPartLike = LikeHelper.getRemoveLikeFunc(BillPart);
  */
 exports.list = function(req, res)
 {
+	if (!config.capabilities.bill.read)
+		return res.status(403).send();
+
 	Bill.model.find()
 		.populate('likes')
 		.select('-parts')
@@ -52,6 +55,9 @@ exports.list = function(req, res)
  */
 exports.get = function(req, res)
 {
+	if (!config.capabilities.bill.read)
+		return res.status(403).send();
+
 	Bill.model.findById(req.params.id)
 		.deepPopulate('likes parts.likes')
 		.exec(function(err, bill)
@@ -75,6 +81,9 @@ exports.get = function(req, res)
 
 exports.latest = function(req, res)
 {
+	if (!config.capabilities.bill.read)
+		return res.status(403).send();
+
 	Bill.model.find()
 		.sort('-publishedAt')
 		.limit(10)
@@ -138,6 +147,9 @@ exports.getBallot = function(req, res)
  */
 exports.getBySlug = function(req, res)
 {
+	if (!config.capabilities.bill.read)
+		return res.status(403).send();
+
 	Bill.model.findOne()
 		.where('slug', req.params.slug)
 		.populate('likes')
@@ -401,6 +413,9 @@ exports.save = function(req, res)
 
 			if (!bill)
 			{
+				if (!config.capabilities.bill.create)
+					return res.status(403).send();
+
 				updateBill(newBill, req.user, function(err)
 				{
 					if (err)
@@ -432,6 +447,9 @@ exports.save = function(req, res)
 			}
 			else
 			{
+				if (!config.capabilities.bill.edit)
+					return res.status(403).send();
+
 				if (bcrypt.compareSync(req.user.sub, bill.author))
 				{
 					bill.title = newBill.title;
@@ -476,6 +494,9 @@ exports.save = function(req, res)
 
 exports.status = function(req, res)
 {
+	if (!config.capabilities.bill.edit)
+		return res.status(403).send();
+
 	Bill.model.findById(req.params.id)
 		.select('status author')
 		.exec(function(err, bill)
