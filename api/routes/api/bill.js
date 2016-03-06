@@ -477,6 +477,7 @@ exports.save = function(req, res)
 exports.status = function(req, res)
 {
 	Bill.model.findById(req.params.id)
+		.select('status author')
 		.exec(function(err, bill)
 	    {
 			if (err)
