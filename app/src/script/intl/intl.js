@@ -83,6 +83,8 @@ var Intl = {
 			VOTE_PENDING: 'Enregistrement de votre vote en cours...',
 			VOTER_GENDER_MALE: 'homme',
 			VOTER_GENDER_FEMALE: 'femme',
+			VOTE_DISABLED: 'Vote désactivé.',
+			VOTE_UNAVAILABLE: 'Impossible de voter pour l\'instant. Merci de bien vouloir réessayer plus tard.',
 			UNVOTE: 'retirer mon vote',
 			ALREADY_VOTED: 'Vous avez voté \'{ value }\' le { date }.',
 			TOO_LATE_TO_VOTE: 'Vous ne pouvez plus voter pour ce texte.',

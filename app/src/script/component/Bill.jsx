@@ -53,13 +53,14 @@ var Bill = React.createClass({
         Reflux.connect(ConfigStore, 'config')
     ],
 
-    componentDidMount: function()
+    componentWillMount: function()
     {
         BillAction.show(this.props.billId);
-
-        // if (this.isAuthenticated())
         BillAction.showCurrentUserVote(this.props.billId);
+    },
 
+    componentDidMount: function()
+    {
         this.listenTo(VoteAction.vote, (billId) => {
             BillAction.show(this.props.billId);
             this.startPollingBallot();
@@ -211,36 +212,7 @@ var Bill = React.createClass({
                                                 </span>
                                                 : <span/>}
                                         </h2>
-                                        {!currentUser
-                                            ? bill.status != 'published'
-                                                ? <p className="hint">
-                                                    {this.getIntlMessage('bill.LOGIN_REQUIRED')} <LoginButton />
-                                                </p>
-                                                : <p className="hint">
-                                                    {this.getIntlMessage('bill.TOO_LATE_TO_VOTE')}
-                                                </p>
-                                            : !!this.state.ballots && (!ballot || ballot.error == 404 || ballot.status != 'complete')
-                                                ? bill.status == 'vote'
-                                                    ? !!ballot && ballot.status == 'pending'
-                                                        ? <span>
-                                                            <span className="vote-pending-indicator"/>
-                                                            {this.getIntlMessage('bill.VOTE_PENDING')}
-                                                        </span>
-                                                        : <VoteButtonBar billId={bill.id}/>
-                                                    : <p className="hint">
-                                                        {this.getIntlMessage('bill.TOO_LATE_TO_VOTE')}
-                                                    </p>
-                                                : <div>
-                                                    <FormattedMessage message={this.getIntlMessage('bill.ALREADY_VOTED')}
-                                                        value={ballot && ballot.value ? this.getIntlMessage('bill.VOTE_' + ballot.value.toUpperCase()) : ''}
-                                                        date={<FormattedTime value={ballot && ballot.time ? ballot.time : Date.now()}/>}/>
-                                                    {bill.status == 'vote'
-                                                        ? <div>
-                                                            <UnvoteButton bill={bill}/>
-                                                        </div>
-                                                        : <div/>}
-                                                </div>
-                                        }
+                                        <VoteButtonBar bill={bill} ballot={ballot}/>
                                     </Col>
                                 </Row>
                             </Grid>
