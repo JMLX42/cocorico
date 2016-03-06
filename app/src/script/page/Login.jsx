@@ -65,15 +65,18 @@ var Login = React.createClass({
                         </Row>
                         : <div/>}
                         <Row>
-                            <Col md={12}>
-                                <ul className="list-unstyled">
+                            <Col md={4} mdPush={4} sm={6} smPush={3} xs={10} xsPush={1}>
+                                <p className="text-center">
+                                    {this.getIntlMessage('login.SIGN_IN_WITH')}
+                                </p>
+                                <ul className="list-unstyled text-center">
                                     {authProviders && authProviders.map((provider) => {
                                         return (
                                             <li>
                                                 <a href={provider.url + redirect}>
                                                     <Button className={"btn-login btn-login-" + provider.name}>
                                                         <span className={"icon-" + provider.name}/>
-                                                        {this.getIntlMessage('login.SIGN_IN_WITH') + ' ' + displayName[provider.name]}
+                                                        {displayName[provider.name]}
                                                     </Button>
                                                 </a>
                                             </li>

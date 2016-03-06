@@ -42,7 +42,7 @@ var Intl = {
 			PASSWORD: "Mot de passe",
 			FORGOTTEN_PASSWORD: "Mot de passe oublié",
 			SIGN_IN: "Se Connecter",
-			SIGN_IN_WITH: "Se connecter avec",
+			SIGN_IN_WITH: "Se connecter avec :",
 			SIGN_OUT: "Se Déconnecter",
 			SIGN_UP: "Créer un compte",
 			REQUIRE_LOGIN: "Vous devez être connecté pour accéder à cette page."
