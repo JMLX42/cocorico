@@ -1,6 +1,6 @@
 description "{{ project_name }}-{{ role_name }}"
 
-{% if blockchain_vote %}
+{% if capabilities.bill.vote == "blockchain" %}
     {% if is_development_environment %}
 start on vagrant-mounted
     {% else %}

@@ -10,7 +10,7 @@ if python -mplatform | grep Ubuntu; then
 	/etc/init.d/rabbitmq-server start
 	/etc/init.d/redis-server start
 	/etc/init.d/cocorico-api-web start
-{% if blockchain_vote %}
+{% if capabilities.bill.vote == "blockchain" %}
     /etc/init.d/cocorico-blockchain start
 {% endif %}
 fi

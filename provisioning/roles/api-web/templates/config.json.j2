@@ -11,11 +11,6 @@
     "uploadDir" : "{{ home_web_upload_dir }}",
     "capabilities" : {{ capabilities | to_json }},
     "blockchain" : {
-        {% if blockchain_vote %}
-        "voteEnabled" : true,
-        {% else %}
-        "voteEnabled" : false,
-        {% endif %}
         "httpProvider" : "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}"
     }
 {% if franceconnect_client_id and franceconnect_client_secret %}

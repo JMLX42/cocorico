@@ -49,7 +49,7 @@ exports.getStatus = function(req, res)
             system : {
                 blockchainNode : getBlockchainStatus(),
                 blockchainMiner : blockchainMinerIsConnected,
-                blockchainVote : config.blockchain.voteEnabled,
+                blockchainVote : config.capabilities.bill.vote == 'blockchain',
                 database : databaseIsConnected,
                 queue : queueIsConnected,
             },
@@ -58,7 +58,7 @@ exports.getStatus = function(req, res)
                     ? queueIsConnected && blockchainMinerIsConnected
                     : databaseIsConnected,
                 createBill : config.capabilities.bill.create
-                  && (config.blockchain.voteEnabled
+                  && (config.capabilities.bill.vote == 'blockchain'
                     ? blockchainMinerIsConnected
                     : databaseIsConnected),
                 readBill : config.capabilities.bill.read

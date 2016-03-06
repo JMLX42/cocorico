@@ -5,13 +5,13 @@ hostname: "{{ front_hostname }}-{{ environment_name }}"
 is_development_environment: yes
 http_protocol_prefix: http
 
-blockchain_vote: yes
 capabilities:
   bill:
-    create: yes
-    edit: yes
+    create: no
+    edit: no
     read: yes
     favorite: yes
+    vote: blockchain
   step:
     draft: yes
     review: yes
@@ -35,9 +35,9 @@ capabilities:
 
 mongodb_database_name: "{{ project_name }}"
 
-franceconnect_client_id: #10e0a74c752107f712b890e6183b03b179146eb682189c3158370cb8f3fe7068
-franceconnect_client_secret: #9ecc4856675778548fae7c3042b07df78a5134f3ab9ae09b91543965b24f04a3
-franceconnect_url: #https://fcp.integ01.dev-franceconnect.fr
+franceconnect_client_id: 10e0a74c752107f712b890e6183b03b179146eb682189c3158370cb8f3fe7068
+franceconnect_client_secret: 9ecc4856675778548fae7c3042b07df78a5134f3ab9ae09b91543965b24f04a3
+franceconnect_url: https://fcp.integ01.dev-franceconnect.fr
 
 facebook_client_id: 142422522809982
 facebook_client_secret: 8f0812597bdc510a32f27e79b77f4b21
@@ -68,4 +68,4 @@ ethereum_rpc_private_host: 127.0.0.1
 ethereum_rpc_private_port: 8545
 ethereum_rpc_public_url: "{{ http_protocol_prefix }}://{{ front_web_public_host }}/blockchain/"
 ethereum_datadir: "{{ project_dir }}/blockchain/data"
-ethereum_mine_on_boot: "{{ blockchain_vote }}"
+ethereum_mine_on_boot: "{{ capabilities.bill.vote | bool }}"

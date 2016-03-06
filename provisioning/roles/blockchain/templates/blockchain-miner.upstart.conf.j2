@@ -1,6 +1,6 @@
 description "{{ role_name }}"
 
-{% if ethereum_mine_on_boot and blockchain_vote %}
+{% if ethereum_mine_on_boot and capabilities.bill.vote == "blockchain" %}
     {% if is_development_environment %}
 start on vagrant-mounted
     {% else %}

@@ -5,7 +5,7 @@
   apt: name={{ item }} state=present
   when:
     - ansible_os_family == 'Debian'
-    - blockchain_vote
+    - capabilities.bill.vote == "blockchain"
   with_items:
     - rabbitmq-server
 
@@ -13,7 +13,7 @@
   yum: name={{ item }} state=present
   when:
     - ansible_os_family == 'RedHat'
-    - blockchain_vote
+    - capabilities.bill.vote == "blockchain"
   with_items:
     - https://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm
     - erlang
@@ -25,20 +25,20 @@
   shell: update-rc.d rabbitmq-server disable
   when:
     - ansible_os_family == 'Debian'
-    - blockchain_vote
+    - capabilities.bill.vote == "blockchain"
 
 - name: start queue service
-  when: blockchain_vote
+  when: capabilities.bill.vote == "blockchain"
   service: name=rabbitmq-server state=started
 
 - name: stop queue service
-  when: not blockchain_vote
+  when: not capabilities.bill.vote == "blockchain"
   service: name=rabbitmq-server state=stopped
 
 - name: install queue admin
   command: rabbitmq-plugins enable rabbitmq_management
   when:
     - is_development_environment
-    - blockchain_vote
+    - capabilities.bill.vote == "blockchain"
   register: result
   changed_when: "'The following plugins have been enabled' in result.stdout"
