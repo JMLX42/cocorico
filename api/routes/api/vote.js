@@ -173,7 +173,7 @@ exports.result = function(req, res)
 
 function pushBallotOnQueue(bill, ballot, callback)
 {
-    if (!config.blockchain.voteEnabled)
+    if (config.capabilities.bill.vote != 'blockchain')
         return callback(null, null);
 
     require('amqplib/callback_api').connect(
@@ -190,9 +190,9 @@ function pushBallotOnQueue(bill, ballot, callback)
 
                 var ballotObj = {
                     ballot : {
-                        id                  : ballot.id,
+                        id : ballot.id,
                         voteContractAddress : bill.voteContractAddress,
-                        value               : ballot.value
+                        value : ballot.value
                     }
                 };
 
