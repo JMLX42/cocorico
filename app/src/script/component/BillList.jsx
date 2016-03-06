@@ -5,7 +5,10 @@ var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
 
 var BillAction = require("../action/BillAction");
-var BillStore = require("../store/BillStore");
+
+var BillStore = require("../store/BillStore"),
+    ConfigStore = require("../store/ConfigStore");
+
 var BillLink = require("../component/BillLink"),
     BillStatusSelect = require("../component/BillStatusSelect");
 
@@ -18,7 +21,10 @@ var Link = ReactRouter.Link;
 
 var BillList = React.createClass({
 
-    mixins: [ReactIntl.IntlMixin],
+    mixins: [
+        ReactIntl.IntlMixin,
+        Reflux.connect(ConfigStore, 'config')
+    ],
 
     editable: function(feature)
     {
@@ -46,10 +52,10 @@ var BillList = React.createClass({
                                     {this.props.showLikeButtons
                                         ? <LikeButtons likeAction={BillAction.like} resource={bill}/>
                                         : <span/>}
-                                    {this.editable('bill-content')
+                                    {this.editable('bill-content') && this.state.config.capabilities.bill.edit
                                         ? <Link to={this.getIntlMessage('route.EDIT_BILL') + '/' + bill.id + '/' + bill.slug} className="pull-right">Modifier</Link>
                                         : ''}
-                                    {this.editable('bill-status')
+                                    {this.editable('bill-status') && this.state.config.capabilities.bill.edit
                                         ? <BillStatusSelect bill={bill} className="pull-right"/>
                                         : ''}
                                 </li>
