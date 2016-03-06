@@ -69,12 +69,10 @@
 
 - name: start the ethereum blockchain mining service
   service: name=cocorico-blockchain-miner state=started
-  when:
-    - capabilities.bill.vote == "blockchain"
-    - ethereum_mine_on_boot
+  when: capabilities.bill.vote == "blockchain"
 
 - name: stop the ethereum blockchain mining service
-  when: not capabilities.bill.vote == "blockchain"
+  when: capabilities.bill.vote != "blockchain"
   service: name=cocorico-blockchain-miner state=stopped
 
 - name: install apache configuration
