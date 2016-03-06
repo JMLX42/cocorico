@@ -41,7 +41,7 @@ var ForceAuthMixin = {
 
     renderLoginPage: function(message)
     {
-        return <Login message={message} redirect={'/' + location.hash}/>
+        return <Login message={message} redirect={location.pathname}/>
     },
 
     renderLoginMessage: function(message)
