@@ -15,6 +15,9 @@ exports.removeLike = LikeHelper.getRemoveLikeFunc(Source);
 
 exports.list = function(req, res)
 {
+    if (!config.capabilities.source.read)
+        return res.status(403).send();
+
     Bill.model.findById(req.params.billId)
         .exec(function(err, bill)
         {
@@ -45,6 +48,9 @@ exports.list = function(req, res)
 
 exports.add = function(req, res)
 {
+    if (!config.capabilities.source.create)
+        return res.status(403).send();
+
     Bill.model.findById(req.body.billId)
         .exec(function(err, bill)
         {
