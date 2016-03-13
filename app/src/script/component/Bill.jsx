@@ -55,14 +55,13 @@ var Bill = React.createClass({
 
     componentWillMount: function()
     {
-        BillAction.show(this.props.billId);
-        BillAction.showCurrentUserVote(this.props.billId);
+        BillAction.showCurrentUserVote(this.props.bill.id);
     },
 
     componentDidMount: function()
     {
         this.listenTo(VoteAction.vote, (billId) => {
-            BillAction.show(this.props.billId);
+            BillAction.show(this.props.bill.id);
             this.startPollingBallot();
         });
     },
@@ -75,7 +74,7 @@ var Bill = React.createClass({
         this._ballotPollingInterval = setInterval(
             () => {
                 var ballot = this.state.ballots
-                    ? this.state.ballots.getBallotByBillId(this.props.billId)
+                    ? this.state.ballots.getBallotByBillId(this.props.bill.id)
                     : null;
 
                 if (ballot && (ballot.status == 'complete' || ballot.error == 404))
@@ -85,7 +84,7 @@ var Bill = React.createClass({
                 }
                 else
                 {
-                    BillAction.showCurrentUserVote(this.props.billId, true);
+                    BillAction.showCurrentUserVote(this.props.bill.id, true);
                 }
             },
             10000
@@ -94,15 +93,13 @@ var Bill = React.createClass({
 
     componentWillReceiveProps: function(nextProps)
     {
-        if (nextProps.billId != this.props.billId)
-            BillAction.show(nextProps.billId);
+        if (nextProps.bill.id != this.props.bill.id)
+            BillAction.showById(nextProps.bill.id);
     },
 
     render: function()
     {
-        var bill = this.state.bills
-            ? this.state.bills.getById(this.props.billId)
-            : null;
+        var bill = this.props.bill;
 
         if (!bill || !bill.likes || !bill.parts)
             return null;

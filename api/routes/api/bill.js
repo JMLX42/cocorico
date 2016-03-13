@@ -150,17 +150,15 @@ exports.getBySlug = function(req, res)
 	if (!config.capabilities.bill.read)
 		return res.status(403).send();
 
-	Bill.model.findOne()
-		.where('slug', req.params.slug)
-		.populate('likes')
-		.populate('parts')
+	Bill.model.findOne({slug : req.params.slug})
+		.deepPopulate('likes parts.likes')
 		.exec(function(err, bill)
 	    {
 			if (err)
 				return res.apiError('database error', err);
 
 			if (!bill)
-				return res.status(404).send();
+				return res.apiError('not found');
 
 			if (!BillHelper.billIsReadable(bill, req))
 				return res.status(403).send();
@@ -169,7 +167,7 @@ exports.getBySlug = function(req, res)
 			for (var part of bill.parts)
 				part.likes = LikeHelper.filterUserLikes(part.likes, req.user);
 
-			res.apiResponse({ bill: bill });
+			res.apiResponse({ bill : bill });
 		});
 }
 

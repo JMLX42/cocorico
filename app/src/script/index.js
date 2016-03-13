@@ -30,8 +30,7 @@ ReactDOM.render(
             <Route path={messages.route.MY_BILLS} component={MyBills}/>
             <Route path={messages.route.CREATE_BILL} component={CreateBill}/>
             <Route path={messages.route.EDIT_BILL + '/:billId/:slug'} component={EditBill}/>
-            <Route path={messages.route.VIEW_BILL + '/:billId/:slug(/:tab)'} component={ViewBill}/>
-            <Route path={messages.route.DELETE_BILL + '/:billId/:slug'} component={DeleteBill}/>
+            <Route path={messages.route.VIEW_BILL + '/:billSlug(/:tab)'} component={ViewBill}/>
             <Route path={messages.route.SERVICE_STATUS} component={ServiceStatus}/>
             <Route path='page/:slug' component={Page}/>
             <Route path=':slug' component={Page}/>

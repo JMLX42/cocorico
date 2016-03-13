@@ -13,7 +13,7 @@ var Bill = React.createClass({
     render: function()
     {
 		return (
-            <Link to={this.getIntlMessage('route.VIEW_BILL') + '/' + this.props.bill.id + '/' + this.props.bill.slug}>
+            <Link to={this.getIntlMessage('route.VIEW_BILL') + '/' + this.props.bill.slug}>
                 {this.props.bill.title}
             </Link>
 		);

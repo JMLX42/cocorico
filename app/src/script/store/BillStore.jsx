@@ -8,6 +8,7 @@ module.exports = Reflux.createStore({
         this.listenTo(BillAction.list, this._fetchBills);
         this.listenTo(BillAction.showLatestBills, this._fetchLatest);
         this.listenTo(BillAction.show, this._fetchBillById);
+        this.listenTo(BillAction.showBySlug, this._fetchBillBySlug);
         this.listenTo(BillAction.listCurrentUserBills, this._fetchCurrentUserBills);
         this.listenTo(BillAction.save, this._billSaveHandler);
         this.listenTo(BillAction.delete, this._deleteBillById);
@@ -17,6 +18,11 @@ module.exports = Reflux.createStore({
 
         this._clearCache();
         this._lastCreated = null;
+    },
+
+    getInitialState: function()
+    {
+        return this;
     },
 
     get: function()
@@ -31,10 +37,11 @@ module.exports = Reflux.createStore({
 
     getBySlug: function(slug)
     {
-        if (this._bills)
-            for (var bill of this._bills)
-                if (bill.slug == slug)
-                    return bill;
+        for (var list of [this._bills, this._latest, this._currentUserBills])
+            if (list && list !== true)
+                for (var bill of list)
+                    if (bill.slug == slug)
+                        return bill;
 
         return null;
     },

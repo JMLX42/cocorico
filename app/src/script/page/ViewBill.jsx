@@ -1,14 +1,21 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
+var Reflux = require('reflux');
 
 var Bill = require('../component/Bill');
 
+var BillAction = require('../action/BillAction');
+
+var BillStore = require('../store/BillStore');
+
 var ViewBill = React.createClass({
+
+    mixins: [Reflux.connect(BillStore, 'bills')],
 
     getInitialState: function()
     {
         return {
-            billId: null,
+            billSlug: null,
             tab: null
         };
     },
@@ -16,28 +23,35 @@ var ViewBill = React.createClass({
     componentWillReceiveProps: function(nextProps)
     {
         this.setState({
-            billId : nextProps.params.billId,
             billSlug : nextProps.params.billSlug,
             tab: nextProps.params.tab
         });
+        if (nextProps.params.billSlug)
+            BillAction.showBySlug(nextProps.params.billSlug);
     },
 
     componentDidMount: function()
     {
         this.setState({
-            billId : this.props.params.billId,
             billSlug : this.props.params.billSlug,
             tab: this.props.params.tab
         });
+        if (this.props.params.billSlug)
+            BillAction.showBySlug(this.props.params.billSlug);
     },
 
     render: function()
     {
-        if (!this.state.billId)
+        if (!this.state.billSlug)
+            return null;
+
+        var bill = this.state.bills.getBySlug(this.state.billSlug);
+
+        if (!bill)
             return null;
 
 		return (
-            <Bill billId={this.state.billId} slug={this.state.billSlug} tab={this.state.tab}/>
+            <Bill bill={bill} tab={this.state.tab}/>
 		);
 	}
 });
