@@ -356,7 +356,7 @@ function updateBill(bill, user, callback)
 
 function pushVoteOnQueue(bill, callback)
 {
-	if (!config.blockchain.voteEnabled)
+	if (!config.capabilities.bill.vote == 'blockchain')
 		return callback(null, null);
 
 	require('amqplib/callback_api').connect(
