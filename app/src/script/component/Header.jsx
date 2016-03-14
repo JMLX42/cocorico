@@ -3,6 +3,7 @@ var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
 var ReactRouter = require('react-router');
+var ReactDOM = require('react-dom');
 
 var PageStore = require('../store/PageStore'),
     UserStore = require('../store/UserStore'),
@@ -33,6 +34,20 @@ var Header = React.createClass({
     componentDidMount: function()
     {
         UserAction.requireLogin();
+
+        const navBar = ReactDOM.findDOMNode(this).querySelector('nav.navbar');
+        const collapsibleNav = navBar.querySelector('div.navbar-collapse');
+        const btnToggle = navBar.querySelector('button.navbar-toggle');
+
+        navBar.addEventListener('click', (evt) => {
+            if (evt.target.tagName !== 'A' || evt.target.classList.contains('dropdown-toggle')
+                || ! collapsibleNav.classList.contains('in'))
+            {
+                return;
+            }
+
+            btnToggle.click();
+        }, false);
     },
 
     render: function()
@@ -56,7 +71,7 @@ var Header = React.createClass({
                         </NavbarBrand>
                         <Navbar.Toggle/>
                     </Navbar.Header>
-                    <Navbar.Collapse>
+                    <Navbar.Collapse ref="headerMenu">
                         <Nav>
                             {!this.state.pages ? '' : this.state.pages.navBar().map(function(page) {
                                 return (
