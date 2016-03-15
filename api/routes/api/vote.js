@@ -214,8 +214,6 @@ function vote(req, res, value)
     if (!config.capabilities.bill.vote)
         return res.status(403).send();
 
-    res.connection.setTimeout(0);
-
 	Bill.model.findById(req.params.id).exec(function(err, bill)
 	{
 		if (err)
@@ -239,10 +237,12 @@ function vote(req, res, value)
 						error: 'user already voted'
 					});
 
-                var age = Math.floor(
-                    (Date.now() - new Date(req.user.birthdate)) / 1000
-                    / (60 * 60 * 24) / 365.25
-                );
+                var age = 0;
+                if (req.user.birthdate)
+                    age = Math.floor(
+                        (Date.now() - new Date(req.user.birthdate)) / 1000
+                        / (60 * 60 * 24) / 365.25
+                    );
 
 				ballot = Ballot.model({
 					bill: bill,
@@ -250,7 +250,7 @@ function vote(req, res, value)
 					value: value,
                     voterAge : age,
                     voterGender : req.user.gender,
-                    status: config.blockchain.voteEnabled ? 'pending' : 'complete'
+                    status: config.capabilities.bill.vote == 'blockchain' ? 'pending' : 'complete'
 				});
 
                 ballot.save(function(err, result)
