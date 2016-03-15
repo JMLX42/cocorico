@@ -103,7 +103,7 @@ var Bill = React.createClass({
     componentWillReceiveProps: function(nextProps)
     {
         if (nextProps.bill.id != this.props.bill.id)
-            BillAction.showById(nextProps.bill.id);
+            BillAction.show(nextProps.bill.id);
     },
 
     componentWillUnmount: function()
