@@ -11,6 +11,8 @@ var PageStore = require('../store/PageStore');
 var PageAction = require('../action/PageAction');
 var Error404 = require('../page/Error404');
 
+var LoadingIndicator = require('./LoadingIndicator');
+
 var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Grid = ReactBootstrap.Grid,
@@ -53,9 +55,7 @@ var Page = React.createClass({
             return null;
 
         if (this.state.pages.pageIsLoading(this.props.slug))
-            return (
-                <p>Chargement...</p>
-            );
+            return <LoadingIndicator/>;
 
         var page = this.state.pages.getPageBySlug(this.props.slug);
 
