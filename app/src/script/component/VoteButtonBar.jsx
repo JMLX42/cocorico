@@ -60,9 +60,29 @@ var VoteButtonBar = React.createClass({
         var ballot = this.props.ballot;
         var bill = this.props.bill;
 
+        if (!this.isAuthenticated())
+        {
+            if (bill.status != 'published')
+            {
+                return (
+                    <p className="hint">
+                        {this.renderLoginMessage(this.getIntlMessage('bill.LOGIN_REQUIRED'))}
+                    </p>
+                );
+            }
+            else
+            {
+                return (
+                    <p className="hint">
+                        {this.getIntlMessage('bill.TOO_LATE_TO_VOTE')}
+                    </p>
+                );
+            }
+        }
+
         if (this.props.bill.voteContractAddress && !this.state.serviceStatus)
             return <LoadingIndicator/>;
-        
+
         var system = this.state.serviceStatus
             ? this.state.serviceStatus.getSystemStatus()
             : null;
@@ -76,32 +96,24 @@ var VoteButtonBar = React.createClass({
                     ? <p className="hint">
                         {this.getIntlMessage('bill.VOTE_DISABLED')}
                     </p>
-                    : !this.isAuthenticated()
-                        ? bill.status != 'published'
-                            ? <p className="hint">
-                                {this.renderLoginMessage(this.getIntlMessage('bill.LOGIN_REQUIRED'))}
-                            </p>
+                    : !ballot || ballot.error == 404 || ballot.status != 'complete'
+                        ? bill.status == 'vote'
+                            ? !!ballot && ballot.status == 'pending'
+                                ? <LoadingIndicator text={this.getIntlMessage('bill.VOTE_PENDING')}/>
+                                : this.renderVoteButtons()
                             : <p className="hint">
                                 {this.getIntlMessage('bill.TOO_LATE_TO_VOTE')}
                             </p>
-                        : !ballot || ballot.error == 404 || ballot.status != 'complete'
-                            ? bill.status == 'vote'
-                                ? !!ballot && ballot.status == 'pending'
-                                    ? <LoadingIndicator text={this.getIntlMessage('bill.VOTE_PENDING')}/>
-                                    : this.renderVoteButtons()
-                                : <p className="hint">
-                                    {this.getIntlMessage('bill.TOO_LATE_TO_VOTE')}
-                                </p>
-                            : <div>
-                                <FormattedMessage message={this.getIntlMessage('bill.ALREADY_VOTED')}
-                                    value={ballot && ballot.value ? this.getIntlMessage('bill.VOTE_' + ballot.value.toUpperCase()) : ''}
-                                    date={<FormattedTime value={ballot && ballot.time ? ballot.time : Date.now()}/>}/>
-                                {bill.status == 'vote'
-                                    ? <div>
-                                        <UnvoteButton bill={bill}/>
-                                    </div>
-                                    : <div/>}
-                            </div>
+                        : <div>
+                            <FormattedMessage message={this.getIntlMessage('bill.ALREADY_VOTED')}
+                                value={ballot && ballot.value ? this.getIntlMessage('bill.VOTE_' + ballot.value.toUpperCase()) : ''}
+                                date={<FormattedTime value={ballot && ballot.time ? ballot.time : Date.now()}/>}/>
+                            {bill.status == 'vote'
+                                ? <div>
+                                    <UnvoteButton bill={bill}/>
+                                </div>
+                                : <div/>}
+                        </div>
 		);
 	}
 });
