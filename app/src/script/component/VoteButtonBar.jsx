@@ -8,7 +8,8 @@ var FormattedMessage = ReactIntl.FormattedMessage,
     FormattedTime = ReactIntl.FormattedTime;
 
 var VoteButton = require('./VoteButton'),
-    UnvoteButton = require('./UnvoteButton');
+    UnvoteButton = require('./UnvoteButton'),
+    LoadingIndicator = require('./LoadingIndicator');
 
 var ServiceStatusAction = require('../action/ServiceStatusAction');
 
@@ -58,7 +59,13 @@ var VoteButtonBar = React.createClass({
     {
         var ballot = this.props.ballot;
         var bill = this.props.bill;
-        var system = this.state.serviceStatus.getSystemStatus();
+
+        if (this.props.bill.voteContractAddress && !this.state.serviceStatus)
+            return <LoadingIndicator/>;
+        
+        var system = this.state.serviceStatus
+            ? this.state.serviceStatus.getSystemStatus()
+            : null;
 
 		return (
             bill.voteContractAddress && (!system.blockchainNode || !system.blockchainMiner)
@@ -80,10 +87,7 @@ var VoteButtonBar = React.createClass({
                         : !ballot || ballot.error == 404 || ballot.status != 'complete'
                             ? bill.status == 'vote'
                                 ? !!ballot && ballot.status == 'pending'
-                                    ? <span>
-                                        <span className="vote-pending-indicator"/>
-                                        {this.getIntlMessage('bill.VOTE_PENDING')}
-                                    </span>
+                                    ? <LoadingIndicator text={this.getIntlMessage('bill.VOTE_PENDING')}/>
                                     : this.renderVoteButtons()
                                 : <p className="hint">
                                     {this.getIntlMessage('bill.TOO_LATE_TO_VOTE')}
