@@ -126,9 +126,9 @@ li.active {
 }
 
 #footer {
-    border-top: 1px solid #E7E7E7;
+    border-top: 1px solid @cocorico-grey;
     min-height: 200px;
-    background-color: #f8f8f8;
+    background-color: @cocorico-light-grey;
     padding-top: 20px;
     color: @cocorico-dark-grey;
 
@@ -477,7 +477,7 @@ ul.argument-list {
     }
 }
 
-.vote-pending-indicator {
+.loading-indicator {
     background-image: url(/img/ripple.gif);
     background-repeat: no-repeat;
     width: 50px;
@@ -544,6 +544,31 @@ ul.argument-list {
 
         .like-score {
             margin-left: 0;
+        }
+    }
+}
+
+.callout {
+    border: 1px solid @cocorico-grey;
+    border-left-width: 5px;
+    padding: 20px;
+    margin: 10px 0;
+
+    h1, h2, h3, h4, h5, h6 {
+        color: @cocorico-grey;
+    }
+
+    &.callout-primary {
+        border-left-color: @cocorico-blue;
+        h1, h2, h3, h4, h5, h6 {
+            color: @cocorico-blue;
+        }
+    }
+
+    &.callout-danger {
+        border-left-color: @cocorico-red;
+        h1, h2, h3, h4, h5, h6 {
+            color: @cocorico-red;
         }
     }
 }
