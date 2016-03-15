@@ -19,7 +19,8 @@ var Intl = {
 
 	messages: {
 		site: {
-			TITLE: "Cocorico"
+			TITLE: "Cocorico",
+			LOADING: "Chargement"
 		},
 
 		route: {
