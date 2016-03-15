@@ -79,7 +79,7 @@ var Bill = React.createClass({
 
                 if (ballot && (ballot.status == 'complete' || ballot.error == 404))
                 {
-                    clearInterval(this._ballotPollingInterval);
+                    this.stopPollingBallot();
                     this._ballotPollingInterval = false;
                 }
                 else
@@ -91,10 +91,24 @@ var Bill = React.createClass({
         );
     },
 
+    stopPollingBallot: function()
+    {
+        if (this._ballotPollingInterval)
+        {
+            clearInterval(this._ballotPollingInterval);
+            this._ballotPollingInterval = false;
+        }
+    },
+
     componentWillReceiveProps: function(nextProps)
     {
         if (nextProps.bill.id != this.props.bill.id)
             BillAction.showById(nextProps.bill.id);
+    },
+
+    componentWillUnmount: function()
+    {
+        this.stopPollingBallot();
     },
 
     render: function()
