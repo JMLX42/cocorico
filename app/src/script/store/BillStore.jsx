@@ -59,7 +59,7 @@ module.exports = Reflux.createStore({
 
     getCurrentUserBills: function()
     {
-        return this._currentUserBills;
+        return this._currentUserBills === true ? null : this._currentUserBills;
     },
 
     getLastCreated: function()
