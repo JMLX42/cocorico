@@ -2,6 +2,8 @@ var React = require('react');
 var ReactIntl = require('react-intl');
 var ReactRouter = require('react-router');
 
+var Title = require('./Title');
+
 var Link = ReactRouter.Link;
 
 var Bill = React.createClass({
@@ -14,7 +16,7 @@ var Bill = React.createClass({
     {
 		return (
             <Link to={this.getIntlMessage('route.VIEW_BILL') + '/' + this.props.bill.slug}>
-                {this.props.bill.title}
+                <Title text={this.props.bill.title}/>
             </Link>
 		);
 	}
