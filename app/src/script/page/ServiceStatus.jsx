@@ -4,6 +4,8 @@ var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
 var ReactDocumentTitle = require('react-document-title');
 
+var LoadingIndicator = require('../component/LoadingIndicator');
+
 var ServiceStatusAction = require('../action/ServiceStatusAction');
 
 var ServiceStatusStore = require('../store/ServiceStatusStore');
@@ -45,6 +47,19 @@ module.exports = React.createClass({
 
     render: function()
     {
+        if (!this.state.serviceStatus)
+            return (
+                <div className="page">
+                    <Grid>
+                        <Row>
+                            <Col md={12}>
+                                <LoadingIndicator/>
+                            </Col>
+                        </Row>
+                    </Grid>
+                </div>
+            );
+
         var system = this.state.serviceStatus.getSystemStatus();
         var capabilities = this.state.serviceStatus.getSystemCapabilities();
 

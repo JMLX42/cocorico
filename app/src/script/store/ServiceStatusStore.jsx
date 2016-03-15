@@ -12,11 +12,6 @@ module.exports = Reflux.createStore({
         this._capabilities = {};
     },
 
-    getInitialState: function()
-    {
-        return this;
-    },
-
     getSystemStatus: function()
     {
         return this._system;
