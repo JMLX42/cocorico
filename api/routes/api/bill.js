@@ -496,7 +496,7 @@ exports.status = function(req, res)
 		return res.status(403).send();
 
 	Bill.model.findById(req.params.id)
-		.select('status author')
+		.select('title status author')
 		.exec(function(err, bill)
 	    {
 			if (err)
