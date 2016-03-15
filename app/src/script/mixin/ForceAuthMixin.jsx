@@ -41,7 +41,15 @@ var ForceAuthMixin = {
 
     renderLoginPage: function(message)
     {
-        return <Login message={message} redirect={location.pathname}/>
+        return <div className="page">
+            <Grid>
+                <Row>
+                    <Col md={12}>
+                        {this.renderLoginMessage(message)}
+                    </Col>
+                </Row>
+            </Grid>
+        </div>
     },
 
     renderLoginMessage: function(message)
