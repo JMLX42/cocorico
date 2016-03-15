@@ -121,7 +121,7 @@ var Bill = React.createClass({
                                 {this.getIntlMessage('billEditor.BUTTON_SAVE')}
                             </Button>
                             {!!bill
-                                ? <Link to={this.getIntlMessage('route.VIEW_BILL') + '/' + bill.id + '/' + bill.slug}>
+                                ? <Link to={this.getIntlMessage('route.VIEW_BILL') + '/' + bill.slug}>
                                     <Button bsSize="large" bsStyle="link">
                                         {this.getIntlMessage('billEditor.BUTTON_VIEW')}
                                     </Button>
