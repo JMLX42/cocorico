@@ -27,7 +27,8 @@ var VoteButtonBar = require('./VoteButtonBar'),
     Hint = require('./Hint'),
     VoteResult = require('./VoteResult'),
     BillRenderer = require('./BillRenderer'),
-    Title = require('./Title');
+    Title = require('./Title'),
+    LoadingIndicator = require('./LoadingIndicator');
 
 var BallotStore = require('../store/BallotStore'),
     UserStore = require('../store/UserStore'),
@@ -111,7 +112,15 @@ var Bill = React.createClass({
         var bill = this.props.bill;
 
         if (!bill || !bill.likes || !bill.parts)
-            return null;
+            return (
+                <Grid>
+                    <Row className="section">
+                        <Col md={12}>
+                            <LoadingIndicator/>
+                        </Col>
+                    </Row>
+                </Grid>
+            );
 
         var ballot = this.state.ballots
             ? this.state.ballots.getBallotByBillId(bill.id)
