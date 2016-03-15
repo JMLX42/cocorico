@@ -78,14 +78,9 @@ var Bill = React.createClass({
                     : null;
 
                 if (ballot && (ballot.status == 'complete' || ballot.error == 404))
-                {
                     this.stopPollingBallot();
-                    this._ballotPollingInterval = false;
-                }
                 else
-                {
                     BillAction.showCurrentUserVote(this.props.bill.id, true);
-                }
             },
             10000
         );
