@@ -121,8 +121,11 @@ function handleBallot(ballot, callback)
     {
         initializeVoterAccount(
             ballot.address,
-            function()
+            function(err, block)
             {
+                if (err)
+                    return callback(err, null);
+
                 getVoteContractInstance(
                     web3,
                     ballot.voteContractAddress,
@@ -139,10 +142,11 @@ function handleBallot(ballot, callback)
                                 if (err)
                                     return callback(err, null);
 
-                                console.log({event:result})
 
                                 if (result.args.user == ballot.address)
                                 {
+                                    console.log({event:result});
+
                                     Ballot.model.findById(ballot.id)
                                         .exec(function(err, dbBallot)
                                         {
@@ -185,12 +189,17 @@ function ballotError(ballot, msg, callback)
             if (err)
                 return callback(err, null);
 
-            dbBallot.status = 'error';
-
-            dbBallot.save(function(err, dbBallot)
+            if (dbBallot)
             {
-                return callback(null, dbBallot);
-            });
+                dbBallot.status = 'error';
+
+                dbBallot.save(function(err, dbBallot)
+                {
+                    return callback(null, dbBallot);
+                });
+            }
+            else
+                return callback(null, null);
         });
 }
 
