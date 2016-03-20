@@ -35,5 +35,5 @@
 
 - name: install global npm modules
   npm: name={{ item.item.name }} version={{ item.item.version }} global=yes state=present
-  with_items: result.results
+  with_items: "{{ result.results }}"
   when: item.changed
