@@ -2,3 +2,5 @@
 provisioning/generated/hosts.json
 *.log
 npm-debug*
+.node*
+provision.retry
