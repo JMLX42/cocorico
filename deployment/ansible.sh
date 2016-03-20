@@ -49,7 +49,7 @@ if [ ! -x /usr/local/bin/ansible-playbook ]; then
         apt-add-repository ppa:ansible/ansible
         apt-get update -qq
         apt-get install -qq -y python2.7 python-pip
-        pip install ansible==1.9.4
+        pip install ansible
     elif [ -f /etc/redhat-release ]; then
         rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
         yum install centos-release-SCL -y
