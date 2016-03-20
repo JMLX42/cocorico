@@ -13,6 +13,7 @@
     "npm": ">=1.3.14"
   },
   "scripts": {
-      "vote-queue-worker": "nodemon -w vote-queue-worker.js -d 2 vote-queue-worker.js"
+      "vote-queue-worker": "nodemon -w vote-queue-worker.js -d 2 vote-queue-worker.js",
+      "ballot-queue-worker": "nodemon -w ballot-queue-worker.js -d 2 ballot-queue-worker.js"
   }
 }
