@@ -39,9 +39,9 @@ function initializeVoterAccount(address, callback)
 
     web3.eth.sendTransaction(
         {
-            from    : web3.eth.accounts[0],
-            to      : address,
-            value   : web3.toWei(10, "ether")
+            from: web3.eth.accounts[0],
+            to: address,
+            value: web3.toWei(10, "ether")
         },
         function(error, result)
         {
@@ -53,6 +53,11 @@ function initializeVoterAccount(address, callback)
                     if (err)
                         return callback(err, null);
 
+                    console.log({
+                        address: address,
+                        balance: web3.fromWei(web3.eth.getBalance(address), "ether").toString()
+                    });
+
                     return callback(null, block);
                 }
             );
@@ -60,71 +65,18 @@ function initializeVoterAccount(address, callback)
     );
 }
 
-function blockchainVote(voteContractAdress, proposal, callback)
+function getVoteContractInstance(web3, address, callback)
 {
-    var web3 = new Web3();
-    var accounts = new EthereumAccounts({ web3 : web3});
-    var userAccount = accounts.new(null); // no passphrase
-
-    web3.setProvider(new HookedWeb3Provider({
-        host: "http://127.0.0.1:8545",
-        transaction_signer: accounts
-    }));
-
-    initializeVoterAccount(
-        userAccount.address,
-        function(err, block)
+    var Vote = require('/opt/cocorico/blockchain/Vote.json');
+    var voteContract = web3.eth.contract(eval(Vote.contracts.Vote.abi));
+    var voteInstance = voteContract.at(
+        address,
+        function(err, voteInstance)
         {
             if (err)
                 return callback(err, null);
 
-            console.log('block', block.hash);
-
-            var transactionHash = '';
-            var Vote = require('/opt/cocorico/blockchain/Vote.json');
-            var voteContract = web3.eth.contract(eval(Vote.contracts.Vote.abi));
-            var voteInstance = voteContract.at(
-                voteContractAdress,
-                function(err, voteInstance)
-                {
-                    if (err)
-                        return callback(err, null);
-
-                    console.log('contract at', voteContractAdress);
-
-                    var ballotEvent = voteInstance.Ballot();
-                    ballotEvent.watch(
-                        function(err, result)
-                        {
-                            if (err)
-                                return callback(err, null);
-
-                            if (result.args.user == userAccount.address)
-                            {
-                                console.log('vote event: ', result.args.proposal.toNumber(), result.args.user);
-                                return callback(null, transactionHash);
-                            }
-                        }
-                    );
-
-                    voteInstance.vote.sendTransaction(
-                        proposal,
-                        {
-                            from: userAccount.address,
-                            gas: 999999
-                        },
-                        function(err, tx)
-                        {
-                            if (err)
-                                return callback(err, null);
-
-                            transactionHash = tx;
-
-                            console.log('tx', tx);
-                        }
-                    );
-                }
-            );
+            return callback(null, voteInstance);
         }
     );
 }
@@ -158,31 +110,88 @@ function waitForBlockchain(callback)
 
 function handleBallot(ballot, callback)
 {
+    if (!ballot.id || !ballot.address || !ballot.voteContractAddress
+        || !ballot.transaction)
+        return callback('invalid ballot', null);
+
+    var web3 = new Web3();
+    web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
+
     waitForBlockchain(function()
     {
-        blockchainVote(
-            ballot.voteContractAddress,
-            ['yes', 'blank', 'no'].indexOf(ballot.value),
-            function(err, tx)
+        initializeVoterAccount(
+            ballot.address,
+            function()
             {
-                console.log(ballot.id, '@', tx);
-                Ballot.model.findById(ballot.id)
-                    .exec(function(err, dbBallot)
+                getVoteContractInstance(
+                    web3,
+                    ballot.voteContractAddress,
+                    function(err, voteInstance)
                     {
                         if (err)
                             return callback(err, null);
 
-                        dbBallot.transactionAddress = tx;
-                        dbBallot.status = 'complete';
+                        var hash = '';
+                        var ballotEvent = voteInstance.Ballot();
+                        ballotEvent.watch(
+                            function(err, result)
+                            {
+                                if (err)
+                                    return callback(err, null);
 
-                        dbBallot.save(function(err, dbBallot)
-                        {
-                            return callback(null, dbBallot);
-                        });
-                    });
+                                console.log({event:result})
+
+                                if (result.args.user == ballot.address)
+                                {
+                                    Ballot.model.findById(ballot.id)
+                                        .exec(function(err, dbBallot)
+                                        {
+                                            dbBallot.transactionHash = hash;
+                                            dbBallot.status = 'complete';
+
+                                            dbBallot.save(function(err, dbBallot)
+                                            {
+                                                return callback(null, dbBallot);
+                                            });
+                                        });
+                                }
+                            }
+                        );
+
+                        web3.eth.sendRawTransaction(
+                            ballot.transaction,
+                            function(err, txhash)
+                            {
+                                if (err)
+                                    return callback(err, null);
+
+                                hash = txhash;
+                                console.log({transactionHash:txhash});
+                            }
+                        );
+                    }
+                )
             }
         );
     });
+}
+
+function ballotError(ballot, msg, callback)
+{
+    console.log({error:msg.toString()});
+    Ballot.model.findById(ballot.id)
+        .exec(function(err, dbBallot)
+        {
+            if (err)
+                return callback(err, null);
+
+            dbBallot.status = 'error';
+
+            dbBallot.save(function(err, dbBallot)
+            {
+                return callback(null, dbBallot);
+            });
+        });
 }
 
 require('amqplib/callback_api').connect(
@@ -197,19 +206,25 @@ require('amqplib/callback_api').connect(
             if (err != null)
                 return console.error(err);
 
-            ch.assertQueue('pending-ballots');
+            ch.assertQueue('ballots');
             ch.consume(
-                'pending-ballots',
+                'ballots',
                 function(msg)
                 {
                     if (msg !== null)
                     {
-                        var obj = JSON.parse(msg.content.toString());
+                        var msgObj = JSON.parse(msg.content.toString());
 
-                        if (obj.ballot)
+                        // return ch.ack(msg);
+
+                        if (msgObj.ballot)
                         {
-                            handleBallot(obj.ballot, function(err, ballot)
+                            console.log(msgObj.ballot);
+                            handleBallot(msgObj.ballot, function(err, ballot)
                             {
+                                if (err)
+                                    return ballotError(msgObj.ballot, err, function() {ch.ack(msg)});
+
                                 ch.ack(msg);
                             });
                         }

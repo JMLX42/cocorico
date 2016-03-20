@@ -12,11 +12,13 @@ var Ballot = new keystone.List('Ballot', {
 Ballot.add({
 	value: { type: String, default: true, required: true, initial: true },
 	time: { type: Types.Datetime, default: Date.now },
-	status: { type: Types.Select, options: ['pending', 'complete'], required: true, initial: true},
+	status: { type: Types.Select, options: ['signing', 'pending', 'complete', 'error'], required: true, initial: true},
 	voter: { type: String, required: true, initial: true },
 	bill: { type: Types.Relationship, ref: 'Bill', required: true, initial: true },
 	voterAge: { type: Types.Number, required: true, initial: true },
 	voterGender: { type: Types.Select, options: ['male', 'female'], initial: true },
+	address: { type: String },
+	transactionParameters: { type: String },
 	transactionAddress: { type: String }
 });
 

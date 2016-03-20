@@ -68,9 +68,10 @@ exports = module.exports = function(app) {
 	app.get('/vote/result/per-gender/:billId', keystone.middleware.api, routes.api.vote.resultPerGender);
 	app.get('/vote/result/per-age/:billId', keystone.middleware.api, routes.api.vote.resultPerAge);
 	app.get('/vote/result/per-date/:billId', keystone.middleware.api, routes.api.vote.resultPerDate);
-	app.get('/vote/yes/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteYes);
-	app.get('/vote/blank/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteBlank);
-	app.get('/vote/no/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.voteNo);
+	app.get('/vote/yes/:id/:address', keystone.middleware.api, isAuthenticated, routes.api.vote.voteYes);
+	app.get('/vote/blank/:id/:address', keystone.middleware.api, isAuthenticated, routes.api.vote.voteBlank);
+	app.get('/vote/no/:id/:address', keystone.middleware.api, isAuthenticated, routes.api.vote.voteNo);
+	app.get('/vote/transaction/:id/:address/:transaction', keystone.middleware.api, isAuthenticated, routes.api.vote.transaction);
 	app.get('/vote/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.remove);
 
 	app.get('/source/list/:billId', keystone.middleware.api, routes.api.source.list);

@@ -25,7 +25,9 @@
     "jquery": "2.1.4",
     "node-lessify": "0.1.1",
     "d3": "^3.5.3",
-    "classnames": "2.2.3"
+    "classnames": "2.2.3",
+    "web3": "0.15.0",
+    "ethereumjs-accounts": "https://github.com/promethe42/ethereumjs-accounts"
   },
   "engines": {
     "node": ">=0.10.22",
