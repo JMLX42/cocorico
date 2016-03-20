@@ -110,8 +110,11 @@ var Bill = React.createClass({
     render: function()
     {
         var bill = this.props.bill;
+        var ballot = this.state.ballots
+            ? this.state.ballots.getBallotByBillId(bill.id)
+            : null;
 
-        if (!bill || !bill.likes || !bill.parts)
+        if ((!bill || !bill.likes || !bill.parts) && !ballot)
             return (
                 <Grid>
                     <Row className="section">
@@ -121,13 +124,6 @@ var Bill = React.createClass({
                     </Row>
                 </Grid>
             );
-
-        var ballot = this.state.ballots
-            ? this.state.ballots.getBallotByBillId(bill.id)
-            : null;
-
-        if (ballot && ballot.status == 'pending')
-            this.startPollingBallot(bill.id);
 
         var currentUser = this.state.users
             ? this.state.users.getCurrentUser()
@@ -214,24 +210,7 @@ var Bill = React.createClass({
                         : <div/>}
 
                     {bill.status == 'vote' || bill.status == 'published'
-                        ? <div className={this.state.ballots && ballot && !ballot.error && ballot.status == 'complete' && ballot.value ? 'voted-' + ballot.value : ''}>
-                            <Grid>
-                                <Row className="section section-no-border section-vote">
-                                    <Col md={12}>
-                                        <h2 className="section-title">
-                                            {this.getIntlMessage('bill.YOUR_VOTE')}
-                                            {!!bill.voteContractAddress
-                                                ? <span className="small">
-                                                    <span className="icon-secured"/>
-                                                    {this.getIntlMessage('bill.BLOCKCHAIN_SECURED')}
-                                                </span>
-                                                : <span/>}
-                                        </h2>
-                                        <VoteButtonBar bill={bill} ballot={ballot}/>
-                                    </Col>
-                                </Row>
-                            </Grid>
-                        </div>
+                        ? <VoteButtonBar bill={bill} ballot={ballot}/>
                         : <div/>}
 
                     {bill.status == 'published'
