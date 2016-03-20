@@ -1,3 +1,5 @@
+var config = require('../../config.json');
+
 var keystone = require('keystone');
 var bcrypt = require('bcrypt');
 
