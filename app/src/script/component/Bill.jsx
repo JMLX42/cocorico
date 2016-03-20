@@ -54,57 +54,10 @@ var Bill = React.createClass({
         Reflux.connect(ConfigStore, 'config')
     ],
 
-    componentWillMount: function()
-    {
-        BillAction.showCurrentUserVote(this.props.bill.id);
-    },
-
-    componentDidMount: function()
-    {
-        this.listenTo(VoteAction.vote, (billId) => {
-            BillAction.show(this.props.bill.id);
-            this.startPollingBallot();
-        });
-    },
-
-    startPollingBallot: function()
-    {
-        if (!!this._ballotPollingInterval)
-            return;
-
-        this._ballotPollingInterval = setInterval(
-            () => {
-                var ballot = this.state.ballots
-                    ? this.state.ballots.getBallotByBillId(this.props.bill.id)
-                    : null;
-
-                if (ballot && (ballot.status == 'complete' || ballot.error == 404))
-                    this.stopPollingBallot();
-                else
-                    BillAction.showCurrentUserVote(this.props.bill.id, true);
-            },
-            10000
-        );
-    },
-
-    stopPollingBallot: function()
-    {
-        if (this._ballotPollingInterval)
-        {
-            clearInterval(this._ballotPollingInterval);
-            this._ballotPollingInterval = false;
-        }
-    },
-
     componentWillReceiveProps: function(nextProps)
     {
         if (nextProps.bill.id != this.props.bill.id)
             BillAction.show(nextProps.bill.id);
-    },
-
-    componentWillUnmount: function()
-    {
-        this.stopPollingBallot();
     },
 
     render: function()
@@ -210,7 +163,7 @@ var Bill = React.createClass({
                         : <div/>}
 
                     {bill.status == 'vote' || bill.status == 'published'
-                        ? <VoteButtonBar bill={bill} ballot={ballot}/>
+                        ? <VoteButtonBar bill={bill}/>
                         : <div/>}
 
                     {bill.status == 'published'
