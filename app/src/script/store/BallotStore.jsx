@@ -1,6 +1,7 @@
 var Reflux = require('reflux');
 var jquery = require('jquery');
-var EthereumAccounts = require('ethereumjs-accounts');
+var lightwallet = require('eth-lightwallet');
+var Tx = require('ethereumjs-tx');
 
 var BillAction = require('../action/BillAction'),
     VoteAction = require('../action/VoteAction');
@@ -13,9 +14,6 @@ module.exports = Reflux.createStore({
         this.listenTo(BillAction.showCurrentUserVote, this._fetchBallotByBillId);
 
         this._ballots = {};
-
-        this._accounts = new EthereumAccounts({ web3 : null});
-        this._accounts.clear();
     },
 
     getBallotAccount: function(ballot)
@@ -58,66 +56,109 @@ module.exports = Reflux.createStore({
         return true;
     },
 
+    _getKeystore: function(callback)
+    {
+        if (!this._keystore)
+        {
+            var secretSeed = lightwallet.keystore.generateRandomSeed();
+            var password = 'password'; // FIXME
+
+            lightwallet.keystore.deriveKeyFromPassword(password, (err, pwDerivedKey) => {
+                var ks = new lightwallet.keystore(secretSeed, pwDerivedKey);
+
+                this._keystore = ks;
+                this._pwDerivedKey = pwDerivedKey;
+                ks.passwordProvider = (callback) => 'password';
+
+                callback(ks, pwDerivedKey);
+            });
+        }
+        else
+            callback(this._keystore, this._pwDerivedKey);
+    },
+
+    _deleteKeystore: function()
+    {
+        delete this._keystore;
+        delete this._pwDerivedKey;
+    },
+
+    _generateAddress: function(callback)
+    {
+        this._getKeystore((ks, pwDerivedKey) => {
+            ks.generateNewAddress(pwDerivedKey);
+
+            var addresses = ks.getAddresses();
+
+            callback('0x' + addresses[addresses.length - 1]);
+        });
+    },
+
     _signBallot: function(ballot, success, error)
     {
-        // If the ballot address is not available client side, then we can
-        // assume the ballot did not originate from this client so we remove it.
-        if (!this._accounts.contains(ballot.address))
-            return this._removeVote(ballot.bill, (data) => error());
+        this._getKeystore((ks, pwDerivedKey) => {
+            // If the ballot address is not available client side, then we can
+            // assume the ballot did not originate from this client so we remove it.
+            if (ks.getAddresses().indexOf(ballot.address.substring(2)) > 0)
+                return this._removeVote(ballot.bill, (data) => error());
 
-        // Otherwise, we sign the transaction and send the serialized signed
-        // raw transaction back to the server.
-        this._accounts.signTransaction(
-            JSON.parse(ballot.transactionParameters),
-            (err, serializedTx) => {
-                jquery.get(
-                    '/api/vote/transaction/' + ballot.bill + '/' + ballot.address
-                        + '/' + serializedTx,
-                    (data) => {
-                        // When the ballot/transaction is signed, we remove the
-                        // corresponding account from the client storage.
-                        // Otherwise, someone else on the same computer/client
-                        // could get this account and change this vote.
-                        // FIXME: we should first provide a printable "proof of
-                        // vote" by serializing the account into a QR code.
-                        this._accounts.remove(ballot.address);
-                        success(data);
-                    }
-                );
-            });
+            // Otherwise, we sign the transaction and send the serialized signed
+            // raw transaction back to the server.
+            var tx = new Tx(JSON.parse(ballot.transactionParameters));
+            var signedTx = '0x' + lightwallet.signing.signTx(
+                ks,
+                pwDerivedKey,
+                tx.serialize(),
+                ballot.address
+            );
+
+            jquery.get(
+                '/api/vote/transaction/' + ballot.bill + '/' + ballot.address
+                    + '/' + signedTx,
+                (data) => {
+                    // When the ballot/transaction is signed, we remove the
+                    // corresponding account from the client storage.
+                    // Otherwise, someone else on the same computer/client
+                    // could get this account and change this vote.
+                    // FIXME: we should first provide a printable "proof of
+                    // vote" by serializing the account into a QR code.
+                    this._deleteKeystore();
+                    success(data);
+                }
+            );
+        });
     },
 
     _vote: function(billId, value)
     {
-        // FIXME: we should ask the user for a passphrase
-        var ballotAccount = this._accounts.new(null);
-
-        jquery.get(
-            '/api/vote/' + value + '/' + billId + '/' + ballotAccount.address,
-            (data) => {
-                // Ballot should be ready to be signed, so we must sign it before
-                // doing anything else.
-                if (data.ballot.transactionParameters)
-                {
-                    this._signBallot(
-                        data.ballot,
-                        (data) => {
-                            this._ballots[billId] = data.ballot;
-                            this.trigger(this);
-                        },
-                        () => {
-                            // Ballot has been removed.
-                            this.trigger(this);
-                        }
-                    )
+        this._generateAddress((address) => {
+            jquery.get(
+                '/api/vote/' + value + '/' + billId + '/' + address,
+                (data) => {
+                    // Ballot should be ready to be signed, so we must sign it before
+                    // doing anything else.
+                    if (data.ballot.transactionParameters)
+                    {
+                        this._signBallot(
+                            data.ballot,
+                            (data) => {
+                                this._ballots[billId] = data.ballot;
+                                this.trigger(this);
+                            },
+                            () => {
+                                // Ballot has been removed.
+                                this.trigger(this);
+                            }
+                        )
+                    }
+                    else
+                    {
+                        this._ballots[billId] = data.ballot;
+                        this.trigger(this);
+                    }
                 }
-                else
-                {
-                    this._ballots[billId] = data.ballot;
-                    this.trigger(this);
-                }
-            }
-        );
+            );
+        });
     },
 
     _removeVote: function(billId, callback)

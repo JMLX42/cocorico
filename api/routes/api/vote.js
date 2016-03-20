@@ -247,12 +247,12 @@ function getBallotTransactionParameters(address, voteContractAdress, value, call
 
             var params = {
                 from: address,
-                gas: web3.toHex(999999),
-                gasPrice: web3.eth.gasPrice.toString(10),
+                gasLimit: web3.toHex(999999),
+                gasPrice: web3.toHex(web3.eth.gasPrice),
                 to: web3.toHex(voteContractAdress),
                 data: voteInstance.vote.getData(value),
                 nonce: web3.toHex(web3.eth.getTransactionCount(address)),
-                value: '0x00'
+                value: '0x0'
             };
 
             callback(null, params);
@@ -450,6 +450,7 @@ exports.transaction = function(req, res)
 
                 // if the transaction parameters are not the one we prepared, the
                 // transaction is not properly formed
+                console.log(signedTx.gas, signedTx.gasLimit);
                 for (var paramName of ['to', 'from', 'data'])
                     if (EthereumUtil.bufferToHex(signedTx[paramName]) != txParams[paramName])
                         return ballotTransactionError(

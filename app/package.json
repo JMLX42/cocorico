@@ -26,8 +26,8 @@
     "node-lessify": "0.1.1",
     "d3": "^3.5.3",
     "classnames": "2.2.3",
-    "web3": "0.15.0",
-    "ethereumjs-accounts": "https://github.com/promethe42/ethereumjs-accounts"
+    "eth-lightwallet": "2.2.5",
+    "ethereumjs-tx": "1.1.1"
   },
   "engines": {
     "node": ">=0.10.22",
