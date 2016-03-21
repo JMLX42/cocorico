@@ -19,7 +19,7 @@ Ballot.add({
 	voterGender: { type: Types.Select, options: ['male', 'female'], initial: true },
 	address: { type: String },
 	transactionParameters: { type: String },
-	transactionAddress: { type: String }
+	transactionHash: { type: String }
 });
 
 transform.toJSON(Ballot);
