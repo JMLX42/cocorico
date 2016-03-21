@@ -45,8 +45,11 @@ module.exports = Reflux.createStore({
         jquery.get(
             '/api/bill/ballot/' + billId,
             (data) => {
-                this._ballots[billId] = data.ballot;
-                this.trigger(this);
+                // If the user closed its client before we had a chance to reply
+                // to the ballot creation with a ballot signing request, we have
+                // left the ballot hanging with a "signing" status. We have to
+                // fix this by signing it as soon as we fetch it.
+                this._signBallotAndTrigger(data.ballot);
             }
         ).error((xhr, billStatus, err) => {
             this._ballots[billId] = { error: xhr.status };
@@ -94,8 +97,34 @@ module.exports = Reflux.createStore({
         });
     },
 
+    _signBallotAndTrigger: function(ballot)
+    {
+        if (ballot.status == 'signing')
+        {
+            this._signBallot(
+                ballot,
+                (data) => {
+                    this._ballots[ballot.bill] = ballot;
+                    this.trigger(this);
+                },
+                () => {
+                    // Ballot has been removed.
+                    this.trigger(this);
+                }
+            )
+        }
+        else
+        {
+            this._ballots[ballot.bill] = ballot;
+            this.trigger(this);
+        }
+    },
+
     _signBallot: function(ballot, success, error)
     {
+        if (ballot.status != 'signing' || !ballot.transactionParameters)
+            return this._removeVote(ballot.bill, (data) => error());
+
         this._getKeystore((ks, pwDerivedKey) => {
             // If the ballot address is not available client side, then we can
             // assume the ballot did not originate from this client so we remove it.
@@ -137,25 +166,7 @@ module.exports = Reflux.createStore({
                 (data) => {
                     // Ballot should be ready to be signed, so we must sign it before
                     // doing anything else.
-                    if (data.ballot.transactionParameters)
-                    {
-                        this._signBallot(
-                            data.ballot,
-                            (data) => {
-                                this._ballots[billId] = data.ballot;
-                                this.trigger(this);
-                            },
-                            () => {
-                                // Ballot has been removed.
-                                this.trigger(this);
-                            }
-                        )
-                    }
-                    else
-                    {
-                        this._ballots[billId] = data.ballot;
-                        this.trigger(this);
-                    }
+                    this._signBallotAndTrigger(data.ballot);
                 }
             );
         });
