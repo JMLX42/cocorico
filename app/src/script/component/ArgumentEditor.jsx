@@ -3,6 +3,7 @@ var Markdown = require('react-remarkable');
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
+var classNames = require('classnames');
 
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
@@ -55,9 +56,12 @@ var Bill = React.createClass({
         if (!this.state.expanded)
             return (
                 <div className="argument-editor">
-                    <Button bsStyle={this.props.value ? 'primary' : 'danger'}
-                        onClick={(e)=>this.setState({expanded:true})}
-                        className="btn-add-argument">
+                    <Button onClick={(e)=>this.setState({expanded:true})}
+                        className={classNames({
+                            "btn-add-argument": true,
+                            "btn-positive": this.props.value,
+                            "btn-negative": !this.props.value,
+                        })}>
                         <FormattedMessage message={this.getIntlMessage('bill.ADD_ARGUMENT')}
                             value={this.getIntlMessage('bill.VOTE_YES')}/>
                     </Button>

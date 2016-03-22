@@ -19,6 +19,11 @@
 @btn-primary-bg: @cocorico-blue;
 @btn-primary-border: @cocorico-blue;
 
+@color-positive: @btn-success-bg;
+@color-positive-dark: #5cb85c;
+@color-negative: @btn-danger-bg;
+@color-negative-dark: @cocorico-dark-red;
+
 @import "./bootswatch-journal.less";
 
 @import "./icons.less";
@@ -49,6 +54,22 @@ li.active {
 
 #app {
     background-color: white;
+}
+
+.positive {
+    color: @color-positive;
+}
+
+.negative {
+    color: @color-negative;
+}
+
+.positive-background {
+    background-color: @color-positive;
+}
+
+.negative-background {
+    background-color: @color-negative;
 }
 
 .cocorico-blue {
@@ -186,7 +207,7 @@ li.active {
     .voted-no {
         .voted-blank;
 
-        background-color: @cocorico-red;
+        background-color: @color-negative;
         color: white;
 
         h2, h2 .small, h2 .icon-secured {
@@ -195,7 +216,7 @@ li.active {
 
         .btn-unvote {
             background-color: white;
-            color: @cocorico-red;
+            color: @color-negative;
             border: none !important;
 
             &:hover {
@@ -206,10 +227,10 @@ li.active {
 
     .voted-yes {
         .voted-no;
-        background-color: @cocorico-blue;
+        background-color: @color-positive;
 
         .btn-unvote {
-            color: @cocorico-blue;
+            color: @color-positive;
         }
     }
 }
@@ -226,38 +247,20 @@ li.active {
     padding: 20px;
 }
 
-.btn-vote-yes {
-    .btn-vote;
-
-    color: white;
-    background-color: @cocorico-blue;
-    border-color: @cocorico-dark-blue;
-
-    &:hover {
-        color: white;
-        border-color: @cocorico-blue;
-        background-color: @cocorico-dark-blue;
-    }
+.btn-positive {
+    .btn-vote();
+    .btn-success();
 }
 
-.btn-vote-blank {
-    .btn-vote;
+.btn-neutral {
+    .btn-vote();
 
     background-color: @cocorico-dark-grey;
 }
 
-.btn-vote-no {
-    .btn-vote;
-
-    color: white;
-    background-color: @cocorico-red;
-    border-color: @cocorico-dark-red;
-
-    &:hover {
-        color: white;
-        border-color: @cocorico-red;
-        background-color: @cocorico-dark-red;
-    }
+.btn-negative {
+    .btn-vote();
+    .btn-danger();
 }
 
 .btn-unvote {
@@ -414,14 +417,14 @@ li.active {
 .icon-thumb_up {
     &.icon-btn-active,
     &:hover {
-        color: @cocorico-blue;
+        color: @color-positive;
     }
 }
 
 .icon-thumb_down {
     &.icon-btn-active,
     &:hover {
-        color: @cocorico-red;
+        color: @color-negative;
     }
 }
 

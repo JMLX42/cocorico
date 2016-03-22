@@ -8,7 +8,8 @@ var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
 var ArgumentEditor = require('./ArgumentEditor'),
     LikeButtons = require('./LikeButtons'),
-    Title = require('./Title');
+    Title = require('./Title'),
+    LoadingIndicator = require('./LoadingIndicator');
 
 var ArgumentAction = require('../action/ArgumentAction');
 
@@ -71,7 +72,7 @@ var Footer = React.createClass({
                 <Grid className="argument-tab">
                     <Row>
                         <Col md={12}>
-                            Chargement...
+                            <LoadingIndicator/>
                         </Col>
                     </Row>
                 </Grid>
@@ -108,7 +109,7 @@ var Footer = React.createClass({
                 <Row>
                     <Col md={6}>
                         <h3>
-                            Arguments '<span className="cocorico-blue">pour</span>' ({pros ? pros.length : 0})
+                            Arguments '<span className="positive">pour</span>' ({pros ? pros.length : 0})
                             <span className="small">
                                 &nbsp;
                                 <FormattedMessage message={this.getIntlMessage('sort.SORTED_BY_POPULARITY')}
@@ -123,7 +124,7 @@ var Footer = React.createClass({
                     </Col>
                     <Col md={6}>
                         <h3>
-                            Arguments '<span className="cocorico-red">contre</span>' ({cons ? cons.length : 0})
+                            Arguments '<span className="negative">contre</span>' ({cons ? cons.length : 0})
                             <span className="small">
                                 &nbsp;
                                 <FormattedMessage message={this.getIntlMessage('sort.SORTED_BY_POPULARITY')}

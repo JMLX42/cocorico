@@ -93,15 +93,15 @@ var VoteButtonBar = React.createClass({
                 <VoteButton message="bill.VOTE_YES"
                     bill={this.props.bill.id}
                     value="yes"
-                    className="btn-vote-yes"/>
+                    className="btn-positive"/>
                 <VoteButton message="bill.VOTE_BLANK"
                     bill={this.props.bill.id}
                     value="blank"
-                    className="btn-vote-blank"/>
+                    className="btn-neutral"/>
                 <VoteButton message="bill.VOTE_NO"
                     bill={this.props.bill.id}
                     value="no"
-                    className="btn-vote-no"/>
+                    className="btn-negative"/>
             </ButtonToolbar>
         );
     },
