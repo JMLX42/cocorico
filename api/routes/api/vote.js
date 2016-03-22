@@ -433,24 +433,28 @@ exports.transaction = function(req, res)
                 if (!ballot)
                     return res.status(404).send();
 
-                // if the ballot original address and the request address parameter
-                // do not match then there is something wrong
+                // We have to make sure we're trying to sign a ballot that is
+                // meant to be signed.
+                if (ballot.status != 'signing')
+                    return res.status(403).send();
+
+                // If the ballot original address and the request address parameter
+                // do not match then there is something wrong.
                 // FIXME: log an error somewhere, probably block the user account
                 if (ballot.address != req.params.address)
                     return res.status(403).send();
 
-                // we have to check this is not any transaction but the one we expect
+                // We have to check this is not any transaction but the one we expect.
                 var txParams = JSON.parse(ballot.transactionParameters);
                 var signedTx = new EthereumTx(req.params.transaction);
 
-                // if the address does not match, the transaction does not come from
-                // the right account
+                // If the address does not match, the transaction does not come from
+                // the right account.
                 if (EthereumUtil.bufferToHex(signedTx.getSenderAddress()) != ballot.address)
                     return ballotTransactionError(res, ballot, 'invalid transaction address');
 
-                // if the transaction parameters are not the one we prepared, the
-                // transaction is not properly formed
-                console.log(signedTx.gas, signedTx.gasLimit);
+                // If the transaction parameters are not the one we prepared, the
+                // transaction is not properly formed.
                 for (var paramName of ['to', 'from', 'data'])
                     if (EthereumUtil.bufferToHex(signedTx[paramName]) != txParams[paramName])
                         return ballotTransactionError(
@@ -459,25 +463,28 @@ exports.transaction = function(req, res)
                             'invalid transaction parameter \'' + paramName + '\''
                         );
 
-                pushBallotOnQueue(
-                    bill,
-                    ballot,
-                    { transaction: req.params.transaction },
-                    function(err, ballotMsg)
-                    {
-                        if (err)
-                            return res.apiError('queue error', err);
+                ballot.status = 'pending';
 
-                        ballot.status = 'pending';
-                        ballot.save(function(err)
+                // We save the new status of the ballot *before* we push it in
+                // the queue to make sure the same ballot cannot be pushed twice.
+                ballot.save(function(err)
+                {
+                    if (err)
+                        return res.apiError('database error', err);
+
+                    pushBallotOnQueue(
+                        bill,
+                        ballot,
+                        { transaction: req.params.transaction },
+                        function(err, ballotMsg)
                         {
                             if (err)
-                                return res.apiError('database error', err);
+                                return ballotTransactionError(res, ballot, err);
 
                             return res.apiResponse({ ballot : ballot });
-                        })
-                    }
-                );
+                        }
+                    );
+                });
             }
         );
     });
