@@ -6,7 +6,8 @@
     "web3": "0.15.0",
     "ethereumjs-accounts": "https://github.com/promethe42/ethereumjs-accounts",
     "hooked-web3-provider": "https://github.com/promethe42/hooked-web3-provider",
-    "amqplib": "0.4.0"
+    "amqplib": "0.4.0",
+    "async": "1.5.2"
   },
   "engines": {
     "node": ">=0.10.22",

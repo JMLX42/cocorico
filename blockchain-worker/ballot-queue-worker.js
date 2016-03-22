@@ -1,5 +1,6 @@
-var keystone = require('../api/node_modules/keystone');
 var config = require('../api/config.json');
+var keystone = require('../api/node_modules/keystone');
+var async = require('async');
 
 var EthereumAccounts = require('ethereumjs-accounts');
 var HookedWeb3Provider = require("hooked-web3-provider");
@@ -13,22 +14,28 @@ var Ballot = keystone.list('Ballot');
 
 function whenTransactionMined(web3, tx, callback)
 {
-    var check = setInterval(
-        function()
+    async.during(
+        function(callback)
         {
             web3.eth.getTransaction(
                 tx,
                 function(e, r)
                 {
-                    if (e || (r && r.blockHash))
-                    {
-                        clearInterval(check);
-                        callback(e, r);
-                    }
+                    if (r && r.blockHash)
+                        return callback(e, false, r);
+
+                    return callback(e, true, null);
                 }
             );
         },
-        1000
+        function(callback)
+        {
+            setTimeout(callback, 1000);
+        },
+        function(err, r)
+        {
+            callback(err, r);
+        }
     );
 }
 
@@ -36,6 +43,8 @@ function initializeVoterAccount(address, callback)
 {
     var web3 = new Web3();
     web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
+
+    console.log({log:'initialize account ' + address});
 
     web3.eth.sendTransaction(
         {
@@ -84,27 +93,30 @@ function getVoteContractInstance(web3, address, callback)
 function waitForBlockchain(callback)
 {
     var errorLogged = false;
-    var i = setInterval(
+
+    var web3 = new Web3();
+    web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
+
+    async.whilst(
         function()
         {
-            var web3 = new Web3();
-            web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
+            var connected = web3.isConnected();
 
-            if (web3.isConnected())
-            {
-                if (errorLogged)
-                    console.log({log : 'successfully connected to the blockchain'});
-
-                clearInterval(i);
-                return callback();
-            }
-            else if (!errorLogged)
-            {
+            if (!connected && !errorLogged)
                 console.log({error : 'unable to connect to the blockchain'});
-                errorLogged = true;
-            }
+            if (connected && errorLogged)
+                console.log({log : 'successfully connected to the blockchain'});
+
+            return !connected;
         },
-        5000
+        function(callback)
+        {
+            setTimeout(callback, 5000);
+        },
+        function(err)
+        {
+            callback();
+        }
     );
 }
 
@@ -142,7 +154,6 @@ function handleBallot(ballot, callback)
                                 if (err)
                                     return callback(err, null);
 
-
                                 if (result.args.user == ballot.address)
                                 {
                                     console.log({event:result});
@@ -150,6 +161,12 @@ function handleBallot(ballot, callback)
                                     Ballot.model.findById(ballot.id)
                                         .exec(function(err, dbBallot)
                                         {
+                                            if (err)
+                                                return callback(err, null);
+
+                                            if (!ballot)
+                                                return callback('unknown ballot with id ' + ballot.id, null);
+
                                             dbBallot.transactionHash = hash;
                                             dbBallot.status = 'complete';
 
