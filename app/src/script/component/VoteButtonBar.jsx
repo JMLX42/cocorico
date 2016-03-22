@@ -115,7 +115,7 @@ var VoteButtonBar = React.createClass({
         var validBallot = ballot && !ballot.error && ballot.status == 'complete'
             && ballot.value;
 
-        if (ballot && ballot.status != 'complete')
+        if (!!ballot && ballot.error && ballot.status != 'complete')
             this.startPollingBallot();
 
         return (
