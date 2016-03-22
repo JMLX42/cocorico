@@ -1,10 +1,11 @@
 project_name: cocorico
 
-data_dir: /var/data
-backup_dir: /var/backup
-www_dir: /var/www
-download_dir: /opt/download
-project_dir: /opt/{{ project_name }}
+data_dir: "/var/data"
+backup_dir: "/var/backup"
+www_dir: "/var/www"
+download_dir: "/opt/download"
+project_dir: "/opt/{{ project_name }}"
+log_dir: "{{ project_dir }}/log"
 
 home_web_private_host: 127.0.0.1
 home_web_private_port: 3000

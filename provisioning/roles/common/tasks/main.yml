@@ -55,14 +55,13 @@
     - ansible_os_family == 'Debian'
     - provider != 'docker'
 
-- name: create backup directory
+- name: create directories
   file: path={{ backup_dir }} state=directory
-
-- name: create download directory
-  file: path={{ download_dir }} state=directory
-
-- name: create project directory
-  file: path={{ project_dir }} state=directory
+  with_items:
+    - "{{ project_dir }}"
+    - "{{ backup_dir}}"
+    - "{{ download_dir }}"
+    - "{{ log_dir }}"
 
 - name: install docker boot script
   template: src=run.sh.j2 dest={{ project_dir }}/run.sh mode=0755
