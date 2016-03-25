@@ -209,6 +209,7 @@ function ballotError(ballot, msg, callback)
             if (dbBallot)
             {
                 dbBallot.status = 'error';
+                dbBallot.error = JSON.stringify(msg);
 
                 dbBallot.save(function(err, dbBallot)
                 {
