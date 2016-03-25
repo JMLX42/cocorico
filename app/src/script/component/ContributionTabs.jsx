@@ -89,7 +89,6 @@ var Bill = React.createClass({
     {
         this.context.history.replace(
             this.getIntlMessage('route.VIEW_BILL')
-            + '/' + this.props.bill.id
             + '/' + this.props.bill.slug
             + '/' + this.getTabSlugByKey(key)
         );
