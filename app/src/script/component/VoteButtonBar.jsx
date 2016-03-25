@@ -12,6 +12,7 @@ var FormattedMessage = ReactIntl.FormattedMessage,
 
 var VoteButton = require('./VoteButton'),
     UnvoteButton = require('./UnvoteButton'),
+    Hint = require('./Hint'),
     LoadingIndicator = require('./LoadingIndicator');
 
 var ServiceStatusAction = require('../action/ServiceStatusAction');
@@ -39,7 +40,7 @@ var VoteButtonBar = React.createClass({
 
     componentWillMount: function()
     {
-        BillAction.showCurrentUserVote(this.props.bill.id);
+        // BillAction.showCurrentUserVote(this.props.bill.id);
         if (this.props.bill.voteContractAddress)
             ServiceStatusAction.showStatus();
     },
@@ -48,42 +49,12 @@ var VoteButtonBar = React.createClass({
     {
         this.listenTo(VoteAction.vote, (billId) => {
             BillAction.show(this.props.bill.id);
-            this.startPollingBallot();
         });
-    },
-
-    startPollingBallot: function()
-    {
-        if (!!this._ballotPollingInterval)
-            return;
-
-        this._ballotPollingInterval = setInterval(
-            () => {
-                var ballot = this.state.ballots
-                    ? this.state.ballots.getBallotByBillId(this.props.bill.id)
-                    : null;
-
-                if (ballot && (ballot.status == 'complete' || ballot.error == 404))
-                    this.stopPollingBallot();
-                else
-                    BillAction.showCurrentUserVote(this.props.bill.id, true);
-            },
-            10000
-        );
-    },
-
-    stopPollingBallot: function()
-    {
-        if (this._ballotPollingInterval)
-        {
-            clearInterval(this._ballotPollingInterval);
-            this._ballotPollingInterval = false;
-        }
     },
 
     componentWillUnmount: function()
     {
-        this.stopPollingBallot();
+        VoteAction.stopPollingBallot(this.props.bill.id);
     },
 
     renderVoteButtons: function()
@@ -108,6 +79,9 @@ var VoteButtonBar = React.createClass({
 
     render: function()
     {
+        if (this.isAuthenticated())
+            VoteAction.startPollingBallot(this.props.bill.id);
+
         var bill = this.props.bill;
         var ballot = this.state.ballots
             ? this.state.ballots.getBallotByBillId(bill.id)
@@ -115,15 +89,12 @@ var VoteButtonBar = React.createClass({
         var validBallot = ballot && !ballot.error && ballot.status == 'complete'
             && ballot.value;
 
-        if (!!ballot && ballot.error && ballot.status != 'complete')
-            this.startPollingBallot();
-
         return (
             <div className={validBallot ? 'voted-' + ballot.value : ''}>
-                <Grid>
-                    <Row className="section section-no-border section-vote">
+                <Grid className="section section-vote">
+                    <Row>
                         <Col md={12}>
-                            <h2 className="section-title">
+                            <h2>
                                 {this.getIntlMessage('bill.YOUR_VOTE')}
                                 {!!bill.voteContractAddress
                                     ? <span className="small">
@@ -132,6 +103,20 @@ var VoteButtonBar = React.createClass({
                                     </span>
                                     : <span/>}
                             </h2>
+                        </Col>
+                    </Row>
+
+                    {!validBallot && bill.status == 'vote'
+                        ? <Row>
+                            <Col md={12}>
+                                <Hint pageSlug="astuce-etape-vote"
+                                    disposable={true}/>
+                            </Col>
+                        </Row>
+                        : <div/>}
+
+                    <Row>
+                        <Col md={12}>
                             {this.renderChildren()}
                         </Col>
                     </Row>
@@ -143,9 +128,6 @@ var VoteButtonBar = React.createClass({
     renderChildren: function()
     {
         var bill = this.props.bill;
-        var ballot = this.state.ballots
-            ? this.state.ballots.getBallotByBillId(bill.id)
-            : null;
 
         if (!this.isAuthenticated())
         {
@@ -167,7 +149,20 @@ var VoteButtonBar = React.createClass({
             }
         }
 
-        if (this.props.bill.voteContractAddress && !this.state.serviceStatus)
+        var ballot = this.state.ballots
+            ? this.state.ballots.getBallotByBillId(bill.id)
+            : null;
+
+        // If the app takes some time to retrieve the ballot (ex: busy server),
+        // then we *need* to wait: if the ballot does not exist, it will still
+        // load and create a ballot object with the 404 error code anyway. So
+        // the case where the ballot object does not exist at all should not
+        // happen and we should just wait.
+        if (!ballot)
+            return <LoadingIndicator/>;
+
+        if (this.props.bill.voteContractAddress && !this.state.serviceStatus
+            && ballot.status != 'complete')
             return <LoadingIndicator/>;
 
         if (ballot && ballot.status == 'error')
@@ -178,13 +173,13 @@ var VoteButtonBar = React.createClass({
                 </div>
             );
 
-        var system = this.state.serviceStatus
+        var systemStatus = this.state.serviceStatus
             ? this.state.serviceStatus.getSystemStatus()
             : null;
 
 		return (
             <div>
-                {bill.voteContractAddress && (!system.blockchainNode || !system.blockchainMiner)
+                {bill.voteContractAddress && (!systemStatus || !systemStatus.blockchainNode || !systemStatus.blockchainMiner)
                     ? <span>
                         {this.getIntlMessage('bill.VOTE_UNAVAILABLE')}
                     </span>
