@@ -4,7 +4,7 @@
   apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
 
 - name: install nodesource repository
-  apt_repository: repo='deb https://deb.nodesource.com/node_0.12 trusty main' state=present
+  apt_repository: repo='deb https://deb.nodesource.com/node_4.x trusty main' state=present
 
 - name: install node
   apt: name={{ item }} state=present
