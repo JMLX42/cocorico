@@ -63,9 +63,7 @@ var Header = React.createClass({
                         <NavbarBrand>
                             <div id="logo">
                                 <Link to="/">
-                                    <span className="cocorico-blue">co</span>
-                                    <span className="cocorico-dark-grey">cori</span>
-                                    <span className="cocorico-red">co</span>
+                                    <span className="cocorico-dark-grey">cocorico</span>
                                 </Link>
                             </div>
                         </NavbarBrand>
