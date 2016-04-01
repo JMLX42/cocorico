@@ -22,6 +22,15 @@ var Hint = React.createClass({
         ReactIntl.IntlMixin
     ],
 
+    getDefaultProps: function()
+    {
+        return {
+            style: 'default',
+            actionButtonClassName: 'btn-default',
+            onActionButtonClick: null
+        };
+    },
+
     getInitialState: function()
     {
         return {
@@ -51,24 +60,33 @@ var Hint = React.createClass({
         }
 
 		return (
-            <div className={this.props.className}>
+            <div className={'callout callout-' + this.props.style}>
                 <div className="hint-content">
-                    <Page slug={this.props.pageSlug}/>
+                    {this.props.pageSlug
+                        ? <Page slug={this.props.pageSlug}/>
+                        : this.props.children}
                 </div>
-                {this.props.disposable
-                    ? <ButtonToolbar>
-                        <Button onClick={this.buttonClickHandler}>
-                            J'ai compris, ne plus afficher ce message
+                <ButtonToolbar>
+                    {this.props.disposable
+                        ? <Button bsStyle="link" onClick={this.buttonClickHandler}
+                            className="btn-hint-hide">
+                            {this.getIntlMessage('hint.HIDE_HINT_BUTTON')}
                         </Button>
-                        {this.props.morePageSlug
-                            ? <Link to={'/' + this.props.morePageSlug}>
+                        : <span/>}
+                    {this.props.actionButtonLabel && this.props.onActionButtonClick
+                        ? <Button bsStyle={this.props.style}
+                            onClick={this.props.onActionButtonClick}>
+                            {this.props.actionButtonLabel}
+                        </Button>
+                        : <span/>}
+                    {this.props.morePageSlug
+                        ? <Link to={'/' + this.props.morePageSlug}>
                             <Button bsStyle="link">
-                                En savoir plus...
+                                {this.getIntlMessage('hint.LEARN_MORE_BUTTON')}
                             </Button>
                         </Link>
                         : <span/>}
-                    </ButtonToolbar>
-                    : <div/>}
+                </ButtonToolbar>
             </div>
 		);
 	}
