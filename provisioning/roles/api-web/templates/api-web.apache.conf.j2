@@ -4,11 +4,11 @@ ProxyRequests       Off
 ProxyPreserveHost   On
 
 <LocationMatch "/api/">
-    ProxyPass           http://127.0.0.1:3000/
+    ProxyPass           http://127.0.0.1:3000/ retry=0
     ProxyPassReverse    http://127.0.0.1:3000/
 </LocationMatch>
 
 <LocationMatch "/keystone">
-    ProxyPass           http://127.0.0.1:3000/keystone
+    ProxyPass           http://127.0.0.1:3000/keystone retry=0
     ProxyPassReverse    http://127.0.0.1:3000/keystone
 </LocationMatch>
