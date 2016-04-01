@@ -42,7 +42,7 @@ module.exports = React.createClass({
 
     getStatusClassNames: function(status)
     {
-        return status ? 'cocorico-blue' : 'cocorico-red';
+        return status ? 'positive' : 'negative';
     },
 
     render: function()
