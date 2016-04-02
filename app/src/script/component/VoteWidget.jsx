@@ -85,8 +85,8 @@ var VoteWidget = React.createClass({
             return this.goToStep(VoteWidget.STEP_COMPLETE, true);
 
         if (!!ballot && !ballot.error && ballot.status == 'pending'
-            && this.state.step != VoteWidget.STEP_PROOF_OF_VOTE)
-            return this.goToStep(VoteWidget.STEP_PENDING, true);
+            && this.state.step < VoteWidget.STEP_PROOF_OF_VOTE)
+            return this.goToStep(VoteWidget.STEP_PROOF_OF_VOTE, true);
     },
 
     componentWillMount: function()
@@ -136,7 +136,8 @@ var VoteWidget = React.createClass({
     confirmVoteValue: function()
     {
         VoteAction.vote(this.props.bill, this.state.vote);
-        this.goToNextStep();
+        // this.goToNextStep();
+        this.setState({voted:true});
     },
 
     setVoteValue: function(value)
@@ -195,7 +196,9 @@ var VoteWidget = React.createClass({
                 <div className="clearfix">
                     <ProgressBar now={100}
                         style={{borderRight:'1px solid white',borderRadius:0,width:'25%',float:'left'}}
-                        className="vote-step-progress"/>
+                        className="vote-step-progress"
+                        active={this.state.step == VoteWidget.STEP_CONFIRM && this.state.voted}
+                        stripped={this.state.step == VoteWidget.STEP_CONFIRM && this.state.voted}/>
                     <ProgressBar now={this.state.step >= VoteWidget.STEP_PROOF_OF_VOTE ? 100 : 0}
                         style={{borderRight:'1px solid white',borderRadius:0,width:'25%',float:'left'}}
                         className="vote-step-progress"/>
@@ -303,7 +306,7 @@ var VoteWidget = React.createClass({
                                 'btn-negative': this.state.vote == 2,
                                 'btn-vote': true
                             })}
-                            disabled={!this.state.confirmVoteButtonEnabled}
+                            disabled={this.state.voted || !this.state.confirmVoteButtonEnabled}
                             onClick={(e)=>this.confirmVoteValue()}>
                             {!this.state.confirmVoteButtonEnabled
                                 ? <Countdown count={VoteWidget.COUNTDOWN}
@@ -312,6 +315,7 @@ var VoteWidget = React.createClass({
                                     value={this.getVoteValueDisplayMessage()}/>}
                         </Button>
                         <Button bsStyle="link"
+                            disabled={this.state.voted}
                             onClick={(e)=>this.props.onCancel(e)}>
                             Annuler
                         </Button>
