@@ -137,7 +137,7 @@ var VoteWidget = React.createClass({
     {
         VoteAction.vote(this.props.bill, this.state.vote);
         // this.goToNextStep();
-        this.setState({voted:true});
+        this.setState({confirmedVote:true});
     },
 
     setVoteValue: function(value)
@@ -197,8 +197,8 @@ var VoteWidget = React.createClass({
                     <ProgressBar now={100}
                         style={{borderRight:'1px solid white',borderRadius:0,width:'25%',float:'left'}}
                         className="vote-step-progress"
-                        active={this.state.step == VoteWidget.STEP_CONFIRM && this.state.voted}
-                        stripped={this.state.step == VoteWidget.STEP_CONFIRM && this.state.voted}/>
+                        active={this.state.step == VoteWidget.STEP_CONFIRM && this.state.confirmedVote}
+                        stripped={this.state.step == VoteWidget.STEP_CONFIRM && this.state.confirmedVote}/>
                     <ProgressBar now={this.state.step >= VoteWidget.STEP_PROOF_OF_VOTE ? 100 : 0}
                         style={{borderRight:'1px solid white',borderRadius:0,width:'25%',float:'left'}}
                         className="vote-step-progress"/>
@@ -221,7 +221,9 @@ var VoteWidget = React.createClass({
                                     'hidden-xs': this.state.step != VoteWidget.STEP_CONFIRM
                                 })}>
                                 <div className="vote-step-number">1</div>
-                                <span className="vote-step-name">Confirmation</span>
+                                <span className="vote-step-name">
+                                    {this.getIntlMessage('vote.STEP_1_NAME')}
+                                </span>
                             </div>
                         </Col>
                         <Col sm={3}>
@@ -232,7 +234,9 @@ var VoteWidget = React.createClass({
                                     'hidden-xs': this.state.step != VoteWidget.STEP_PROOF_OF_VOTE
                                 })}>
                                 <div className="vote-step-number">2</div>
-                                <span className="vote-step-name">Preuve de vote</span>
+                                    <span className="vote-step-name">
+                                        {this.getIntlMessage('vote.STEP_2_NAME')}
+                                    </span>
                             </div>
                         </Col>
                         <Col sm={3}>
@@ -243,7 +247,9 @@ var VoteWidget = React.createClass({
                                     'hidden-xs': this.state.step != VoteWidget.STEP_PENDING
                                 })}>
                                 <div className="vote-step-number">3</div>
-                                <span className="vote-step-name">Enregistrement</span>
+                                    <span className="vote-step-name">
+                                        {this.getIntlMessage('vote.STEP_3_NAME')}
+                                    </span>
                             </div>
                         </Col>
                         <Col sm={3}>
@@ -254,7 +260,9 @@ var VoteWidget = React.createClass({
                                     'hidden-xs': this.state.step != VoteWidget.STEP_COMPLETE
                                 })}>
                                 <div className="vote-step-number">4</div>
-                                <span className="vote-step-name">A voté !</span>
+                                    <span className="vote-step-name">
+                                        {this.getIntlMessage('vote.STEP_4_NAME')}
+                                    </span>
                             </div>
                         </Col>
                     </Row>
@@ -300,25 +308,28 @@ var VoteWidget = React.createClass({
                             }/>
                     </p>
                     <ButtonToolbar>
-                        <Button className={classNames({
-                                'btn-positive': this.state.vote == 0,
-                                'btn-neutral': this.state.vote == 1,
-                                'btn-negative': this.state.vote == 2,
-                                'btn-vote': true
-                            })}
-                            disabled={this.state.voted || !this.state.confirmVoteButtonEnabled}
-                            onClick={(e)=>this.confirmVoteValue()}>
-                            {!this.state.confirmVoteButtonEnabled
-                                ? <Countdown count={VoteWidget.COUNTDOWN}
-                                    onComplete={()=>this.setState({confirmVoteButtonEnabled:true})}/>
-                                : <FormattedMessage message={'je confirme : ' + this.getIntlMessage('vote.VOTE')}
-                                    value={this.getVoteValueDisplayMessage()}/>}
-                        </Button>
-                        <Button bsStyle="link"
-                            disabled={this.state.voted}
-                            onClick={(e)=>this.props.onCancel(e)}>
-                            Annuler
-                        </Button>
+                        {this.state.confirmedVote
+                            ? <LoadingIndicator text="Envoi de votre vote en cours..."/>
+                            : <div>
+                                <Button className={classNames({
+                                        'btn-positive': this.state.vote == 0,
+                                        'btn-neutral': this.state.vote == 1,
+                                        'btn-negative': this.state.vote == 2,
+                                        'btn-vote': true
+                                    })}
+                                    disabled={!this.state.confirmVoteButtonEnabled}
+                                    onClick={(e)=>this.confirmVoteValue()}>
+                                    {!this.state.confirmVoteButtonEnabled
+                                        ? <Countdown count={VoteWidget.COUNTDOWN}
+                                            onComplete={()=>this.setState({confirmVoteButtonEnabled:true})}/>
+                                        : <FormattedMessage message={'je confirme : ' + this.getIntlMessage('vote.VOTE')}
+                                            value={this.getVoteValueDisplayMessage()}/>}
+                                </Button>
+                                <Button bsStyle="link"
+                                    onClick={(e)=>this.props.onCancel(e)}>
+                                    {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+                                </Button>
+                            </div>}
                     </ButtonToolbar>
                 </div>
                 <Hint style="warning" pageSlug="attention-impossible-de-revenir-en-arriere"/>
@@ -343,7 +354,12 @@ var VoteWidget = React.createClass({
                             disabled={!this.state.skipProofOfVoteButtonEnabled}
                             onClick={(e)=>this.goToNextStep()}>
                             <Countdown count={VoteWidget.COUNTDOWN}
-                                format={(c) => c ? 'Ignorer (' + c + ')' : 'Ignorer (non recommandé)'}
+                                format={(c) => c
+                                    ? this.getIntlMessage('vote.IGNORE') + ' ('
+                                        + c + ')'
+                                    : this.getIntlMessage('vote.IGNORE') + ' ('
+                                        + this.getIntlMessage('vote.NOT_RECOMMENDED')
+                                        + ')'}
                                 onComplete={()=>this.setState({skipProofOfVoteButtonEnabled:true})}/>
                         </Button>
                     </ButtonToolbar>
@@ -442,19 +458,6 @@ var VoteWidget = React.createClass({
                 step={this.state.step + 1}
                 total="4"
                 title={stepTitles[this.state.step]}/>
-        );
-    },
-
-    renderErrorDialog: function()
-    {
-        return (
-            <Hint style="danger">
-                <h3>Oho...</h3>
-                <p>
-                    Une erreur s'est produite pendant le processus de vote.
-                    <strong>Votre vote n'a pas été pris en compte</strong>.
-                </p>
-            </Hint>
         );
     },
 

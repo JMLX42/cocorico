@@ -8,8 +8,8 @@ var LoadingIndicator = React.createClass({
     render: function()
     {
 		return (
-            <span>
-                <span className="loading-indicator"/>
+            <span className="loading-indicator">
+                <span className="loading-indicator-animation"/>
                 {this.props.text ? this.props.text : this.getIntlMessage('site.LOADING') + '...'}
             </span>
 		);

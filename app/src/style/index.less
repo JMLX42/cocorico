@@ -170,7 +170,7 @@ li.active {
 
 .bill {
     .tab-content {
-        padding: 20px 0;
+        padding-top: 20px;
     }
 
     .nav-tabs {
@@ -312,8 +312,7 @@ li.active {
 }
 
 .section {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    margin-top: 20px;
 }
 
 .section-title {
@@ -483,15 +482,17 @@ ul.argument-list {
 }
 
 .loading-indicator {
-    background-image: url(/img/loading.gif);
-    background-repeat: no-repeat;
-    background-size: contain;
-    width: 25px;
-    height: 25px;
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 10px;
-    margin-bottom: 4px;
+    &-animation {
+        background-image: url(/img/loading.gif);
+        background-repeat: no-repeat;
+        background-size: contain;
+        width: 25px;
+        height: 25px;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 10px;
+        margin-top: -3px;
+    }
 }
 
 .bill-part {
@@ -667,6 +668,16 @@ ul.argument-list {
 
         .btn-toolbar {
             margin-top: 30px;
+            margin-left: 0;
+
+            .loading-indicator {
+                height: 37px;
+                padding: 8px 0;
+                font-size: 15px;
+                line-height: 1.42857143;
+                vertical-align: middle;
+                display: inline-block;
+            }
         }
     }
 }
