@@ -2,27 +2,27 @@
 @import "font-news-cycle.less";
 @import "./bootswatch-journal-variables.less";
 
-@cocorico-blue: #4285F4;
-@cocorico-dark-blue: #0d64f3;
-@cocorico-red: @brand-primary;
-@cocorico-dark-red: #993300;
-@cocorico-grey: #e7e7e7;
-@cocorico-dark-grey: #999;
-@cocorico-light-grey: #f8f8f8;
+@cocorico-light-grey: #ecf0f1;
+@cocorico-grey: #bdc3c7;
+@cocorico-dark-grey: #95a5a6;
+
+@color-positive: #2ecc71;
+@color-positive-dark: #27ae60;
+@color-negative: #e74c3c;
+@color-negative-dark: #c0392b;
 
 @text-color: #444;
-@link-color: #5B86CF;
+@link-color: #2980b9;
 @headings-color: @text-color;
-@component-active-bg: @cocorico-blue;
-@btn-danger-bg: @cocorico-red;
-@btn-danger-border: @cocorico-red;
-@btn-primary-bg: @cocorico-blue;
-@btn-primary-border: @cocorico-blue;
-
-@color-positive: @btn-success-bg;
-@color-positive-dark: #5cb85c;
-@color-negative: @btn-danger-bg;
-@color-negative-dark: @cocorico-dark-red;
+@component-active-bg: #3498db;
+@btn-danger-bg: @color-negative;
+@btn-danger-border: @color-negative-dark;
+@btn-primary-bg: #4285F4;
+@btn-primary-border: #0d64f3;
+@btn-success-bg: @color-positive;
+@btn-success-border: @color-positive-dark;
+@btn-warning-bg: #f39c12;
+@btn-warning-border: #e67e22;
 
 @import "./bootswatch-journal.less";
 
@@ -33,17 +33,16 @@
 }
 
 body {
-    background-color: #f8f8f8;
+    background-color: @cocorico-light-grey;
 }
 
 a {
     // text-decoration: underline;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    .small {
-        margin-left: 10px;
-    }
+.btn {
+    border: none;
+    white-space: normal;
 }
 
 li.active {
@@ -60,6 +59,10 @@ li.active {
     color: @color-positive;
 }
 
+.neutral {
+    color: @cocorico-dark-grey;
+}
+
 .negative {
     color: @color-negative;
 }
@@ -70,10 +73,6 @@ li.active {
 
 .negative-background {
     background-color: @color-negative;
-}
-
-.cocorico-blue {
-    color: @cocorico-blue;
 }
 
 .cocorico-grey {
@@ -92,10 +91,6 @@ li.active {
     color: @cocorico-dark-grey;
 }
 
-.cocorico-red {
-    color: @cocorico-red;
-}
-
 #header {
 
     a {
@@ -111,7 +106,7 @@ li.active {
     }
 
     .navbar-default .navbar-nav > li > a.active {
-        color: @cocorico-blue;
+        color: @component-active-bg;
     }
 
     .navbar-right {
@@ -143,21 +138,20 @@ li.active {
 
 #content {
     padding-top: @navbar-height;
-    font-size: 1.5em;
 }
 
 #footer {
-    border-top: 1px solid @cocorico-grey;
     min-height: 200px;
     background-color: @cocorico-light-grey;
     padding-top: 20px;
     color: @cocorico-dark-grey;
+    margin-top: 40px;
 
     a {
         color: @cocorico-dark-grey;
 
         &:hover {
-            color: @cocorico-blue;
+            color: @link-color;
         }
     }
 
@@ -179,33 +173,39 @@ li.active {
         padding: 20px 0;
     }
 
-    .nav-tabs > li:first-child > a {
-        margin-left: 15px;
+    .nav-tabs {
+        font-size: @font-size-large;
+
+        & > li:first-child > a {
+            margin-left: 15px;
+        }
     }
 
     .bill-content {
-        text-align: justify;
         min-height: 100px;
+        font-size: @font-size-large;
     }
 
     .bill-title {
         margin-top: 80px;
         margin-right: 10px;
-        font-size: 2em;
         text-transform: capitalize;
         display: inline-block;
     }
 
     .voted-blank {
         background-color: @cocorico-grey;
+        color: white;
+        border-radius: 4px;
+        padding: 10px;
 
-        .section {
-            border: none;
+        h2, h2 .small, h2 .icon-secured {
+            color: white !important;
         }
     }
 
     .voted-no {
-        .voted-blank;
+        .voted-blank();
 
         background-color: @color-negative;
         color: white;
@@ -226,7 +226,7 @@ li.active {
     }
 
     .voted-yes {
-        .voted-no;
+        .voted-blank();
         background-color: @color-positive;
 
         .btn-unvote {
@@ -243,23 +243,18 @@ li.active {
 }
 
 .btn-vote {
-    width: 170px;
-    padding: 20px;
+    min-width: 170px;
 }
 
 .btn-positive {
-    .btn-vote();
     .btn-success();
 }
 
 .btn-neutral {
-    .btn-vote();
-
     background-color: @cocorico-dark-grey;
 }
 
 .btn-negative {
-    .btn-vote();
     .btn-danger();
 }
 
@@ -317,28 +312,21 @@ li.active {
 }
 
 .section {
-    padding-top: 30px;
-    padding-bottom: 30px;
-    border-top: 1px solid @cocorico-grey;
-
-    .section-title {
-        margin-bottom: 20px;
-    }
-
-    &.section-no-border {
-        border: none;
-    }
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
-.section-hint {
-    .section;
-
+.section-title {
     border-bottom: 1px solid @cocorico-grey;
 }
 
 .hint {
     color: @cocorico-dark-grey;
+}
 
+.hint-title {
+    padding-left: 5px;
+    vertical-align: middle;
 }
 
 .pace {
@@ -354,9 +342,9 @@ li.active {
 }
 
 .pace .pace-progress {
-    background: @cocorico-red;
+    background: @component-active-bg;
     position: fixed;
-    z-index: 2000;
+    z-index: 1000;
     top: @navbar-height + 1;
     right: 100%;
     width: 100%;
@@ -404,6 +392,8 @@ li.active {
 }
 
 .like-buttons {
+    font-size: 20px;
+
     .icon-thumb_up, .icon-thumb_down {
         margin: 0 5px;
         cursor: default;
@@ -434,26 +424,34 @@ li.active {
     margin-left: 5px;
 }
 
-a.btn-hint-show {
+.btn-hint-show {
     color: @cocorico-dark-grey;
     cursor: pointer;
-    border-bottom: 1px dashed @cocorico-dark-grey;
-    padding-bottom: 3px;
     text-decoration: none;
+    margin-top: 20px;
+    display: inline-block;
+    font-size: @font-size-large;
 
     .icon-info {
         vertical-align: middle;
-    }
-
-    .hint-title {
-        padding-left: 5px;
-        padding-top: 4px;
+        &:before {
+        }
     }
 
     &:hover {
         text-decoration: none;
-        border-bottom-style: solid;
+
+        .icon-info {
+            color: @link-hover-color;
+        }
     }
+}
+
+.btn-hint-hide {
+    margin-left: 0 !important;
+    padding-left: 5px;
+    padding-bottom: 0;
+    text-align: left;
 }
 
 ul.argument-list {
@@ -555,24 +553,116 @@ ul.argument-list {
 .callout {
     border: 1px solid @cocorico-grey;
     border-left-width: 5px;
+    border-radius: 4px;
     padding: 20px;
-    margin: 10px 0;
+    margin-top: 20px;
 
     h1, h2, h3, h4, h5, h6 {
         color: @cocorico-grey;
+        margin-top: 0;
     }
 
     &.callout-primary {
-        border-left-color: @cocorico-blue;
+        border-left-color: @btn-primary-bg;
         h1, h2, h3, h4, h5, h6 {
-            color: @cocorico-blue;
+            color: @btn-primary-bg;
         }
     }
 
     &.callout-danger {
-        border-left-color: @cocorico-red;
+        border-left-color: @btn-danger-bg;
         h1, h2, h3, h4, h5, h6 {
-            color: @cocorico-red;
+            color: @btn-danger-bg;
+        }
+    }
+
+    &.callout-warning {
+        border-left-color: @btn-warning-bg;
+        h1, h2, h3, h4, h5, h6 {
+            color: @btn-warning-bg;
+        }
+    }
+}
+
+.proof-of-vote {
+    display: none;
+
+    img {
+        width: 512px;
+        height: 512px;
+    }
+}
+
+@media print {
+    .proof-of-vote {
+        display: block;
+    }
+}
+
+.vote-widget {
+    .modal-header {
+        border: none;
+    }
+
+    .container {
+        width: 100%;
+    }
+
+    .vote-step-progress {
+        margin-bottom: 0;
+        border-radius: 0;
+
+        .progress-bar {
+            background-color: @btn-primary-bg;
+        }
+    }
+
+    .vote-step-counter {
+        text-align: center;
+        margin-top: 5px;
+        color: @cocorico-grey;
+
+        .vote-step-number {
+            border-radius: 50%;
+            behavior: url(PIE.htc);
+            box-sizing: content-box;
+            width: 18px;
+            height: 18px;
+            padding: 2px;
+            line-height: 18px;
+            font-size: 14px;
+            border: 1px solid @cocorico-grey;
+            text-align: center;
+            font-family: sans-serif;
+            margin: auto;
+        }
+
+        .vote-step-name {
+            display: block;
+        }
+
+        &-active {
+            color: @btn-primary-bg;
+
+            .vote-step-number {
+                border: 1px solid @btn-primary-bg;
+            }
+        }
+
+        &-done {
+            color: @text-color;
+
+            .vote-step-number {
+                border: 1px solid @text-color;
+            }
+        }
+    }
+
+    .vote-step-description {
+        margin: 10px 0;
+
+        .btn-toolbar {
+            margin-top: 30px;
         }
     }
 }

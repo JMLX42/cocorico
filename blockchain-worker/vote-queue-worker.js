@@ -1,10 +1,9 @@
 var config = require('../api/config.json');
 var keystone = require('../api/node_modules/keystone');
 var async = require('async');
-
-var EthereumAccounts = require('ethereumjs-accounts');
-var HookedWeb3Provider = require("hooked-web3-provider");
 var Web3 = require('web3');
+var fs = require('fs');
+var md5 = require('md5');
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
@@ -69,37 +68,58 @@ function waitForBlockchain(callback)
     );
 }
 
+function getCompiledVoteContract(web3)
+{
+    var source = fs.readFileSync('/vagrant/contract/Vote.sol', {encoding: 'utf-8'});
+    var compiled = web3.eth.compile.solidity(source);
+
+    console.log({
+        log: 'compiled Vote.sol smart contract',
+        md5Hash: md5(source)
+    });
+
+    return compiled;
+}
+
 function mineVoteContract(callback)
 {
-	var Web3 = require('web3');
 	var web3 = new Web3();
 	web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
 
-	var Vote = require('/opt/cocorico/blockchain/Vote.json');
-	var voteContract = web3.eth.contract(eval(Vote.contracts.Vote.abi));
-	var voteInstance = voteContract.new(
+    var hash = '';
+	var compiled = getCompiledVoteContract(web3);
+    var code = compiled.Vote.code;
+    var abi = compiled.Vote.info.abiDefinition;
+
+	web3.eth.contract(abi).new(
 		3, // num proposals
 		{
-			from    : web3.eth.accounts[0],
-			data    : Vote.contracts.Vote.bin,
-			gas     : 300000
+			from: web3.eth.accounts[0],
+			data: code,
+            gas: 999999
 		},
 		function(error, contract)
 		{
 			if (error)
-				return callback(error, null);
+				return callback(error, null, null);
 
 			if (!contract)
 				return;
 
 			if (!contract.address)
 			{
-				// tx sent, hash = contract.transactionHash
+				hash = contract.transactionHash
 			}
 			else
 			{
 				// tx mined
-				callback(null, contract);
+                console.log({
+                    log: 'contract transaction mined',
+                    hash: hash,
+                    contractAddress: contract.address
+                });
+
+				callback(null, contract, abi);
 			}
 		}
 	);
@@ -107,15 +127,19 @@ function mineVoteContract(callback)
 
 function handleVote(vote, callback)
 {
-    mineVoteContract(function(err, res)
+    mineVoteContract(function(err, contract, abi)
     {
+        if (err)
+            return callback(err, null);
+
         Bill.model.findById(vote.id)
             .exec(function(err, bill)
             {
                 if (err)
                     return callback(err, null);
 
-                bill.voteContractAddress = res.address;
+            	bill.voteContractABI = JSON.stringify(abi);
+                bill.voteContractAddress = contract.address;
 
                 bill.save(function(err, bill)
                 {
@@ -149,12 +173,19 @@ require('amqplib/callback_api').connect(
                     {
                         var obj = JSON.parse(msg.content.toString());
 
-                        ch.ack(msg);
+                        console.log({
+                            log: 'vote received',
+                            vote: obj
+                        });
 
                         if (obj.vote)
                         {
                             handleVote(obj.vote, function(err, bill)
                             {
+                                if (err)
+                                    console.log({err: err});
+                                else
+                                    ch.ack(msg);
                             });
                         }
                     }

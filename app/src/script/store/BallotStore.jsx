@@ -10,6 +10,8 @@ var BillAction = require('../action/BillAction'),
 module.exports = Reflux.createStore({
     init: function()
     {
+        jquery.ajaxSetup({ cache: false });
+
         this.listenTo(VoteAction.vote, this._vote);
         this.listenTo(VoteAction.unvote, this._unvote);
         this.listenTo(VoteAction.startPollingBallot, this._startPollingBallot);
@@ -22,6 +24,11 @@ module.exports = Reflux.createStore({
         this._deleteAllKeystores();
     },
 
+    getInitialState: function()
+    {
+        return this;
+    },
+
     getBallotByBillId: function(billId)
     {
         if (this._ballots[billId] && this._ballots[billId] !== true)
@@ -30,9 +37,9 @@ module.exports = Reflux.createStore({
         return null;
     },
 
-    _fetchBallotByBillId: function(billId, noCache)
+    _fetchBallotByBillId: function(billId, forceUpdate)
     {
-        if (this._ballots[billId] && !noCache)
+        if (this._ballots[billId] && !forceUpdate)
         {
             this.trigger(this);
             return false;
@@ -43,12 +50,6 @@ module.exports = Reflux.createStore({
         jquery.get(
             '/api/bill/ballot/' + billId,
             (data) => {
-                // If the user closed its client before we had a chance to reply
-                // to the ballot creation with a ballot signing request, we have
-                // left the ballot hanging with a "signing" status. We have to
-                // fix this by signing it as soon as we fetch it.
-                // this._signBallotAndTrigger(data.ballot);
-
                 this._ballots[billId] = data.ballot;
                 this.trigger(this);
             }
@@ -104,6 +105,18 @@ module.exports = Reflux.createStore({
         return this._keystore[billId].serialize();
     },
 
+    getProofOfVote: function(billId)
+    {
+        if (!(billId in this._keystore))
+            return null;
+
+        var ks = this._keystore[billId];
+
+        return {
+            address: ks.getAddresses()[0]
+        };
+    },
+
     _generateAddress: function(billId, callback)
     {
         this._getKeystore(billId, (ks, pwDerivedKey) => {
@@ -117,100 +130,64 @@ module.exports = Reflux.createStore({
                 + ' with private key ' + ks.exportPrivateKey(address, pwDerivedKey)
             );
 
-            callback(address);
+            callback(ks, pwDerivedKey, address);
         });
     },
 
-    _signBallotAndTrigger: function(ballot)
+    _getVoteTransaction: function(billId, voteContractAddress, voteContractABI, value, callback)
     {
-        if (ballot.status == 'signing')
-        {
-            this._signBallot(
-                ballot,
-                (data) => {
-                    this._ballots[ballot.bill] = ballot;
-                    this.trigger(this);
-                },
-                () => {
-                    // Ballot has been removed.
-                    this.trigger(this);
+        console.log('creating vote transaction');
+
+        this._generateAddress(billId, (ks, pwDerivedKey, address) => {
+            var tx = lightwallet.txutils.functionTx(
+                JSON.parse(voteContractABI),
+                'vote',
+                value,
+                {
+                    to: voteContractAddress,
+                    gasLimit: 999999,
+                    gasPrice: 20000000000,
+                    value: 0,
+                    nonce: 0
                 }
-            )
-        }
-        else
-        {
-            this._ballots[ballot.bill] = ballot;
-            this.trigger(this);
-        }
-    },
+            );
 
-    _signBallot: function(ballot, success, error)
-    {
-        if (ballot.error || ballot.status != 'signing' || !ballot.transactionParameters)
-        {
-            console.error('invalid ballot');
-            return this._removeVote(ballot.bill, (data) => error());
-        }
-
-        console.log('signing ballot with address ' + ballot.address);
-
-        this._getKeystore(ballot.bill, (ks, pwDerivedKey) => {
-            // If the ballot address is not available client side, then we can
-            // assume the ballot did not originate from this client so we remove it.
-            if (ks.getAddresses().indexOf(ballot.address.substring(2)) < 0)
-            {
-                console.error('unknown ballot address ' + ballot.address);
-                return this._removeVote(ballot.bill, (data) => error());
-            }
-
-            // Otherwise, we sign the transaction and send the serialized signed
-            // raw transaction back to the server.
-            var tx = new Tx(JSON.parse(ballot.transactionParameters));
             var signedTx = '0x' + lightwallet.signing.signTx(
                 ks,
                 pwDerivedKey,
-                tx.serialize(),
-                ballot.address
+                tx,
+                address
             );
 
-            var polling = this._isPollingBallot(ballot.bill);
-            // Ballots fetched by polling might be signed as part of the
-            // fetching process. But signing the same ballot twice will trigger
-            // a legit error in the API. So we pause polling before sending the
-            // signing request and then we resum it when we're done.
-            this._stopPollingBallot(ballot.bill);
+            console.log('signed tx', signedTx);
 
-            jquery.get(
-                '/api/vote/transaction/' + ballot.bill + '/' + ballot.address
-                    + '/' + signedTx,
-                (data) => {
-                    console.log('signed ballot with address ' + data.ballot.address);
-                    if (polling)
-                        this._startPollingBallot(ballot.bill);
-                    success(data);
-                }
-            );
+            callback(signedTx);
         });
     },
 
-    _vote: function(billId, value)
+    _vote: function(bill, value)
     {
         // For now, we delete the existing keystore to make sure every vote will
         // create a new one.
         // FIXME: use the existing (scanned) keystore when the user will want to
         // change its vote using its "proof of vote".
-        this._deleteKeystore(billId);
+        this._deleteKeystore(bill.id);
 
-        this._generateAddress(billId, (address) => {
-            jquery.get(
-                '/api/vote/' + value + '/' + billId + '/' + address,
-                (data) => {
-                    // Ballot should be ready to be signed, so we must sign it before
-                    // doing anything else.
-                    this._signBallotAndTrigger(data.ballot);
-                }
-            );
-        });
+        this._getVoteTransaction(
+            bill.id,
+            bill.voteContractAddress,
+            bill.voteContractABI,
+            value,
+            (tx) => {
+                jquery.get(
+                    '/api/vote/' + tx,
+                    (data) => {
+                        console.log('vote transaction sent');
+                        this.trigger(this);
+                    }
+                );
+            }
+        );
     },
 
     _removeVote: function(billId, callback)

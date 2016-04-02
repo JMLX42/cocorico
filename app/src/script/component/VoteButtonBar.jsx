@@ -13,7 +13,8 @@ var FormattedMessage = ReactIntl.FormattedMessage,
 var VoteButton = require('./VoteButton'),
     UnvoteButton = require('./UnvoteButton'),
     Hint = require('./Hint'),
-    LoadingIndicator = require('./LoadingIndicator');
+    LoadingIndicator = require('./LoadingIndicator'),
+    VoteWidget = require('./VoteWidget');
 
 var ServiceStatusAction = require('../action/ServiceStatusAction');
 
@@ -22,6 +23,7 @@ var ServiceStatusStore = require('../store/ServiceStatusStore'),
     BallotStore = require('../store/BallotStore');
 
 var ButtonToolbar = ReactBootstrap.ButtonToolbar,
+    Button = ReactBootstrap.Button,
     Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
     Col = ReactBootstrap.Col;
@@ -38,17 +40,30 @@ var VoteButtonBar = React.createClass({
         ForceAuthMixin
     ],
 
+    getInitialState: function()
+    {
+        return {
+            voting: false
+        };
+    },
+
     componentWillMount: function()
     {
-        // BillAction.showCurrentUserVote(this.props.bill.id);
-        if (this.props.bill.voteContractAddress)
-            ServiceStatusAction.showStatus();
+        ServiceStatusAction.showStatus();
+        VoteAction.startPollingBallot(this.props.bill.id)
     },
 
     componentDidMount: function()
     {
         this.listenTo(VoteAction.vote, (billId) => {
-            BillAction.show(this.props.bill.id);
+
+        });
+
+        BallotStore.listen((store) => {
+            var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
+
+            if (!!ballot && ballot.status == 'pending')
+                this.setState({voting:true});
         });
     },
 
@@ -57,70 +72,68 @@ var VoteButtonBar = React.createClass({
         VoteAction.stopPollingBallot(this.props.bill.id);
     },
 
+    startVotingProcess: function(vote)
+    {
+        this.setState({
+            vote: vote,
+            voting: true
+        });
+    },
+
     renderVoteButtons: function()
     {
         return (
-            <ButtonToolbar className="bill-center">
-                <VoteButton message="bill.VOTE_YES"
-                    bill={this.props.bill.id}
-                    value="yes"
-                    className="btn-positive"/>
-                <VoteButton message="bill.VOTE_BLANK"
-                    bill={this.props.bill.id}
-                    value="blank"
-                    className="btn-neutral"/>
-                <VoteButton message="bill.VOTE_NO"
-                    bill={this.props.bill.id}
-                    value="no"
-                    className="btn-negative"/>
-            </ButtonToolbar>
+            <div>
+                <ButtonToolbar className="bill-center">
+                    <Button bsSize="large" className="btn-vote btn-positive"
+                        onClick={(e)=>this.startVotingProcess(0)}>
+                        <FormattedMessage message={this.getIntlMessage('vote.VOTE')}
+                            value={this.getIntlMessage('vote.VOTE_YES')}/>
+                    </Button>
+                    <Button bsSize="large" className="btn-vote btn-neutral"
+                        onClick={(e)=>this.startVotingProcess(1)}>
+                        <FormattedMessage message={this.getIntlMessage('vote.VOTE')}
+                            value={this.getIntlMessage('vote.VOTE_BLANK')}/>
+                    </Button>
+                    <Button bsSize="large" className="btn-vote btn-negative"
+                        onClick={(e)=>this.startVotingProcess(2)}>
+                        <FormattedMessage message={this.getIntlMessage('vote.VOTE')}
+                            value={this.getIntlMessage('vote.VOTE_NO')}/>
+                    </Button>
+                </ButtonToolbar>
+                <Hint pageSlug="astuce-etape-vote" disposable={true}/>
+            </div>
         );
     },
 
-    render: function()
+    renderAlreadyVotedMessage: function()
     {
-        if (this.isAuthenticated())
-            VoteAction.startPollingBallot(this.props.bill.id);
-
-        var bill = this.props.bill;
-        var ballot = this.state.ballots
-            ? this.state.ballots.getBallotByBillId(bill.id)
-            : null;
-        var validBallot = ballot && !ballot.error && ballot.status == 'complete'
-            && ballot.value;
+        var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
 
         return (
-            <div className={validBallot ? 'voted-' + ballot.value : ''}>
-                <Grid className="section section-vote">
-                    <Row>
-                        <Col md={12}>
-                            <h2>
-                                {this.getIntlMessage('bill.YOUR_VOTE')}
-                                {!!bill.voteContractAddress
-                                    ? <span className="small">
-                                        <span className="icon-secured"/>
-                                        {this.getIntlMessage('bill.BLOCKCHAIN_SECURED')}
-                                    </span>
-                                    : <span/>}
-                            </h2>
-                        </Col>
-                    </Row>
+            <div>
+                <p>
+                    <FormattedMessage
+                        message={this.getIntlMessage('vote.ALREADY_VOTED')}
+                        date={<FormattedTime value={ballot.time}/>}/>
+                </p>
+                <UnvoteButton bill={this.props.bill}/>
+            </div>
+        );
+    },
 
-                    {!validBallot && bill.status == 'vote'
-                        ? <Row>
-                            <Col md={12}>
-                                <Hint pageSlug="astuce-etape-vote"
-                                    disposable={true}/>
-                            </Col>
-                        </Row>
-                        : <div/>}
-
-                    <Row>
-                        <Col md={12}>
-                            {this.renderChildren()}
-                        </Col>
-                    </Row>
-                </Grid>
+    renderVoteWidget: function()
+    {
+        return (
+            <div>
+                <VoteWidget bill={this.props.bill}
+                    vote={this.state.vote}
+                    visible={this.state.voting}
+                    onCancel={(e)=>this.setState({voting:false})}
+                    onComplete={(e)=>this.setState({voting:false})}/>
+                <p>
+                    {this.getIntlMessage('vote.VOTE_PENDING')}
+                </p>
             </div>
         );
     },
@@ -135,7 +148,7 @@ var VoteButtonBar = React.createClass({
             {
                 return (
                     <p className="hint">
-                        {this.renderLoginMessage(this.getIntlMessage('bill.LOGIN_REQUIRED'))}
+                        {this.renderLoginMessage(this.getIntlMessage('vote.LOGIN_REQUIRED'))}
                     </p>
                 );
             }
@@ -143,26 +156,19 @@ var VoteButtonBar = React.createClass({
             {
                 return (
                     <p className="hint">
-                        {this.getIntlMessage('bill.TOO_LATE_TO_VOTE')}
+                        {this.getIntlMessage('vote.TOO_LATE_TO_VOTE')}
                     </p>
                 );
             }
         }
-
-        var ballot = this.state.ballots
-            ? this.state.ballots.getBallotByBillId(bill.id)
-            : null;
 
         // If the app takes some time to retrieve the ballot (ex: busy server),
         // then we *need* to wait: if the ballot does not exist, it will still
         // load and create a ballot object with the 404 error code anyway. So
         // the case where the ballot object does not exist at all should not
         // happen and we should just wait.
+        var ballot = this.state.ballots.getBallotByBillId(bill.id);
         if (!ballot)
-            return <LoadingIndicator/>;
-
-        if (this.props.bill.voteContractAddress && !this.state.serviceStatus
-            && ballot.status != 'complete')
             return <LoadingIndicator/>;
 
         if (ballot && ballot.status == 'error')
@@ -177,34 +183,62 @@ var VoteButtonBar = React.createClass({
             ? this.state.serviceStatus.getSystemStatus()
             : null;
 
+        if (ballot.status != 'complete')
+        {
+            if (!systemStatus)
+                return <LoadingIndicator/>;
+
+            if (bill.voteContractAddress && (!systemStatus || !systemStatus.blockchainNode || !systemStatus.blockchainMiner))
+                return (
+                    <Hint style="danger">
+                        <h3>
+                            {this.getIntlMessage('vote.VOTE_UNAVAILABLE')}
+                        </h3>
+                    </Hint>
+                );
+
+            if (!this.state.config.capabilities.bill.vote)
+                return (
+                    <Hint style="danger">
+                        <p>
+                            {this.getIntlMessage('vote.VOTE_DISABLED')}
+                        </p>
+                    </Hint>
+                );
+        }
+
+        return (
+            <div>
+                <Row>
+                    <Col md={12}>
+                        {this.state.voting
+                            ? this.renderVoteWidget()
+                            : !!ballot && ballot.status == 'complete'
+                                ? this.renderAlreadyVotedMessage()
+                                : this.renderVoteButtons()}
+                    </Col>
+                </Row>
+            </div>
+        );
+    },
+
+    render: function()
+    {
+        if (this.isAuthenticated())
+            VoteAction.startPollingBallot(this.props.bill.id);
+
 		return (
             <div>
-                {bill.voteContractAddress && (!systemStatus || !systemStatus.blockchainNode || !systemStatus.blockchainMiner)
-                    ? <span>
-                        {this.getIntlMessage('bill.VOTE_UNAVAILABLE')}
-                    </span>
-                    : !this.state.config.capabilities.bill.vote
-                        ? <p className="hint">
-                            {this.getIntlMessage('bill.VOTE_DISABLED')}
-                        </p>
-                        : !ballot || ballot.error == 404 || ballot.status != 'complete'
-                            ? bill.status == 'vote'
-                                ? !!ballot && (ballot.status && ballot.status != 'complete')
-                                    ? <LoadingIndicator text={this.getIntlMessage('bill.VOTE_PENDING')}/>
-                                    : this.renderVoteButtons()
-                                : <p className="hint">
-                                    {this.getIntlMessage('bill.TOO_LATE_TO_VOTE')}
-                                </p>
-                            : <div>
-                                <FormattedMessage message={this.getIntlMessage('bill.ALREADY_VOTED')}
-                                    value={ballot && ballot.value ? this.getIntlMessage('bill.VOTE_' + ballot.value.toUpperCase()) : ''}
-                                    date={<FormattedTime value={ballot && ballot.time ? ballot.time : Date.now()}/>}/>
-                                {bill.status == 'vote'
-                                    ? <div>
-                                        <UnvoteButton bill={bill}/>
-                                    </div>
-                                    : <div/>}
-                            </div>}
+                <Grid className="section section-vote" id="vote-widget">
+                    <Row>
+                        <Col md={12}>
+                            <h2>
+                                {this.getIntlMessage('vote.YOUR_VOTE')}
+                            </h2>
+                        </Col>
+                    </Row>
+                    {this.renderChildren()}
+                </Grid>
             </div>
 		);
 	}

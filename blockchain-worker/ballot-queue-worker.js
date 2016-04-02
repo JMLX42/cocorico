@@ -1,10 +1,12 @@
 var config = require('../api/config.json');
 var keystone = require('../api/node_modules/keystone');
 var async = require('async');
-
-var EthereumAccounts = require('ethereumjs-accounts');
-var HookedWeb3Provider = require("hooked-web3-provider");
+var EthereumTx = require('ethereumjs-tx');
+var EthereumUtil = require('ethereumjs-util');
 var Web3 = require('web3');
+var bunyan = require('bunyan');
+
+var log = bunyan.createLogger({name: "ballot-queue-worker"});
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
@@ -44,13 +46,35 @@ function initializeVoterAccount(address, callback)
     var web3 = new Web3();
     web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
 
-    console.log({log:'initialize account ' + address});
+    var value = '20000000000000000';
+    var from = web3.eth.accounts[0];
+
+    log.info(
+        {
+            from : from,
+            value : value,
+            address : address
+        },
+        'initialize account'
+    );
+
+    if (web3.eth.getBalance(address) != 0)
+    {
+        // Each account is unique: one vote => one account => one address. If
+        // the address already has some funds, then it was used before and
+        // something fishy is happening:
+        // 1) someone is tempering with the platform; or
+        // 2) the worker stopped/crashed after initializing the account but
+        // before sending the vote transaction to the blockchain: not cool, but
+        // it's safer to throw an error and ask the user to vote again.
+        return callback('account already initialized', null);
+    }
 
     web3.eth.sendTransaction(
         {
-            from: web3.eth.accounts[0],
+            from: from,
             to: address,
-            value: web3.toWei(10, "ether")
+            value: value
         },
         function(error, result)
         {
@@ -62,10 +86,13 @@ function initializeVoterAccount(address, callback)
                     if (err)
                         return callback(err, null);
 
-                    console.log({
-                        address: address,
-                        balance: web3.fromWei(web3.eth.getBalance(address), "ether").toString()
-                    });
+                    log.info(
+                        {
+                            address : address,
+                            balance: web3.eth.getBalance(address).toString()
+                        },
+                        'account initialized'
+                    );
 
                     return callback(null, block);
                 }
@@ -74,10 +101,9 @@ function initializeVoterAccount(address, callback)
     );
 }
 
-function getVoteContractInstance(web3, address, callback)
+function getVoteContractInstance(web3, abi, address, callback)
 {
-    var Vote = require('/opt/cocorico/blockchain/Vote.json');
-    var voteContract = web3.eth.contract(eval(Vote.contracts.Vote.abi));
+    var voteContract = web3.eth.contract(abi);
     var voteInstance = voteContract.at(
         address,
         function(err, voteInstance)
@@ -86,6 +112,71 @@ function getVoteContractInstance(web3, address, callback)
                 return callback(err, null);
 
             return callback(null, voteInstance);
+        }
+    );
+}
+
+function registerVoter(web3, address, voteInstance, callback)
+{
+    var voteRegisteredEvent = voteInstance.VoterRegistered();
+
+    voteRegisteredEvent.watch((err, e) => {
+        if (e.args.voter == address)
+            callback(err, e);
+    });
+
+    voteInstance.registerVoter.sendTransaction(
+        address,
+        {
+            from: web3.eth.accounts[0],
+            gasLimit: 999999,
+            gasPrice: 20000000000,
+        },
+        function(err, txhash)
+        {
+            if (err)
+                return callback(err, null, null);
+
+            log.info(
+                {
+                    contract: voteInstance.address,
+                    address: address,
+                    transactionHash: txhash,
+                    balance: web3.eth.getBalance(address).toString()
+                },
+                'Vote.registerVoter function call transaction sent'
+            );
+        }
+    );
+}
+
+function sendVoteTransaction(web3, voteInstance, transaction, callback)
+{
+    var ballotEvent = voteInstance.Ballot();
+    var signedTx = new EthereumTx(transaction);
+    var address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
+
+    ballotEvent.watch((err, e) => {
+        if (e.args.voter == address)
+            callback(err, e);
+    });
+
+    web3.eth.sendRawTransaction(
+        transaction,
+        function(err, txhash)
+        {
+            if (err)
+                return callback(err, null, null);
+
+            log.info(
+                {
+                    contract: voteInstance.address,
+                    address: address,
+                    transactionHash: txhash,
+                    balance: web3.eth.getBalance(address).toString()
+                },
+                'Vote.vote function call transaction sent'
+            );
         }
     );
 }
@@ -103,9 +194,12 @@ function waitForBlockchain(callback)
             var connected = web3.isConnected();
 
             if (!connected && !errorLogged)
-                console.log({error : 'unable to connect to the blockchain'});
+            {
+                log.error('unable to connect to the blockchain');
+                errorLogged = true;
+            }
             if (connected && errorLogged)
-                console.log({log : 'successfully connected to the blockchain'});
+                log.info('successfully connected to the blockchain');
 
             return !connected;
         },
@@ -122,84 +216,87 @@ function waitForBlockchain(callback)
 
 function handleBallot(ballot, callback)
 {
-    if (!ballot.id || !ballot.address || !ballot.voteContractAddress
-        || !ballot.transaction)
+    if (!ballot.id || !ballot.voteContractAddress || !ballot.transaction)
         return callback('invalid ballot', null);
 
     var web3 = new Web3();
     web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
 
-    waitForBlockchain(function()
-    {
-        initializeVoterAccount(
-            ballot.address,
-            function(err, block)
-            {
-                if (err)
-                    return callback(err, null);
+    var signedTx = new EthereumTx(ballot.transaction);
+    var address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
 
-                getVoteContractInstance(
-                    web3,
-                    ballot.voteContractAddress,
-                    function(err, voteInstance)
+    async.waterfall(
+        [
+            // Step 1: we wait for the blockchain to be available.
+            (callback) => waitForBlockchain(() => callback(null)),
+            // Step 2: the voter account will need some ether to vote. So
+            // the "root" account will make a first transaction to the voter
+            // account to initialize it.
+            (callback) => initializeVoterAccount(address, callback),
+            // Step 3 : we fetch the vote contract instance from the blockchain.
+            (block, callback) => getVoteContractInstance(
+                web3,
+                ballot.voteContractABI,
+                ballot.voteContractAddress,
+                callback
+            ),
+            // Step 4: the "root" account must authorize the voter account to
+            // vote. If having enough ether was the only required condition to
+            // vote, then anyone mining on the blockchain could create accounts
+            // and vote. To avoid this:
+            // * only registered accounts can vote ;
+            // * only the account that instanciated the vote contract can
+            //   register accounts.
+            // * vote contracts macthing actual bills an only be instanciated
+            //   being the scenes by the API by the root account.
+            (voteInstance, callback) => registerVoter(
+                web3,
+                address,
+                voteInstance,
+                (err, event) => callback(err, voteInstance)
+            ),
+            // Step 5: we call the Vote.vote() contract function by sending
+            // the raw transaction built/signed by the client app. We also
+            // start listening to the Ballot event to know when the vote has
+            // actually been successfully recorded on the blockchain.
+            (voteInstance, callback) => sendVoteTransaction(
+                web3,
+                voteInstance,
+                ballot.transaction,
+                callback
+            ),
+            // Step 6: the Ballot event has been emitted => the vote has been
+            // recorded on the blockchain. We need to update the corresponding
+            // database Ballot object but first we have to find it.
+            (event, callback) => {
+                log.info(
                     {
-                        if (err)
-                            return callback(err, null);
+                        balance: web3.eth.getBalance(address).toString(),
+                        event: event
+                    },
+                    'ballot event'
+                );
 
-                        var hash = '';
-                        var ballotEvent = voteInstance.Ballot();
-                        ballotEvent.watch(
-                            function(err, result)
-                            {
-                                if (err)
-                                    return callback(err, null);
+                Ballot.model.findById(ballot.id).exec(callback);
+            },
+            // Step 7: update the Ballot.status field in the database.
+            (dbBallot, callback) => {
+                if (!dbBallot)
+                    return callback('unknown ballot with id ' + ballot.id, null);
 
-                                if (result.args.user == ballot.address)
-                                {
-                                    console.log({event:result});
+                dbBallot.status = 'complete';
 
-                                    Ballot.model.findById(ballot.id)
-                                        .exec(function(err, dbBallot)
-                                        {
-                                            if (err)
-                                                return callback(err, null);
-
-                                            if (!ballot)
-                                                return callback('unknown ballot with id ' + ballot.id, null);
-
-                                            dbBallot.transactionHash = hash;
-                                            dbBallot.status = 'complete';
-
-                                            dbBallot.save(function(err, dbBallot)
-                                            {
-                                                return callback(null, dbBallot);
-                                            });
-                                        });
-                                }
-                            }
-                        );
-
-                        web3.eth.sendRawTransaction(
-                            ballot.transaction,
-                            function(err, txhash)
-                            {
-                                if (err)
-                                    return callback(err, null);
-
-                                hash = txhash;
-                                console.log({transactionHash:txhash});
-                            }
-                        );
-                    }
-                )
+                dbBallot.save(callback);
             }
-        );
-    });
+        ],
+        callback
+    );
 }
 
 function ballotError(ballot, msg, callback)
 {
-    console.log({error:msg.toString()});
+    log.error(msg.toString());
+
     Ballot.model.findById(ballot.id)
         .exec(function(err, dbBallot)
         {
@@ -246,7 +343,6 @@ require('amqplib/callback_api').connect(
 
                         if (msgObj.ballot)
                         {
-                            console.log(msgObj.ballot);
                             handleBallot(msgObj.ballot, function(err, ballot)
                             {
                                 if (err)

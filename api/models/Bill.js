@@ -22,6 +22,7 @@ Bill.add({
     likes: { type: Types.Relationship, ref: 'Like', required: true, initial: true, many: true, noedit: true },
     score: { type: Types.Number, required: true, default: 0, format: false },
     voteContractAddress: { type: String },
+    voteContractABI: { type: String },
     parts: { type: Types.Relationship, ref: 'BillPart', required: true, initial: true, many: true, noedit: true }
 });
 

@@ -17,9 +17,7 @@ Ballot.add({
 	bill: { type: Types.Relationship, ref: 'Bill', required: true, initial: true },
 	voterAge: { type: Types.Number, required: true, initial: true },
 	voterGender: { type: Types.Select, options: ['male', 'female'], initial: true },
-	address: { type: String },
-	transactionParameters: { type: String },
-	transactionHash: { type: String }
+	error: { type: String }
 });
 
 transform.toJSON(Ballot);

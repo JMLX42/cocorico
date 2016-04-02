@@ -94,7 +94,7 @@ var Bill = React.createClass({
             <ReactDocumentTitle title={StringHelper.toTitleCase(bill.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
                 <div className="bill">
                     <Grid>
-                        <Row className="section">
+                        <Row className="section section-title">
                             <Col md={12}>
                                 <h1 className="bill-title"><Title text={bill.title}/></h1>
                                 {this.state.config.capabilities.bill.favorite
@@ -116,7 +116,7 @@ var Bill = React.createClass({
                     </Grid>
 
                     {bill.status == 'review'
-                        ? <div className="section section-hint cocorico-light-grey-background">
+                        ? <div className="section section-hint">
                             <Grid>
                                 <Row>
                                     <Col md={12}>
@@ -129,7 +129,7 @@ var Bill = React.createClass({
                         : <div/>}
 
                     {bill.status == 'debate'
-                        ? <div className="section section-hint cocorico-light-grey-background">
+                        ? <div className="section section-hint">
                             <Grid>
                                 <Row>
                                     <Col md={12}>
@@ -143,23 +143,17 @@ var Bill = React.createClass({
 
                     {showContributionTab
                         ? <Grid>
-                            <Row className="section" style={{border:'none'}}>
+                            <Row>
+                                <Col md={12}>
+                                    <h2>
+                                        {this.getIntlMessage('bill.CONTRIBUTIONS')}
+                                    </h2>
+                                </Col>
+                            </Row>
+                            <Row className="section section-contributions">
                                 <ContributionTabs bill={bill} editable={true} tab={this.props.tab}/>
                             </Row>
                         </Grid>
-                        : <div/>}
-
-                    {bill.status == 'vote'
-                        ? <div className="section section-hint cocorico-light-grey-background">
-                            <Grid>
-                                <Row>
-                                    <Col md={12}>
-                                        <Hint pageSlug="astuce-etape-vote"
-                                            disposable={true}/>
-                                    </Col>
-                                </Row>
-                            </Grid>
-                        </div>
                         : <div/>}
 
                     {bill.status == 'vote' || bill.status == 'published'

@@ -77,23 +77,9 @@ var Intl = {
 
 		bill: {
 			BILLS: 'Textes',
-			VOTE_YES: 'pour',
-			VOTE_BLANK: 'blanc',
-			VOTE_NO: 'contre',
-			VOTE: 'je vote { value }',
-			VOTE_PENDING: 'Enregistrement de votre vote en cours...',
-			VOTER_GENDER_MALE: 'homme',
-			VOTER_GENDER_FEMALE: 'femme',
-			VOTE_DISABLED: 'Vote désactivé.',
-			VOTE_UNAVAILABLE: 'Impossible de voter pour l\'instant. Merci de bien vouloir réessayer plus tard.',
-			UNVOTE: 'retirer mon vote',
-			ALREADY_VOTED: 'Vous avez voté \'{ value }\' le { date }.',
-			TOO_LATE_TO_VOTE: 'Vous ne pouvez plus voter pour ce texte.',
-			TOO_LATE_TO_REVIEW: 'Vous ne pouvez plus faire de propositions pour ce texte.',
-			TOO_LATE_TO_DEBATE: 'Vous ne pouvez plus débattre de ce texte.',
-			LOGIN_REQUIRED: 'Vous devez être connecté pour voter.',
-			ADDITIONAL_DATA: 'Données Additionnelles',
-			YOUR_VOTE: 'Votre Vote',
+			TOO_LATE_TO_REVIEW: 'Ce texte n\'est plus en cours de révision : vous ne pouvez plus faire de propositions pour ce texte.',
+			TOO_LATE_TO_DEBATE: 'Ce texte n\'est plus en cours de débat : vous ne pouvez plus proposer d\'arguments.',
+			CONTRIBUTIONS: 'Contributions',
 			NO_PROPOSAL: 'Aucune proposition.',
 			ADD_PROPOSAL: 'Faire une proposition',
 			ADD_PROPOSAL_LOGIN: 'Vous devez être connecté pour faire une proposition.',
@@ -114,8 +100,42 @@ var Intl = {
 			STATUS_REVIEW: 'Révision',
 			STATUS_DEBATE: 'Débat',
 			STATUS_VOTE: 'Vote',
-			STATUS_PUBLISHED: 'Publié',
-			BLOCKCHAIN_SECURED: 'Vote sécurisé sur la blockchain'
+			STATUS_PUBLISHED: 'Publié'
+		},
+
+		vote: {
+			YOUR_VOTE: 'Votre Vote',
+			LOGIN_REQUIRED: 'Vous devez être connecté pour voter.',
+			VOTE_YES: 'pour',
+			VOTE_BLANK: 'blanc',
+			VOTE_NO: 'contre',
+			VOTE: 'je vote { value }',
+			PLEASE_WAIT_RECORDING_VOTE: 'Merci de bien vouloir patienter pendant l\'enregistrement de votre vote : cela peut prendre quelques minutes...',
+			VOTE_PENDING: 'Vote en cours...',
+			VOTER_GENDER_MALE: 'homme',
+			VOTER_GENDER_FEMALE: 'femme',
+			VOTE_DISABLED: 'Vote désactivé.',
+			VOTE_UNAVAILABLE: 'Impossible de voter pour l\'instant. Merci de bien vouloir réessayer plus tard.',
+			UNVOTE: 'retirer mon vote',
+			ALREADY_VOTED: 'Vous avez voté le { date }.',
+			TOO_LATE_TO_VOTE: 'Vous ne pouvez plus voter pour ce texte.',
+			PRINT_PROOF_OF_VOTE: 'Imprimer ma preuve de vote',
+			BEFORE_UNLOAD_MESSAGE: 'Si vous quittez ou actualiez cette page, vous ne pourrez jamais récupérer votre preuve de vote.',
+			EXIT: 'Terminer',
+			EXIT_WITHOUT_PROOF_OF_VOTE: 'Terminer sans récupérer ma preuve de vote',
+			CONFIRM_VOTE_MESSAGE: 'Vous êtes sur le point de voter "{ value }" au sujet du texte "{ bill }". Confirmez-vous votre choix ?',
+			YOUR_VOTE_IS_BEING_RECORDED: 'Votre vote "{ value }" au sujet du texte "{ bill }" est en cours d\'enregistrement...',
+			YOUR_VOTE_IS_COMPLETE: 'Votre vote "{ value }" au sujet du texte "{ bill }" a bien été enregistré !',
+			STEP_1_TITLE: 'Confirmation de votre vote',
+			STEP_2_TITLE: 'L\'enregistrement de votre vote a commencé ! Pendant ce temps...',
+			STEP_3_TITLE: 'L\'enregistrement de votre vote est toujours en cours...',
+			STEP_4_TITLE: 'A voté !',
+			STEP_TITLE: 'Étape { step }/{ total } : { title }'
+		},
+
+		hint: {
+			HIDE_HINT_BUTTON: 'J\'ai compris, ne plus afficher ce message.',
+			LEARN_MORE_BUTTON: 'En savoir plus...'
 		},
 
 		billEditor: {

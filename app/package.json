@@ -27,7 +27,8 @@
     "d3": "^3.5.3",
     "classnames": "2.2.3",
     "eth-lightwallet": "2.2.5",
-    "ethereumjs-tx": "1.1.1"
+    "ethereumjs-tx": "1.1.1",
+    "async": "1.5.2"
   },
   "engines": {
     "node": ">=0.10.22",

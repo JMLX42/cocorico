@@ -174,7 +174,7 @@ exports.result = function(req, res)
         });
 }
 
-function pushBallotOnQueue(bill, ballot, extra, callback)
+function pushBallotMessageOnQueue(data, callback)
 {
     if (config.capabilities.bill.vote != 'blockchain')
         return callback(null, null);
@@ -191,17 +191,7 @@ function pushBallotOnQueue(bill, ballot, extra, callback)
                 if (err != null)
                     return callback(err, null);
 
-                var ballotObj = {
-                    ballot : {
-                        id : ballot.id,
-                        voteContractAddress : bill.voteContractAddress,
-                        address: ballot.address
-                    }
-                };
-
-                if (extra)
-                    for (var propertyName in extra)
-                        ballotObj.ballot[propertyName] = extra[propertyName];
+                var ballotObj = { ballot : data };
 
                 ch.assertQueue('ballots');
                 ch.sendToQueue(
@@ -232,115 +222,96 @@ function getVoteContractInstance(web3, address, callback)
     );
 }
 
-function getBallotTransactionParameters(address, voteContractAdress, value, callback)
+function ballotTransactionError(res, ballot, msg)
 {
-    var web3 = new Web3();
-    web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
+    ballot.status = 'error';
+    ballot.error = JSON.stringify(msg);
+    ballot.save(function(err)
+    {
+        if (err)
+            return res.apiError('database error', err);
 
-    getVoteContractInstance(
-        web3,
-        voteContractAdress,
-        function(err, voteInstance)
-        {
-            if (err)
-                return callback(err, null);
+        return res.status(400).send({error:msg});
+    });
+}
 
-            var params = {
-                from: address,
-                gasLimit: web3.toHex(999999),
-                gasPrice: web3.toHex(web3.eth.gasPrice),
-                to: web3.toHex(voteContractAdress),
-                data: voteInstance.vote.getData(value),
-                nonce: web3.toHex(web3.eth.getTransactionCount(address)),
-                value: '0x0'
-            };
+function birthdateToAge(birthdate)
+{
+    if (!birthdate)
+        return 0;
 
-            callback(null, params);
-        }
+    return Math.floor(
+        (Date.now() - new Date(birthdate)) / 1000
+        / (60 * 60 * 24) / 365.25
     );
 }
 
-function vote(req, res, value)
+exports.vote = function(req, res)
 {
     if (!config.capabilities.bill.vote)
         return res.status(403).send();
 
-	Bill.model.findById(req.params.id).exec(function(err, bill)
-	{
-		if (err)
-			return res.apiError('database error', err);
-		if (!bill)
-			return res.apiError('not found');
+    var signedTx = new EthereumTx(req.params.transaction);
+    var voteContractAddress = EthereumUtil.bufferToHex(signedTx.to);
 
-		if (!BillHelper.billIsReadable(bill, req))
-			return res.status(403).send();
+	Bill.model.findOne({voteContractAddress:voteContractAddress})
+        .exec(function(err, bill)
+    	{
+    		if (err)
+    			return res.apiError('database error', err);
+    		if (!bill)
+    			return res.apiError('no bill found for contract address ' + voteContractAddress);
 
-		BallotHelper.getByBillIdAndVoter(
-			req.params.id,
-			req.user.sub,
-			function(err, ballot)
-			{
-				if (err)
-					return res.apiError('database error', err);
+    		if (!BillHelper.billIsReadable(bill, req))
+    			return res.status(403).send();
 
-				if (ballot)
-					return res.status(403).apiResponse({
-						error: 'user already voted'
-					});
+    		BallotHelper.getByBillIdAndVoter(
+    			bill.id,
+    			req.user.sub,
+    			function(err, ballot)
+    			{
+    				if (err)
+    					return res.apiError('database error', err);
 
-                var age = 0;
-                if (req.user.birthdate)
-                    age = Math.floor(
-                        (Date.now() - new Date(req.user.birthdate)) / 1000
-                        / (60 * 60 * 24) / 365.25
-                    );
+    				if (ballot)
+    					return res.status(403).apiResponse({
+    						error: 'user already voted'
+    					});
 
-                getBallotTransactionParameters(
-                    req.params.address,
-                    bill.voteContractAddress,
-                    ['yes', 'blank', 'no'].indexOf(value),
-                    function(err, params)
+                    var ballot = Ballot.model({
+                        bill: bill,
+                        voter: bcrypt.hashSync(req.user.sub, 10),
+                        voterAge: birthdateToAge(req.user.birthdate),
+                        voterGender: req.user.gender,
+                        status: config.capabilities.bill.vote == 'blockchain'
+                            ? 'pending'
+                            : 'complete'
+                    });
+
+                    ballot.save(function(err, result)
                     {
-                        var ballot = Ballot.model({
-                            bill: bill,
-                            voter: bcrypt.hashSync(req.user.sub, 10),
-                            value: value,
-                            voterAge : age,
-                            voterGender : req.user.gender,
-                            status: config.capabilities.bill.vote == 'blockchain'
-                                ? 'signing'
-                                : 'complete',
-                            address: req.params.address,
-                            transactionParameters: JSON.stringify(params)
-                        });
+                        if (err)
+                            return res.apiError('database error', err);
 
-                        ballot.save(function(err, result)
-                        {
-                            if (err)
-                                return res.apiError('database error', err);
+                        pushBallotMessageOnQueue(
+                            {
+                                id: ballot.id,
+                                transaction: req.params.transaction,
+                                voteContractAddress: bill.voteContractAddress,
+                                voteContractABI: JSON.parse(bill.voteContractABI)
+                            },
+                            function(err, ballotMsg)
+                            {
+                                if (err)
+                                    return ballotTransactionError(res, ballot, err);
 
-                            return res.apiResponse({ ballot : ballot });
-                        });
-                    }
-                );
-			}
-		);
-	});
-}
-
-exports.voteYes = function(req, res)
-{
-	vote(req, res, 'yes');
-}
-
-exports.voteBlank = function(req, res)
-{
-	vote(req, res, 'blank');
-}
-
-exports.voteNo = function(req, res)
-{
-	vote(req, res, 'no');
+                                return res.apiResponse({ ballot: ballot });
+                            }
+                        );
+                    });
+    			}
+    		);
+    	});
 }
 
 exports.remove = function(req, res)
@@ -392,100 +363,4 @@ exports.remove = function(req, res)
 				});
 			});
 	});
-}
-
-function ballotTransactionError(res, ballot, msg)
-{
-    ballot.status = 'error';
-    ballot.save(function(err)
-    {
-        if (err)
-            return res.apiError('database error', err);
-
-        return res.status(401).send({error:msg});
-    });
-}
-
-exports.transaction = function(req, res)
-{
-    if (!config.capabilities.bill.vote || config.capabilities.bill.vote != 'blockchain')
-        return res.status(403).send();
-
-    Bill.model.findById(req.params.id).exec(function(err, bill)
-	{
-		if (err)
-			return res.apiError('database error', err);
-		if (!bill)
-			return res.apiError('not found');
-
-		if (!BillHelper.billIsReadable(bill, req))
-			return res.status(403).send();
-
-        BallotHelper.getByBillIdAndVoter(
-            req.params.id,
-            req.user.sub,
-            function(err, ballot)
-            {
-                if (err)
-                    return res.apiError('database error', err);
-
-                // FIXME: log an error somewhere, probably block the user account
-                if (!ballot)
-                    return res.status(404).send();
-
-                // We have to make sure we're trying to sign a ballot that is
-                // meant to be signed.
-                if (ballot.status != 'signing')
-                    return res.status(403).send();
-
-                // If the ballot original address and the request address parameter
-                // do not match then there is something wrong.
-                // FIXME: log an error somewhere, probably block the user account
-                if (ballot.address != req.params.address)
-                    return res.status(403).send();
-
-                // We have to check this is not any transaction but the one we expect.
-                var txParams = JSON.parse(ballot.transactionParameters);
-                var signedTx = new EthereumTx(req.params.transaction);
-
-                // If the address does not match, the transaction does not come from
-                // the right account.
-                if (EthereumUtil.bufferToHex(signedTx.getSenderAddress()) != ballot.address)
-                    return ballotTransactionError(res, ballot, 'invalid transaction address');
-
-                // If the transaction parameters are not the one we prepared, the
-                // transaction is not properly formed.
-                for (var paramName of ['to', 'from', 'data'])
-                    if (EthereumUtil.bufferToHex(signedTx[paramName]) != txParams[paramName])
-                        return ballotTransactionError(
-                            res,
-                            ballot,
-                            'invalid transaction parameter \'' + paramName + '\''
-                        );
-
-                ballot.status = 'pending';
-
-                // We save the new status of the ballot *before* we push it in
-                // the queue to make sure the same ballot cannot be pushed twice.
-                ballot.save(function(err)
-                {
-                    if (err)
-                        return res.apiError('database error', err);
-
-                    pushBallotOnQueue(
-                        bill,
-                        ballot,
-                        { transaction: req.params.transaction },
-                        function(err, ballotMsg)
-                        {
-                            if (err)
-                                return ballotTransactionError(res, ballot, err);
-
-                            return res.apiResponse({ ballot : ballot });
-                        }
-                    );
-                });
-            }
-        );
-    });
 }

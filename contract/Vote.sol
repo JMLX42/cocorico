@@ -1,11 +1,21 @@
 contract Vote {
 
     event Ballot (
-        address indexed user,
+        address indexed voter,
         uint8 proposal
     );
 
+    event VoterRegistered (
+        address indexed voter
+    );
+
+    event VoteError (
+        address indexed user,
+        string message
+    );
+
     struct Voter {
+        bool registered;
         bool voted;
         uint8 vote;
     }
@@ -23,15 +33,40 @@ contract Vote {
         proposals.length = _numProposals;
     }
 
+    modifier onlyChairPerson() {
+        if (msg.sender != chairperson)
+            throw;
+        _
+    }
+
+    modifier onlyRegisteredVoter() {
+        Voter voter = voters[msg.sender];
+
+        if (voter.voted || !voter.registered)
+            throw;
+        _
+    }
+
+    function registerVoter(address voterAddress) onlyChairPerson {
+        Voter voter = voters[voterAddress];
+
+        if (voter.voted || voter.registered)
+            throw;
+
+        voter.registered = true;
+
+        VoterRegistered(voterAddress);
+    }
+
     // Give a single vote to proposal $(proposal).
-    function vote(uint8 proposal) {
-        Voter sender = voters[msg.sender];
+    function vote(uint8 proposal) onlyRegisteredVoter {
+        Voter voter = voters[msg.sender];
 
-        if (sender.voted || proposal >= proposals.length)
-            return;
+        if (proposal >= proposals.length)
+            return; // FIXME: emit a BallotError event
 
-        sender.voted = true;
-        sender.vote = proposal;
+        voter.voted = true;
+        voter.vote = proposal;
         proposals[proposal].voteCount += 1;
 
         Ballot(msg.sender, proposal);
@@ -44,5 +79,10 @@ contract Vote {
                 winningVoteCount = proposals[proposal].voteCount;
                 winningProposal = proposal;
             }
+    }
+
+    /* This unnamed function is called whenever someone tries to send ether to it */
+    function () {
+        throw; // Prevents accidental sending of ether
     }
 }
