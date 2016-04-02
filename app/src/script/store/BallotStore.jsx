@@ -183,6 +183,7 @@ module.exports = Reflux.createStore({
                     '/api/vote/' + tx,
                     (data) => {
                         console.log('vote transaction sent');
+                        this._ballots[bill.id] = data.ballot;
                         this.trigger(this);
                     }
                 );
