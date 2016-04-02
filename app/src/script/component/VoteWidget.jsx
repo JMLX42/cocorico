@@ -21,7 +21,6 @@ var FormattedMessage = ReactIntl.FormattedMessage,
 var VoteAction = require('../action/VoteAction');
 
 var LoadingIndicator = require('./LoadingIndicator'),
-    VoteButton = require('./VoteButton'),
     Hint = require('./Hint'),
     UnvoteButton = require('./UnvoteButton'),
     Countdown = require('./Countdown'),

@@ -10,8 +10,7 @@ var BillAction = require('../action/BillAction'),
 var FormattedMessage = ReactIntl.FormattedMessage,
     FormattedTime = ReactIntl.FormattedTime;
 
-var VoteButton = require('./VoteButton'),
-    UnvoteButton = require('./UnvoteButton'),
+var UnvoteButton = require('./UnvoteButton'),
     Hint = require('./Hint'),
     LoadingIndicator = require('./LoadingIndicator'),
     VoteWidget = require('./VoteWidget');
