@@ -19,6 +19,7 @@ module.exports = Reflux.createStore({
         this.listenTo(BillAction.showCurrentUserVote, this._fetchBallotByBillId);
 
         this._ballots = {};
+        this._loadingBallot = {};
         this._ballotPolling = {};
 
         this._deleteAllKeystores();
@@ -31,30 +32,34 @@ module.exports = Reflux.createStore({
 
     getBallotByBillId: function(billId)
     {
-        if (this._ballots[billId] && this._ballots[billId] !== true)
-            return this._ballots[billId];
-
-        return null;
+        return this._ballots[billId];
     },
 
     _fetchBallotByBillId: function(billId, forceUpdate)
     {
+        if (billId in this._loadingBallot)
+            return false;
+
         if (this._ballots[billId] && !forceUpdate)
         {
             this.trigger(this);
             return false;
         }
 
-        this._ballots[billId] = true;
+        this._loadingBallot[billId] = true;
 
         jquery.get(
             '/api/bill/ballot/' + billId,
             (data) => {
                 this._ballots[billId] = data.ballot;
+                delete this._loadingBallot[billId];
+
                 this.trigger(this);
             }
         ).error((xhr, billStatus, err) => {
             this._ballots[billId] = { error: xhr.status };
+            delete this._loadingBallot[billId];
+            
             this.trigger(this, this._ballots[billId]);
         });
 
