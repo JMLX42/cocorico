@@ -68,61 +68,78 @@ function waitForBlockchain(callback)
     );
 }
 
-function getCompiledVoteContract(web3)
+function getCompiledVoteContract(web3, callback)
 {
     var source = fs.readFileSync('/vagrant/contract/Vote.sol', {encoding: 'utf-8'});
-    var compiled = web3.eth.compile.solidity(source);
 
-    console.log({
-        log: 'compiled Vote.sol smart contract',
-        md5Hash: md5(source)
+    web3.eth.compile.solidity(source, (error, compiled) => {
+        if (!error)
+            console.log({
+                log: 'compiled Vote.sol smart contract',
+                md5Hash: md5(source)
+            });
+
+        callback(error, compiled);
     });
-
-    return compiled;
 }
 
 function mineVoteContract(callback)
 {
-	var web3 = new Web3();
-	web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
-
     var hash = '';
-	var compiled = getCompiledVoteContract(web3);
-    var code = compiled.Vote.code;
-    var abi = compiled.Vote.info.abiDefinition;
+    var web3 = new Web3();
 
-	web3.eth.contract(abi).new(
-		3, // num proposals
-		{
-			from: web3.eth.accounts[0],
-			data: code,
-            gas: 999999
-		},
-		function(error, contract)
-		{
-			if (error)
-				return callback(error, null, null);
+    web3.setProvider(new web3.providers.HttpProvider(
+        "http://127.0.0.1:8545"
+    ));
 
-			if (!contract)
-				return;
+    async.waterfall(
+        [
+            (callback) => getCompiledVoteContract(web3, callback),
+            (compiled, callback) => web3.eth.getAccounts(
+                (err, accounts) => callback(err, accounts, compiled)
+            ),
+            (accounts, compiled, callback) => {
+                var code = compiled.Vote.code;
+                var abi = compiled.Vote.info.abiDefinition;
 
-			if (!contract.address)
-			{
-				hash = contract.transactionHash
-			}
-			else
-			{
-				// tx mined
-                console.log({
-                    log: 'contract transaction mined',
-                    hash: hash,
-                    contractAddress: contract.address
-                });
+                console.log({log:'start mining contract', address:accounts[0]});
 
-				callback(null, contract, abi);
-			}
-		}
-	);
+                web3.eth.contract(abi).new(
+                    3, // num proposals
+                    {
+                        from: accounts[0],
+                        data: code,
+                        gas: 999999
+                    },
+                    function(error, contract)
+                    {
+                        if (error)
+                            return callback(error, null, null);
+
+                        if (!contract)
+                            return;
+
+                        if (!contract.address)
+                        {
+                            hash = contract.transactionHash
+                        }
+                        else
+                        {
+                            // tx mined
+                            console.log({
+                                log: 'contract transaction mined',
+                                hash: hash,
+                                contractAddress: contract.address
+                            });
+
+                            callback(null, contract, abi);
+                        }
+                    }
+                );
+            }
+        ],
+        callback
+    );
 }
 
 function handleVote(vote, callback)
