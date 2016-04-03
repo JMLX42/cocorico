@@ -44,7 +44,7 @@ var VoteWidget = React.createClass({
     statics: {
         STEP_CONFIRM:       0,
         STEP_PROOF_OF_VOTE: 1,
-        STEP_PENDING:       2,
+        STEP_RECORDING:     2,
         STEP_COMPLETE:      3,
         STEP_ERROR:         4,
 
@@ -81,12 +81,22 @@ var VoteWidget = React.createClass({
     goToBallotStep: function(ballot)
     {
         if (!!ballot && !ballot.error && ballot.status == 'complete'
-            && this.state.step != VoteWidget.STEP_PROOF_OF_VOTE)
-            return this.goToStep(VoteWidget.STEP_COMPLETE, true);
+            && this.state.step != VoteWidget.STEP_PROOF_OF_VOTE
+            && !this._completeTimeout)
+            // We wait 1sec to give the progress bar of the pending state
+            // enough time to animate to 100%.
+            return this._completeTimeout = setTimeout(
+                () => this.goToStep(VoteWidget.STEP_COMPLETE),
+                1000
+            );
 
         if (!!ballot && !ballot.error && ballot.status == 'pending'
             && this.state.step < VoteWidget.STEP_PROOF_OF_VOTE)
-            return this.goToStep(VoteWidget.STEP_PROOF_OF_VOTE, true);
+            return this.goToStep(
+                !this.state.confirmVoteButtonEnabled
+                    ? VoteWidget.STEP_RECORDING
+                    : VoteWidget.STEP_PROOF_OF_VOTE
+            );
     },
 
     componentWillMount: function()
@@ -107,13 +117,28 @@ var VoteWidget = React.createClass({
     componentWillUnmount: function()
     {
         this.goToStep(VoteWidget.STEP_CONFIRM);
+
         this._ballotStoreUnsubscribe();
+
         window.onbeforeunload = null;
+
+        delete this._completeTimeout;
+
+        clearInterval(this._ballotProgressOffsetInterval);
+        delete this._ballotProgressOffsetInterval;
     },
 
     checkBallot: function()
     {
         var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
+
+        if (!!ballot && this.state.ballotStatus != ballot.status)
+        {
+            this.setState({
+                ballotStatus: ballot.status,
+                ballotProgressOffset: 0.0
+            });
+        }
 
         this.goToBallotStep(ballot);
     },
@@ -130,7 +155,7 @@ var VoteWidget = React.createClass({
         // FIXME: print
         alert('Pas encore implémenté ! (ceci n\'est pas un bug)');
         this.setState({printedProofOfVote: true});
-        this.goToStep(Math.max(VoteWidget.STEP_PENDING, this.state.step));
+        this.goToStep(Math.max(VoteWidget.STEP_RECORDING, this.state.step));
     },
 
     confirmVoteValue: function()
@@ -189,6 +214,40 @@ var VoteWidget = React.createClass({
         this.goToStep(this.state.step + 1);
     },
 
+    getPendingProgress: function()
+    {
+        if (this.state.step == VoteWidget.STEP_COMPLETE)
+        {
+            clearInterval(this._ballotProgressOffsetInterval);
+            delete this._ballotProgressOffsetInterval;
+            return 1.0;
+        }
+
+        if (this.state.step != VoteWidget.STEP_RECORDING)
+            return 0.0;
+
+        if (!this._ballotProgressOffsetInterval)
+        {
+            this._ballotProgressOffsetInterval = setInterval(
+                () => this.setState({
+                    ballotProgressOffset: this.state.ballotProgressOffset + 0.005
+                }),
+                1000
+            );
+        }
+
+        var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
+
+        if (ballot.status == 'pending')
+            return Math.min(0.33, this.state.ballotProgressOffset);
+        if (ballot.status == 'initialized')
+            return 0.33 + Math.min(0.33, this.state.ballotProgressOffset);
+        if (ballot.status == 'registered')
+            return 0.67 + Math.min(0.33, this.state.ballotProgressOffset);
+
+        return 1.0;
+    },
+
     renderProgressBar: function()
     {
         return (
@@ -202,11 +261,11 @@ var VoteWidget = React.createClass({
                     <ProgressBar now={this.state.step >= VoteWidget.STEP_PROOF_OF_VOTE ? 100 : 0}
                         style={{borderRight:'1px solid white',borderRadius:0,width:'25%',float:'left'}}
                         className="vote-step-progress"/>
-                    <ProgressBar now={this.state.step >= VoteWidget.STEP_PENDING ? 100 : 0}
+                    <ProgressBar now={this.getPendingProgress() * 100}
                         style={{borderRight:'1px solid white',borderRadius:0,width:'25%',float:'left'}}
                         className="vote-step-progress"
-                        active={this.state.step == VoteWidget.STEP_PENDING}
-                        stripped={this.state.step == VoteWidget.STEP_PENDING}/>
+                        active={this.state.step == VoteWidget.STEP_RECORDING}
+                        stripped={this.state.step == VoteWidget.STEP_RECORDING}/>
                     <ProgressBar now={this.state.step >= VoteWidget.STEP_COMPLETE ? 100 : 0}
                         style={{borderRadius:0,width:'25%',float:'left'}}
                         className="vote-step-progress"/>
@@ -242,9 +301,9 @@ var VoteWidget = React.createClass({
                         <Col sm={3}>
                             <div className={classNames({
                                     'vote-step-counter': true,
-                                    'vote-step-counter-active': this.state.step == VoteWidget.STEP_PENDING,
-                                    'vote-step-counter-done': this.state.step > VoteWidget.STEP_PENDING,
-                                    'hidden-xs': this.state.step != VoteWidget.STEP_PENDING
+                                    'vote-step-counter-active': this.state.step == VoteWidget.STEP_RECORDING,
+                                    'vote-step-counter-done': this.state.step > VoteWidget.STEP_RECORDING,
+                                    'hidden-xs': this.state.step != VoteWidget.STEP_RECORDING
                                 })}>
                                 <div className="vote-step-number">3</div>
                                     <span className="vote-step-name">
@@ -282,6 +341,33 @@ var VoteWidget = React.createClass({
         return voteDisplay[this.state.vote];
     },
 
+    renderConfirmVoteButton: function()
+    {
+        return (
+            <Button className={classNames({
+                    'btn-positive': this.state.vote == 0,
+                    'btn-neutral': this.state.vote == 1,
+                    'btn-negative': this.state.vote == 2,
+                    'btn-vote': true
+                })}
+                disabled={!this.state.confirmVoteButtonEnabled}
+                onClick={(e)=>this.confirmVoteValue()}>
+                    <Countdown count={VoteWidget.COUNTDOWN}
+                        format={(c) => c == 0
+                            ? <FormattedMessage
+                                message={this.getIntlMessage('vote.I_CONFIRM_MY_VOTE')
+                                    + this.getIntlMessage('vote.VOTE')}
+                                value={this.getVoteValueDisplayMessage()}/>
+                            : <FormattedMessage
+                                message={this.getIntlMessage('vote.I_CONFIRM_MY_VOTE')
+                                    + this.getIntlMessage('vote.VOTE') + ' ('
+                                    + c + ')'}
+                                value={this.getVoteValueDisplayMessage()}/>}
+                        onComplete={()=>this.setState({confirmVoteButtonEnabled:true})}/>
+            </Button>
+        );
+    },
+
     renderConfirmDialog: function()
     {
         return (
@@ -311,20 +397,7 @@ var VoteWidget = React.createClass({
                         {this.state.confirmedVote
                             ? <LoadingIndicator text="Envoi de votre vote en cours..."/>
                             : <div>
-                                <Button className={classNames({
-                                        'btn-positive': this.state.vote == 0,
-                                        'btn-neutral': this.state.vote == 1,
-                                        'btn-negative': this.state.vote == 2,
-                                        'btn-vote': true
-                                    })}
-                                    disabled={!this.state.confirmVoteButtonEnabled}
-                                    onClick={(e)=>this.confirmVoteValue()}>
-                                    {!this.state.confirmVoteButtonEnabled
-                                        ? <Countdown count={VoteWidget.COUNTDOWN}
-                                            onComplete={()=>this.setState({confirmVoteButtonEnabled:true})}/>
-                                        : <FormattedMessage message={'je confirme : ' + this.getIntlMessage('vote.VOTE')}
-                                            value={this.getVoteValueDisplayMessage()}/>}
-                                </Button>
+                                {this.renderConfirmVoteButton()}
                                 <Button bsStyle="link"
                                     onClick={(e)=>this.props.onCancel(e)}>
                                     {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
@@ -415,7 +488,7 @@ var VoteWidget = React.createClass({
                                             'neutral': this.state.vote == 1,
                                             'negative': this.state.vote == 2
                                         })}>
-                                    {this.getVoteValueDisplayMessage()}
+                                        {this.getVoteValueDisplayMessage()}
                                     </span>
                                 </strong>
                             }
@@ -461,6 +534,49 @@ var VoteWidget = React.createClass({
         );
     },
 
+    renderModalFooter: function()
+    {
+        return (
+            <Modal.Footer>
+                {this.state.step == VoteWidget.STEP_COMPLETE
+                    ? <Button onClick={(e)=>this.complete(e)}
+                        disabled={!this.state.printedProofOfVote && this.state.confirmedVote && !this.state.exitButtonEnabled}>
+                        {this.state.printedProofOfVote || !this.state.confirmedVote
+                            ? this.getIntlMessage('vote.EXIT')
+                            : <Countdown count={VoteWidget.COUNTDOWN}
+                                format={(c) => c != 0
+                                    ? this.getIntlMessage('vote.EXIT_WITHOUT_PROOF_OF_VOTE') + ' (' + c + ')'
+                                    : this.getIntlMessage('vote.EXIT_WITHOUT_PROOF_OF_VOTE')}
+                                onComplete={()=>this.setState({exitButtonEnabled:true})}/>}
+                    </Button>
+                    : this.state.step >= VoteWidget.STEP_PROOF_OF_VOTE
+                        ? <span className="pull-left">
+                            <LoadingIndicator text={
+                                <FormattedMessage
+                                    message={this.getIntlMessage('vote.YOUR_VOTE_IS_BEING_RECORDED')}
+                                    value={
+                                        <strong>
+                                            <span className={classNames({
+                                                    'positive': this.state.vote == 0,
+                                                    'neutral': this.state.vote == 1,
+                                                    'negative': this.state.vote == 2
+                                                })}>
+                                            {this.getVoteValueDisplayMessage()}
+                                            </span>
+                                        </strong>
+                                    }
+                                    bill={
+                                        <strong>
+                                            <Title text={this.props.bill.title}/>
+                                        </strong>
+                                    }/>
+                                }/>
+                        </span>
+                        : <span/>}
+            </Modal.Footer>
+        );
+    },
+
     render: function()
     {
         var showModalFooter = this.state.step == VoteWidget.STEP_COMPLETE
@@ -481,7 +597,7 @@ var VoteWidget = React.createClass({
                     {this.state.step == VoteWidget.STEP_PROOF_OF_VOTE
                         ? this.renderProofOfVoteDialog()
                         : <span/>}
-                    {this.state.step == VoteWidget.STEP_PENDING
+                    {this.state.step == VoteWidget.STEP_RECORDING
                         ? this.renderVotePendingDialog()
                         : <span/>}
                     {this.state.step == VoteWidget.STEP_COMPLETE
@@ -489,43 +605,7 @@ var VoteWidget = React.createClass({
                         : <span/>}
                 </Modal.Body>
                 {showModalFooter
-                    ? <Modal.Footer>
-                        {this.state.step == VoteWidget.STEP_COMPLETE
-                            ? <Button onClick={(e)=>this.complete(e)}
-                                disabled={!this.state.printedProofOfVote && !this.state.exitButtonEnabled}>
-                                {this.state.printedProofOfVote
-                                    ? this.getIntlMessage('vote.EXIT')
-                                    : <Countdown count={VoteWidget.COUNTDOWN}
-                                        format={(c) => c != 0
-                                            ? this.getIntlMessage('vote.EXIT_WITHOUT_PROOF_OF_VOTE') + ' (' + c + ')'
-                                            : this.getIntlMessage('vote.EXIT_WITHOUT_PROOF_OF_VOTE')}
-                                        onComplete={()=>this.setState({exitButtonEnabled:true})}/>}
-                            </Button>
-                            : this.state.step >= VoteWidget.STEP_PROOF_OF_VOTE
-                                ? <span className="pull-left">
-                                    <LoadingIndicator text={
-                                        <FormattedMessage
-                                            message={this.getIntlMessage('vote.YOUR_VOTE_IS_BEING_RECORDED')}
-                                            value={
-                                                <strong>
-                                                    <span className={classNames({
-                                                            'positive': this.state.vote == 0,
-                                                            'neutral': this.state.vote == 1,
-                                                            'negative': this.state.vote == 2
-                                                        })}>
-                                                    {this.getVoteValueDisplayMessage()}
-                                                    </span>
-                                                </strong>
-                                            }
-                                            bill={
-                                                <strong>
-                                                    <Title text={this.props.bill.title}/>
-                                                </strong>
-                                            }/>
-                                        }/>
-                                </span>
-                                : <span/>}
-                    </Modal.Footer>
+                    ? this.renderModalFooter()
                     : <span/>}
             </Modal>
         );
