@@ -17,5 +17,12 @@ pre-start script
 end script
 
 script
+{% if is_development_environment and ethereum_testrpc %}
+    PRIVATE_KEY=0x$(cat $(find /opt/cocorico/blockchain/data/keystore/ -type f) | jq ".Crypto.mac" -r)
+    BALANCE=$(cat /opt/cocorico/blockchain/genesis_block.json | jq -r '.alloc[.alloc | keys[0]].balance')
+
+    exec testrpc --account="${PRIVATE_KEY},${BALANCE}" --port {{ ethereum_rpc_private_port }}
+{% else %}
     exec geth --maxpeers 0 --nodiscover --rpc --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" --mine --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}" --unlock 0 --password {{ project_dir }}/{{ role_name }}/password --minerthreads "1" --datadir {{ ethereum_datadir }}
+{% endif %}
 end script

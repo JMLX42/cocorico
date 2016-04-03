@@ -22,16 +22,28 @@
     - ethereum
     - cpp-ethereum
 
+- name: install testrpc
+  command: npm install -g ethereumjs-testrpc --unsafe-perm
+  args:
+    creates: /usr/lib/node_modules/ethereumjs-testrpc
+  when:
+    - capabilities.bill.vote == "blockchain"
+    - is_development_environment
+
 - lineinfile: line={{ ethereum_etherbase_password }} dest={{ project_dir}}/{{ role_name }}/password mode=700 state=present create=yes
   when: capabilities.bill.vote == "blockchain"
   register: ethereum_password_file
+
+- stat: path={{ project_dir }}/{{ role_name }}/data/keystore
+  register: ethereum_keystore_file
+  when: capabilities.bill.vote == "blockchain"
 
 - name: create ethereum account
   shell: geth --datadir {{ ethereum_datadir }} --password {{ project_dir}}/{{ role_name }}/password account new
   register: result
   when:
     - capabilities.bill.vote == "blockchain"
-    - ethereum_password_file.changed
+    - ethereum_password_file.changed or not ethereum_keystore_file.stat.exists
 
 - name: extract etherbase address
   set_fact: ethereum_etherbase_address="{{ result.stdout | regex_replace('^Mining Beneficiary.* (.*)$', '\\1') }}"
@@ -51,32 +63,26 @@
 - name: install miner upstart script
   template: src=blockchain-miner.upstart.conf.j2 dest=/etc/init/cocorico-blockchain-miner.conf
 
-- name: compile all contracts
-  when: capabilities.bill.vote == "blockchain"
-  shell: solc /vagrant/contract/{{ item }}.sol --combined-json abi,bin > {{ project_dir}}/{{ role_name }}/{{ item }}.json
-  register: result
-  failed_when: result.stderr
-  with_lines:
-    - find /vagrant/contract/ -name '*.sol' -exec basename {} .sol \;
-
 - name: start the ethereum blockchain service
-  when: capabilities.bill.vote == "blockchain"
   service: name=cocorico-blockchain state=started
+  when: capabilities.bill.vote == "blockchain"
 
 - name: stop the ethereum blockchain service
-  when: not capabilities.bill.vote == "blockchain"
   service: name=cocorico-blockchain state=stopped
+  when: not capabilities.bill.vote == "blockchain"
 
 - name: start the ethereum blockchain mining service
   service: name=cocorico-blockchain-miner state=started
-  when: capabilities.bill.vote == "blockchain"
+  when:
+    - capabilities.bill.vote == "blockchain"
+    - ethereum_mine_on_boot
 
 - name: stop the ethereum blockchain mining service
-  when: capabilities.bill.vote != "blockchain"
   service: name=cocorico-blockchain-miner state=stopped
+  when: capabilities.bill.vote != "blockchain"
 
 - name: install apache configuration
-  when: capabilities.bill.vote == "blockchain"
   template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
+  when: capabilities.bill.vote == "blockchain"
   notify:
     - restart apache2 service
