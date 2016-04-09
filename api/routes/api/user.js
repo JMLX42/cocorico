@@ -10,7 +10,10 @@ var User = keystone.list('User'),
  */
 exports.me = function(req, res)
 {
-    res.apiResponse({ 'user': req.user });
+    res.apiResponse({ 'user': {
+        firstName: req.user.firstName,
+        lastName: req.user.lastName
+    }});
 }
 
 exports.bills = function(req, res)
