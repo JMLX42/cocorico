@@ -52,7 +52,7 @@ var Page = React.createClass({
     render: function()
     {
         if (!this.state.pages)
-            return null;
+            return <LoadingIndicator/>;
 
         if (this.state.pages.pageIsLoading(this.props.slug))
             return <LoadingIndicator/>;
@@ -60,7 +60,7 @@ var Page = React.createClass({
         var page = this.state.pages.getPageBySlug(this.props.slug);
 
         if (!page)
-            return null;
+            return <LoadingIndicator/>;
 
         if (page.error == 404)
             return (
