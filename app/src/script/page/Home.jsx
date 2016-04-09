@@ -38,12 +38,8 @@ var Home = React.createClass({
     {
 		return (
             <div className="page-home">
+                <Page slug="accueil" setDocumentTitle={true}/>
                 <Grid>
-                    <Row>
-                        <Col md={12}>
-                            <Page slug="accueil" setDocumentTitle={true} hideContent={this.isAuthenticated()}/>
-                            </Col>
-                        </Row>
                     <Row>
                         <Col md={12}>
                             <h2>{this.getIntlMessage('bill.BILLS')}</h2>
