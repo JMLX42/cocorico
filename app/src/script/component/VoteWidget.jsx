@@ -5,6 +5,7 @@ var ReactRouter = require('react-router');
 var Reflux = require('reflux');
 var jquery = require('jquery');
 var classNames = require('classnames');
+var PrintHTMLElement = require("print-html-element");
 
 var Button = ReactBootstrap.Button,
     ButtonToolbar = ReactBootstrap.ButtonToolbar,
@@ -25,7 +26,8 @@ var LoadingIndicator = require('./LoadingIndicator'),
     UnvoteButton = require('./UnvoteButton'),
     Countdown = require('./Countdown'),
     Title = require('./Title'),
-    Page = require('./Page');
+    Page = require('./Page'),
+    ProofOfVote = require('./ProofOfVote');
 
 var ConfigStore = require('../store/ConfigStore'),
     BallotStore = require('../store/BallotStore');
@@ -44,9 +46,8 @@ var VoteWidget = React.createClass({
     statics: {
         STEP_CONFIRM:       0,
         STEP_PROOF_OF_VOTE: 1,
-        STEP_RECORDING:     2,
-        STEP_COMPLETE:      3,
-        STEP_ERROR:         4,
+        STEP_COMPLETE:      2,
+        STEP_ERROR:         3,
 
         COUNTDOWN:          10
     },
@@ -81,20 +82,14 @@ var VoteWidget = React.createClass({
     goToBallotStep: function(ballot)
     {
         if (!!ballot && !ballot.error && ballot.status == 'complete'
-            && this.state.step != VoteWidget.STEP_PROOF_OF_VOTE
-            && !this._completeTimeout)
-            // We wait 1sec to give the progress bar of the pending state
-            // enough time to animate to 100%.
-            return this._completeTimeout = setTimeout(
-                () => this.goToStep(VoteWidget.STEP_COMPLETE),
-                1000
-            );
+            && this.state.step != VoteWidget.STEP_PROOF_OF_VOTE)
+            return this.goToStep(VoteWidget.STEP_COMPLETE);
 
         if (!!ballot && !ballot.error && ballot.status == 'pending'
             && this.state.step < VoteWidget.STEP_PROOF_OF_VOTE)
             return this.goToStep(
                 !this.state.confirmVoteButtonEnabled
-                    ? VoteWidget.STEP_RECORDING
+                    ? VoteWidget.STEP_COMPLETE
                     : VoteWidget.STEP_PROOF_OF_VOTE
             );
     },
@@ -123,9 +118,6 @@ var VoteWidget = React.createClass({
         window.onbeforeunload = null;
 
         delete this._completeTimeout;
-
-        clearInterval(this._ballotProgressOffsetInterval);
-        delete this._ballotProgressOffsetInterval;
     },
 
     checkBallot: function()
@@ -153,9 +145,15 @@ var VoteWidget = React.createClass({
     printProofOfVote: function()
     {
         // FIXME: print
-        alert('Pas encore implémenté ! (ceci n\'est pas un bug)');
+        // alert('Pas encore implémenté ! (ceci n\'est pas un bug)');
+
+        PrintHTMLElement.printElement(
+            document.getElementById('proof-of-vote'),
+            { printMode: 'popup' }
+        );
+
         this.setState({printedProofOfVote: true});
-        this.goToStep(Math.max(VoteWidget.STEP_RECORDING, this.state.step));
+        this.goToStep(Math.max(VoteWidget.STEP_COMPLETE, this.state.step));
     },
 
     confirmVoteValue: function()
@@ -173,18 +171,7 @@ var VoteWidget = React.createClass({
         this.goToNextStep();
     },
 
-    scrollTop: function()
-    {
-        jquery('html, body').animate(
-            {
-                scrollTop: jquery('#vote-widget').offset().top
-                    - jquery('#header .navbar').outerHeight()
-            },
-            500
-        );
-    },
-
-    goToStep: function(step, doNotScroll)
+    goToStep: function(step)
     {
         if (step != this.state.step)
         {
@@ -198,9 +185,6 @@ var VoteWidget = React.createClass({
                     printedProofOfVote: false
                 });
             }
-
-            // if (!doNotScroll)
-            //     this.scrollTop();
         }
     },
 
@@ -214,65 +198,29 @@ var VoteWidget = React.createClass({
         this.goToStep(this.state.step + 1);
     },
 
-    getPendingProgress: function()
-    {
-        if (this.state.step == VoteWidget.STEP_COMPLETE)
-        {
-            clearInterval(this._ballotProgressOffsetInterval);
-            delete this._ballotProgressOffsetInterval;
-            return 1.0;
-        }
-
-        if (this.state.step != VoteWidget.STEP_RECORDING)
-            return 0.0;
-
-        if (!this._ballotProgressOffsetInterval)
-        {
-            this._ballotProgressOffsetInterval = setInterval(
-                () => this.setState({
-                    ballotProgressOffset: this.state.ballotProgressOffset + 0.005
-                }),
-                1000
-            );
-        }
-
-        var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
-
-        if (ballot.status == 'pending')
-            return Math.min(0.33, this.state.ballotProgressOffset);
-        if (ballot.status == 'initialized')
-            return 0.33 + Math.min(0.33, this.state.ballotProgressOffset);
-        if (ballot.status == 'registered')
-            return 0.67 + Math.min(0.33, this.state.ballotProgressOffset);
-
-        return 1.0;
-    },
-
     renderProgressBar: function()
     {
         return (
             <div>
-                <div className="clearfix">
-                    <ProgressBar now={100}
-                        style={{borderRight:'1px solid white',borderRadius:0,width:'25%',float:'left'}}
-                        className="vote-step-progress"
-                        active={this.state.step == VoteWidget.STEP_CONFIRM && this.state.confirmedVote}
-                        stripped={this.state.step == VoteWidget.STEP_CONFIRM && this.state.confirmedVote}/>
-                    <ProgressBar now={this.state.step >= VoteWidget.STEP_PROOF_OF_VOTE ? 100 : 0}
-                        style={{borderRight:'1px solid white',borderRadius:0,width:'25%',float:'left'}}
-                        className="vote-step-progress"/>
-                    <ProgressBar now={this.getPendingProgress() * 100}
-                        style={{borderRight:'1px solid white',borderRadius:0,width:'25%',float:'left'}}
-                        className="vote-step-progress"
-                        active={this.state.step == VoteWidget.STEP_RECORDING}
-                        stripped={this.state.step == VoteWidget.STEP_RECORDING}/>
-                    <ProgressBar now={this.state.step >= VoteWidget.STEP_COMPLETE ? 100 : 0}
-                        style={{borderRadius:0,width:'25%',float:'left'}}
-                        className="vote-step-progress"/>
-                </div>
                 <Grid>
                     <Row>
-                        <Col sm={3}>
+                        <Col xs={4} className="vote-step-progress">
+                            <ProgressBar now={100}
+                                style={{borderRight:'1px solid white',borderRadius:0}}
+                                active={this.state.step == VoteWidget.STEP_CONFIRM && this.state.confirmedVote}
+                                stripped={this.state.step == VoteWidget.STEP_CONFIRM && this.state.confirmedVote}/>
+                        </Col>
+                        <Col xs={4} className="vote-step-progress">
+                            <ProgressBar now={this.state.step >= VoteWidget.STEP_PROOF_OF_VOTE ? 100 : 0}
+                                style={{borderRight:'1px solid white',borderRadius:0}}/>
+                        </Col>
+                        <Col xs={4} className="vote-step-progress">
+                            <ProgressBar now={this.state.step >= VoteWidget.STEP_COMPLETE ? 100 : 0}
+                                style={{borderRadius:0}}/>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col sm={4}>
                             <div className={classNames({
                                     'vote-step-counter': true,
                                     'vote-step-counter-active': this.state.step == VoteWidget.STEP_CONFIRM,
@@ -285,7 +233,7 @@ var VoteWidget = React.createClass({
                                 </span>
                             </div>
                         </Col>
-                        <Col sm={3}>
+                        <Col sm={4}>
                             <div className={classNames({
                                     'vote-step-counter': true,
                                     'vote-step-counter-active': this.state.step == VoteWidget.STEP_PROOF_OF_VOTE,
@@ -298,27 +246,14 @@ var VoteWidget = React.createClass({
                                     </span>
                             </div>
                         </Col>
-                        <Col sm={3}>
-                            <div className={classNames({
-                                    'vote-step-counter': true,
-                                    'vote-step-counter-active': this.state.step == VoteWidget.STEP_RECORDING,
-                                    'vote-step-counter-done': this.state.step > VoteWidget.STEP_RECORDING,
-                                    'hidden-xs': this.state.step != VoteWidget.STEP_RECORDING
-                                })}>
-                                <div className="vote-step-number">3</div>
-                                    <span className="vote-step-name">
-                                        {this.getIntlMessage('vote.STEP_3_NAME')}
-                                    </span>
-                            </div>
-                        </Col>
-                        <Col sm={3}>
+                        <Col sm={4}>
                             <div className={classNames({
                                     'vote-step-counter': true,
                                     'vote-step-counter-active': this.state.step == VoteWidget.STEP_COMPLETE,
                                     'vote-step-counter-done': this.state.step > VoteWidget.STEP_COMPLETE,
                                     'hidden-xs': this.state.step != VoteWidget.STEP_COMPLETE
                                 })}>
-                                <div className="vote-step-number">4</div>
+                                <div className="vote-step-number">3</div>
                                     <span className="vote-step-name">
                                         {this.getIntlMessage('vote.STEP_4_NAME')}
                                     </span>
@@ -363,7 +298,7 @@ var VoteWidget = React.createClass({
                                     + this.getIntlMessage('vote.VOTE') + ' ('
                                     + c + ')'}
                                 value={this.getVoteValueDisplayMessage()}/>}
-                        onComplete={()=>this.setState({confirmVoteButtonEnabled:true})}/>
+                        onComplete={()=>this.setState({confirmVoteButtonEnabled : true})}/>
             </Button>
         );
     },
@@ -439,31 +374,9 @@ var VoteWidget = React.createClass({
                 </div>
                 <Hint style="warning"
                     pageSlug="attention-recuperer-preuve-de-vote-1"/>
-            </div>
-        );
-    },
-
-    renderVotePendingDialog: function()
-    {
-        if (this.state.skipProofOfVoteButtonEnabled && !this.state.printedProofOfVote)
-            window.onbeforeunload = () => this.getIntlMessage('vote.BEFORE_UNLOAD_MESSAGE');
-        else
-            window.onbeforeunload = null;
-
-        return (
-            <div>
-                <div className="vote-step-description">
-                    <div>
-                        {this.getIntlMessage('vote.PLEASE_WAIT_RECORDING_VOTE')}
-                    </div>
+                <div className="visible-print-block" id="proof-of-vote">
+                    <ProofOfVote/>
                 </div>
-                {this.state.skipProofOfVoteButtonEnabled && !this.state.printedProofOfVote
-                    ? <Hint style="warning"
-                        actionButtonLabel={this.getIntlMessage('vote.PRINT_PROOF_OF_VOTE')}
-                        onActionButtonClick={(e)=>this.printProofOfVote()}
-                        pageSlug="attention-recuperer-preuve-de-vote-2"/>
-                    : <span/>}
-                <Hint pageSlug="astuce-enregistrement-du-vote" disposable={true}/>
             </div>
         );
     },
@@ -529,7 +442,7 @@ var VoteWidget = React.createClass({
         return (
             <FormattedMessage message={this.getIntlMessage('vote.STEP_TITLE')}
                 step={this.state.step + 1}
-                total="4"
+                total="3"
                 title={stepTitles[this.state.step]}/>
         );
     },
@@ -596,9 +509,6 @@ var VoteWidget = React.createClass({
                         : <span/>}
                     {this.state.step == VoteWidget.STEP_PROOF_OF_VOTE
                         ? this.renderProofOfVoteDialog()
-                        : <span/>}
-                    {this.state.step == VoteWidget.STEP_RECORDING
-                        ? this.renderVotePendingDialog()
                         : <span/>}
                     {this.state.step == VoteWidget.STEP_COMPLETE
                         ? this.renderVoteCompleteDialog()

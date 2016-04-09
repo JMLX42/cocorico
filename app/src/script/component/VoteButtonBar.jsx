@@ -3,6 +3,7 @@ var ReactBootstrap = require('react-bootstrap');
 var ReactRouter = require('react-router');
 var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
+var classNames = require('classnames');
 
 var BillAction = require('../action/BillAction'),
     VoteAction = require('../action/VoteAction');
@@ -13,7 +14,8 @@ var FormattedMessage = ReactIntl.FormattedMessage,
 var UnvoteButton = require('./UnvoteButton'),
     Hint = require('./Hint'),
     LoadingIndicator = require('./LoadingIndicator'),
-    VoteWidget = require('./VoteWidget');
+    VoteWidget = require('./VoteWidget'),
+    Title = require('./Title');
 
 var ServiceStatusAction = require('../action/ServiceStatusAction');
 
@@ -42,7 +44,9 @@ var VoteButtonBar = React.createClass({
     getInitialState: function()
     {
         return {
-            voting: false
+            voting: false,
+            showProofOfVoteReader: false,
+            proofOfVoteSuccess: false
         };
     },
 
@@ -59,10 +63,10 @@ var VoteButtonBar = React.createClass({
         });
 
         BallotStore.listen((store) => {
-            var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
-
-            if (!!ballot && ballot.status == 'pending')
-                this.setState({voting:true});
+            // var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
+            //
+            // if (!!ballot && ballot.status == 'pending')
+            //     this.setState({voting:true});
         });
     },
 
@@ -108,18 +112,24 @@ var VoteButtonBar = React.createClass({
         );
     },
 
-    renderAlreadyVotedMessage: function()
+    renderVoteStatusMessage: function()
     {
         var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
 
         return (
             <div>
-                <p>
+                <p className="lead">
                     <FormattedMessage
                         message={this.getIntlMessage('vote.ALREADY_VOTED')}
                         date={<FormattedTime value={ballot.time}/>}/>
                 </p>
-                <UnvoteButton bill={this.props.bill}/>
+                {ballot.status == 'pending' || ballot.status == 'initialized'
+                    || ballot.status == 'registered'
+                    ? this.renderVoteRecordingMessage()
+                    : <span/>}
+                {!!ballot && ballot.status == 'complete'
+                    ? <UnvoteButton bill={this.props.bill}/>
+                    : <span/>}
             </div>
         );
     },
@@ -128,14 +138,58 @@ var VoteButtonBar = React.createClass({
     {
         return (
             <div>
+                <p>
+                    {this.getIntlMessage('vote.VOTE_PENDING')}
+                </p>
                 <VoteWidget bill={this.props.bill}
                     vote={this.state.vote}
                     visible={this.state.voting}
                     onCancel={(e)=>this.setState({voting:false})}
                     onComplete={(e)=>this.setState({voting:false})}/>
+            </div>
+        );
+    },
+
+    getVoteValueDisplayMessage: function()
+    {
+        var voteDisplay = [
+            this.getIntlMessage('vote.VOTE_YES'),
+            this.getIntlMessage('vote.VOTE_BLANK'),
+            this.getIntlMessage('vote.VOTE_NO')
+        ];
+
+        return voteDisplay[this.state.vote];
+    },
+
+    renderVoteRecordingMessage: function()
+    {
+        var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
+
+        return (
+            <div>
                 <p>
-                    {this.getIntlMessage('vote.VOTE_PENDING')}
+                    <LoadingIndicator text={
+                        <FormattedMessage
+                            message={this.getIntlMessage('vote.YOUR_VOTE_IS_BEING_RECORDED')}
+                            value={
+                                <strong>
+                                    <span className={classNames({
+                                            'positive': this.state.vote == 0,
+                                            'neutral': this.state.vote == 1,
+                                            'negative': this.state.vote == 2
+                                        })}>
+                                    {this.getVoteValueDisplayMessage()}
+                                    </span>
+                                </strong>
+                            }
+                            bill={
+                                <strong>
+                                    <Title text={this.props.bill.title}/>
+                                </strong>
+                            }/>
+                        }/>
                 </p>
+                <Hint pageSlug="astuce-enregistrement-du-vote" disposable={true}/>
             </div>
         );
     },
@@ -210,17 +264,11 @@ var VoteButtonBar = React.createClass({
         }
 
         return (
-            <div>
-                <Row>
-                    <Col md={12}>
-                        {this.state.voting
-                            ? this.renderVoteWidget()
-                            : !!ballot && ballot.status == 'complete'
-                                ? this.renderAlreadyVotedMessage()
-                                : this.renderVoteButtons()}
-                    </Col>
-                </Row>
-            </div>
+            this.state.voting
+                ? this.renderVoteWidget()
+                : !!ballot && !!ballot.status
+                    ? this.renderVoteStatusMessage()
+                    : this.renderVoteButtons()
         );
     },
 
@@ -229,20 +277,7 @@ var VoteButtonBar = React.createClass({
         if (this.isAuthenticated())
             VoteAction.startPollingBallot(this.props.bill.id);
 
-		return (
-            <div>
-                <Grid className="section section-vote" id="vote-widget">
-                    <Row>
-                        <Col md={12}>
-                            <h2>
-                                {this.getIntlMessage('vote.YOUR_VOTE')}
-                            </h2>
-                        </Col>
-                    </Row>
-                    {this.renderChildren()}
-                </Grid>
-            </div>
-		);
+		return this.renderChildren();
 	}
 });
 

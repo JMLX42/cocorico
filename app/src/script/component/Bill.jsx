@@ -96,7 +96,9 @@ var Bill = React.createClass({
                     <Grid>
                         <Row className="section section-title">
                             <Col md={12}>
-                                <h1 className="bill-title"><Title text={bill.title}/></h1>
+                                <span className="bill-title">
+                                    <Title text={bill.title}/>
+                                </span>
                                 {this.state.config.capabilities.bill.favorite
                                     ? <LikeButtons likeAction={BillAction.like} resource={bill}/>
                                     : <span/>}
@@ -145,9 +147,10 @@ var Bill = React.createClass({
                         ? <Grid>
                             <Row>
                                 <Col md={12}>
-                                    <h2>
+                                    <h1>
+                                        <span className="icon-lab"/>
                                         {this.getIntlMessage('bill.CONTRIBUTIONS')}
-                                    </h2>
+                                    </h1>
                                 </Col>
                             </Row>
                             <Row className="section section-contributions">
@@ -157,7 +160,21 @@ var Bill = React.createClass({
                         : <div/>}
 
                     {bill.status == 'vote' || bill.status == 'published'
-                        ? <VoteButtonBar bill={bill}/>
+                        ? <Grid className="section section-vote">
+                            <Row>
+                                <Col md={12}>
+                                    <h1>
+                                        <span className="icon-enveloppe"/>
+                                        {this.getIntlMessage('bill.YOUR_VOTE')}
+                                    </h1>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col md={12}>
+                                    <VoteButtonBar bill={bill}/>
+                                </Col>
+                            </Row>
+                        </Grid>
                         : <div/>}
 
                     {bill.status == 'published'

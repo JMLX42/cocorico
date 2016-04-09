@@ -100,17 +100,16 @@ var Intl = {
 			STATUS_REVIEW: 'Révision',
 			STATUS_DEBATE: 'Débat',
 			STATUS_VOTE: 'Vote',
-			STATUS_PUBLISHED: 'Publié'
+			STATUS_PUBLISHED: 'Publié',
+			YOUR_VOTE: 'Votre Vote'
 		},
 
 		vote: {
-			YOUR_VOTE: 'Votre Vote',
 			LOGIN_REQUIRED: 'Vous devez être connecté pour voter.',
 			VOTE_YES: 'pour',
 			VOTE_BLANK: 'blanc',
 			VOTE_NO: 'contre',
 			VOTE: 'je vote { value }',
-			PLEASE_WAIT_RECORDING_VOTE: 'Merci de bien vouloir patienter pendant l\'enregistrement de votre vote : cela prend 2 minutes en moyenne...',
 			VOTE_PENDING: 'Vote en cours...',
 			VOTER_GENDER_MALE: 'homme',
 			VOTER_GENDER_FEMALE: 'femme',
@@ -129,7 +128,7 @@ var Intl = {
 			IGNORE: 'Ignorer',
 			NOT_RECOMMENDED: 'non recommandé',
 			YOUR_VOTE_IS_BEING_RECORDED: 'Votre vote { value } au sujet du texte { bill } est en cours d\'enregistrement...',
-			YOUR_VOTE_IS_COMPLETE: 'Votre vote { value } au sujet du texte { bill } a bien été enregistré !',
+			YOUR_VOTE_IS_COMPLETE: 'Votre vote { value } au sujet du texte { bill } a bien été envoyé !',
 			STEP_1_TITLE: 'Confirmation de votre vote',
 			STEP_2_TITLE: 'L\'enregistrement de votre vote a commencé ! Pendant ce temps...',
 			STEP_3_TITLE: 'L\'enregistrement de votre vote est toujours en cours...',
@@ -138,7 +137,9 @@ var Intl = {
 			STEP_2_NAME: 'Preuve de vote',
 			STEP_3_NAME: 'Enregistrement',
 			STEP_4_NAME: 'A voté !',
-			STEP_TITLE: 'Étape { step }/{ total } : { title }'
+			STEP_TITLE: 'Étape { step }/{ total } : { title }',
+			SCAN_PROOF_OF_VOTE: 'Pour continuer, merci de scanner votre preuve de vote...',
+			REMOVING_VOTE: 'Suppression de votre vote en cours...'
 		},
 
 		hint: {

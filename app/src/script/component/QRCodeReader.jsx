@@ -7,8 +7,8 @@ module.exports = React.createClass({
     {
         return  {
             frameRate   : 15.0,
-            success     : (result) => {},
-            error       : (error) => {},
+            onSuccess   : (result) => {},
+            onError     : (error) => {},
             width       : '100%',
             height      : 'auto',
             threshold   : 10
@@ -25,6 +25,8 @@ module.exports = React.createClass({
 
         if (navigator.getUserMedia)
             navigator.getUserMedia({video : true}, this.handleVideo, this.videoError);
+        else
+            return this.props.onError('no media devices');
 
         this._qr = new QRCodeReader();
         this._qr.callback = this.handleDecode;
@@ -39,6 +41,13 @@ module.exports = React.createClass({
         {
             clearInterval(this._intervalId);
             this._intervalId = -1;
+
+            // https://developers.google.com/web/updates/2015/07/mediastream-deprecations?hl=en
+            if (this._stream.getTracks)
+                this._stream.getTracks()[0].stop();
+            else if (this._stream.stop)
+                this._stream.stop();
+            this._stream = null;
         }
     },
 
@@ -54,24 +63,25 @@ module.exports = React.createClass({
 
             if (this._counts[result] > this.props.threshold)
             {
-                this.props.success(result);
+                this.props.onSuccess(result);
                 this._counts = {};
             }
         }
         else
         {
             // this._counts = {};
-            this.props.error(result);
+            this.props.onError(result);
         }
     },
 
     videoError: function(err)
     {
-        console.log(err);
+        console.log('video error: ' + err);
     },
 
     handleVideo: function(stream)
     {
+        this._stream = stream;
         this.refs.qrVideo.addEventListener('loadeddata', this.handleVideoData);
         this.refs.qrVideo.src = window.URL.createObjectURL(stream);
     },
@@ -92,7 +102,7 @@ module.exports = React.createClass({
 
     capture: function()
     {
-        var context = this.refs.qrCanvas.getConbill('2d');
+        var context = this.refs.qrCanvas.getContext('2d');
         var w = this.refs.qrCanvas.width;
         var h = this.refs.qrCanvas.height;
 
