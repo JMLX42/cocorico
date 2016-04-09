@@ -2,8 +2,19 @@
 
 # Actual virtual host
 <VirtualHost *:80>
-    ServerName          {{ front_web_public_host }}
+    ServerName {{ front_web_public_host }}
 
+{% if http_protocol_prefix == 'https' %}
+    # HTTP to HTTPS redirection
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI}
+{% endif %}
+
+</VirtualHost>
+
+{% if http_protocol_prefix == 'https' %}
+<VirtualHost *:443>
 {% if environment_name == 'staging' %}
     <Proxy *>
         Options +FollowSymLinks +Multiviews +Indexes
@@ -17,12 +28,15 @@
     </Proxy>
 {% endif %}
 
-    # Including all additional rewrite rule configurations set by roles.
-    IncludeOptional     /etc/apache2/sites-available/cocorico-front-web-include/*.conf
+    SSLCertificateFile /etc/letsencrypt/live/{{ front_web_public_host }}/cert.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ front_web_public_host }}/privkey.pem
+    Include /etc/letsencrypt/options-ssl-apache.conf
+    SSLCertificateChainFile /etc/letsencrypt/live/{{ front_web_public_host }}/chain.pem
 
-    #
+    # Including all additional rewrite rule configurations set by roles.
+    IncludeOptional /etc/apache2/sites-available/cocorico-front-web-include/*.conf
+
     # Compression
-    #
     AddOutputFilterByType DEFLATE text/plain
     AddOutputFilterByType DEFLATE text/html
     AddOutputFilterByType DEFLATE text/xml
@@ -33,12 +47,11 @@
     AddOutputFilterByType DEFLATE application/javascript
     AddOutputFilterByType DEFLATE application/x-javascript
 
-    #
     # Cache control
-    #
-    <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|js|css|swf|data|mem|scene|html)$">
+    <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|css|html)$">
         Header unset Cache-Control
         Header set Cache-Control "max-age=290304000, public"
     </FilesMatch>
 
 </VirtualHost>
+{% endif %}
