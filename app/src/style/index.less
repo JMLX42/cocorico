@@ -28,12 +28,22 @@
 
 @import "./icons.less";
 
-[class^="icon-"], [class*=" icon-"] {
-    color: @cocorico-dark-grey;
-}
-
 body {
     background-color: @cocorico-light-grey;
+}
+
+h1 {
+    [class^="icon-"], [class*=" icon-"] {
+        font-size: ceil(@font-size-h1 * 0.8);
+        margin-right: 15px;
+    }
+}
+
+.nav-tabs > li,
+.panel-title {
+    [class^="icon-"], [class*=" icon-"] {
+        margin-right: 10px;
+    }
 }
 
 a {
@@ -244,6 +254,11 @@ li.active {
 
 .btn-vote {
     min-width: 170px;
+
+    [class^="icon-"], [class*=" icon-"] {
+        color: white;
+        margin-right: 10px;
+    }
 }
 
 .btn-positive {
@@ -396,6 +411,10 @@ li.active {
 
 .like-buttons {
     font-size: 20px;
+
+    [class^="icon-"], [class*=" icon-"] {
+        color: @cocorico-dark-grey;
+    }
 
     .icon-thumb_up, .icon-thumb_down {
         margin: 0 5px;

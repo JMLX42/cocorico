@@ -113,17 +113,32 @@ var Bill = React.createClass({
         return (
             <Tabs animation={false} activeKey={this.state.activeKey} onSelect={this.tabSelectHandler} className="hidden-xs">
                 {this.state.config.capabilities.argument.read && bill.status == 'debate' || bill.status == 'vote' || bill.status == 'published'
-                    ? <Tab eventKey={eventKey++} title={'Arguments (' + (args ? args.length : 0) + ')'}>
+                    ? <Tab eventKey={eventKey++} title={
+                            <div>
+                                <span className="icon-chat"/>
+                                Arguments ({args ? args.length : 0})
+                            </div>
+                        }>
                         <ArgumentTab bill={bill} editable={this.props.editable && bill.status == 'debate'}/>
                     </Tab>
                     : <div/>}
                 {this.state.config.capabilities.source.read
-                    ? <Tab eventKey={eventKey++} title={'Sources (' + (sources ? sources.length : 0) + ')'}>
+                    ? <Tab eventKey={eventKey++} title={
+                            <div>
+                                <span className="icon-sphere"/>
+                                Sources ({sources ? sources.length : 0})
+                            </div>
+                        }>
                         <SourceTab bill={bill} editable={this.props.editable && bill.status == 'review'}/>
                     </Tab>
                     : <div/>}
                 {this.state.config.capabilities.proposal.read
-                    ? <Tab eventKey={eventKey++} title="Propositions (0)">
+                    ? <Tab eventKey={eventKey++} title={
+                            <div>
+                                <span className="icon-pull-request"/>
+                                Propositions (0)
+                            </div>
+                        }>
                         <Grid>
                             <Row>
                                 <Col md={12}>
@@ -154,6 +169,10 @@ var Bill = React.createClass({
             ? this.state.sources.getSourcesByBillId(bill.id)
             : null;
 
+        var args = this.state.args
+            ? this.state.args.getArgumentsByBillId(this.props.bill.id)
+            : null;
+
         var eventKey = 1;
 
         return (
@@ -161,14 +180,29 @@ var Bill = React.createClass({
                 activeKey={this.state.activeKey}
                 onSelect={this.tabSelectHandler}>
                 {bill.status == 'debate' || bill.status == 'vote' || bill.status == 'published'
-                    ? <Panel eventKey={eventKey++} header="Arguments (0)">
+                    ? <Panel eventKey={eventKey++} header={
+                            <div>
+                                <span className="icon-chat"/>
+                                Arguments ({args ? args.length : 0})
+                            </div>
+                        }>
                         <ArgumentTab bill={bill} editable={this.props.editable && bill.status == 'debate'}/>
                     </Panel>
                     : <div/>}
-                <Panel eventKey={eventKey++} header={'Sources (' + (sources ? sources.length : 0) + ')'}>
+                <Panel eventKey={eventKey++} header={
+                        <div>
+                            <span className="icon-sphere"/>
+                            Sources ({sources ? sources.length : 0})
+                        </div>
+                    }>
                     <SourceTab bill={bill} editable={this.props.editable && bill.status == 'review'}/>
                 </Panel>
-                <Panel eventKey={eventKey++} header="Propositions (0)">
+                <Panel eventKey={eventKey++} header={
+                        <div>
+                            <span className="icon-pull-request"/>
+                            Propositions (0)
+                        </div>
+                    }>
                     <Grid>
                         <Row>
                             <Col md={12}>

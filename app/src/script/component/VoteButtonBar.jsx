@@ -86,16 +86,19 @@ var VoteButtonBar = React.createClass({
                 <ButtonToolbar className="bill-center">
                     <Button bsSize="large" className="btn-vote btn-positive"
                         onClick={(e)=>this.startVotingProcess(0)}>
+                        <span className="icon-thumb_up"/>
                         <FormattedMessage message={this.getIntlMessage('vote.VOTE')}
                             value={this.getIntlMessage('vote.VOTE_YES')}/>
                     </Button>
                     <Button bsSize="large" className="btn-vote btn-neutral"
                         onClick={(e)=>this.startVotingProcess(1)}>
+                        <span className="icon-stop"/>
                         <FormattedMessage message={this.getIntlMessage('vote.VOTE')}
                             value={this.getIntlMessage('vote.VOTE_BLANK')}/>
                     </Button>
                     <Button bsSize="large" className="btn-vote btn-negative"
                         onClick={(e)=>this.startVotingProcess(2)}>
+                        <span className="icon-thumb_down"/>
                         <FormattedMessage message={this.getIntlMessage('vote.VOTE')}
                             value={this.getIntlMessage('vote.VOTE_NO')}/>
                     </Button>
