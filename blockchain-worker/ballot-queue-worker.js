@@ -218,7 +218,6 @@ function handleBallot(ballot, callback)
             (callback) => accountIsNotInitialized(web3, address, callback),
             (callback) => web3.eth.getAccounts((err, acc) => {
                 rootAccount = acc[0];
-                console.log(acc);
                 callback(err);
             }),
             // Step 1: we wait for the blockchain to be available.
