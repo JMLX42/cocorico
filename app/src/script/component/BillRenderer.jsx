@@ -1,6 +1,7 @@
 var React = require('react');
 var classNames = require('classnames');
 var Reflux = require('reflux');
+var ReactRouter = require('react-router');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 
@@ -11,6 +12,8 @@ var ConfigStore = require('../store/ConfigStore');
 var LinkWithTooltip = require('./LinkWithTooltip'),
     LikeButtons = require('./LikeButtons'),
     Title = require('./Title');
+
+var Link = ReactRouter.Link;
 
 module.exports = React.createClass({
 
@@ -49,9 +52,9 @@ module.exports = React.createClass({
         return (
             <div>
                 <a name={title} className="bill-part-header-anchor"></a>
-                <a href={location.pathname + '#' + title}>
+                <Link to={location.pathname + '#' + title}>
                     {this.renderHeaderTag(title, level)}
-                </a>
+                </Link>
             </div>
         );
     },
