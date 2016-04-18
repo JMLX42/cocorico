@@ -5,7 +5,8 @@ var ReactIntl = require('react-intl');
 var ReactDocumentTitle = require('react-document-title');
 var Reflux = require('reflux');
 
-var Page = require('../component/Page');
+var Page = require('../component/Page'),
+    LoadingIndicator = require('../component/LoadingIndicator');
 
 var UserAction = require('../action/UserAction');
 
@@ -66,23 +67,29 @@ var Login = React.createClass({
                         : <div/>}
                         <Row>
                             <Col md={4} mdPush={4} sm={6} smPush={3} xs={10} xsPush={1}>
-                                <p className="text-center">
-                                    {this.getIntlMessage('login.SIGN_IN_WITH')}
-                                </p>
-                                <ul className="list-unstyled text-center">
-                                    {authProviders && authProviders.map((provider) => {
-                                        return (
-                                            <li>
-                                                <a href={provider.url + redirect}>
-                                                    <Button className={"btn-login btn-login-" + provider.name}>
-                                                        <span className={"icon-" + provider.name}/>
-                                                        {displayName[provider.name]}
-                                                    </Button>
-                                                </a>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
+                                {!authProviders
+                                    ? <div className="text-center">
+                                        <LoadingIndicator/>
+                                    </div>
+                                    : <div>
+                                        <p className="text-center">
+                                            {this.getIntlMessage('login.SIGN_IN_WITH')}
+                                        </p>
+                                        <ul className="list-unstyled text-center">
+                                            {authProviders && authProviders.map((provider) => {
+                                                return (
+                                                    <li>
+                                                        <a href={provider.url + redirect}>
+                                                            <Button className={"btn-login btn-login-" + provider.name}>
+                                                                <span className={"icon-" + provider.name}/>
+                                                                {displayName[provider.name]}
+                                                            </Button>
+                                                        </a>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>}
                             </Col>
                         </Row>
                     </Grid>
