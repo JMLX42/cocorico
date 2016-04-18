@@ -10,18 +10,20 @@
 }
 
 [class^="icon-"], [class*=" icon-"] {
-    /* use !important to prevent issues with browser extensions that change fonts */
-	font-family: 'icomoon' !important;
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
+	&:before {
+	    /* use !important to prevent issues with browser extensions that change fonts */
+		font-family: 'icomoon' !important;
+		speak: none;
+		font-style: normal;
+		font-weight: normal;
+		font-variant: normal;
+		text-transform: none;
+		line-height: 1;
 
-	/* Better Font Rendering =========== */
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+		/* Better Font Rendering =========== */
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
 }
 
 .icon-thumb_up:before {
@@ -75,10 +77,34 @@
 	font-weight: bold;
 }
 
+.icon-eye-blocked:before {
+    content: "\e913";
+}
+
+.icon-lock_open:before {
+    content: "\e914";
+}
+
+.icon-security:before {
+    content: "\e915";
+}
+
+.icon-download:before {
+    content: "\e917";
+}
+
+.icon-printer:before {
+    content: "\e916";
+}
+
+.icon-switch_video:before {
+    content: "\e918";
+}
+
 .icon-france-connect {
 	background-image: url('/img/icon-france-connect.png');
-	width: 26px;
-	height: 26px;
+	width: 25px;
+	height: 25px;
 	background-size: cover;
 	display: inline-block;
 }
