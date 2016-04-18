@@ -44,17 +44,14 @@ var Page = React.createClass({
     getPageContent: function(page)
     {
         if (page.contentType == 'Markdown')
-            return <Markdown source={page.markdown.md} />;
+            return <Markdown source={page.markdown.md} options={{linkify:true,html:true}}/>;
         else
             return <div dangerouslySetInnerHTML={{__html: this.state.pages.getPageBySlug(this.props.slug).html}}></div>;
     },
 
     render: function()
     {
-        if (!this.state.pages)
-            return <LoadingIndicator/>;
-
-        if (this.state.pages.pageIsLoading(this.props.slug))
+        if (!this.state.pages || this.state.pages.pageIsLoading(this.props.slug))
             return <LoadingIndicator/>;
 
         var page = this.state.pages.getPageBySlug(this.props.slug);
