@@ -9,6 +9,9 @@
     RewriteEngine On
     RewriteCond %{HTTPS} off
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI}
+{% else %}
+    # Including all additional rewrite rule configurations set by roles.
+    IncludeOptional /etc/apache2/sites-available/cocorico-front-web-include/*.conf
 {% endif %}
 
 </VirtualHost>
