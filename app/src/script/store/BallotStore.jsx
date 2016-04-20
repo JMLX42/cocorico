@@ -59,7 +59,7 @@ module.exports = Reflux.createStore({
         ).error((xhr, billStatus, err) => {
             this._ballots[billId] = { error: xhr.status };
             delete this._loadingBallot[billId];
-            
+
             this.trigger(this, this._ballots[billId]);
         });
 
@@ -198,7 +198,6 @@ module.exports = Reflux.createStore({
 
     _removeVote: function(billId, callback)
     {
-        delete this._ballots[billId];
         jquery.get(
             '/api/vote/remove/' + billId,
             (data) => {
