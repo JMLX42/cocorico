@@ -25,9 +25,7 @@ var Hint = React.createClass({
     getDefaultProps: function()
     {
         return {
-            style: 'default',
-            actionButtonClassName: 'btn-default',
-            onActionButtonClick: null
+            style: 'default'
         };
     },
 
@@ -64,19 +62,14 @@ var Hint = React.createClass({
                 <div className="hint-content">
                     {this.props.pageSlug
                         ? <Page slug={this.props.pageSlug}/>
-                        : this.props.children}
+                        : <span/>}
                 </div>
+                {this.props.children}
                 <ButtonToolbar>
                     {this.props.disposable
                         ? <Button bsStyle="link" onClick={this.buttonClickHandler}
                             className="btn-hint-hide">
                             {this.getIntlMessage('hint.HIDE_HINT_BUTTON')}
-                        </Button>
-                        : <span/>}
-                    {this.props.actionButtonLabel && this.props.onActionButtonClick
-                        ? <Button bsStyle={this.props.style}
-                            onClick={this.props.onActionButtonClick}>
-                            {this.props.actionButtonLabel}
                         </Button>
                         : <span/>}
                     {this.props.morePageSlug

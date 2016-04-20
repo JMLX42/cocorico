@@ -1,122 +1,125 @@
 var React = require('react');
-var QRCodeReader = require('qrcode-reader');
+var QRCodeDecoder = require('qrcode-reader');
 
-module.exports = React.createClass({
+var CameraVideo = require('./CameraVideo');
 
-    getDefaultProps: function()
-    {
-        return  {
-            frameRate   : 15.0,
-            onSuccess   : (result) => {},
-            onError     : (error) => {},
-            width       : '100%',
-            height      : 'auto',
-            threshold   : 10
+var PropTypes = React.PropTypes;
+
+var QRCodeReader = React.createClass({
+
+    getInitialState: function() {
+        return {
+            canvasWidth: 0,
+            canvasHeight: 0
         };
     },
 
-    componentWillMount: function()
-    {
-        navigator.getUserMedia = navigator.getUserMedia
-            || navigator.webkitGetUserMedia
-            || navigator.mozGetUserMedia
-            || navigator.msGetUserMedia
-            || navigator.oGetUserMedia;
-
-        if (navigator.getUserMedia)
-            navigator.getUserMedia({video : true}, this.handleVideo, this.videoError);
-        else
-            return this.props.onError('no media devices');
-
-        this._qr = new QRCodeReader();
-        this._qr.callback = this.handleDecode;
-
-        this._intervalId = -1;
-        this._counts = {};
+    getDefaultProps: function() {
+        return {
+            onSuccess: (data) => null,
+            onError: (error) => null,
+            captureRate: 10.0,
+            decodeThreshold: 10
+        };
     },
 
-    componentWillUnmount: function()
-    {
-        if (this._intervalId > 0)
-        {
-            clearInterval(this._intervalId);
-            this._intervalId = -1;
+    componentWillMount: function() {
+        this._qrCodeDecoder = new QRCodeDecoder();
+        this._qrCodeDecoder.callback = this.handleDecode;
+        this._qrDecodeSuccessCount = {};
+    },
 
-            // https://developers.google.com/web/updates/2015/07/mediastream-deprecations?hl=en
-            if (this._stream.getTracks)
-                this._stream.getTracks()[0].stop();
-            else if (this._stream.stop)
-                this._stream.stop();
-            this._stream = null;
-        }
+    componentWillUnmount: function() {
+        this.stopReadingFromVideo();
+
+        this._qrCodeDecoder = null;
     },
 
     handleDecode: function(result)
     {
         if (result.indexOf('error decoding QR Code') < 0)
         {
-
-            if (!(result in this._counts))
-                this._counts[result] = 1;
+            if (!(result in this._qrDecodeSuccessCount))
+                this._qrDecodeSuccessCount[result] = 1;
             else
-                this._counts[result]++;
+                this._qrDecodeSuccessCount[result]++;
 
-            if (this._counts[result] > this.props.threshold)
+            if (this._qrDecodeSuccessCount[result] > this.props.decodeThreshold)
             {
                 this.props.onSuccess(result);
-                this._counts = {};
+                this._qrDecodeSuccessCount = {};
             }
         }
         else
         {
-            // this._counts = {};
+            // this._qrDecodeSuccessCount = {};
             this.props.onError(result);
         }
     },
 
-    videoError: function(err)
-    {
-        console.log('video error: ' + err);
+    decodeQRCode: function() {
+        var context = this.refs.videoCanvas.getContext('2d');
+        var w = this.refs.videoCanvas.width;
+        var h = this.refs.videoCanvas.height;
+
+        this._qrCodeDecoder.decode(context.getImageData(0, 0, w, h));
     },
 
-    handleVideo: function(stream)
-    {
-        this._stream = stream;
-        this.refs.qrVideo.addEventListener('loadeddata', this.handleVideoData);
-        this.refs.qrVideo.src = window.URL.createObjectURL(stream);
+    startReadingFromVideo: function() {
+        clearInterval(this._captureInterval);
     },
 
-    handleVideoData: function()
-    {
-        if (this.refs.qrVideo.videoWidth <= 0 || this.refs.qrVideo.videoHeight <= 0)
-            return;
-
-        this.refs.qrVideo.removeEventListener('loadeddata', this.handleVideoData);
-
-        this.refs.qrCanvas.width = Math.min(this.refs.qrVideo.videoWidth, 800);
-        this.refs.qrCanvas.height = this.refs.qrCanvas.width
-            * (this.refs.qrVideo.videoHeight / this.refs.qrVideo.videoWidth);
-
-        this._intervalId = setInterval(this.capture, 1000.0 / this.props.frameRate);
+    stopReadingFromVideo: function() {
+        clearInterval(this._captureInterval);
+        this._captureInterval = null;
     },
 
-    capture: function()
+    captureVideoFrame: function(video)
     {
-        var context = this.refs.qrCanvas.getContext('2d');
-        var w = this.refs.qrCanvas.width;
-        var h = this.refs.qrCanvas.height;
+        var w = video.offsetWidth;
+        var h = video.offsetHeight;
 
-        context.drawImage(this.refs.qrVideo, 0, 0, w, h);
-        this._qr.decode(context.getImageData(0, 0, w, h));
+        if (!!w && !!h)
+        {
+            var canvasWidth = Math.min(640, w);
+            var canvasHeight = h * (canvasWidth / w);
+
+            this.setState({
+                canvasWidth: canvasWidth,
+                canvasHeight: canvasHeight
+            });
+
+            var context = this.refs.videoCanvas.getContext('2d');
+
+            context.drawImage(video, 0, 0, w, h);
+        }
     },
 
-    render: function()
-    {
-		return (
+    onVideoReady: function(e) {
+        this.stopReadingFromVideo();
+
+        this._captureInterval = setInterval(
+            () => {
+                this.captureVideoFrame(e.target);
+                this.decodeQRCode();
+            },
+            1000.0 / this.props.captureRate
+        );
+    },
+
+    render: function() {
+        return (
             <div>
-                <video autoPlay ref="qrVideo" style={{width:this.props.width,height:this.props.height}}></video>
-                <canvas ref="qrCanvas" id="qr-canvas" width="600" height="440" style={{display:'none'}}></canvas>
+                <CameraVideo ref="cameraVideo"
+                    onVideoReady={this.onVideoReady}
+                    onVideoStop={this.stopReadingFromVideo}/>
+                <canvas ref="videoCanvas" width={this.state.canvasWidth}
+                    height={this.state.canvasHeight}
+                    style={{display:'none'}}/>
             </div>
-		);
-	}
+        );
+    }
+
 });
+
+module.exports = QRCodeReader;

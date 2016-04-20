@@ -19,7 +19,6 @@ var BillAction = require('../action/BillAction'),
 
 var VoteButtonBar = require('./VoteButtonBar'),
     LoginButton = require('./LoginButton'),
-    UnvoteButton = require('./UnvoteButton'),
     ArgumentEditor = require('./ArgumentEditor'),
     ArgumentTab = require('./ArgumentTab'),
     ContributionTabs = require('./ContributionTabs'),

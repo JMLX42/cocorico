@@ -26,12 +26,22 @@
 
 @import "./bootswatch-journal.less";
 
+// @import "./Source Sans Pro.less";
 @import "./icons.less";
+
+// @font-family-sans-serif: "Source Sans Pro", "Arial Narrow", sans-serif;
+// @font-family-serif: Georgia, "Times New Roman", Times, serif;
 
 body {
     background-color: @cocorico-light-grey;
     font-family: @font-family-sans-serif;
+    // color: @text-color;
     font-size: floor(@font-size-base * 1.2);
+
+    // https://github.com/twbs/bootstrap/issues/14040
+    &.modal-open {
+        padding-right: 0 !important;
+    }
 }
 
 a {
@@ -39,13 +49,13 @@ a {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-weight: normal;
-}
+    font-weight: normal !important;
 
-h1 {
     [class^="icon-"], [class*=" icon-"] {
-        font-size: ceil(@font-size-h1 * 0.8);
-        margin-right: 15px;
+        &:before {
+            margin-right: 15px;
+            vertical-align: bottom;
+        }
     }
 }
 
@@ -56,18 +66,48 @@ h1 {
     }
 }
 
+.container {
+    max-width: 100%;
+}
+
 .btn {
     border: none;
     white-space: normal;
+
+    [class^="icon-"], [class*=" icon-"] {
+        &:before {
+            margin-right: 10px;
+        }
+    }
+}
+
+.modal-footer .btn-toolbar .btn {
+    margin: 0;
+}
+
+.btn-outline {
+    border: 2px solid white;
+    color: white;
+    background: transparent;
+
+    &:hover {
+        background-color: white;
+        color: @text-color;
+    }
+}
+
+.btn-toolbar-vertical {
+    .btn {
+        float: none;
+        display: block;
+        margin: 10px 0;
+        width: 100%;
+    }
 }
 
 .btn-toolbar {
-    @media (max-width: (@screen-xs-max)) {
-        .btn {
-            float: none;
-            display: block;
-            margin: 10px 0;
-        }
+    @media (max-width: (@screen-sm-min)) {
+        .btn-toolbar-vertical();
     }
 }
 
@@ -121,6 +161,8 @@ li.active {
 
     a {
         text-decoration: none !important;
+        // color: @text-color;
+        // font-weight: bold;
     }
 
     .navbar {
@@ -128,7 +170,7 @@ li.active {
     }
 
     .nav button {
-        margin-top: 6px;
+        margin-top: 9px;
     }
 
     .navbar-default .navbar-nav > li > a.active {
@@ -145,6 +187,10 @@ li.active {
 
         a:hover {
             text-decoration: none;
+        }
+
+        small {
+            font-size: 50%;
         }
     }
 
@@ -292,18 +338,24 @@ li.active {
 
 .page {
     margin: 50px 0;
-}
 
-.page-home {
+    & > .loading-indicator {
+        display: block;
+        margin: 100px 0;
+        text-align: center;
+    }
+
+    &-home {
+        margin: 0;
+    }
+
+    .embed-responsive {
+        margin: 20px 0;
+    }
 }
 
 .btn-vote {
     min-width: 170px;
-
-    [class^="icon-"], [class*=" icon-"] {
-        color: white;
-        margin-right: 10px;
-    }
 }
 
 .btn-positive {
@@ -748,5 +800,28 @@ ul.argument-list {
                 display: inline-block;
             }
         }
+    }
+}
+
+.btn-switch-video {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    color: @cocorico-light-grey;
+    font-size: 37px;
+    border: 2px solid @cocorico-light-grey;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    padding: 4px;
+    line-height: 37px;
+    background-color: rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    text-align: center;
+
+    &:hover {
+        color: white;
+        border-color: white;
     }
 }

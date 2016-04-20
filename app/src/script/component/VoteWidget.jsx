@@ -5,7 +5,6 @@ var ReactRouter = require('react-router');
 var Reflux = require('reflux');
 var jquery = require('jquery');
 var classNames = require('classnames');
-var PrintHTMLElement = require("print-html-element");
 
 var Button = ReactBootstrap.Button,
     ButtonToolbar = ReactBootstrap.ButtonToolbar,
@@ -23,11 +22,12 @@ var VoteAction = require('../action/VoteAction');
 
 var LoadingIndicator = require('./LoadingIndicator'),
     Hint = require('./Hint'),
-    UnvoteButton = require('./UnvoteButton'),
     Countdown = require('./Countdown'),
     Title = require('./Title'),
     Page = require('./Page'),
-    ProofOfVote = require('./ProofOfVote');
+    ProofOfVote = require('./ProofOfVote'),
+    ProofOfVoteDownloadButton = require('./ProofOfVoteDownloadButton'),
+    ProofOfVotePrintButton = require('./ProofOfVotePrintButton');
 
 var ConfigStore = require('../store/ConfigStore'),
     BallotStore = require('../store/BallotStore');
@@ -59,7 +59,7 @@ var VoteWidget = React.createClass({
             step: 0,
             confirmVoteButtonEnabled: false,
             skipProofOfVoteButtonEnabled: false,
-            printedProofOfVote: false
+            fetchedProofOfVote: false
         };
     },
 
@@ -135,32 +135,23 @@ var VoteWidget = React.createClass({
         this.goToBallotStep(ballot);
     },
 
-    downloadProofOfVote: function()
+    proofOfVoteDownloaded: function()
     {
-        // FIXME: download
-        console.log('download');
-        this.goToNextStep();
+        this.setState({fetchedProofOfVote: true});
+        this.goToStep(VoteWidget.STEP_COMPLETE);
     },
 
-    printProofOfVote: function()
+    proofOfVotePrinted: function()
     {
-        // FIXME: print
-        // alert('Pas encore implémenté ! (ceci n\'est pas un bug)');
-
-        PrintHTMLElement.printElement(
-            document.getElementById('proof-of-vote'),
-            { printMode: 'popup' }
-        );
-
-        this.setState({printedProofOfVote: true});
-        this.goToStep(Math.max(VoteWidget.STEP_COMPLETE, this.state.step));
+        this.setState({fetchedProofOfVote: true});
+        this.goToStep(VoteWidget.STEP_COMPLETE);
     },
 
     confirmVoteValue: function()
     {
         VoteAction.vote(this.props.bill, this.state.vote);
-        // this.goToNextStep();
         this.setState({confirmedVote:true});
+        // this.goToNextStep();
     },
 
     setVoteValue: function(value)
@@ -182,7 +173,7 @@ var VoteWidget = React.createClass({
                 this.setState({
                     confirmVoteButtonEnabled: false,
                     skipProofOfVoteButtonEnabled: false,
-                    printedProofOfVote: false
+                    fetchedProofOfVote: false
                 });
             }
         }
@@ -276,6 +267,41 @@ var VoteWidget = React.createClass({
         return voteDisplay[this.state.vote];
     },
 
+    renderProofOfVotePrintButton: function(className)
+    {
+        return (
+            <ProofOfVotePrintButton
+                className={className ? className : 'btn btn-primary'}
+                billId={this.props.bill.id}
+                onClick={this.proofOfVotePrinted}/>
+        );
+    },
+
+    renderProofOfVoteDownloadButton: function(className)
+    {
+        var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
+        var date = new Date(ballot.time);
+        var filename = 'cocorico_' + this.props.bill.title
+            + '_'  + date.toLocaleDateString()
+            + '_'  + date.toLocaleTimeString()
+            + '_'  + this.props.bill.id
+            + '.svg';
+
+        filename = filename
+            .toLowerCase()
+            .replace(/ /g, '_')
+            .replace(/[:\/]/g, '');
+        console.log(filename);
+
+        return (
+            <ProofOfVoteDownloadButton
+                filename={filename}
+                className={className ? className : 'btn btn-primary'}
+                billId={this.props.bill.id}
+                onClick={this.proofOfVoteDownloaded}/>
+        );
+    },
+
     renderConfirmVoteButton: function()
     {
         return (
@@ -354,10 +380,8 @@ var VoteWidget = React.createClass({
                 <div className="vote-step-description">
                     <Page slug="vote-preuve-de-vote"/>
                     <ButtonToolbar>
-                        <Button bsStyle="primary"
-                            onClick={(e)=>this.printProofOfVote()}>
-                            {this.getIntlMessage('vote.PRINT_PROOF_OF_VOTE')}
-                        </Button>
+                        {this.renderProofOfVotePrintButton()}
+                        {this.renderProofOfVoteDownloadButton()}
                         <Button bsStyle="link"
                             disabled={!this.state.skipProofOfVoteButtonEnabled}
                             onClick={(e)=>this.goToNextStep()}>
@@ -374,16 +398,13 @@ var VoteWidget = React.createClass({
                 </div>
                 <Hint style="warning"
                     pageSlug="attention-recuperer-preuve-de-vote-1"/>
-                <div className="visible-print-block" id="proof-of-vote">
-                    <ProofOfVote/>
-                </div>
             </div>
         );
     },
 
     renderVoteCompleteDialog: function()
     {
-        if (this.state.skipProofOfVoteButtonEnabled && !this.state.printedProofOfVote)
+        if (this.state.skipProofOfVoteButtonEnabled && !this.state.fetchedProofOfVote)
             window.onbeforeunload = () => this.getIntlMessage('vote.BEFORE_UNLOAD_MESSAGE');
         else
             window.onbeforeunload = null;
@@ -412,11 +433,14 @@ var VoteWidget = React.createClass({
                             }/>
                     </p>
                 </div>
-                {this.state.skipProofOfVoteButtonEnabled && !this.state.printedProofOfVote
+                {this.state.skipProofOfVoteButtonEnabled && !this.state.fetchedProofOfVote
                     ? <Hint style="warning"
-                        actionButtonLabel={this.getIntlMessage('vote.PRINT_PROOF_OF_VOTE')}
-                        onActionButtonClick={(e)=>this.printProofOfVote()}
-                        pageSlug="attention-recuperer-preuve-de-vote-3"/>
+                        pageSlug="attention-recuperer-preuve-de-vote-3">
+                        <ButtonToolbar>
+                            {this.renderProofOfVotePrintButton('btn btn-warning')}
+                            {this.renderProofOfVoteDownloadButton('btn btn-warning')}
+                        </ButtonToolbar>
+                    </Hint>
                     : <span/>}
             </div>
         );
@@ -453,8 +477,8 @@ var VoteWidget = React.createClass({
             <Modal.Footer>
                 {this.state.step == VoteWidget.STEP_COMPLETE
                     ? <Button onClick={(e)=>this.complete(e)}
-                        disabled={!this.state.printedProofOfVote && this.state.confirmedVote && !this.state.exitButtonEnabled}>
-                        {this.state.printedProofOfVote || !this.state.confirmedVote
+                        disabled={!this.state.fetchedProofOfVote && this.state.confirmedVote && !this.state.exitButtonEnabled}>
+                        {this.state.fetchedProofOfVote || !this.state.confirmedVote
                             ? this.getIntlMessage('vote.EXIT')
                             : <Countdown count={VoteWidget.COUNTDOWN}
                                 format={(c) => c != 0

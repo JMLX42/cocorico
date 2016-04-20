@@ -1,13 +1,34 @@
 var React = require('react');
-var PropTypes = React.PropTypes;
+var Reflux = require('reflux');
 
-var QRCode = require('./QRCode');
+var ProofOfVoteStore = require('../store/ProofOfVoteStore');
+
+var VoteAction = require('../action/VoteAction');
+
+var PropTypes = React.PropTypes;
 
 var ProofOfVote = React.createClass({
 
+    mixins: [
+        Reflux.connect(ProofOfVoteStore, 'proofOfVote')
+    ],
+
+    componentWillMount: function() {
+        VoteAction.generateProofOfVote(this.props.billId);
+    },
+
     render: function() {
+        var pov = this.state.proofOfVote.getProofOfVoteByBillId(
+            this.props.billId
+        );
+
+        if (!pov) {
+            return;
+        }
+
         return (
-            <QRCode data="0x42424242"/>
+            <div dangerouslySetInnerHTML={{__html: pov}}
+                id={this.props.id}/>
         );
     }
 

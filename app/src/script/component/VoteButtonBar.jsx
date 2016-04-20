@@ -11,7 +11,7 @@ var BillAction = require('../action/BillAction'),
 var FormattedMessage = ReactIntl.FormattedMessage,
     FormattedTime = ReactIntl.FormattedTime;
 
-var UnvoteButton = require('./UnvoteButton'),
+var RemoveMyVoteButton = require('./RemoveMyVoteButton'),
     Hint = require('./Hint'),
     LoadingIndicator = require('./LoadingIndicator'),
     VoteWidget = require('./VoteWidget'),
@@ -46,7 +46,8 @@ var VoteButtonBar = React.createClass({
         return {
             voting: false,
             showProofOfVoteReader: false,
-            proofOfVoteSuccess: false
+            proofOfVoteSuccess: false,
+            removingVote: false
         };
     },
 
@@ -62,12 +63,18 @@ var VoteButtonBar = React.createClass({
 
         });
 
-        BallotStore.listen((store) => {
+        this.listenTo(VoteAction.unvote, (billId) => {
+            if (billId == this.props.bill.id) {
+                this.setState({removingVote:true});
+            }
+        });
+
+        // BallotStore.listen((store) => {
             // var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
             //
             // if (!!ballot && ballot.status == 'pending')
             //     this.setState({voting:true});
-        });
+        // });
     },
 
     componentWillUnmount: function()
@@ -79,7 +86,8 @@ var VoteButtonBar = React.createClass({
     {
         this.setState({
             vote: vote,
-            voting: true
+            voting: true,
+            removingVote: false
         });
     },
 
@@ -88,12 +96,12 @@ var VoteButtonBar = React.createClass({
         return (
             <div>
                 <ButtonToolbar className="bill-center">
-                    <Button bsSize="large" className="btn-vote btn-positive"
+                    <a className="btn btn-lg btn-vote btn-positive"
                         onClick={(e)=>this.startVotingProcess(0)}>
                         <span className="icon-thumb_up"/>
                         <FormattedMessage message={this.getIntlMessage('vote.VOTE')}
                             value={this.getIntlMessage('vote.VOTE_YES')}/>
-                    </Button>
+                    </a>
                     <Button bsSize="large" className="btn-vote btn-neutral"
                         onClick={(e)=>this.startVotingProcess(1)}>
                         <span className="icon-stop"/>
@@ -128,7 +136,13 @@ var VoteButtonBar = React.createClass({
                     ? this.renderVoteRecordingMessage()
                     : <span/>}
                 {!!ballot && ballot.status == 'complete'
-                    ? <UnvoteButton bill={this.props.bill}/>
+                    ? this.state.removingVote
+                        ? <LoadingIndicator text={this.getIntlMessage('vote.REMOVING_VOTE')}/>
+                        : <ButtonToolbar>
+                            <RemoveMyVoteButton bill={this.props.bill}/>
+                            <RemoveMyVoteButton bill={this.props.bill}
+                                value={this.getIntlMessage('vote.CHANGE_MY_VOTE')}/>
+                        </ButtonToolbar>
                     : <span/>}
             </div>
         );
@@ -231,7 +245,7 @@ var VoteButtonBar = React.createClass({
             return (
                 <div>
                     <p>Error</p>
-                    <UnvoteButton bill={bill}/>
+                    <RemoveMyVoteButton bill={bill} proofOfVoteRequired={false}/>
                 </div>
             );
 

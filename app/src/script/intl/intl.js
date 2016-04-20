@@ -115,10 +115,12 @@ var Intl = {
 			VOTER_GENDER_FEMALE: 'femme',
 			VOTE_DISABLED: 'Vote désactivé.',
 			VOTE_UNAVAILABLE: 'Impossible de voter pour l\'instant. Merci de bien vouloir réessayer plus tard.',
-			UNVOTE: 'retirer mon vote',
+			REMOVE_MY_VOTE: 'retirer mon vote',
+			CHANGE_MY_VOTE: 'changer mon vote',
 			ALREADY_VOTED: 'Vous avez voté le { date }.',
 			TOO_LATE_TO_VOTE: 'Vous ne pouvez plus voter pour ce texte.',
 			PRINT_PROOF_OF_VOTE: 'Imprimer ma preuve de vote',
+			DOWNLOAD_PROOF_OF_VOTE: 'Télécharger ma preuve de vote',
 			BEFORE_UNLOAD_MESSAGE: 'Si vous quittez ou actualiez cette page, vous ne pourrez jamais récupérer votre preuve de vote.',
 			EXIT: 'Terminer',
 			EXIT_WITHOUT_PROOF_OF_VOTE: 'Terminer sans récupérer ma preuve de vote',
@@ -138,8 +140,15 @@ var Intl = {
 			STEP_3_NAME: 'Enregistrement',
 			STEP_4_NAME: 'A voté !',
 			STEP_TITLE: 'Étape { step }/{ total } : { title }',
-			SCAN_PROOF_OF_VOTE: 'Pour continuer, merci de scanner votre preuve de vote...',
 			REMOVING_VOTE: 'Suppression de votre vote en cours...'
+		},
+
+		proofOfVoteReader : {
+			PROVIDE_PROOF_OF_VOTE: 'Pour continuer, merci de fournir votre preuve de vote',
+			SCAN_PRINTED_FILE: 'Utiliser ma webcam pour scanner ma preuve de vote imprimée',
+			SEND_DOWNLOADED_FILE: 'Envoyer le fichier de ma preuve de vote téléchargée',
+			BACK: 'Retour',
+			CANCEL: 'Annuler'
 		},
 
 		hint: {

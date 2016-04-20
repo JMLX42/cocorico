@@ -14,11 +14,17 @@ var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Button = ReactBootstrap.Button;
 
-var UnvoteButton = React.createClass({
+var RemoveMyVoteButton = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin
     ],
+
+    getDefaultProps: function() {
+        return {
+            proofOfVoteRequired: true
+        };
+    },
 
     getInitialState: function() {
         return {
@@ -28,13 +34,20 @@ var UnvoteButton = React.createClass({
 
     handleClick: function()
     {
-        this.setState({
-            showProofOfVoteReader: true
-        });
+        if (this.props.proofOfVoteRequired) {
+            this.setState({
+                showProofOfVoteReader: true
+            });
+        }
+        else {
+            this.removeVote();
+        }
     },
 
     componentWillUnmount: function() {
-        this._unsubscribe();
+        // if (this._unsubscribe) {
+        //     this._unsubscribe();
+        // }
     },
 
     proofOfVoteReaderSuccess: function(data) {
@@ -43,14 +56,11 @@ var UnvoteButton = React.createClass({
             unvoting: true
         });
 
+        this.removeVote();
+    },
+
+    removeVote: function() {
         VoteAction.unvote(this.props.bill.id);
-
-        this._unsubscribe = BallotStore.listen((store) => {
-            var ballot = this.ballots.getBallotByBillId(this.props.billId);
-
-            if (!!ballot && ballot.error == 'removed')
-                this._unsubscribe();
-        });
     },
 
     proofOfVoteReaderCancelled: function() {
@@ -62,16 +72,19 @@ var UnvoteButton = React.createClass({
     render: function()
     {
 		return (
-            this.state.unvoting
-                ? <LoadingIndicator text={this.getIntlMessage('vote.REMOVING_VOTE')}/>
-                : this.state.showProofOfVoteReader
-                    ? <ProofOfVoteReader onSuccess={this.proofOfVoteReaderSuccess}
+            <Button onClick={this.handleClick} className="btn-unvote">
+                {this.props.value
+                    ? this.props.value
+                    : this.getIntlMessage('vote.REMOVE_MY_VOTE')}
+                {this.state.showProofOfVoteReader
+                    ? <ProofOfVoteReader
+                        data={this.props.proofOfVoteRequired}
+                        onSuccess={this.proofOfVoteReaderSuccess}
                         onCancel={this.proofOfVoteReaderCancelled}/>
-                    : <Button onClick={this.handleClick} className="btn-unvote">
-                        <FormattedMessage message={this.getIntlMessage('vote.UNVOTE')}/>
-                    </Button>
+                    : <span/>}
+            </Button>
 		);
 	}
 });
 
-module.exports = UnvoteButton;
+module.exports = RemoveMyVoteButton;
