@@ -179,31 +179,36 @@ function pushBallotMessageOnQueue(data, callback)
     if (config.capabilities.bill.vote != 'blockchain')
         return callback(null, null);
 
-    require('amqplib/callback_api').connect(
-        'amqp://localhost',
-        function(err, conn)
-        {
-            if (err != null)
-                return callback(err, null);
-
-            conn.createChannel(function(err, ch)
+    try {
+        require('amqplib/callback_api').connect(
+            'amqp://localhost',
+            function(err, conn)
             {
                 if (err != null)
                     return callback(err, null);
 
-                var ballotObj = { ballot : data };
+                conn.createChannel(function(err, ch)
+                {
+                    if (err != null)
+                        return callback(err, null);
 
-                ch.assertQueue('ballots');
-                ch.sendToQueue(
-                    'ballots',
-                    new Buffer(JSON.stringify(ballotObj)),
-                    { persistent : true }
-                );
+                    var ballotObj = { ballot : data };
 
-                callback(null, ballotObj);
-            });
-        }
-    );
+                    ch.assertQueue('ballots');
+                    ch.sendToQueue(
+                        'ballots',
+                        new Buffer(JSON.stringify(ballotObj)),
+                        { persistent : true }
+                    );
+
+                    callback(null, ballotObj);
+                });
+            }
+        );
+    }
+    catch (e) {
+        callback(e, null);
+    }
 }
 
 function getVoteContractInstance(web3, address, callback)
@@ -284,7 +289,7 @@ exports.vote = function(req, res)
                         voterAge: birthdateToAge(req.user.birthdate),
                         voterGender: req.user.gender,
                         status: config.capabilities.bill.vote == 'blockchain'
-                            ? 'pending'
+                            ? 'queued'
                             : 'complete'
                     });
 
