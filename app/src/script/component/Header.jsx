@@ -64,6 +64,7 @@ var Header = React.createClass({
                             <div id="logo">
                                 <Link to="/">
                                     <span className="cocorico-dark-grey">cocorico</span>
+                                    <small>beta</small>
                                 </Link>
                             </div>
                         </NavbarBrand>
