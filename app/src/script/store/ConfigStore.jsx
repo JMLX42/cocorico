@@ -1,4 +1,4 @@
-var Reflux = require('reflux')
+var Reflux = require('reflux');
 var config = require('/opt/cocorico/app-web/config.json');
 
 module.exports = Reflux.createStore({
