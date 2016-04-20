@@ -10,11 +10,10 @@ var Ballot = new keystone.List('Ballot', {
 });
 
 Ballot.add({
-	value: { type: String, default: true, required: true, initial: true },
 	time: { type: Types.Datetime, default: Date.now },
 	status: {
 		type: Types.Select,
-		options: ['signing', 'pending', 'initialized', 'registered', 'complete', 'error'],
+		options: ['signing', 'queued', 'pending', 'initialized', 'registered', 'complete', 'error'],
 		required: true,
 		initial: true
 	},
@@ -27,5 +26,5 @@ Ballot.add({
 
 transform.toJSON(Ballot);
 
-Ballot.defaultColumns = 'voter, value, time';
+Ballot.defaultColumns = 'time, status, voterAge, voterGender';
 Ballot.register();
