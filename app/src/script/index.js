@@ -1,4 +1,5 @@
 require('../style/index.less');
+require('babel-polyfill');
 
 var React = require('react');
 var ReactRouter = require('react-router');

@@ -5,6 +5,7 @@
   "dependencies": {
     "babel-core": "^5.8.21",
     "babel-plugin-object-assign": "^1.2.1",
+    "babel-polyfill": "^6.7.4",
     "babelify": "^6.1.3",
     "browserify": "^11.2.0",
     "watchify": "3.7.0",
@@ -26,10 +27,15 @@
     "node-lessify": "0.1.1",
     "d3": "^3.5.3",
     "classnames": "2.2.3",
-    "eth-lightwallet": "2.2.5",
+    "eth-lightwallet": "2.3.1",
     "ethereumjs-tx": "1.1.1",
     "async": "1.5.2",
-    "print-html-element": "0.3.4"
+    "print-html-element": "0.3.4",
+    "qrcode-npm": "0.0.3",
+    "qr-image": "latest",
+    "js-base64" : "2.1.9",
+    "getusermedia": "1.3.7",
+    "json-stable-stringify": "1.0.0"
   },
   "engines": {
     "node": ">=0.10.22",
