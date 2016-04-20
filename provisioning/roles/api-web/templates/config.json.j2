@@ -7,7 +7,6 @@
     "mongo" : {
       "uri" : "mongodb://{{ home_db_private_host }}/{{ mongodb_database_name }}"
     },
-    "savedPages" : {{ home_db_saved_pages | to_json }},
     "uploadDir" : "{{ home_web_upload_dir }}",
     "capabilities" : {{ capabilities | to_json }},
     "blockchain" : {
@@ -19,7 +18,7 @@
         "openIDConnectStrategyParameters": {
             "clientID": "{{ franceconnect_client_id }}",
             "clientSecret": "{{ franceconnect_client_secret }}",
-            "callbackURL": "http://{{ front_web_public_host }}/api/auth/france-connect/callback",
+            "callbackURL": "{{ http_protocol_prefix }}://{{ front_web_public_host }}/api/auth/france-connect/callback",
             "authorizationURL": "{{ franceconnect_url }}/api/v1/authorize",
             "tokenURL": "{{ franceconnect_url }}/api/v1/token",
             "userInfoURL": "{{ franceconnect_url }}/api/v1/userinfo",
@@ -29,7 +28,7 @@
         "oauth": {
             "authorizationURL": "{{ franceconnect_url }}/api/v1/authorize",
             "tokenURL": "{{ franceconnect_url }}/api/v1/token",
-            "callbackURL": "http://{{ front_web_public_host }}/api/auth/france-connect/callback",
+            "callbackURL": "{{ http_protocol_prefix }}://{{ front_web_public_host }}/api/auth/france-connect/callback",
             "scope": ["openid", "profile"]
         }
     }
