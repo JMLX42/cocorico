@@ -207,6 +207,11 @@ function handleBallot(ballot, callback)
 
     async.waterfall(
         [
+            (callback) => updateBallotStatus(
+                ballot,
+                'pending',
+                (err, dbBallot) => callback(err)
+            ),
             // Step 0: we make sure the ballot account is a new account.
             // Each account is unique: one vote => one account => one address. If
             // the address already has some funds, then it was used before and
