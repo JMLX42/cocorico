@@ -18,7 +18,7 @@ keystone.init({
 
 	'mongo' : config.mongo.uri,
 
-	'auto update': true,
+	'auto update': false,
 	'session': true,
 	'auth': true,
 	'user model': 'User',
