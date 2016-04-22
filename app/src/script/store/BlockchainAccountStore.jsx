@@ -1,56 +1,138 @@
 var Reflux = require('reflux');
-var EthereumAccounts = require('ethereumjs-accounts');
-var HookedWeb3Provider = require("hooked-web3-provider");
-var Web3 = require('web3');
+var lightwallet = require('eth-lightwallet');
+var Tx = require('ethereumjs-tx');
+var qr = require('qr-image');
 
 var BlockchainAccountAction = require('../action/BlockchainAccountAction');
 
 module.exports = Reflux.createStore({
-    listenables: [BlockchainAccountAction],
 
-    init: function()
-    {
+    init: function() {
+        this._deleteAllKeystores();
+
+        this._voterCard = {};
+
         this.listenTo(BlockchainAccountAction.create, this._createAccount);
-
-        this._userAccount = null;
-        this._userProvider = null;
-
-        this.trigger(this);
+        this.listenTo(BlockchainAccountAction.import, this._importSerializedAccount);
     },
 
-    getInitialState: function()
-    {
+    getInitialState: function() {
         return this;
     },
 
-    getCurrentUserAccount: function()
-    {
-        return this._userAccount;
+    getKeystoreByBillId: function(billId) {
+        if (!(billId in this._keystore)) {
+            return null;
+        }
+
+        return this._keystore[billId];
     },
 
-    getCurrentUserProvider: function()
-    {
-        return this._userProvider;
+    getPwDerivedKeyByBillId: function(billId) {
+        if (!(billId in this._pwDerivedKey)) {
+            return null;
+        }
+
+        return this._pwDerivedKey[billId];
     },
 
-    _createAccount: function(passphrase)
-    {
-        if (!this._userAccount)
-        {
-            var web3 = new Web3();
-            web3.setProvider(new web3.providers.HttpProvider("http://cocorico.cc.test/blockchain/"));
-            
-            var accounts = new EthereumAccounts({web3 : web3});
+    getVoterCardByBillId: function(billId) {
+        if (!(billId in this._voterCard)) {
+            return null;
+        }
 
-            this._userAccount = accounts.new(passphrase);
-            console.log(this._userAccount);
+        return this._voterCard[billId];
+    },
 
-            this._userProvider = new HookedWeb3Provider({
-                host: "http://cocorico.cc.test/blockchain/",
-                transaction_signer: accounts
-            });
+    getAddressByBillId: function(billId) {
+        if (!(billId in this._keystore)) {
+            return null;
+        }
+
+        return this._keystore[billId].getAddresses()[0];
+    },
+
+    getSerializedBlockchainAccountByBillId: function(billId) {
+        if (!(billId in this._keystore) || !this._keystore[billId]) {
+            return null;
+        }
+
+        return this._keystore[billId].serialize();
+    },
+
+    _deleteKeystore: function(billId) {
+        delete this._keystore[billId];
+        delete this._pwDerivedKey[billId];
+
+        console.log('deleted keystore');
+    },
+
+    _deleteAllKeystores: function() {
+        this._keystore = {};
+        this._pwDerivedKey = {};
+    },
+
+    _getKeystore: function(billId, callback) {
+        var secretSeed = lightwallet.keystore.generateRandomSeed();
+        var password = 'password'; // FIXME
+
+        lightwallet.keystore.deriveKeyFromPassword(password, (err, pwDerivedKey) => {
+            var ks = new lightwallet.keystore(secretSeed, pwDerivedKey);
+
+            ks.passwordProvider = (callback) => password;
+
+            console.log('BlockchainAccountStore: created new keystore');
+            callback(ks, pwDerivedKey);
+        });
+    },
+
+    _generateVoterCard: function(ks) {
+        var voterCardData = ks.serialize();
+        var svg = qr.imageSync(
+            voterCardData,
+            { type: 'svg', ec_level: 'M' }
+        );
+
+        return svg.replace('</svg>', '<desc>' + voterCardData + '</desc></svg>');
+    },
+
+    _createAccount: function(billId) {
+        // // if (billId in this._keystore)
+        // //     return this.trigger(this);
+        //
+        // this._keystore[billId] = false;
+
+        this._getKeystore(billId, (ks, pwDerivedKey) => {
+            this._keystore[billId] = ks;
+            this._pwDerivedKey[billId] = pwDerivedKey;
+
+            ks.generateNewAddress(pwDerivedKey);
+
+            var addresses = ks.getAddresses();
+            var address = '0x' + addresses[addresses.length - 1];
+
+            console.log(
+                'BlockchainAccountStore: generated new address ' + address
+                + ' with private key ' + ks.exportPrivateKey(address, pwDerivedKey)
+            );
+
+            this._voterCard[billId] = this._generateVoterCard(ks);
 
             this.trigger(this);
-        }
+        });
+    },
+
+    _importSerializedAccount: function(billId, serializedAccount) {
+        this._keystore[billId] = lightwallet.keystore.deserialize(
+            serializedAccount
+        );
+
+        console.log(
+            'BlockchainAccountStore: imported serialized keystore '
+            + this.getSerializedBlockchainAccountByBillId(billId)
+        );
+
+        this.trigger(this);
     }
+
 });

@@ -787,7 +787,7 @@ ul.argument-list {
     .vote-step-description {
         margin: 10px 0;
 
-        .btn-toolbar {
+        .btn-toolbar.vote-step-actions {
             margin-top: 30px;
             margin-left: 0;
 
@@ -823,5 +823,21 @@ ul.argument-list {
     &:hover {
         color: white;
         border-color: white;
+    }
+}
+
+.voter-card-reader {
+    .btn-toolbar {
+        .text-center();
+
+        .btn {
+            float: none;
+        }
+    }
+
+    @media (min-width: (@screen-xs-max)) {
+        .btn {
+            max-width: 300px;
+        }
     }
 }

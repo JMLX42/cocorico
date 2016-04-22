@@ -7,7 +7,7 @@ var VoteAction = require('../action/VoteAction');
 
 var BallotStore = require('../store/BallotStore');
 
-var ProofOfVoteReader = require('./ProofOfVoteReader'),
+var VoterCardReaderModal = require('./VoterCardReaderModal'),
     LoadingIndicator = require('./LoadingIndicator');
 
 var FormattedMessage = ReactIntl.FormattedMessage;
@@ -28,7 +28,7 @@ var RemoveMyVoteButton = React.createClass({
 
     getInitialState: function() {
         return {
-            showProofOfVoteReader: false
+            showVoterCardReader: false
         };
     },
 
@@ -36,7 +36,7 @@ var RemoveMyVoteButton = React.createClass({
     {
         if (this.props.proofOfVoteRequired) {
             this.setState({
-                showProofOfVoteReader: true
+                showVoterCardReader: true
             });
         }
         else {
@@ -52,7 +52,7 @@ var RemoveMyVoteButton = React.createClass({
 
     proofOfVoteReaderSuccess: function(data) {
         this.setState({
-            showProofOfVoteReader: false,
+            showVoterCardReader: false,
             unvoting: true
         });
 
@@ -65,7 +65,7 @@ var RemoveMyVoteButton = React.createClass({
 
     proofOfVoteReaderCancelled: function() {
         this.setState({
-            showProofOfVoteReader: false
+            showVoterCardReader: false
         });
     },
 
@@ -76,11 +76,10 @@ var RemoveMyVoteButton = React.createClass({
                 {this.props.value
                     ? this.props.value
                     : this.getIntlMessage('vote.REMOVE_MY_VOTE')}
-                {this.state.showProofOfVoteReader
-                    ? <ProofOfVoteReader
-                        data={this.props.proofOfVoteRequired}
-                        onSuccess={this.proofOfVoteReaderSuccess}
-                        onCancel={this.proofOfVoteReaderCancelled}/>
+                {this.state.showVoterCardReader
+                    ? <VoterCardReaderModal
+                            onSuccess={this.proofOfVoteReaderSuccess}
+                            onCancel={this.proofOfVoteReaderCancelled}/>
                     : <span/>}
             </Button>
 		);

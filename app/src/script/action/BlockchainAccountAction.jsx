@@ -1,5 +1,6 @@
 var Reflux = require('reflux');
 
 module.exports = Reflux.createActions({
-    'create': {sync: true}
+    'create': {sync: false},
+    'import': {sync: false}
 });

@@ -4,21 +4,21 @@ var ReactBootstrap = require('react-bootstrap');
 var Reflux = require('reflux');
 var PrintHTMLElement = require("print-html-element");
 
-var ProofOfVoteStore = require('../store/ProofOfVoteStore');
+var BlockchainAccountStore = require('../store/BlockchainAccountStore');
 
 var VoteAction = require('../action/VoteAction');
 
-var ProofOfVote = require('./ProofOfVote');
+var VoterCard = require('./VoterCard');
 
 var PropTypes = React.PropTypes;
 
 var Button = ReactBootstrap.Button;
 
-var ProofOfVotePrintButton = React.createClass({
+var VoterCardPrintButton = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin,
-        Reflux.connect(ProofOfVoteStore, 'proofOfVote')
+        Reflux.connect(BlockchainAccountStore, 'blockchainAccounts')
     ],
 
     getDefaultProps: function() {
@@ -33,10 +33,6 @@ var ProofOfVotePrintButton = React.createClass({
         };
     },
 
-    componentWillMount: function() {
-        VoteAction.generateProofOfVote(this.props.billId);
-    },
-
     onClick: function(e) {
         PrintHTMLElement.printElement(
             document.getElementById(this.state.elementId),
@@ -47,11 +43,11 @@ var ProofOfVotePrintButton = React.createClass({
     },
 
     render: function() {
-        var pov = this.state.proofOfVote.getProofOfVoteByBillId(
+        var voterCard = this.state.blockchainAccounts.getVoterCardByBillId(
             this.props.billId
         );
 
-        if (!pov) {
+        if (!voterCard) {
             return null;
         }
 
@@ -63,11 +59,11 @@ var ProofOfVotePrintButton = React.createClass({
                         : 'btn btn-primary'}
                     onClick={this.onClick}>
                     <span className="icon-printer"/>
-                    {this.getIntlMessage('vote.PRINT_PROOF_OF_VOTE')}
+                    {this.getIntlMessage('vote.PRINT_VOTER_CARD')}
                 </Button>
                 <div className="visible-print-block" id={this.state.elementId}
                     style={{width:'50%'}}>
-                    <ProofOfVote billId={this.props.billId}/>
+                    <VoterCard billId={this.props.billId}/>
                 </div>
             </span>
         );
@@ -75,4 +71,4 @@ var ProofOfVotePrintButton = React.createClass({
 
 });
 
-module.exports = ProofOfVotePrintButton;
+module.exports = VoterCardPrintButton;

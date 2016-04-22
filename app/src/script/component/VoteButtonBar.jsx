@@ -45,7 +45,7 @@ var VoteButtonBar = React.createClass({
     {
         return {
             voting: false,
-            showProofOfVoteReader: false,
+            showVoterCardReader: false,
             proofOfVoteSuccess: false,
             removingVote: false
         };
@@ -131,8 +131,8 @@ var VoteButtonBar = React.createClass({
                         message={this.getIntlMessage('vote.ALREADY_VOTED')}
                         date={<FormattedTime value={ballot.time}/>}/>
                 </p>
-                {ballot.status == 'pending' || ballot.status == 'initialized'
-                    || ballot.status == 'registered'
+                {ballot.status == 'queued' || ballot.status == 'pending'
+                    || ballot.status == 'initialized' || ballot.status == 'registered'
                     ? this.renderVoteRecordingMessage()
                     : <span/>}
                 {!!ballot && ballot.status == 'complete'
@@ -255,26 +255,26 @@ var VoteButtonBar = React.createClass({
 
         if (ballot.status != 'complete')
         {
-            if (!systemStatus)
-                return <LoadingIndicator/>;
-
-            if (bill.voteContractAddress && (!systemStatus || !systemStatus.blockchainNode || !systemStatus.blockchainMiner))
-                return (
-                    <Hint style="danger">
-                        <h3>
-                            {this.getIntlMessage('vote.VOTE_UNAVAILABLE')}
-                        </h3>
-                    </Hint>
-                );
-
-            if (!this.state.config.capabilities.bill.vote)
-                return (
-                    <Hint style="danger">
-                        <p>
-                            {this.getIntlMessage('vote.VOTE_DISABLED')}
-                        </p>
-                    </Hint>
-                );
+            // if (!systemStatus)
+            //     return <LoadingIndicator/>;
+            //
+            // if (bill.voteContractAddress && (!systemStatus || !systemStatus.blockchainNode || !systemStatus.blockchainMiner))
+            //     return (
+            //         <Hint style="danger">
+            //             <h3>
+            //                 {this.getIntlMessage('vote.VOTE_UNAVAILABLE')}
+            //             </h3>
+            //         </Hint>
+            //     );
+            //
+            // if (!this.state.config.capabilities.bill.vote)
+            //     return (
+            //         <Hint style="danger">
+            //             <p>
+            //                 {this.getIntlMessage('vote.VOTE_DISABLED')}
+            //             </p>
+            //         </Hint>
+            //     );
         }
 
         return (

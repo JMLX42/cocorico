@@ -21,8 +21,6 @@ module.exports = Reflux.createStore({
         this._ballots = {};
         this._loadingBallot = {};
         this._ballotPolling = {};
-
-        this._deleteAllKeystores();
     },
 
     getInitialState: function()
@@ -66,132 +64,59 @@ module.exports = Reflux.createStore({
         return true;
     },
 
-    _getKeystore: function(billId, callback)
-    {
-        if (!(billId in this._keystore))
-        {
-            var secretSeed = lightwallet.keystore.generateRandomSeed();
-            var password = 'password'; // FIXME
-
-            lightwallet.keystore.deriveKeyFromPassword(password, (err, pwDerivedKey) => {
-                var ks = new lightwallet.keystore(secretSeed, pwDerivedKey);
-
-                this._keystore[billId] = ks;
-                this._pwDerivedKey[billId] = pwDerivedKey;
-                ks.passwordProvider = (callback) => password;
-
-                console.log('created new keystore');
-                callback(ks, pwDerivedKey);
-            });
-        }
-        else
-            callback(this._keystore[billId], this._pwDerivedKey[billId]);
-    },
-
-    _deleteKeystore: function(billId)
-    {
-        delete this._keystore[billId];
-        delete this._pwDerivedKey[billId];
-
-        console.log('deleted keystore');
-    },
-
-    _deleteAllKeystores: function()
-    {
-        this._keystore = {};
-        this._pwDerivedKey = {};
-    },
-
-    getSerializedKeystore: function(billId)
-    {
-        if (!(billId in this._keystore))
-            return '';
-
-        return this._keystore[billId].serialize();
-    },
-
-    getProofOfVote: function(billId)
-    {
-        if (!(billId in this._keystore))
-            return null;
-
-        var ks = this._keystore[billId];
-
-        return {
-            address: ks.getAddresses()[0]
-        };
-    },
-
-    _generateAddress: function(billId, callback)
-    {
-        this._getKeystore(billId, (ks, pwDerivedKey) => {
-            ks.generateNewAddress(pwDerivedKey);
-
-            var addresses = ks.getAddresses();
-            var address = '0x' + addresses[addresses.length - 1];
-
-            console.log(
-                'generated new address ' + address
-                + ' with private key ' + ks.exportPrivateKey(address, pwDerivedKey)
-            );
-
-            callback(ks, pwDerivedKey, address);
-        });
-    },
-
-    _getVoteTransaction: function(billId, voteContractAddress, voteContractABI, value, callback)
+    _getVoteTransaction: function(keystore,
+                                  pwDerivedKey,
+                                  address,
+                                  billId,
+                                  voteContractAddress,
+                                  voteContractABI,
+                                  value)
     {
         console.log('creating vote transaction');
 
-        this._generateAddress(billId, (ks, pwDerivedKey, address) => {
-            var tx = lightwallet.txutils.functionTx(
-                JSON.parse(voteContractABI),
-                'vote',
-                value,
-                {
-                    to: voteContractAddress,
-                    gasLimit: 999999,
-                    gasPrice: 20000000000,
-                    value: 0,
-                    nonce: 0
-                }
-            );
+        var tx = lightwallet.txutils.functionTx(
+            JSON.parse(voteContractABI),
+            'vote',
+            value,
+            {
+                to: voteContractAddress,
+                gasLimit: 999999,
+                gasPrice: 20000000000,
+                value: 0,
+                nonce: 0
+            }
+        );
 
-            var signedTx = '0x' + lightwallet.signing.signTx(
-                ks,
-                pwDerivedKey,
-                tx,
-                address
-            );
+        var signedTx = '0x' + lightwallet.signing.signTx(
+            keystore,
+            pwDerivedKey,
+            tx,
+            address
+        );
 
-            console.log('signed tx', signedTx);
+        console.log('signed tx', signedTx);
 
-            callback(signedTx);
-        });
+        return signedTx;
     },
 
-    _vote: function(bill, value)
+    _vote: function(keystore, pwDerivedKey, address, bill, value)
     {
-        // For now, we delete the existing keystore to make sure every vote will
-        // create a new one.
-        // FIXME: use the existing (scanned) keystore when the user will want to
-        // change its vote using its "proof of vote".
-        this._deleteKeystore(bill.id);
-
-        this._getVoteTransaction(
+        var tx = this._getVoteTransaction(
+            keystore,
+            pwDerivedKey,
+            address,
             bill.id,
             bill.voteContractAddress,
             bill.voteContractABI,
-            value,
-            (tx) => {
-                jquery.get(
-                    '/api/vote/' + tx,
-                    (data) => {
-                        console.log('vote transaction sent');
-                        this._ballots[bill.id] = data.ballot;
-                        this.trigger(this);
-                    }
-                );
+            value
+        );
+
+        jquery.get(
+            '/api/vote/' + tx,
+            (data) => {
+                console.log('vote transaction sent');
+                this._ballots[bill.id] = data.ballot;
+                this.trigger(this);
             }
         );
     },
