@@ -65,21 +65,24 @@ var Hint = React.createClass({
                         : <span/>}
                 </div>
                 {this.props.children}
-                <ButtonToolbar>
-                    {this.props.disposable
-                        ? <Button bsStyle="link" onClick={this.buttonClickHandler}
-                            className="btn-hint-hide">
-                            {this.getIntlMessage('hint.HIDE_HINT_BUTTON')}
-                        </Button>
-                        : <span/>}
-                    {this.props.morePageSlug
-                        ? <Link to={'/' + this.props.morePageSlug}>
-                            <Button bsStyle="link">
-                                {this.getIntlMessage('hint.LEARN_MORE_BUTTON')}
+                {this.props.disposable || this.props.morePageSlug
+                    ? <ButtonToolbar>
+                        {this.props.disposable
+                            ? <Button bsStyle="link" onClick={this.buttonClickHandler}
+                                className="btn-hint-hide">
+                                {this.getIntlMessage('hint.HIDE_HINT_BUTTON')}
                             </Button>
-                        </Link>
-                        : <span/>}
-                </ButtonToolbar>
+                            : <span/>}
+                        {this.props.morePageSlug
+                            ? <Link to={'/' + this.props.morePageSlug}>
+                                <Button bsStyle="link">
+                                    {this.getIntlMessage('hint.LEARN_MORE_BUTTON')}
+                                </Button>
+                            </Link>
+                            : <span/>}
+                    </ButtonToolbar>
+                    : <span/>
+                }
             </div>
 		);
 	}
