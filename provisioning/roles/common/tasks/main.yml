@@ -56,7 +56,7 @@
     - provider != 'docker'
 
 - name: create directories
-  file: path={{ backup_dir }} state=directory
+  file: path={{ item }} state=directory
   with_items:
     - "{{ project_dir }}"
     - "{{ backup_dir}}"
