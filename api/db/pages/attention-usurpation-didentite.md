@@ -1,0 +1,3 @@
+### Attention : l'usurpation d'identité est un déli !
+
+Selon l'[article 226-4-1 du code pénal](https://www.legifrance.gouv.fr/affichCodeArticle.do?idArticle=LEGIARTI000023709201&cidTexte=LEGITEXT000006070719), le fait d'**usurper l'identité d'un tiers est puni d'un an d'emprisonnement et de 15 000 € d'amende**. Cette infraction est punie des mêmes peines lorsqu'elle est commise sur un réseau de communication au public en ligne.

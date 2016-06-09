@@ -14,10 +14,7 @@ function savePage(page, next)
 {
     var output = './pages/' + page.slug + '.js';// getOutputFilename(page.slug);
 
-    var uriRegex = new RegExp("\/" + config.uploadDir + "\/([^\.]*)\.");
-    var imgRegEx = page.contentType == 'HTML'
-        ? new RegExp(/<img\s[^>]*?src\s*=\s*['\"]([^'\"]*?)['\"][^>]*?>/g)
-        : new RegExp(/(!\[.*?\]\()(.+?)(\))/g);
+    var imgRegEx = new RegExp(/\/upload\/(.*)\.(jpg|png)/g);
     var content = page.contentType == 'HTML'
         ? beautify_html(page.html, {indent:4})
         : page.markdown.md;
@@ -25,10 +22,8 @@ function savePage(page, next)
 
     while (match = imgRegEx.exec(content))
     {
-        match = match[1].match(uriRegex)[1];
-
         if (match)
-            imgs.push(match);
+            imgs.push(match[1]);
     }
 
     if (imgs.length != 0)
@@ -41,20 +36,11 @@ function savePage(page, next)
         {
             for (var media of medias)
             {
-                mediaMigration += "\t\tfunction(callback) {\n"
-                    + "\t\t\tMedia.model.update(\n"
-                    + "\t\t\t\t{slug: '" + media.slug + "'},";
-
-                stringify(media, {space : '\t'}).split('\n').map(function(v, i, t)
-                {
-                    mediaMigration += "\n\t\t\t\t" + v;
-                });
-
-                mediaMigration += ",\n"
-                    + "\t\t\t\t{upsert: true},\n"
-                    + "\t\t\t\tfunction(err) { callback(err); }\n"
-                    + "\t\t\t);\n"
-                    + "\t\t},\n";
+                fs.writeFileSync(
+                    "./db/media/" + media.slug + '.json',
+                    stringify(media, { space : '\t' }),
+                    'utf8'
+                );
             }
 
             process.stdout.write('writing page \'' + page.slug + '\'... ');
@@ -62,18 +48,15 @@ function savePage(page, next)
             var filename = page.contentType == 'HTML'
                 ? page.slug + '.html'
                 : page.slug + '.md'
-            fs.writeFileSync("./pages/" + filename, content, 'utf8');
+            fs.writeFileSync("./db/pages/" + filename, content, 'utf8');
 
             page = JSON.parse(stringify(page));
             delete page.markdown;
             delete page.html;
 
             fs.writeFileSync(
-                "./pages/" + page.slug + '.json',
-                stringify(
-                    { page: page },
-                    {space : '\t'}
-                ),
+                "./db/pages/" + page.slug + '.json',
+                stringify(page, { space : '\t' }),
                 'utf8'
             );
 
@@ -106,8 +89,10 @@ function savePages(pages, done)
 
 module.exports = function(slugs, done)
 {
-    if (!fs.existsSync('./pages'))
-        fs.mkdirSync('./pages');
+    if (!fs.existsSync('./db/pages'))
+        fs.mkdirSync('./db/pages');
+    if (!fs.existsSync('./db/media'))
+        fs.mkdirSync('./db/media');
 
     if (slugs)
     {

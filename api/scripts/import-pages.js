@@ -32,27 +32,39 @@ function find(startPath,filter)
 
 module.exports = function(done)
 {
-    var pageFiles = find('./pages', '.json');
+    var pageFiles = find('./db/pages', '.json');
+    var mediaFiles = find('./db/media', '.json');
 
     async.waterfall(
-        pageFiles.map((pageFile) => (callback) => {
-            var pageData = JSON.parse(fs.readFileSync(pageFile));
-            var page = pageData.page;
+        mediaFiles.map((mediaFile) => (callback) => {
+            var mediaData = JSON.parse(fs.readFileSync(mediaFile));
 
-            if (page.contentType == 'HTML')
-                page.html = fs.readFileSync('./pages/' + page.slug + '.html', 'utf8');
-            else
-                page.markdown = { md : fs.readFileSync('./pages/' + page.slug + '.md', 'utf8')};
-
-            // console.log(page);
-
-            Page.model.update(
-                {slug: page.slug},
-                page,
+            Media.model.update(
+                {slug: mediaData.slug},
+                mediaData,
                 {upsert: true},
                 (err) => callback(err)
             );
         }),
-        done
+        (err, result) => {
+            async.waterfall(
+                pageFiles.map((pageFile) => (callback) => {
+                    var pageData = JSON.parse(fs.readFileSync(pageFile));
+
+                    if (pageData.contentType == 'HTML')
+                        pageData.html = fs.readFileSync('./pages/' + pageData.slug + '.html', 'utf8');
+                    else
+                        pageData.markdown = { md : fs.readFileSync('./pages/' + pageData.slug + '.md', 'utf8')};
+
+                    Page.model.update(
+                        {slug: pageData.slug},
+                        page,
+                        {upsert: true},
+                        (err) => callback(err)
+                    );
+                }),
+                done
+            );
+        }
     );
 }

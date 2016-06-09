@@ -12,7 +12,7 @@ Media.add({
 	title: { type: String, required: true },
     file: {
         type: Types.LocalFile,
-        dest: 'public/' + config.uploadDir,
+        dest: '../app/public/' + config.uploadDir,
         allowedTypes: [
             'image/jpeg',
             'image/png',
