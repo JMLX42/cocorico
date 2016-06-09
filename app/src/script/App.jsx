@@ -4,8 +4,7 @@ var ReactIntl = require('react-intl');
 var ReactRouter = require('react-router');
 
 var Header = require('./component/Header'),
-    Footer = require('./component/Footer'),
-    Pace = require('./component/Pace');
+    Footer = require('./component/Footer');
 
 var Intl = require('./intl/intl');
 
@@ -27,7 +26,6 @@ var App = React.createClass({
     {
 		return (
 			<div>
-                <Pace/>
 				<Header/>
                     <div id="content">
                         {this.props.children || <div/>}
