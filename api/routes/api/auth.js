@@ -35,7 +35,7 @@ exports.logout = function(req, res)
 {
     req.logout();
 
-    return res.redirect(302, '/');
+    return res.redirect(302, req.query.redirect ? req.query.redirect : '/');
 }
 
 exports.fakeLogin = function(req, res)
@@ -45,7 +45,7 @@ exports.fakeLogin = function(req, res)
         firstName: 'Fake',
         lastName: 'User',
         gender: 'male',
-        birthdate: '1970-01-01'
+        birthdate: '1987-05-16'
     };
 
     req.login(user, function(err) {
