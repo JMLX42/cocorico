@@ -12,6 +12,7 @@
     - nodejs
     - jq
     - build-essential
+    - libkrb5-dev
 
 - name: fix node binary name
   command: update-alternatives --install /usr/bin/node node /usr/bin/nodejs 10
