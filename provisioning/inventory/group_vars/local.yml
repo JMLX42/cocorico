@@ -50,21 +50,6 @@ home_web_admin_password: admin
 home_web_admin_name: Admin
 home_web_upload_dir: upload
 
-home_db_saved_pages:
-    - accueil
-    - aide
-    - politique-de-confidentialite
-    - manifeste
-    - astuce-etape-debat
-    - astuce-etape-revision
-    - astuce-etape-vote
-    - astuce-enregistrement-du-vote
-    - attention-impossible-de-revenir-en-arriere
-    - attention-recuperer-preuve-de-vote-1
-    - attention-recuperer-preuve-de-vote-2
-    - attention-recuperer-preuve-de-vote-3
-    - vote-preuve-de-vote
-
 ethereum_etherbase_password: "test"
 ethereum_etherbase_balance: "10015200000000000000000"
 ethereum_genesis_difficulty: "0x40000"
