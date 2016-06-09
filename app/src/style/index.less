@@ -215,21 +215,22 @@ li.active {
 #footer {
     min-height: 200px;
     background-color: @cocorico-light-grey;
-    padding-top: 20px;
     color: @cocorico-dark-grey;
     margin-top: 40px;
     font-size: @font-size-base;
 
-    a {
-        color: @cocorico-dark-grey;
-
-        &:hover {
-            color: @link-color;
-        }
-    }
-
     .list-inline li {
         margin-right: 20px;
+
+        a {
+            margin-top: 20px;
+            display: inline-block;
+            color: @cocorico-dark-grey;
+
+            &:hover {
+                color: @link-color;
+            }
+        }
     }
 }
 
