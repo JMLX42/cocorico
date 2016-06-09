@@ -12,7 +12,8 @@ exports.me = function(req, res)
 {
     res.apiResponse({ 'user': {
         firstName: req.user.firstName,
-        lastName: req.user.lastName
+        lastName: req.user.lastName,
+        birthdate: req.user.birthdate
     }});
 }
 

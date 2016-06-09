@@ -14,6 +14,8 @@ var Button = ReactBootstrap.Button,
     ProgressBar = ReactBootstrap.ProgressBar,
     Modal = ReactBootstrap.Modal;
 
+var Link = ReactRouter.Link;
+
 var FormattedMessage = ReactIntl.FormattedMessage,
     FormattedTime = ReactIntl.FormattedTime,
     FormattedHTMLMessage = ReactIntl.FormattedHTMLMessage;
@@ -33,6 +35,7 @@ var LoadingIndicator = require('./LoadingIndicator'),
 
 var ConfigStore = require('../store/ConfigStore'),
     BallotStore = require('../store/BallotStore'),
+    // UserStore = require('../store/UserStore'),
     BlockchainAccountStore = require('../store/BlockchainAccountStore');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
@@ -43,14 +46,16 @@ var VoteWidget = React.createClass({
         Reflux.connect(ConfigStore, 'config'),
         Reflux.connect(BallotStore, 'ballots'),
         Reflux.connect(BlockchainAccountStore, 'blockchainAccounts'),
+        // Reflux.connect(UserStore, 'users'),
         ForceAuthMixin,
         ReactIntl.IntlMixin
     ],
 
     statics: {
-        STEP_VOTER_CARD:    0,
-        STEP_CONFIRM:       1,
-        STEP_COMPLETE:      2,
+        STEP_VOTER_ID:      0,
+        STEP_VOTE_CARD:    1,
+        STEP_CONFIRM:       2,
+        STEP_COMPLETE:      3,
         STEP_ERROR:         4,
 
         COUNTDOWN:          10
@@ -151,15 +156,17 @@ var VoteWidget = React.createClass({
     proofOfVoteDownloaded: function()
     {
         this.setState({fetchedVoterCard: true});
-        // this.goToStep(VoteWidget.STEP_COMPLETE);
-        this.goToNextStep();
+        if (this.state.step == VoteWidget.STEP_VOTE_CARD) {
+            this.goToNextStep();
+        }
     },
 
     proofOfVotePrinted: function()
     {
         this.setState({fetchedVoterCard: true});
-        // this.goToStep(VoteWidget.STEP_COMPLETE);
-        this.goToNextStep();
+        if (this.state.step == VoteWidget.STEP_VOTE_CARD) {
+            this.goToNextStep();
+        }
     },
 
     confirmVoteValue: function()
@@ -216,34 +223,42 @@ var VoteWidget = React.createClass({
 
     renderProgressBar: function()
     {
+        var voterCard = this.state.blockchainAccounts.getVoterCardByBillId(
+            this.props.bill.id
+        );
+
         return (
             <div>
                 <Grid>
                     <Row>
-                        <Col xs={4} className="vote-step-progress">
+                        <Col xs={3} className="vote-step-progress">
                             <ProgressBar now={100}
-                                style={{borderRight:'1px solid white',borderRadius:0}}
-                                active={this.state.step == VoteWidget.STEP_VOTER_CARD && this.state.blockchainAccountCreated}
-                                stripped={this.state.step == VoteWidget.STEP_VOTER_CARD && this.state.blockchainAccountCreated}/>
+                                style={{borderRight:'1px solid white',borderRadius:0}}/>
                         </Col>
-                        <Col xs={4} className="vote-step-progress">
+                        <Col xs={3} className="vote-step-progress">
+                            <ProgressBar now={this.state.step >= VoteWidget.STEP_VOTE_CARD ? 100 : 0}
+                                style={{borderRight:'1px solid white',borderRadius:0}}
+                                active={this.state.step == VoteWidget.STEP_VOTE_CARD && this.state.blockchainAccountCreated && !voterCard}
+                                stripped={this.state.step == VoteWidget.STEP_VOTE_CARD && this.state.blockchainAccountCreated && !voterCard}/>
+                        </Col>
+                        <Col xs={3} className="vote-step-progress">
                             <ProgressBar now={this.state.step >= VoteWidget.STEP_CONFIRM ? 100 : 0}
                                 style={{borderRight:'1px solid white',borderRadius:0}}
                                 active={this.state.step == VoteWidget.STEP_CONFIRM && this.state.confirmedVote}
                                 stripped={this.state.step == VoteWidget.STEP_CONFIRM && this.state.confirmedVote}/>
                         </Col>
-                        <Col xs={4} className="vote-step-progress">
+                        <Col xs={3} className="vote-step-progress">
                             <ProgressBar now={this.state.step >= VoteWidget.STEP_COMPLETE ? 100 : 0}
                                 style={{borderRadius:0}}/>
                         </Col>
                     </Row>
                     <Row>
-                        <Col sm={4}>
+                        <Col sm={3}>
                             <div className={classNames({
                                     'vote-step-counter': true,
-                                    'vote-step-counter-active': this.state.step == VoteWidget.STEP_VOTER_CARD,
-                                    'vote-step-counter-done': this.state.step > VoteWidget.STEP_VOTER_CARD,
-                                    'hidden-xs': this.state.step != VoteWidget.STEP_VOTER_CARD
+                                    'vote-step-counter-active': this.state.step == VoteWidget.STEP_VOTER_ID,
+                                    'vote-step-counter-done': this.state.step > VoteWidget.STEP_VOTER_ID,
+                                    'hidden-xs': this.state.step != VoteWidget.STEP_VOTER_ID
                                 })}>
                                 <div className="vote-step-number">1</div>
                                 <span className="vote-step-name">
@@ -251,12 +266,12 @@ var VoteWidget = React.createClass({
                                 </span>
                             </div>
                         </Col>
-                        <Col sm={4}>
+                        <Col sm={3}>
                             <div className={classNames({
                                     'vote-step-counter': true,
-                                    'vote-step-counter-active': this.state.step == VoteWidget.STEP_CONFIRM,
-                                    'vote-step-counter-done': this.state.step > VoteWidget.STEP_CONFIRM,
-                                    'hidden-xs': this.state.step != VoteWidget.STEP_CONFIRM
+                                    'vote-step-counter-active': this.state.step == VoteWidget.STEP_VOTE_CARD,
+                                    'vote-step-counter-done': this.state.step > VoteWidget.STEP_VOTE_CARD,
+                                    'hidden-xs': this.state.step != VoteWidget.STEP_VOTE_CARD
                                 })}>
                                 <div className="vote-step-number">2</div>
                                 <span className="vote-step-name">
@@ -264,7 +279,20 @@ var VoteWidget = React.createClass({
                                 </span>
                             </div>
                         </Col>
-                        <Col sm={4}>
+                        <Col sm={3}>
+                            <div className={classNames({
+                                    'vote-step-counter': true,
+                                    'vote-step-counter-active': this.state.step == VoteWidget.STEP_CONFIRM,
+                                    'vote-step-counter-done': this.state.step > VoteWidget.STEP_CONFIRM,
+                                    'hidden-xs': this.state.step != VoteWidget.STEP_CONFIRM
+                                })}>
+                                <div className="vote-step-number">3</div>
+                                <span className="vote-step-name">
+                                    {this.getIntlMessage('vote.STEP_3_NAME')}
+                                </span>
+                            </div>
+                        </Col>
+                        <Col sm={3}>
                             <div className={classNames({
                                     'vote-step-counter': true,
                                     'vote-step-counter-active': this.state.step == VoteWidget.STEP_COMPLETE,
@@ -273,7 +301,7 @@ var VoteWidget = React.createClass({
                                 })}>
                                 <div className="vote-step-number">4</div>
                                     <span className="vote-step-name">
-                                        {this.getIntlMessage('vote.STEP_3_NAME')}
+                                        {this.getIntlMessage('vote.STEP_4_NAME')}
                                     </span>
                             </div>
                         </Col>
@@ -296,6 +324,9 @@ var VoteWidget = React.createClass({
 
     renderVoterCardPrintButton: function(className)
     {
+        if (!this.state.config.capabilities.vote_card.print)
+            return null;
+
         return (
             <VoterCardPrintButton
                 className={className ? className : 'btn btn-primary'}
@@ -306,6 +337,9 @@ var VoteWidget = React.createClass({
 
     renderVoterCardDownloadButton: function(className)
     {
+        if (!this.state.config.capabilities.vote_card.download)
+            return null;
+
         // var ballot = this.state.ballots.getBallotByBillId(this.props.bill.id);
         // var date = new Date(ballot.time);
         var date = new Date();
@@ -328,6 +362,41 @@ var VoteWidget = React.createClass({
         );
     },
 
+    renderVoterIdDialog: function()
+    {
+        var user = this.state.users.getCurrentUser();
+        var birthdate = new Date(user.birthdate);
+
+        return (
+            <div className="vote-step-description">
+                <Page slug="vote-carte-didentite"/>
+                <p>
+                    <FormattedHTMLMessage
+                        message={this.getIntlMessage('vote.ANNOUNCE_VOTER_ID')}
+                        name={user.firstName + ' ' + user.lastName}
+                        birthdate={birthdate.toLocaleDateString()}/> :
+                </p>
+                <ButtonToolbar className="vote-step-actions">
+                    <Button bsStyle="primary" onClick={(e)=>this.goToNextStep()}>
+                        <FormattedMessage
+                            message={this.getIntlMessage('vote.CONFIRM_VOTER_ID')}
+                            name={user.firstName + ' ' + user.lastName}/>
+                    </Button>
+                    <a href="/api/auth/logout" className="btn btn-default">
+                        <FormattedMessage
+                            message={this.getIntlMessage('vote.DENY_VOTER_ID')}/>
+                    </a>
+                    <Button bsStyle="link"
+                        disabled={this.state.blockchainAccountCreated}
+                        onClick={(e)=>this.props.onCancel(e)}>
+                        {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+                    </Button>
+                </ButtonToolbar>
+                <Hint style="warning" pageSlug="attention-usurpation-didentite"/>
+            </div>
+        );
+    },
+
     renderVoterCardDialog: function()
     {
         var voterCard = this.state.blockchainAccounts.getVoterCardByBillId(
@@ -346,50 +415,28 @@ var VoteWidget = React.createClass({
                             onSuccess={(e)=>this.goToNextStep()}/>
                     </div>
                     : <div>
-                        <p>
-                            Pour garantir l'anonymat de vos votes, ces derniers ne sont pas rattachés
-                            à votre carte d'identité numérique mais à <strong>une carte d'électeur
-                            numérique anonyme dont vous êtes l'unique garant/détenteur</strong>.
-                        </p>
-                        <p>
-                            <strong>Vous pouvez avoir autant de cartes d'électeur numériques que vous le
-                            souhaitez.</strong> Ainsi, vous pouvez :
-                        </p>
-                        <ul>
-                            <li>ré-utiliser la même carte d'électeur pour tous/plusieurs de vos votes ;</li>
-                            <li>ou <strong>créer une nouvelle carte d'électeur pour chaque vote (recommandé)</strong>.</li>
-                        </ul>
-                        <ButtonToolbar className="vote-step-actions">
-                            <Button bsStyle="primary"
-                                disabled={this.state.blockchainAccountCreated}
-                                onClick={this.createNewVoterCard}>
-                                Créer une nouvelle carte d'électeur pour ce vote (recommandé)
-                            </Button>
-                            <Button bsStyle="default"
-                                disabled={this.state.blockchainAccountCreated}
-                                onClick={(e)=>this.setState({showVoterCardReader:true})}>
-                                Utiliser une carte d'électeur existante
-                            </Button>
-                            <Button bsStyle="link"
-                                disabled={this.state.blockchainAccountCreated}
-                                onClick={(e)=>this.props.onCancel(e)}>
-                                {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
-                            </Button>
-                        </ButtonToolbar>
-                        <Hint>
-                            <h3>Pour votre sécurité et votre anonymat...</h3>
-                            <p>
-                                A chaque fois que vous ré-utilisez la même carte d'électeur
-                                numérique, votre vote numérique y est rattaché. Vos votes seront
-                                toujours anonymes, mais il sera alors possible à quiconque de
-                                consulter la liste de tous les votes effectués avec cette carte
-                                d'électeur numérique.
-                            </p>
-                            <p>
-                                Ainsi, il est recommandé de créer une nouvelle carte d'électeur
-                                numérique pour chaque vote.
-                            </p>
-                        </Hint>
+                        <Page slug="vote-carte-de-vote"/>
+                        {!this.state.blockchainAccountCreated
+                            ? <ButtonToolbar className="vote-step-actions">
+                                <Button bsStyle="primary"
+                                    onClick={this.createNewVoterCard}>
+                                    <FormattedMessage
+                                        message={this.getIntlMessage('vote.CREATE_NEW_VOTE_CARD')}/>
+                                </Button>
+                                <Button bsStyle="default"
+                                    onClick={(e)=>this.setState({showVoterCardReader:true})}>
+                                    <FormattedMessage
+                                        message={this.getIntlMessage('vote.USE_EXISTING_VOTE_CARD')}/>
+                                </Button>
+                                <Button bsStyle="link"
+                                    onClick={(e)=>this.props.onCancel(e)}>
+                                    {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+                                </Button>
+                            </ButtonToolbar>
+                            : <ButtonToolbar className="vote-step-actions">
+                                <LoadingIndicator text={this.getIntlMessage('vote.CREATING_NEW_VOTE_CARD')}/>
+                            </ButtonToolbar>}
+                        <Hint pageSlug="astuce-carte-de-vote-a-usage-unique"/>
                     </div>}
             </div>
         );
@@ -402,7 +449,7 @@ var VoteWidget = React.createClass({
         return (
             <div>
                 <div className="vote-step-description">
-                    <Page slug="vote-preuve-de-vote"/>
+                    <Page slug="vote-nouvelle-carte-de-vote"/>
                     <ButtonToolbar className="vote-step-actions">
                         {this.renderVoterCardPrintButton()}
                         {this.renderVoterCardDownloadButton()}
@@ -420,7 +467,7 @@ var VoteWidget = React.createClass({
                         </Button>
                     </ButtonToolbar>
                     <Hint style="warning"
-                        pageSlug="attention-recuperer-preuve-de-vote-1"/>
+                        pageSlug="attention-recuperer-carte-de-vote-1"/>
                 </div>
             </div>
         );
@@ -490,7 +537,15 @@ var VoteWidget = React.createClass({
                             </div>}
                     </ButtonToolbar>
                 </div>
-                <Hint style="warning" pageSlug="attention-impossible-de-revenir-en-arriere"/>
+                {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
+                    ? <Hint style="warning"
+                        pageSlug="attention-recuperer-carte-de-vote-2">
+                        <ButtonToolbar>
+                            {this.renderVoterCardPrintButton('btn btn-warning')}
+                            {this.renderVoterCardDownloadButton('btn btn-warning')}
+                        </ButtonToolbar>
+                    </Hint>
+                    : <span/>}
             </div>
         );
     },
@@ -528,7 +583,7 @@ var VoteWidget = React.createClass({
                 </div>
                 {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
                     ? <Hint style="warning"
-                        pageSlug="attention-recuperer-preuve-de-vote-3">
+                        pageSlug="attention-recuperer-carte-de-vote-3">
                         <ButtonToolbar>
                             {this.renderVoterCardPrintButton('btn btn-warning')}
                             {this.renderVoterCardDownloadButton('btn btn-warning')}
@@ -552,13 +607,14 @@ var VoteWidget = React.createClass({
         var stepTitles = [
             this.getIntlMessage('vote.STEP_1_TITLE'),
             this.getIntlMessage('vote.STEP_2_TITLE'),
-            this.getIntlMessage('vote.STEP_3_TITLE')
+            this.getIntlMessage('vote.STEP_3_TITLE'),
+            this.getIntlMessage('vote.STEP_4_TITLE')
         ];
 
         return (
             <FormattedMessage message={this.getIntlMessage('vote.STEP_TITLE')}
                 step={this.state.step + 1}
-                total="3"
+                total="4"
                 title={stepTitles[this.state.step]}/>
         );
     },
@@ -599,7 +655,7 @@ var VoteWidget = React.createClass({
     {
         return (
             <div>
-                {this.state.step == VoteWidget.STEP_VOTER_CARD
+                {this.state.step == VoteWidget.STEP_VOTE_CARD
                     ? this.renderVoterCardModalFooter()
                     : <span/>}
                 {this.state.step == VoteWidget.STEP_COMPLETE
@@ -612,7 +668,7 @@ var VoteWidget = React.createClass({
     render: function()
     {
         var showModalFooter = this.state.step == VoteWidget.STEP_COMPLETE
-            || this.state.step == VoteWidget.STEP_VOTER_CARD;
+            || this.state.step == VoteWidget.STEP_VOTE_CARD;
 
         return (
             <Modal bsSize="large" show={true} dialogClassName="vote-widget">
@@ -623,7 +679,10 @@ var VoteWidget = React.createClass({
                 </Modal.Header>
                 {this.renderProgressBar()}
                 <Modal.Body>
-                    {this.state.step == VoteWidget.STEP_VOTER_CARD
+                    {this.state.step == VoteWidget.STEP_VOTER_ID
+                        ? this.renderVoterIdDialog()
+                        : <span/>}
+                    {this.state.step == VoteWidget.STEP_VOTE_CARD
                         ? this.renderVoterCardDialog()
                         : <span/>}
                     {this.state.step == VoteWidget.STEP_CONFIRM

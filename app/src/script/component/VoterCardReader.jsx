@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
+var Reflux = require('reflux');
 var QRCodeReader = require('qrcode-reader');
 var Base64 = require('js-base64').Base64;
 
@@ -10,6 +11,8 @@ var BlockchainAccountAction = require('../action/BlockchainAccountAction');
 
 var PropTypes = React.PropTypes;
 
+var ConfigStore = require('../store/ConfigStore');
+
 var Button = ReactBootstrap.Button,
     ButtonToolbar = ReactBootstrap.ButtonToolbar,
     Col = ReactBootstrap.Col,
@@ -18,7 +21,8 @@ var Button = ReactBootstrap.Button,
 var VoterCardReader = React.createClass({
 
     mixins: [
-        ReactIntl.IntlMixin
+        ReactIntl.IntlMixin,
+        Reflux.connect(ConfigStore, 'config')
     ],
 
     getInitialState: function() {
@@ -75,19 +79,25 @@ var VoterCardReader = React.createClass({
         return (
             <Row className="voter-card-reader">
                 <ButtonToolbar>
-                    <Col xs={12} sm={6}>
-                        <Button className="btn btn-primary"
-                            onClick={(e)=>this.setState({readFromVideo:true})}>
-                            {this.getIntlMessage('proofOfVoteReader.SCAN_PRINTED_FILE')}
-                        </Button>
+                    <Col xs={12} sm={this.state.config.capabilities.vote_card.download ? 6 : 12}>
+                        {this.state.config.capabilities.vote_card.scan
+                            ? <Button className="btn btn-primary"
+                                onClick={(e)=>this.setState({readFromVideo:true})}>
+                                {this.getIntlMessage('proofOfVoteReader.SCAN_PRINTED_FILE')}
+                            </Button>
+                            : <span/>}
                     </Col>
-                    <Col xs={12} sm={6}>
-                        <input type="file" name="file" id="file"
-                            style={{display:'none'}}
-                            onChange={this.onFileInputChange}/>
-                        <label htmlFor="file" className="btn btn-primary">
-                            {this.getIntlMessage('proofOfVoteReader.SEND_DOWNLOADED_FILE')}
-                        </label>
+                    <Col xs={12} sm={this.state.config.capabilities.vote_card.scan ? 6 : 12}>
+                        {this.state.config.capabilities.vote_card.download
+                            ? <span>
+                                <input type="file" name="file" id="file"
+                                    style={{display:'none'}}
+                                    onChange={this.onFileInputChange}/>
+                                <label htmlFor="file" className="btn btn-primary">
+                                    {this.getIntlMessage('proofOfVoteReader.SEND_DOWNLOADED_FILE')}
+                                </label>
+                            </span>
+                            : <span/>}
                     </Col>
                 </ButtonToolbar>
             </Row>

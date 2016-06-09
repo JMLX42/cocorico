@@ -54,7 +54,6 @@ var VoteButtonBar = React.createClass({
     componentWillMount: function()
     {
         ServiceStatusAction.showStatus();
-        VoteAction.startPollingBallot(this.props.bill.id)
     },
 
     componentDidMount: function()
@@ -230,6 +229,9 @@ var VoteButtonBar = React.createClass({
                     </p>
                 );
             }
+        }
+        else {
+            VoteAction.startPollingBallot(this.props.bill.id);
         }
 
         // If the app takes some time to retrieve the ballot (ex: busy server),

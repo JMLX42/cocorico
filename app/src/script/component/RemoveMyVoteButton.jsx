@@ -5,7 +5,7 @@ var Reflux = require('reflux');
 
 var VoteAction = require('../action/VoteAction');
 
-var BallotStore = require('../store/BallotStore');
+var BlockchainAccountStore = require('../store/BlockchainAccountStore');
 
 var VoterCardReaderModal = require('./VoterCardReaderModal'),
     LoadingIndicator = require('./LoadingIndicator');
@@ -17,12 +17,13 @@ var Button = ReactBootstrap.Button;
 var RemoveMyVoteButton = React.createClass({
 
     mixins: [
-        ReactIntl.IntlMixin
+        ReactIntl.IntlMixin,
+        Reflux.connect(BlockchainAccountStore, 'blockchainAccounts')
     ],
 
     getDefaultProps: function() {
         return {
-            proofOfVoteRequired: true
+            voterCardRequired: true
         };
     },
 
@@ -34,7 +35,7 @@ var RemoveMyVoteButton = React.createClass({
 
     handleClick: function()
     {
-        if (this.props.proofOfVoteRequired) {
+        if (this.props.voterCardRequired) {
             this.setState({
                 showVoterCardReader: true
             });
@@ -50,7 +51,7 @@ var RemoveMyVoteButton = React.createClass({
         // }
     },
 
-    proofOfVoteReaderSuccess: function(data) {
+    voterCardReaderSuccess: function(data) {
         this.setState({
             showVoterCardReader: false,
             unvoting: true
@@ -60,10 +61,13 @@ var RemoveMyVoteButton = React.createClass({
     },
 
     removeVote: function() {
-        VoteAction.unvote(this.props.bill.id);
+        VoteAction.unvote(
+            this.state.blockchainAccounts.getKeystoreByBillId(this.props.bill.id),
+            this.props.bill.id
+        );
     },
 
-    proofOfVoteReaderCancelled: function() {
+    voterCardReaderCancelled: function() {
         this.setState({
             showVoterCardReader: false
         });
@@ -78,8 +82,9 @@ var RemoveMyVoteButton = React.createClass({
                     : this.getIntlMessage('vote.REMOVE_MY_VOTE')}
                 {this.state.showVoterCardReader
                     ? <VoterCardReaderModal
-                            onSuccess={this.proofOfVoteReaderSuccess}
-                            onCancel={this.proofOfVoteReaderCancelled}/>
+                        billId={this.props.bill.id}
+                        onSuccess={this.voterCardReaderSuccess}
+                        onCancel={this.voterCardReaderCancelled}/>
                     : <span/>}
             </Button>
 		);

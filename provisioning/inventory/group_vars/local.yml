@@ -10,7 +10,7 @@ capabilities:
     create: no
     edit: no
     read: yes
-    favorite: yes
+    favorite: no
     vote: blockchain
   step:
     draft: yes
@@ -19,19 +19,23 @@ capabilities:
     vote: yes
     published: yes
   proposal:
-    create: yes
-    read: yes
-    vote: yes
+    create: no
+    read: no
+    vote: no
   article:
-    vote: yes
+    vote: no
   source:
-    create: yes
-    read: yes
-    vote: yes
+    create: no
+    read: no
+    vote: no
   argument:
-    create: yes
-    read: yes
-    vote: yes
+    create: no
+    read: no
+    vote: no
+  vote_card:
+    print: no
+    scan: no
+    download: yes
 
 mongodb_database_name: "{{ project_name }}"
 
@@ -59,5 +63,5 @@ ethereum_rpc_private_host: 127.0.0.1
 ethereum_rpc_private_port: 8545
 ethereum_rpc_public_url: "{{ http_protocol_prefix }}://{{ front_web_public_host }}/blockchain/"
 ethereum_datadir: "{{ project_dir }}/blockchain/data"
-ethereum_testrpc: yes
+ethereum_testrpc: no
 ethereum_mine_on_boot: yes

@@ -32,12 +32,13 @@ var VoterCardReaderModal = React.createClass({
 
     render: function() {
         return (
-            <Modal show={true}>
+            <Modal show={true} bsSize="large">
                 <Modal.Header>
                     {this.getIntlMessage('proofOfVoteReader.PROVIDE_VOTER_CARD')}
                 </Modal.Header>
                 <Modal.Body>
-                    <VoterCardReader onSuccess={this.props.onSuccess}
+                    <VoterCardReader billId={this.props.billId}
+                        onSuccess={this.props.onSuccess}
                         onError={this.props.onError}/>
                 </Modal.Body>
                 <Modal.Footer>

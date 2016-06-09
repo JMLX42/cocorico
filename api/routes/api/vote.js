@@ -256,7 +256,7 @@ exports.vote = function(req, res)
     if (!config.capabilities.bill.vote)
         return res.status(403).send();
 
-    var signedTx = new EthereumTx(req.params.transaction);
+    var signedTx = new EthereumTx(req.body.transaction);
     var voteContractAddress = EthereumUtil.bufferToHex(signedTx.to);
 
 	Bill.model.findOne({voteContractAddress:voteContractAddress})
@@ -301,7 +301,7 @@ exports.vote = function(req, res)
                         pushBallotMessageOnQueue(
                             {
                                 id: ballot.id,
-                                transaction: req.params.transaction,
+                                transaction: req.body.transaction,
                                 voteContractAddress: bill.voteContractAddress,
                                 voteContractABI: JSON.parse(bill.voteContractABI)
                             },

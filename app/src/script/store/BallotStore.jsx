@@ -3,6 +3,7 @@ var jquery = require('jquery');
 var lightwallet = require('eth-lightwallet');
 var Tx = require('ethereumjs-tx');
 var async = require('async');
+var bcrypt = require('bcryptjs');
 
 var BillAction = require('../action/BillAction'),
     VoteAction = require('../action/VoteAction');
@@ -111,8 +112,12 @@ module.exports = Reflux.createStore({
             value
         );
 
-        jquery.get(
-            '/api/vote/' + tx,
+        jquery.post(
+            '/api/vote/',
+            {
+                transaction: tx,
+                // voterCardHash: bcrypt.hashSync(keystore.serialize(), 10),
+            },
             (data) => {
                 console.log('vote transaction sent');
                 this._ballots[bill.id] = data.ballot;
@@ -121,25 +126,32 @@ module.exports = Reflux.createStore({
         );
     },
 
-    _removeVote: function(billId, callback)
+    _removeVote: function(keystore, billId, callback)
     {
-        jquery.get(
+        jquery.post(
             '/api/vote/remove/' + billId,
+            {
+                // voterCardHash: keystore
+                //     ? bcrypt.hashSync(keystore.serialize(), 10)
+                //     : null,
+                transaction: null // FIXME: generate the actual blockchain transaction
+            },
             (data) => {
                 // No ballot object => ballot is loading. To make sure the
                 // removed ballot does not make the app hang waiting for a
                 // ballot object, we create a dummy ballot object with an error
                 // state.
                 this._ballots[billId] = {error:'removed'};
+
                 if (callback)
                     callback(data);
             }
         );
     },
 
-    _unvote: function(billId)
+    _unvote: function(keystore, billId)
     {
-        this._removeVote(billId, (data) => this.trigger(this));
+        this._removeVote(keystore, billId, (data) => this.trigger(this));
     },
 
     _startPollingBallot: function(billId)
