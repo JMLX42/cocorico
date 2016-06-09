@@ -50,13 +50,17 @@ module.exports = React.createClass({
     renderHeader: function(title, level)
     {
         return (
-            <div>
-                <a name={title} className="bill-part-header-anchor"></a>
-                <Link to={location.pathname + '#' + title}>
-                    {this.renderHeaderTag(title, level)}
-                </Link>
-            </div>
+            this.renderHeaderTag(title, level)
         );
+
+        // return (
+        //     <div>
+        //         <a name={title} className="bill-part-header-anchor"></a>
+        //         <Link to={location.pathname + '#' + title}>
+        //             {this.renderHeaderTag(title, level)}
+        //         </Link>
+        //     </div>
+        // );
     },
 
     getSourceByURL: function(url)
@@ -76,6 +80,21 @@ module.exports = React.createClass({
                     {para.map((part) => {
                         if (typeof part == "string")
                             return part;
+
+                        if (typeof part == "object" && part[0] == "em")
+                            return (
+                                <em>
+                                    {part[1]}
+                                </em>
+                            );
+
+                        if (typeof part == "object" && part[0] == "strong")
+                            return (
+                                <strong>
+                                    {part[1]}
+                                </strong>
+                            );
+
                         if (typeof part == "object" && part[0] == "link")
                         {
                             var source = this.getSourceByURL(part[1].href);
