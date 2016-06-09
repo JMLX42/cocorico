@@ -21,17 +21,17 @@ var Footer = React.createClass({
                     <Row>
                         <Col md={12}>
                             <ul className="list-unstyled list-inline">
-                                <li>
+                                <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
                                     <Link to={this.getIntlMessage('route.PRIVACY_POLICY')}>
                                         {this.getIntlMessage('footer.PRIVACY_POLICY')}
                                     </Link>
                                 </li>
-                                <li>
+                                <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
                                     <a href="https://github.com/promethe42/cocorico">
                                         {this.getIntlMessage('footer.SOURCE_CODE')}
                                     </a>
                                 </li>
-                                <li>
+                                <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
                                     <Link to={this.getIntlMessage('route.SERVICE_STATUS')}>
                                         {this.getIntlMessage('footer.SERVICE_STATUS')}
                                     </Link>
