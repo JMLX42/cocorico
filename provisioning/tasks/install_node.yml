@@ -30,6 +30,8 @@
     - { name: forever, version: 0.14.2 }
     - { name: nodemon, version: 1.3.7 }
     - { name: json, version: 9.0.3 }
+    - { name: watchify, version: 3.7.0 }
+    - { name: browserify, version: 11.2.0 }
   register: result
   failed_when: no
   changed_when: result.stdout != "{{ item.version }}"
