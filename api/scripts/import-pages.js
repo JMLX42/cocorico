@@ -52,13 +52,13 @@ module.exports = function(done)
                     var pageData = JSON.parse(fs.readFileSync(pageFile));
 
                     if (pageData.contentType == 'HTML')
-                        pageData.html = fs.readFileSync('./pages/' + pageData.slug + '.html', 'utf8');
+                        pageData.html = fs.readFileSync('./db/pages/' + pageData.slug + '.html', 'utf8');
                     else
-                        pageData.markdown = { md : fs.readFileSync('./pages/' + pageData.slug + '.md', 'utf8')};
+                        pageData.markdown = { md : fs.readFileSync('./db/pages/' + pageData.slug + '.md', 'utf8')};
 
                     Page.model.update(
                         {slug: pageData.slug},
-                        page,
+                        pageData,
                         {upsert: true},
                         (err) => callback(err)
                     );
