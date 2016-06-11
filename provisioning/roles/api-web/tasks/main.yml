@@ -52,7 +52,6 @@
     chdir: "{{ cocorico_api_dir }}"
   register: result
   failed_when: result.stderr
-  when: not is_development_environment
 
 - name: install upstart script
   template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
