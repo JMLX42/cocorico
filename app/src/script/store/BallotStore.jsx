@@ -3,7 +3,7 @@ var jquery = require('jquery');
 var lightwallet = require('eth-lightwallet');
 var Tx = require('ethereumjs-tx');
 var async = require('async');
-var bcrypt = require('bcryptjs');
+// var bcrypt = require('bcryptjs');
 
 var BillAction = require('../action/BillAction'),
     VoteAction = require('../action/VoteAction');
