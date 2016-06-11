@@ -28,7 +28,7 @@ Votre identifiant unique est utilisé pour savoir quelle contribution vous appar
 
 Si vous ne contribuez pas, aucune de ces données n'est enregistrée. Même si vous vous connectez.
 
-## Comment mon anonymat est-il garantit ?
+## Comment mon anonymat est-il garanti ?
 
 Tout d'abord vos nom, prénom et date de naissance ne sont _**jamais**_ enregistrés.
 
