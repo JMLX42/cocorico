@@ -112,7 +112,7 @@ var Bill = React.createClass({
 
         return (
             <Tabs animation={false} activeKey={this.state.activeKey} onSelect={this.tabSelectHandler} className="hidden-xs">
-                {this.state.config.capabilities.argument.read && bill.status == 'debate' || bill.status == 'vote' || bill.status == 'published'
+                {this.state.config.capabilities.argument.read && (bill.status == 'debate' || bill.status == 'vote' || bill.status == 'published')
                     ? <Tab eventKey={eventKey++} title={
                             <div>
                                 <span className="icon-chat"/>
