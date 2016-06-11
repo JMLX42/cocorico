@@ -90,4 +90,6 @@ exports = module.exports = function(app) {
 	app.get('/user/bills', keystone.middleware.api, isAuthenticated, routes.api.user.bills);
 
 	app.get('/service/status', keystone.middleware.api, routes.api.service.getStatus);
+
+	app.get('/redirect', keystone.middleware.api, routes.api.redirect.redirect);
 };
