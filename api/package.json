@@ -27,7 +27,8 @@
     "web3": "^0.16.0",
     "ethereumjs-tx": "^1.1.1",
     "ethereumjs-util": "^4.0.1",
-    "html-entities": "1.2.0"
+    "html-entities": "1.2.0",
+    "follow-redirects": "0.2.0"
   },
   "engines": {
     "node": ">=0.10.22",

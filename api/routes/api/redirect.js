@@ -1,6 +1,6 @@
 var config = require('../../config.json');
 
-var http = require('http'),
+var http = require('follow-redirects').http,
     url = require('url');
 
 exports.redirect = function(req, res)
@@ -10,12 +10,12 @@ exports.redirect = function(req, res)
 
 exports.proxy = function(req, res)
 {
-    if (!req.headers['referer'])
-        return res.status(400).send();
-
-    var ref_parts = url.parse(req.headers['referer'], true);
-    if (ref_parts.host != config.hostname)
-        return res.status(400).send();
+    // if (!req.headers['referer'])
+    //     return res.status(400).send();
+    //
+    // var ref_parts = url.parse(req.headers['referer'], true);
+    // if (ref_parts.host != config.hostname)
+    //     return res.status(400).send();
 
     var url_parts = url.parse(req.query.url, true);
     var query = url_parts.query;
