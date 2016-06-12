@@ -3,7 +3,6 @@ var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var ReactRouter = require('react-router');
 var Reflux = require('reflux');
-var $ = require('jquery');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin'),
     ProxyMixin = require('../mixin/ProxyMixin');
@@ -36,6 +35,7 @@ var SourceTab = React.createClass({
         ForceAuthMixin,
         ProxyMixin,
         ReactIntl.IntlMixin,
+        Reflux.ListenerMixin,
         Reflux.connect(SourceStore, 'sources'),
         Reflux.connect(ConfigStore, 'config')
     ],
@@ -43,12 +43,32 @@ var SourceTab = React.createClass({
     getInitialState: function() {
         return {
             showAddSourceForm: false,
-            newSourceURL: ''
+            newSourceURL: '',
+            moderatedSourcesToShow: []
         };
     },
 
     componentWillMount: function() {
         BillAction.showSources(this.props.bill.id);
+
+        this._unsubSourceLike = SourceStore.listen((store) => {
+            if (!this.state.sources)
+                return;
+            
+            var sources = this.state.sources.getSourcesByBillId(this.props.bill.id);
+            var moderatedSources = this.state.moderatedSourcesToShow;
+
+            for (var source of sources) {
+                if (source.score >= 0  && moderatedSources.indexOf(source.id) >= 0) {
+                    moderatedSources.splice(moderatedSources.indexOf(source.id), 1);
+                    this.setState({moderatedSourcesToShow: moderatedSources});
+                }
+            }
+        });
+    },
+
+    componentWillUnmount: function() {
+        this._unsubSourceLike();
     },
 
     addSourceButtonClickHandler: function(event) {
@@ -63,48 +83,107 @@ var SourceTab = React.createClass({
         this.setState({showAddSourceForm: false});
     },
 
+    showModeratedSource: function(source) {
+        var sources = this.state.moderatedSourcesToShow;
+
+        sources.push(source.id);
+        this.setState({moderatedSourcesToShow: sources});
+    },
+
+    hideModeratedSource: function(source) {
+        var sources = this.state.moderatedSourcesToShow;
+
+        sources.splice(sources.indexOf(source.id), 1);
+        this.setState({moderatedSourcesToShow: sources});
+    },
+
+    renderModeratedSourceItem: function(source) {
+        return (
+            <li className="source-item source-item-moderated" key={source.url}>
+                <Row>
+                    <Col md={2}>
+                        <div className="source-image text-center">
+                            <i className="icon-thumb_down"/>
+                        </div>
+                    </Col>
+                    <Col md={10}>
+                        <span className="hint">
+                            Ce contenu a reçu trop d'avis négatifs de la communauté.
+                        </span>
+                        &nbsp;<a onClick={(e) => this.showModeratedSource(source)}>
+                            Cliquez ici pour l'afficher.
+                        </a>
+                    </Col>
+                </Row>
+            </li>
+        );
+    },
+
+    renderSourceActionList: function(source) {
+        return (
+            <ul className="pull-right list-unstyled list-inline">
+                {this.state.moderatedSourcesToShow.indexOf(source.id) >= 0
+                    ? <li>
+                        <a onClick={(e) => this.hideModeratedSource(source)} className="small">
+                            <i className="icon-eye-blocked"/>&nbsp;Masquer
+                        </a>
+                    </li>
+                    : null}
+                {source.type == 'activity' && source.latitude != 0.0 && source.longitude != 0.0
+                    ? <li>
+                        <RedirectLink target="_blank" className="small"
+                            href={'https://maps.google.com/?q=' + source.latitude + ',' + source.longitude}>
+                            <i className="icon-map"/>&nbsp;Voir sur la carte
+                        </RedirectLink>
+                    </li>
+                    : null}
+            </ul>
+        );
+    },
+
+    renderSourceItem: function(source) {
+        var description = source.description.length > 200
+            ? source.description.substr(0, 200) + '...'
+            : source.description;
+
+        return (
+            <li className="source-item" key={source.url}>
+                <Row>
+                    <Col md={2}>
+                        <RedirectLink href={source.url} target="_blank">
+                            <div style={{backgroundImage: "url('" + this.proxifyURL(source.image) + "')"}}
+                                className="source-image text-center">
+                                    {source.type == 'video'
+                                    ? <i className="icon-play"/>
+                                    : null}
+                            </div>
+                        </RedirectLink>
+                    </Col>
+                    <Col md={10}>
+                        <RedirectLink href={source.url} className="source-link" target="_blank">
+                            {source.title ? source.title : source.url}
+                        </RedirectLink>
+                        <LikeButtons likeAction={SourceAction.like}
+                            resource={source}
+                            likeButtonEnabled={this.props.editable}
+                            dislikeButtonEnabled={this.props.editable}/>
+                        {this.renderSourceActionList(source)}
+                        <p>
+                            {description}
+                        </p>
+                    </Col>
+                </Row>
+            </li>
+        )
+    },
+
     renderSourceList: function(sources) {
         return (
             <ul className="source-list">
                 {sources.sort((a, b)=> b.score - a.score).map((source) => {
-                    var description = source.description.length > 200
-                        ? source.description.substr(0, 200) + '...'
-                        : source.description;
-
-                    return <li className="source-item" key={source.url}>
-                        <Row>
-                            <Col md={2}>
-                                <RedirectLink href={source.url} target="_blank">
-                                    <div style={{backgroundImage: "url('" + this.proxifyURL(source.image) + "')"}}
-                                        className="source-image text-center">
-                                            {source.type == 'video'
-                                            ? <i className="icon-play"/>
-                                            : null}
-                                    </div>
-                                </RedirectLink>
-                            </Col>
-                            <Col md={10}>
-                                <RedirectLink href={source.url} className="source-link" target="_blank">
-                                    {source.title ? source.title : source.url}
-                                </RedirectLink>
-                                <LikeButtons likeAction={SourceAction.like}
-                                    resource={source}
-                                    likeButtonEnabled={this.props.editable}
-                                    dislikeButtonEnabled={this.props.editable}/>
-                                <span className="pull-right">
-                                    {source.type == 'activity' && source.latitude != 0.0 && source.longitude != 0.0
-                                        ? <RedirectLink target="_blank" className="small"
-                                            href={'https://maps.google.com/?q=' + source.latitude + ',' + source.longitude}>
-                                            <i className="icon-map"/>&nbsp;Voir sur la carte
-                                        </RedirectLink>
-                                        : null}
-                                </span>
-                                <p>
-                                    {description}
-                                </p>
-                            </Col>
-                        </Row>
-                    </li>;
+                    return source.score >= 0 || this.state.moderatedSourcesToShow.indexOf(source.id) >= 0
+                        ? this.renderSourceItem(source)
+                        : this.renderModeratedSourceItem(source);
                 })}
             </ul>
         );

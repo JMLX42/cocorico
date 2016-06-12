@@ -46,6 +46,7 @@ body {
 
 a {
     // text-decoration: underline;
+    cursor: pointer;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -253,10 +254,6 @@ li.active {
 }
 
 .bill {
-    .tab-content {
-        padding-top: 20px;
-    }
-
     .nav-tabs {
         font-size: @font-size-large;
 
@@ -857,7 +854,7 @@ ul.source-list {
     list-style: none;
     padding: 0;
 
-    li {
+    &> li {
         margin: 10px 0;
 
         .source-image {
@@ -867,21 +864,30 @@ ul.source-list {
             background-position: center;
             size: 30px;
             border: 1px solid @cocorico-grey;
+            background-color: @cocorico-light-grey;
+
+            .icon-thumb_down {
+                color: @cocorico-grey;
+                font-size: 50px;
+                width: 100%;
+                line-height: 55px;
+                display: inline-block;
+            }
+
+            .icon-play {
+                color: white;
+                font-size: 50px;
+                margin-top: 2px;
+                width: 100%;
+                display: inline-block;
+                text-shadow: 0px 0px 2px black;
+            }
         }
 
         p {
             .small();
             margin: 0;
             padding: 0;
-        }
-
-        .icon-play {
-            color: white;
-            font-size: 50px;
-            width: 100%;
-            margin-top: 2px;
-            display: inline-block;
-            text-shadow: 0px 0px 2px black;
         }
     }
 }
