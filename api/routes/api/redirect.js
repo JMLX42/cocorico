@@ -5,17 +5,24 @@ var http = require('follow-redirects').http,
 
 exports.redirect = function(req, res)
 {
+    if (!req.headers['referer'])
+        return res.status(400).send();
+
+    var ref_parts = url.parse(req.headers['referer'], true);
+    if (ref_parts.host != config.hostname)
+        return res.status(400).send();
+    
     return res.redirect(301, req.query.url);
 }
 
 exports.proxy = function(req, res)
 {
-    // if (!req.headers['referer'])
-    //     return res.status(400).send();
-    //
-    // var ref_parts = url.parse(req.headers['referer'], true);
-    // if (ref_parts.host != config.hostname)
-    //     return res.status(400).send();
+    if (!req.headers['referer'])
+        return res.status(400).send();
+
+    var ref_parts = url.parse(req.headers['referer'], true);
+    if (ref_parts.host != config.hostname)
+        return res.status(400).send();
 
     var url_parts = url.parse(req.query.url, true);
     var query = url_parts.query;
