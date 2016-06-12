@@ -171,7 +171,7 @@ var SourceTab = React.createClass({
                         {this.renderSourceActionList(source)}
                         <p>
                             {!!description
-                                ? description
+                                ? '"' + description + '"'
                                 : <span className="hint">Pas de description.</span>}
                         </p>
                     </Col>
