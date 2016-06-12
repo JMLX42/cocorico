@@ -90,6 +90,7 @@ var Intl = {
 			COMMUNITY_SOURCES: 'Sources ajoutées par la communauté',
 			NO_SOURCE: 'Aucune source.',
 			ADD_SOURCE_BUTTON: 'Ajouter une source',
+			ADD_SOURCE_CANCEL_BUTTON: 'Annuler',
 			ADD_SOURCE_FORM_TITLE: 'Ajouter une source',
 			ADD_SOURCE_LOGIN: 'Vous devez être connecté pour noter ou proposer une source.',
 			ADD_SOURCE_URL_HINT: 'Adresse Web de la source que vous désirez ajouter :',

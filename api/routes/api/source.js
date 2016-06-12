@@ -8,8 +8,8 @@ var Source = keystone.list('Source'),
     Bill = keystone.list('Bill');
 
 var BillHelper = require('../../helpers/BillHelper'),
-    LikeHelper = require('../../helpers/LikeHelper'),
-    SourceHelper = require('../../helpers/SourceHelper');
+    SourceHelper = require('../../helpers/SourceHelper'),
+    LikeHelper = require('../../helpers/LikeHelper');
 
 exports.addLike = LikeHelper.getAddLikeFunc(Source, 'ERROR_SOURCE_NOT_FOUND', 'ERROR_SOURCE_ALREADY_LIKED');
 
@@ -77,22 +77,25 @@ exports.add = function(req, res)
                             error: 'ERROR_SOURCE_ALREADY_EXISTS'
                         });
 
-                    SourceHelper.fetchPageTitle(
+                    SourceHelper.fetchURLMeta(
                         decodeURIComponent(req.body.url),
-                        function(error, result)
-                        {
-                            if (error)
+                        (err, meta) => {
+                            if (err)
                                 return res.apiError('invalid source URL');
 
                             var newSource = Source.model({
-                                title: error ? '' : result,
-                                url: req.body.url,
+                                title: meta.title,
+                                url: meta.url,
                                 author: bcrypt.hashSync(req.user.sub, 10),
-                                bill: bill
+                                bill: bill.id,
+                                description: meta.description,
+                                image: meta.image,
+                                type: meta.type,
+                                latitude: meta.latitude,
+                                longitude: meta.longitude
                             });
 
-                            newSource.save(function(err)
-                            {
+                            newSource.save((err) => {
                                 if (err)
                                     return res.apiError('database error', err);
 

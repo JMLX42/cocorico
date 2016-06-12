@@ -25,9 +25,11 @@ capabilities:
   article:
     vote: no
   source:
-    create: no
-    read: no
-    vote: no
+    create: yes
+    read: yes
+    vote: yes
+    community: yes
+    bill: no
   argument:
     create: no
     read: no

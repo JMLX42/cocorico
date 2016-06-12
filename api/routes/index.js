@@ -92,4 +92,5 @@ exports = module.exports = function(app) {
 	app.get('/service/status', keystone.middleware.api, routes.api.service.getStatus);
 
 	app.get('/redirect', keystone.middleware.api, routes.api.redirect.redirect);
+	app.get('/redirect/proxy', routes.api.redirect.proxy);
 };

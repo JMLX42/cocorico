@@ -59,6 +59,10 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+img {
+    max-width: 100%;
+}
+
 .nav-tabs > li,
 .panel-title {
     [class^="icon-"], [class*=" icon-"] {
@@ -76,9 +80,15 @@ h1, h2, h3, h4, h5, h6 {
 
     [class^="icon-"], [class*=" icon-"] {
         &:before {
-            margin-right: 10px;
+            margin-right: 5px;
         }
     }
+}
+
+.well {
+    box-shadow: none;
+    background-color: @cocorico-light-grey;
+    border-color: @cocorico-grey;
 }
 
 .modal-footer .btn-toolbar .btn {
@@ -839,6 +849,39 @@ ul.argument-list {
     @media (min-width: (@screen-xs-max)) {
         .btn {
             max-width: 300px;
+        }
+    }
+}
+
+ul.source-list {
+    list-style: none;
+    padding: 0;
+
+    li {
+        margin: 10px 0;
+
+        .source-image {
+            width: 100%;
+            height: 75px;
+            background-size: cover;
+            background-position: center;
+            size: 30px;
+            border: 1px solid @cocorico-grey;
+        }
+
+        p {
+            .small();
+            margin: 0;
+            padding: 0;
+        }
+
+        .icon-play {
+            color: white;
+            font-size: 50px;
+            width: 100%;
+            margin-top: 2px;
+            display: inline-block;
+            text-shadow: 0px 0px 2px black;
         }
     }
 }

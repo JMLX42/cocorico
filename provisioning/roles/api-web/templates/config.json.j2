@@ -4,6 +4,7 @@
 {% else %}
     "env": "production",
 {% endif %}
+    "hostname" : "{{ front_web_public_host }}",
     "mongo" : {
       "uri" : "mongodb://{{ home_db_private_host }}/{{ mongodb_database_name }}"
     },

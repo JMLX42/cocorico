@@ -1,10 +1,55 @@
 {
 	"metadata": {
 		"name": "Cocorico",
-		"lastOpened": 1460383761065,
-		"created": 1460383754852
+		"lastOpened": 1465632465807,
+		"created": 1465632463015
 	},
 	"iconSets": [
+		{
+			"selection": [
+				{
+					"order": 1,
+					"id": 0,
+					"prevSize": 32,
+					"code": 59675,
+					"name": "map-o",
+					"tempChar": ""
+				}
+			],
+			"id": 9,
+			"metadata": {
+				"name": "Font Awesome (subset)",
+				"url": "http://fortawesome.github.com/Font-Awesome/",
+				"designerURL": "https://github.com/davegandy",
+				"designer": "Dave Gandy",
+				"license": "Custom",
+				"licenseURL": "http://fortawesome.github.io/Font-Awesome/license/",
+				"iconsHash": 1137311338,
+				"importSize": {
+					"width": 37,
+					"height": 32
+				}
+			},
+			"height": 1024,
+			"prevSize": 32,
+			"icons": [
+				{
+					"id": 0,
+					"paths": [
+						"M1154.286 6.286q16 11.429 16 30.286v804.571q0 11.429-6.286 20.571t-16.571 13.143l-365.714 146.286q-13.714 6.286-27.429 0l-352-140.571-352 140.571q-5.714 2.857-13.714 2.857-10.857 0-20.571-6.286-16-11.429-16-30.286v-804.571q0-11.429 6.286-20.571t16.571-13.143l365.714-146.286q13.714-6.286 27.429 0l352 140.571 352-140.571q18.286-7.429 34.286 3.429zM420.571 83.429v725.714l329.143 131.429v-725.714zM73.143 207.429v725.714l310.857-124v-725.714zM1097.143 816.571v-725.714l-310.857 124v725.714z"
+					],
+					"attrs": [],
+					"isMulticolor": false,
+					"width": 1170,
+					"tags": [
+						"map-o"
+					],
+					"grid": 14
+				}
+			],
+			"invisible": false,
+			"colorThemes": []
+		},
 		{
 			"selection": [
 				{
@@ -1936,7 +1981,7 @@
 					"prevSize": 32,
 					"code": 59661,
 					"name": "beaker",
-					"tempChar": ""
+					"tempChar": ""
 				}
 			],
 			"id": 7,
@@ -1993,7 +2038,7 @@
 					"prevSize": 32,
 					"code": 59666,
 					"name": "mail-envelope-open",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -2069,7 +2114,7 @@
 					"prevSize": 32,
 					"code": 59663,
 					"name": "git-pull-request",
-					"tempChar": ""
+					"tempChar": ""
 				}
 			],
 			"id": 5,
@@ -2122,7 +2167,7 @@
 					"prevSize": 32,
 					"code": 59665,
 					"name": "chat",
-					"tempChar": ""
+					"tempChar": ""
 				}
 			],
 			"id": 4,
@@ -8449,7 +8494,7 @@
 					"prevSize": 24,
 					"code": 59672,
 					"name": "switch_video",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 1,
@@ -8457,7 +8502,7 @@
 					"prevSize": 24,
 					"code": 59668,
 					"name": "lock_open",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 2,
@@ -8465,14 +8510,14 @@
 					"prevSize": 24,
 					"code": 59669,
 					"name": "security",
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 1,
 					"id": 8,
 					"prevSize": 32,
 					"code": 59648,
-					"tempChar": "",
+					"tempChar": "",
 					"name": "info_outline"
 				},
 				{
@@ -8480,7 +8525,7 @@
 					"id": 7,
 					"prevSize": 32,
 					"code": 59649,
-					"tempChar": "",
+					"tempChar": "",
 					"name": "info"
 				},
 				{
@@ -8488,7 +8533,7 @@
 					"id": 6,
 					"prevSize": 32,
 					"code": 59650,
-					"tempChar": "",
+					"tempChar": "",
 					"name": "remove_circle_outline"
 				},
 				{
@@ -8496,7 +8541,7 @@
 					"id": 5,
 					"prevSize": 32,
 					"code": 59651,
-					"tempChar": "",
+					"tempChar": "",
 					"name": "add_circle_outline"
 				},
 				{
@@ -8504,7 +8549,7 @@
 					"id": 4,
 					"prevSize": 32,
 					"code": 59652,
-					"tempChar": "",
+					"tempChar": "",
 					"name": "search"
 				},
 				{
@@ -8512,7 +8557,7 @@
 					"id": 3,
 					"prevSize": 32,
 					"code": 59653,
-					"tempChar": "",
+					"tempChar": "",
 					"name": "share"
 				},
 				{
@@ -8520,7 +8565,7 @@
 					"id": 2,
 					"prevSize": 32,
 					"code": 59654,
-					"tempChar": "",
+					"tempChar": "",
 					"name": "flag"
 				},
 				{
@@ -8528,7 +8573,7 @@
 					"id": 1,
 					"prevSize": 32,
 					"code": 59655,
-					"tempChar": "",
+					"tempChar": "",
 					"name": "thumb_up"
 				},
 				{
@@ -8536,7 +8581,7 @@
 					"id": 0,
 					"prevSize": 32,
 					"code": 59656,
-					"tempChar": "",
+					"tempChar": "",
 					"name": "thumb_down"
 				}
 			],
@@ -9262,11 +9307,13 @@
 					"id": 74
 				},
 				{
-					"order": 0,
-					"prevSize": 16,
+					"order": 28,
+					"prevSize": 32,
 					"ligatures": "compass2, direction2",
 					"name": "compass2",
-					"id": 75
+					"id": 75,
+					"code": 59674,
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -9338,7 +9385,7 @@
 					"name": "printer",
 					"id": 85,
 					"code": 59670,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -10147,7 +10194,7 @@
 					"name": "download3",
 					"id": 200,
 					"code": 59671,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -10163,7 +10210,7 @@
 					"name": "sphere",
 					"id": 202,
 					"code": 59664,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -10223,7 +10270,7 @@
 					"name": "eye-blocked",
 					"id": 210,
 					"code": 59667,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -10267,7 +10314,7 @@
 					"name": "star-empty",
 					"id": 216,
 					"code": 59657,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -10283,7 +10330,7 @@
 					"name": "star-full",
 					"id": 218,
 					"code": 59658,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -10703,11 +10750,13 @@
 					"id": 277
 				},
 				{
-					"order": 0,
-					"prevSize": 16,
+					"order": 26,
+					"prevSize": 32,
 					"ligatures": "play2, player",
 					"name": "play2",
-					"id": 278
+					"id": 278,
+					"code": 59673,
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -10772,7 +10821,7 @@
 					"name": "stop2",
 					"id": 287,
 					"code": 59662,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -11537,7 +11586,7 @@
 					"name": "google-plus",
 					"id": 396,
 					"code": 59659,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 0,
@@ -11574,7 +11623,7 @@
 					"name": "facebook",
 					"id": 401,
 					"code": 59660,
-					"tempChar": ""
+					"tempChar": ""
 				},
 				{
 					"order": 0,

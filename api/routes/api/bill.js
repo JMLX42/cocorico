@@ -182,15 +182,12 @@ function updateBillSources(user, bill, next)
             ops.push(function(result, callback)
             {
                 // FIXME: do not fetch pages that are already listed in the bill sources
-                SourceHelper.fetchPageTitle(url, function(err, title)
-                {
-                    if (err)
-                        result.push({url: url, title: ''});
-                    else
-                        result.push({url: url, title: title});
-
-                    callback(null, result);
-                });
+				SourceHelper.fetchURLMeta(url, (err, meta) => {
+					if (err)
+						result.push({url: url, error: err});
+					else
+						result.push({url: url, meta: meta});
+				})
             });
         })(match[2]);
     }
@@ -226,22 +223,17 @@ function updateBillSources(user, bill, next)
                             if (err)
                                 return callback(err);
 
-                            if (source && source.title == sourceData.title)
-                                return callback(err);
-
                             if (!source)
-                            {
                                 source = Source.model({
-                                    title: sourceData.title,
-                                    url: sourceData.url,
                                     auto: true,
                                     author: bcrypt.hashSync(user.sub, 10),
                                     bill: bill
                                 });
-                            }
 
-                            source.save(function(err)
-                            {
+							for (var propName in sourceData.meta)
+								source[propName] = sourceData.meta[propName];
+
+                            source.save((err) => {
                                 return callback(err);
                             });
                         });
