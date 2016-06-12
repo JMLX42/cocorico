@@ -44,7 +44,9 @@ var SourceTab = React.createClass({
         return {
             showAddSourceForm: false,
             newSourceURL: '',
-            moderatedSourcesToShow: []
+            moderatedSourcesToShow: [],
+            communitySourceSortFunction: this.randomSort,
+            communitySources: []
         };
     },
 
@@ -54,8 +56,14 @@ var SourceTab = React.createClass({
         this._unsubSourceLike = SourceStore.listen((store) => {
             if (!this.state.sources)
                 return;
-            
+
             var sources = this.state.sources.getSourcesByBillId(this.props.bill.id);
+            var communitySources = sources
+                ? sources.filter((source) => !source.auto)
+                : null;
+
+            this.setState({communitySources: communitySources.sort(this.state.communitySourceSortFunction)});
+
             var moderatedSources = this.state.moderatedSourcesToShow;
 
             for (var source of sources) {
@@ -81,6 +89,7 @@ var SourceTab = React.createClass({
     submitSourceClickHandler: function(event) {
         BillAction.addSource(this.props.bill.id, this.state.newSourceURL);
         this.setState({showAddSourceForm: false});
+        this.setCommunitySourceSortFunctionByName('time');
     },
 
     showModeratedSource: function(source) {
@@ -101,18 +110,14 @@ var SourceTab = React.createClass({
         return (
             <li className="source-item source-item-moderated" key={source.url}>
                 <Row>
-                    <Col md={2}>
-                        <div className="source-image text-center">
-                            <i className="icon-thumb_down"/>
-                        </div>
-                    </Col>
-                    <Col md={10}>
-                        <span className="hint">
-                            Ce contenu a reçu trop d'avis négatifs de la communauté.
-                        </span>
-                        &nbsp;<a onClick={(e) => this.showModeratedSource(source)}>
-                            Cliquez ici pour l'afficher.
-                        </a>
+                    <Col md={12}>
+                        <span className="hint">Contenu modéré</span>
+                        <p className="hint">
+                            Ce contenu a reçu trop d'avis négatifs de la communauté.&nbsp;
+                            <a onClick={(e) => this.showModeratedSource(source)}>
+                                Cliquez ici pour l'afficher.
+                            </a>
+                        </p>
                     </Col>
                 </Row>
             </li>
@@ -142,24 +147,14 @@ var SourceTab = React.createClass({
     },
 
     renderSourceItem: function(source) {
-        var description = source.description.length > 200
-            ? source.description.substr(0, 200) + '...'
+        var description = source.description && source.description.length > 200
+            ? source.description.substr(0, 400) + '...'
             : source.description;
 
         return (
             <li className="source-item" key={source.url}>
                 <Row>
-                    <Col md={2}>
-                        <RedirectLink href={source.url} target="_blank">
-                            <div style={{backgroundImage: "url('" + this.proxifyURL(source.image) + "')"}}
-                                className="source-image text-center">
-                                    {source.type == 'video'
-                                    ? <i className="icon-play"/>
-                                    : null}
-                            </div>
-                        </RedirectLink>
-                    </Col>
-                    <Col md={10}>
+                    <Col md={!!source.image ? 10 : 12}>
                         <RedirectLink href={source.url} className="source-link" target="_blank">
                             {source.title ? source.title : source.url}
                         </RedirectLink>
@@ -169,9 +164,25 @@ var SourceTab = React.createClass({
                             dislikeButtonEnabled={this.props.editable}/>
                         {this.renderSourceActionList(source)}
                         <p>
-                            {description}
+                            {!!description
+                                ? description
+                                : <span className="hint">Pas de description.</span>}
                         </p>
                     </Col>
+                    {!!source.image
+                        ? <Col md={2}>
+                            <RedirectLink href={source.url} target="_blank">
+                                <div style={{
+                                        backgroundImage: "url('" + this.proxifyURL(source.image) + "')"
+                                    }}
+                                    className="source-image text-center">
+                                        {source.type == 'video'
+                                            ? <i className="icon-play"/>
+                                            : null}
+                                </div>
+                            </RedirectLink>
+                        </Col>
+                        : null}
                 </Row>
             </li>
         )
@@ -180,7 +191,7 @@ var SourceTab = React.createClass({
     renderSourceList: function(sources) {
         return (
             <ul className="source-list">
-                {sources.sort((a, b)=> b.score - a.score).map((source) => {
+                {sources.map((source) => {
                     return source.score >= 0 || this.state.moderatedSourcesToShow.indexOf(source.id) >= 0
                         ? this.renderSourceItem(source)
                         : this.renderModeratedSourceItem(source);
@@ -196,11 +207,6 @@ var SourceTab = React.createClass({
                     <h2>
                         {this.getIntlMessage('bill.BILL_SOURCES')}
                         &nbsp;({billSources ? billSources.length : 0})
-                        <span className="small">
-                            &nbsp;
-                            <FormattedMessage message={this.getIntlMessage('sort.SORTED_BY_POPULARITY')}
-                                gender="female"/>
-                        </span>
                     </h2>
                     {billSources && billSources.length
                         ? this.renderSourceList(billSources)
@@ -210,21 +216,58 @@ var SourceTab = React.createClass({
         )
     },
 
-    renderCommunitySourceList: function(communitySources) {
+    randomSort: function(a, b) {
+        return Math.floor((Math.random() * 10) + 1) % 2;
+    },
+
+    scoreSort: function(a, b) {
+        return a.score < b.score;
+    },
+
+    dateSort: function(a, b) {
+        return new Date(b.time) - new Date(a.time);
+    },
+
+    setCommunitySourceSortFunctionByName: function(name) {
+        var fns = {
+            'random': this.randomSort,
+            'score': this.scoreSort,
+            'time': this.dateSort
+        };
+        var fn = fns[name];
+
+        this.setState({
+            communitySourceSortFunctionName: name,
+            communitySourceSortFunction: fn,
+            communitySources: this.state.communitySources.sort(fn)
+        });
+    },
+
+    renderCommunitySourceList: function() {
         return (
             <Row>
                 <Col md={12}>
                     <h2>
                         {this.getIntlMessage('bill.COMMUNITY_SOURCES')}
-                        &nbsp;({communitySources ? communitySources.length : 0})
-                        <span className="small">
-                            &nbsp;
-                            <FormattedMessage message={this.getIntlMessage('sort.SORTED_BY_POPULARITY')}
-                                gender="female"/>
-                        </span>
+                        &nbsp;({this.state.communitySources ? this.state.communitySources.length : 0})
+                        <select onChange={(e) => this.setCommunitySourceSortFunctionByName(e.target.value)}
+                            className="small sort-function">
+                            <option value="random"
+                                selected={this.state.communitySourceSortFunctionName == 'random'}>
+                                {this.formatMessage(this.getIntlMessage('sort.SORTED_RANDOMLY'), {gender:'female'})}
+                            </option>
+                            <option value="score"
+                                selected={this.state.communitySourceSortFunctionName == 'score'}>
+                                {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_POPULARITY'), {gender:'female'})}
+                            </option>
+                            <option value="time"
+                                selected={this.state.communitySourceSortFunctionName == 'time'}>
+                                {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_TIME'), {gender:'female'})}
+                            </option>
+                        </select>
                     </h2>
-                    {communitySources && communitySources.length
-                        ? this.renderSourceList(communitySources)
+                    {this.state.communitySources && this.state.communitySources.length
+                        ? this.renderSourceList(this.state.communitySources)
                         : <p>{this.getIntlMessage('bill.NO_SOURCE')}</p>}
                 </Col>
                 {this.props.editable
@@ -303,9 +346,6 @@ var SourceTab = React.createClass({
         var billSources = sources
             ? sources.filter((source) => source.auto)
             : null;
-        var communitySources = sources
-            ? sources.filter((source) => !source.auto)
-            : null;
 
         return (
             <Grid>
@@ -313,7 +353,7 @@ var SourceTab = React.createClass({
                     ? this.renderBillSourceList(billSources)
                     : null}
                 {this.state.config.capabilities.source.community
-                    ? this.renderCommunitySourceList(communitySources)
+                    ? this.renderCommunitySourceList()
                     : null}
             </Grid>
 		);

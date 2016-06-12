@@ -850,12 +850,22 @@ ul.argument-list {
     }
 }
 
+select.sort-function {
+    border: none;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
 ul.source-list {
     list-style: none;
     padding: 0;
 
     &> li {
         margin: 10px 0;
+
+        .row {
+            min-height: 75px;
+        }
 
         .source-image {
             width: 100%;
@@ -866,12 +876,17 @@ ul.source-list {
             border: 1px solid @cocorico-grey;
             background-color: @cocorico-light-grey;
 
-            .icon-thumb_down {
+            .icon-thumb_down,
+            .icon-eye-blocked {
                 color: @cocorico-grey;
                 font-size: 40px;
                 width: 100%;
-                line-height: 60px;
                 display: inline-block;
+                margin-top: 10px;
+            }
+
+            .icon-thumb_down {
+                margin-top: 4px;
             }
 
             .icon-play {
@@ -888,6 +903,7 @@ ul.source-list {
             .small();
             margin: 0;
             padding: 0;
+            text-align: justify;
         }
     }
 }

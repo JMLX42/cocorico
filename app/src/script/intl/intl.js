@@ -72,7 +72,9 @@ var Intl = {
 		},
 
 		sort: {
-			SORTED_BY_POPULARITY: "tri{gender, select, male {é} female {ée}}s par popularité"
+			SORTED_BY_POPULARITY: "tri{gender, select, male {é} female {ée}}s par popularité",
+			SORTED_BY_TIME: "tri{gender, select, male {é} female {ée}}s par date",
+			SORTED_RANDOMLY: "tri{gender, select, male {é} female {ée}}s au hasard"
 		},
 
 		bill: {
