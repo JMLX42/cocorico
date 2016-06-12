@@ -3,17 +3,30 @@ var AllHtmlEntities = require('html-entities').AllHtmlEntities;
 
 exports.fetchURLMeta = function(url, callback)
 {
-    var client = new MetaInspector(url, { timeout: 5000 });
+    var client = new MetaInspector(
+        url,
+        {
+            timeout: 5000,
+            headers: {
+                'User-Agent': 'request'
+            }
+        }
+    );
 
     client.on("fetch", () => {
+        var description = client.ogDescription
+            ? client.ogDescription
+            : client.description;
+
+        if (description)
+            description = AllHtmlEntities.decode(description);
+
         callback(
             null,
             {
                 title: client.ogTitle ? client.ogTitle : client.title,
                 url: url,
-                description: AllHtmlEntities.decode(
-                    client.ogDescription ? client.ogDescription : client.description
-                ),
+                description: description,
                 image: client.image,
                 type: client.ogType,
                 latitude: client.ogLatitude,
