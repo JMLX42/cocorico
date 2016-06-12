@@ -45,6 +45,7 @@ var SourceTab = React.createClass({
             showAddSourceForm: false,
             newSourceURL: '',
             moderatedSourcesToShow: [],
+            communitySourceSortFunctionName: 'random',
             communitySourceSortFunction: this.randomSort,
             communitySources: []
         };
@@ -53,7 +54,7 @@ var SourceTab = React.createClass({
     componentWillMount: function() {
         BillAction.showSources(this.props.bill.id);
 
-        this._unsubSourceLike = SourceStore.listen((store) => {
+        this._unsubSourceStore = SourceStore.listen((store) => {
             if (!this.state.sources)
                 return;
 
@@ -62,7 +63,11 @@ var SourceTab = React.createClass({
                 ? sources.filter((source) => !source.auto)
                 : null;
 
-            this.setState({communitySources: communitySources.sort(this.state.communitySourceSortFunction)});
+            if (communitySources.length != this.state.communitySources.length
+                || this.state.communitySourceSortFunctionName == 'score')
+                this.setState({
+                    communitySources: communitySources.sort(this.state.communitySourceSortFunction)
+                });
 
             var moderatedSources = this.state.moderatedSourcesToShow;
 
@@ -76,7 +81,7 @@ var SourceTab = React.createClass({
     },
 
     componentWillUnmount: function() {
-        this._unsubSourceLike();
+        this._unsubSourceStore.stop();
     },
 
     addSourceButtonClickHandler: function(event) {
@@ -126,19 +131,20 @@ var SourceTab = React.createClass({
 
     renderSourceActionList: function(source) {
         return (
-            <ul className="pull-right list-unstyled list-inline">
+            <ul className="source-actions list-unstyled list-inline">
                 {this.state.moderatedSourcesToShow.indexOf(source.id) >= 0
                     ? <li>
-                        <a onClick={(e) => this.hideModeratedSource(source)} className="small">
+                        <a onClick={(e) => this.hideModeratedSource(source)}
+                            className="btn btn-xs btn-outline">
                             <i className="icon-eye-blocked"/>&nbsp;Masquer
                         </a>
                     </li>
                     : null}
                 {source.type == 'activity' && source.latitude != 0.0 && source.longitude != 0.0
                     ? <li>
-                        <RedirectLink target="_blank" className="small"
+                        <RedirectLink target="_blank" className="btn btn-xs btn-outline"
                             href={'https://maps.google.com/?q=' + source.latitude + ',' + source.longitude}>
-                            <i className="icon-map"/>&nbsp;Voir sur la carte
+                            <i className="icon-map"/>&nbsp;Voir sur une carte
                         </RedirectLink>
                     </li>
                     : null}
@@ -148,13 +154,13 @@ var SourceTab = React.createClass({
 
     renderSourceItem: function(source) {
         var description = source.description && source.description.length > 200
-            ? source.description.substr(0, 400) + '...'
+            ? source.description.substr(0, 200) + '...'
             : source.description;
 
         return (
             <li className="source-item" key={source.url}>
                 <Row>
-                    <Col md={!!source.image ? 10 : 12}>
+                    <Col md={10}>
                         <RedirectLink href={source.url} className="source-link" target="_blank">
                             {source.title ? source.title : source.url}
                         </RedirectLink>
@@ -251,17 +257,15 @@ var SourceTab = React.createClass({
                         {this.getIntlMessage('bill.COMMUNITY_SOURCES')}
                         &nbsp;({this.state.communitySources ? this.state.communitySources.length : 0})
                         <select onChange={(e) => this.setCommunitySourceSortFunctionByName(e.target.value)}
-                            className="small sort-function">
-                            <option value="random"
-                                selected={this.state.communitySourceSortFunctionName == 'random'}>
+                            className="small sort-function"
+                            value={this.state.communitySourceSortFunctionName}>
+                            <option value="random">
                                 {this.formatMessage(this.getIntlMessage('sort.SORTED_RANDOMLY'), {gender:'female'})}
                             </option>
-                            <option value="score"
-                                selected={this.state.communitySourceSortFunctionName == 'score'}>
+                            <option value="score">
                                 {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_POPULARITY'), {gender:'female'})}
                             </option>
-                            <option value="time"
-                                selected={this.state.communitySourceSortFunctionName == 'time'}>
+                            <option value="time">
                                 {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_TIME'), {gender:'female'})}
                             </option>
                         </select>

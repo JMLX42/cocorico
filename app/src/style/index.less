@@ -97,13 +97,13 @@ img {
 }
 
 .btn-outline {
-    border: 2px solid white;
-    color: white;
+    border: 1px solid @text-color;
+    color: @text-color;
     background: transparent;
 
     &:hover {
-        background-color: white;
-        color: @text-color;
+        background-color: @text-color;
+        color: white;
     }
 }
 
@@ -861,7 +861,7 @@ ul.source-list {
     padding: 0;
 
     &> li {
-        margin: 10px 0;
+        margin: 20px 0;
 
         .row {
             min-height: 75px;
@@ -899,11 +899,27 @@ ul.source-list {
             }
         }
 
+        ul.source-actions {
+            .pull-right();
+
+            display: inline-block;
+            margin-left: 10px;
+
+            .btn-outline {
+                border-color: @cocorico-grey;
+                color: @cocorico-grey;
+
+                &:hover {
+                    background-color: @cocorico-grey;
+                    color: white;
+                }
+            }
+        }
+
         p {
             .small();
             margin: 0;
             padding: 0;
-            text-align: justify;
         }
     }
 }
