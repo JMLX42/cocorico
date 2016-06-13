@@ -47,7 +47,8 @@ var SourceTab = React.createClass({
             moderatedSourcesToShow: [],
             communitySourceSortFunctionName: 'random',
             communitySourceSortFunction: this.randomSort,
-            communitySources: []
+            communitySources: [],
+            communitySourcePage: 0
         };
     },
 
@@ -81,7 +82,7 @@ var SourceTab = React.createClass({
     },
 
     componentWillUnmount: function() {
-        this._unsubSourceStore.stop();
+        this._unsubSourceStore();
     },
 
     addSourceButtonClickHandler: function(event) {
@@ -93,7 +94,10 @@ var SourceTab = React.createClass({
 
     submitSourceClickHandler: function(event) {
         BillAction.addSource(this.props.bill.id, this.state.newSourceURL);
-        this.setState({showAddSourceForm: false});
+        this.setState({
+            showAddSourceForm: false,
+            communitySourcePage: 0
+        });
         this.setCommunitySourceSortFunctionByName('time');
     },
 
@@ -132,6 +136,11 @@ var SourceTab = React.createClass({
     renderSourceActionList: function(source) {
         return (
             <ul className="source-actions list-unstyled list-inline">
+                <li>
+                    <a href="#" className="btn btn-xs btn-outline">
+                        <i className="icon-flag"/>Signaler
+                    </a>
+                </li>
                 {this.state.moderatedSourcesToShow.indexOf(source.id) >= 0
                     ? <li>
                         <a onClick={(e) => this.hideModeratedSource(source)}
@@ -160,7 +169,21 @@ var SourceTab = React.createClass({
         return (
             <li className="source-item" key={source.url}>
                 <Row>
-                    <Col md={10}>
+                    {!!source.image
+                        ? <Col md={2} mdPush={10}>
+                            <RedirectLink href={source.url} target="_blank">
+                                <div style={{
+                                        backgroundImage: "url('" + this.proxifyURL(source.image) + "')"
+                                    }}
+                                    className="source-image text-center">
+                                        {source.type == 'video'
+                                            ? <i className="icon-play"/>
+                                            : null}
+                                </div>
+                            </RedirectLink>
+                        </Col>
+                        : null}
+                    <Col md={10} mdPull={!!source.image ? 2 : 0}>
                         <RedirectLink href={source.url} className="source-link" target="_blank">
                             {source.title ? source.title : source.url}
                         </RedirectLink>
@@ -175,33 +198,60 @@ var SourceTab = React.createClass({
                                 : <span className="hint">Pas de description.</span>}
                         </p>
                     </Col>
-                    {!!source.image
-                        ? <Col md={2}>
-                            <RedirectLink href={source.url} target="_blank">
-                                <div style={{
-                                        backgroundImage: "url('" + this.proxifyURL(source.image) + "')"
-                                    }}
-                                    className="source-image text-center">
-                                        {source.type == 'video'
-                                            ? <i className="icon-play"/>
-                                            : null}
-                                </div>
-                            </RedirectLink>
-                        </Col>
-                        : null}
                 </Row>
             </li>
         )
     },
 
-    renderSourceList: function(sources) {
+    renderSourceList: function(sources, page, numItemsPerPage) {
         return (
             <ul className="source-list">
-                {sources.map((source) => {
+                {sources.slice(page * numItemsPerPage, (page + 1) * numItemsPerPage).map((source) => {
                     return source.score >= 0 || this.state.moderatedSourcesToShow.indexOf(source.id) >= 0
                         ? this.renderSourceItem(source)
                         : this.renderModeratedSourceItem(source);
                 })}
+            </ul>
+        );
+    },
+
+    renderSourcePageList: function(numSources, page, numItemsPerPage, state) {
+        if (numSources < numItemsPerPage)
+            return null;
+
+        var pages = [];
+
+        for (var i = 0; i < numSources; i += numItemsPerPage)
+            pages.push(Math.floor(i / numItemsPerPage));
+
+        return (
+            <ul className="list-inline list-unstyled pull-right">
+                <li>Pages :</li>
+                {page != 0 && pages.length > 2
+                    ? <li>
+                        <a onClick={(e)=>this.setState({[state] : page - 1})}>
+                            &lsaquo;
+                        </a>
+                    </li>
+                    : null}
+                {pages.map((pageNumber) => {
+                    return (
+                        <li>
+                            {pageNumber != page
+                                ? <a onClick={(e)=>this.setState({[state] : pageNumber})}>
+                                    {pageNumber + 1}
+                                </a>
+                                : pageNumber + 1}
+                        </li>
+                    );
+                })}
+                {page < pages.length - 1 && pages.length > 2
+                    ? <li>
+                        <a onClick={(e)=>this.setState({[state] : page + 1})}>
+                            &rsaquo;
+                        </a>
+                    </li>
+                    : null}
             </ul>
         );
     },
@@ -215,7 +265,7 @@ var SourceTab = React.createClass({
                         &nbsp;({billSources ? billSources.length : 0})
                     </h2>
                     {billSources && billSources.length
-                        ? this.renderSourceList(billSources)
+                        ? this.renderSourceList(billSources, 0, 2)
                         : <p>{this.getIntlMessage('bill.NO_SOURCE')}</p>}
                 </Col>
             </Row>
@@ -251,37 +301,53 @@ var SourceTab = React.createClass({
 
     renderCommunitySourceList: function() {
         return (
-            <Row>
-                <Col md={12}>
-                    <h2>
-                        {this.getIntlMessage('bill.COMMUNITY_SOURCES')}
-                        &nbsp;({this.state.communitySources ? this.state.communitySources.length : 0})
-                        <select onChange={(e) => this.setCommunitySourceSortFunctionByName(e.target.value)}
-                            className="small sort-function"
-                            value={this.state.communitySourceSortFunctionName}>
-                            <option value="random">
-                                {this.formatMessage(this.getIntlMessage('sort.SORTED_RANDOMLY'), {gender:'female'})}
-                            </option>
-                            <option value="score">
-                                {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_POPULARITY'), {gender:'female'})}
-                            </option>
-                            <option value="time">
-                                {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_TIME'), {gender:'female'})}
-                            </option>
-                        </select>
-                    </h2>
-                    {this.state.communitySources && this.state.communitySources.length
-                        ? this.renderSourceList(this.state.communitySources)
-                        : <p>{this.getIntlMessage('bill.NO_SOURCE')}</p>}
-                </Col>
-                {this.props.editable
-                    ? this.renderAddSourceForm()
-                    : <Col md={12}>
-                        <p className="hint">
-                            {this.getIntlMessage('bill.TOO_LATE_TO_REVIEW')}
-                        </p>
-                    </Col>}
-            </Row>
+            <div>
+                <Row>
+                    <Col md={12}>
+                        <h2>
+                            {this.getIntlMessage('bill.COMMUNITY_SOURCES')}
+                            &nbsp;({this.state.communitySources ? this.state.communitySources.length : 0})
+                            <select onChange={(e) => this.setCommunitySourceSortFunctionByName(e.target.value)}
+                                className="small sort-function"
+                                value={this.state.communitySourceSortFunctionName}>
+                                <option value="random">
+                                    {this.formatMessage(this.getIntlMessage('sort.SORTED_RANDOMLY'), {gender:'female'})}
+                                </option>
+                                <option value="score">
+                                    {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_POPULARITY'), {gender:'female'})}
+                                </option>
+                                <option value="time">
+                                    {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_TIME'), {gender:'female'})}
+                                </option>
+                            </select>
+                        </h2>
+                        {this.state.communitySources && this.state.communitySources.length
+                            ? this.renderSourceList(
+                                this.state.communitySources,
+                                this.state.communitySourcePage,
+                                this.state.config.capabilities.source.num_items_per_page
+                            )
+                            : <p>{this.getIntlMessage('bill.NO_SOURCE')}</p>}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col md={6}>
+                        {this.props.editable
+                            ? this.renderAddSourceForm()
+                            : <p className="hint">
+                                    {this.getIntlMessage('bill.TOO_LATE_TO_REVIEW')}
+                            </p>}
+                    </Col>
+                    <Col md={6}>
+                        {this.renderSourcePageList(
+                            this.state.communitySources.length,
+                            this.state.communitySourcePage,
+                            this.state.config.capabilities.source.num_items_per_page,
+                            'communitySourcePage'
+                        )}
+                    </Col>
+                </Row>
+            </div>
         );
     },
 
@@ -289,40 +355,38 @@ var SourceTab = React.createClass({
         var sourceError = this.state.sources.getError();
 
         return (
-            <Col md={12}>
-                {!this.isAuthenticated()
-                    ? <p className="hint">
-                        {this.renderLoginMessage(this.getIntlMessage('bill.ADD_SOURCE_LOGIN'))}
-                    </p>
-                    : this.state.showAddSourceForm
-                        ? <Well>
-                            <form id="form-add-source">
-                                <h3>{this.getIntlMessage('bill.ADD_SOURCE_FORM_TITLE')}</h3>
-                                <p>{this.getIntlMessage('bill.ADD_SOURCE_URL_HINT')}</p>
-                                <Input type="bill" placeholder="http://www.exemple.com"
-                                    id="input-source-url" value={this.state.newSourceURL}
-                                    onChange={(e)=>this.setState({newSourceURL: e.target.value})}/>
-                                    {sourceError
-                                        ? <p>{this.getIntlMessage(sourceError.error)}</p>
-                                        : <div/>}
-                                <ButtonToolbar>
-                                    <Button bsStyle="primary" onClick={this.submitSourceClickHandler}>
-                                        <i className="icon-add_circle_outline"/>
-                                        {this.getIntlMessage('bill.ADD_SOURCE_SUBMIT_BUTTON')}
-                                    </Button>
-                                    <Button bsStyle="link"
-                                        onClick={(e) => this.setState({showAddSourceForm:false})}>
-                                        {this.getIntlMessage('bill.ADD_SOURCE_CANCEL_BUTTON')}
-                                    </Button>
-                                </ButtonToolbar>
-                            </form>
-                        </Well>
-                        : <Button bsStyle="primary" onClick={this.addSourceButtonClickHandler}
-                              id="btn-add-source">
-                            <i className="icon-add_circle_outline"/>
-                            {this.getIntlMessage('bill.ADD_SOURCE_BUTTON')}
-                        </Button>}
-            </Col>
+            !this.isAuthenticated()
+                ? <p className="hint">
+                    {this.renderLoginMessage(this.getIntlMessage('bill.ADD_SOURCE_LOGIN'))}
+                </p>
+                : this.state.showAddSourceForm
+                    ? <Well>
+                        <form id="form-add-source">
+                            <h3>{this.getIntlMessage('bill.ADD_SOURCE_FORM_TITLE')}</h3>
+                            <p>{this.getIntlMessage('bill.ADD_SOURCE_URL_HINT')}</p>
+                            <Input type="bill" placeholder="http://www.exemple.com"
+                                id="input-source-url" value={this.state.newSourceURL}
+                                onChange={(e)=>this.setState({newSourceURL: e.target.value})}/>
+                                {sourceError
+                                    ? <p>{this.getIntlMessage(sourceError.error)}</p>
+                                    : <div/>}
+                            <ButtonToolbar>
+                                <Button bsStyle="primary" onClick={this.submitSourceClickHandler}>
+                                    <i className="icon-add_circle_outline"/>
+                                    {this.getIntlMessage('bill.ADD_SOURCE_SUBMIT_BUTTON')}
+                                </Button>
+                                <Button bsStyle="link"
+                                    onClick={(e) => this.setState({showAddSourceForm:false})}>
+                                    {this.getIntlMessage('bill.ADD_SOURCE_CANCEL_BUTTON')}
+                                </Button>
+                            </ButtonToolbar>
+                        </form>
+                    </Well>
+                    : <Button bsStyle="primary" onClick={this.addSourceButtonClickHandler}
+                          id="btn-add-source">
+                        <i className="icon-add_circle_outline"/>
+                        {this.getIntlMessage('bill.ADD_SOURCE_BUTTON')}
+                    </Button>
         );
     },
 

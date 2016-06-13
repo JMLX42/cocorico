@@ -30,6 +30,7 @@ capabilities:
     vote: yes
     community: yes
     bill: no
+    num_items_per_page: 5
   argument:
     create: no
     read: no

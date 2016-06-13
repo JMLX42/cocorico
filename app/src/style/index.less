@@ -876,19 +876,6 @@ ul.source-list {
             border: 1px solid @cocorico-grey;
             background-color: @cocorico-light-grey;
 
-            .icon-thumb_down,
-            .icon-eye-blocked {
-                color: @cocorico-grey;
-                font-size: 40px;
-                width: 100%;
-                display: inline-block;
-                margin-top: 10px;
-            }
-
-            .icon-thumb_down {
-                margin-top: 4px;
-            }
-
             .icon-play {
                 color: white;
                 font-size: 50px;
@@ -899,11 +886,13 @@ ul.source-list {
             }
         }
 
-        ul.source-actions {
-            .pull-right();
+        .like-buttons {
+            margin-right: 10px;
+        }
 
+        ul.source-actions {
             display: inline-block;
-            margin-left: 10px;
+            vertical-align: text-top;
 
             .btn-outline {
                 border-color: @cocorico-dark-grey;
@@ -922,7 +911,21 @@ ul.source-list {
             margin: 0;
             padding: 0;
             font-style: italic;
-            color: @cocorico-dark-grey;
+        }
+    }
+
+    @media (max-width: (@screen-sm-max)) {
+        &> li {
+            margin: 40px 0;
+
+            .source-image {
+                height: 150px;
+
+                .icon-play {
+                    font-size: 75px;
+                    margin-top: 20px;
+                }
+            }
         }
     }
 }
