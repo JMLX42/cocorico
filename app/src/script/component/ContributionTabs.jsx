@@ -189,37 +189,41 @@ var Bill = React.createClass({
                         <ArgumentTab bill={bill} editable={this.props.editable && bill.status == 'debate'}/>
                     </Panel>
                     : <div/>}
-                <Panel eventKey={eventKey++} header={
-                        <div>
-                            <span className="icon-sphere"/>
-                            Sources ({sources ? sources.length : 0})
-                        </div>
-                    }>
-                    <SourceTab bill={bill} editable={this.props.editable && bill.status == 'review'}/>
-                </Panel>
-                <Panel eventKey={eventKey++} header={
-                        <div>
-                            <span className="icon-pull-request"/>
-                            Propositions (0)
-                        </div>
-                    }>
-                    <Grid>
-                        <Row>
-                            <Col md={12}>
-                                <p>{this.getIntlMessage('bill.NO_PROPOSAL')}</p>
-                                {this.props.editable && bill.status == 'review'
-                                    ? !this.isAuthenticated()
-                                        ? <p className="hint">
-                                            {this.renderLoginMessage(this.getIntlMessage('bill.ADD_PROPOSAL_LOGIN'))}
-                                        </p>
-                                        : <Button bsStyle="primary">
-                                            {this.getIntlMessage('bill.ADD_PROPOSAL')}
-                                        </Button>
-                                    : <div/>}
-                            </Col>
-                        </Row>
-                    </Grid>
-                </Panel>
+                {this.state.config.capabilities.source.read
+                    ? <Panel eventKey={eventKey++} header={
+                            <div>
+                                <span className="icon-sphere"/>
+                                Sources ({sources ? sources.length : 0})
+                            </div>
+                        }>
+                        <SourceTab bill={bill} editable={this.props.editable && bill.status == 'review'}/>
+                    </Panel>
+                    : null }
+                {this.state.config.capabilities.proposal.read
+                    ? <Panel eventKey={eventKey++} header={
+                            <div>
+                                <span className="icon-pull-request"/>
+                                Propositions (0)
+                            </div>
+                        }>
+                        <Grid>
+                            <Row>
+                                <Col md={12}>
+                                    <p>{this.getIntlMessage('bill.NO_PROPOSAL')}</p>
+                                    {this.props.editable && bill.status == 'review'
+                                        ? !this.isAuthenticated()
+                                            ? <p className="hint">
+                                                {this.renderLoginMessage(this.getIntlMessage('bill.ADD_PROPOSAL_LOGIN'))}
+                                            </p>
+                                            : <Button bsStyle="primary">
+                                                {this.getIntlMessage('bill.ADD_PROPOSAL')}
+                                            </Button>
+                                        : <div/>}
+                                </Col>
+                            </Row>
+                        </Grid>
+                    </Panel>
+                    : null}
             </Accordion>
         );
     },
