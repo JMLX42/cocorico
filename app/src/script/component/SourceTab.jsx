@@ -141,20 +141,20 @@ var SourceTab = React.createClass({
                         <i className="icon-flag"/>Signaler
                     </a>
                 </li>
-                {this.state.moderatedSourcesToShow.indexOf(source.id) >= 0
-                    ? <li>
-                        <a onClick={(e) => this.hideModeratedSource(source)}
-                            className="btn btn-xs btn-outline">
-                            <i className="icon-eye-blocked"/>&nbsp;Masquer
-                        </a>
-                    </li>
-                    : null}
                 {source.type == 'activity' && source.latitude != 0.0 && source.longitude != 0.0
                     ? <li>
                         <RedirectLink target="_blank" className="btn btn-xs btn-outline"
                             href={'https://maps.google.com/?q=' + source.latitude + ',' + source.longitude}>
                             <i className="icon-map"/>&nbsp;Voir sur une carte
                         </RedirectLink>
+                    </li>
+                    : null}
+                {this.state.moderatedSourcesToShow.indexOf(source.id) >= 0
+                    ? <li>
+                        <a onClick={(e) => this.hideModeratedSource(source)}
+                            className="btn btn-xs btn-outline">
+                            <i className="icon-eye-blocked"/>&nbsp;Masquer
+                        </a>
                     </li>
                     : null}
             </ul>
@@ -273,11 +273,11 @@ var SourceTab = React.createClass({
     },
 
     randomSort: function(a, b) {
-        return Math.floor((Math.random() * 10) + 1) % 2;
+        return Math.floor((Math.random() * 10000)) % 2 == 0;
     },
 
     scoreSort: function(a, b) {
-        return a.score < b.score;
+        return a.score <= b.score;
     },
 
     dateSort: function(a, b) {
@@ -331,14 +331,14 @@ var SourceTab = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col md={6}>
+                    <Col sm={6}>
                         {this.props.editable
                             ? this.renderAddSourceForm()
                             : <p className="hint">
                                     {this.getIntlMessage('bill.TOO_LATE_TO_REVIEW')}
                             </p>}
                     </Col>
-                    <Col md={6}>
+                    <Col sm={6}>
                         {this.renderSourcePageList(
                             this.state.communitySources.length,
                             this.state.communitySourcePage,
