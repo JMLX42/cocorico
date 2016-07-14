@@ -100,10 +100,10 @@ var VoteWidget = React.createClass({
             return;
         }
 
-        if (ballot.status == 'complete') {
-            return this.goToStep(VoteWidget.STEP_COMPLETE);
-        }
-        if (ballot.status == 'pending') {
+        var completeStatus = [
+            'queued', 'pending', 'initialized', 'registered', 'complete'
+        ];
+        if (completeStatus.indexOf(ballot.status) >= 0) {
             return this.goToStep(VoteWidget.STEP_COMPLETE);
         }
     },
