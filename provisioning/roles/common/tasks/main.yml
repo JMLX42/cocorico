@@ -67,3 +67,6 @@
   template: src=run.sh.j2 dest={{ project_dir }}/run.sh mode=0755
   when:
     - provider == 'docker'
+
+- name: install jq
+  get_url: url={{ jq_archive_url }} dest=/usr/local/bin/jq mode=0755

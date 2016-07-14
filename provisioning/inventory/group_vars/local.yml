@@ -11,7 +11,7 @@ capabilities:
     edit: no
     read: yes
     favorite: no
-    vote: blockchain
+    vote: yes
   step:
     draft: yes
     review: yes

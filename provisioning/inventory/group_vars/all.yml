@@ -14,3 +14,5 @@ home_db_private_port: 27017
 
 cocorico_api_dir: /vagrant/api
 cocorico_app_dir: /vagrant/app
+
+jq_archive_url: https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64

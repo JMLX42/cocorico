@@ -1,19 +1,15 @@
 - set_fact: role_name=blockchain
 
 - name: create role directory
-  when: capabilities.bill.vote == "blockchain"
   file: path={{ project_dir}}/{{ role_name }} state=directory
 
 - name: install ethereum dependencies
-  when: capabilities.bill.vote == "blockchain"
   apt: name=software-properties-common state=present
 
 - name: add ethereum PPA
-  when: capabilities.bill.vote == "blockchain"
   apt_repository: repo=ppa:ethereum/ethereum
 
 - name: install ethereum
-  when: capabilities.bill.vote == "blockchain"
   apt: name={{ item }} update_cache=yes
   with_items:
     - ethereum
@@ -23,43 +19,37 @@
   command: npm install -g ethereumjs-testrpc --unsafe-perm
   args:
     creates: /usr/lib/node_modules/ethereumjs-testrpc
-  when:
-    - capabilities.bill.vote == "blockchain"
-    - is_development_environment
+  when: is_development_environment
 
 - lineinfile: line={{ ethereum_etherbase_password }} dest={{ project_dir}}/{{ role_name }}/password mode=700 state=present create=yes
-  when: capabilities.bill.vote == "blockchain"
   register: ethereum_password_file
 
 - stat: path={{ project_dir }}/{{ role_name }}/data/keystore
   register: ethereum_keystore_file
-  when: capabilities.bill.vote == "blockchain"
 
 - name: create ethereum account
   shell: geth --datadir {{ ethereum_datadir }} --password {{ project_dir}}/{{ role_name }}/password account new
   register: result
-  when:
-    - capabilities.bill.vote == "blockchain"
-    - ethereum_password_file.changed or not ethereum_keystore_file.stat.exists
+  when: ethereum_password_file.changed or not ethereum_keystore_file.stat.exists
 
 - name: extract etherbase address
-  set_fact: ethereum_etherbase_address="{{ result.stdout | regex_replace('^Address.* \{(.*)\}$', '\\1') }}"
-  when:
-    - capabilities.bill.vote == "blockchain"
-    - ethereum_password_file.changed
+  shell: cat `ls` | jq --raw-output '.address'
+  args:
+    chdir: "{{ ethereum_datadir }}/keystore"
+  register: result
+  changed_when: no
+
+- name: register ethereum_etherbase_address
+  set_fact: ethereum_etherbase_address={{ result.stdout }}
 
 - name: install genesis block
   template: src=genesis_block.json.j2 dest={{ project_dir}}/{{ role_name }}/genesis_block.json
   register: ethereum_genesis_block
-  when:
-    - capabilities.bill.vote == "blockchain"
-    - ethereum_password_file.changed
+  when: ethereum_password_file.changed
 
 - name: bootstraps and initializes new genesis block
   shell: rm -rf {{ project_dir}}/{{ role_name }}/data/chaindata && geth --datadir {{ ethereum_datadir }} init {{ project_dir}}/{{ role_name }}/genesis_block.json
-  when:
-    - capabilities.bill.vote == "blockchain"
-    - ethereum_genesis_block.changed
+  when: ethereum_genesis_block.changed
 
 - name: install upstart script
   template: src=blockchain.upstart.conf.j2 dest=/etc/init/cocorico-blockchain.conf
@@ -69,24 +59,8 @@
 
 - name: start the ethereum blockchain service
   service: name=cocorico-blockchain state=started
-  when: capabilities.bill.vote == "blockchain"
-
-- name: stop the ethereum blockchain service
-  service: name=cocorico-blockchain state=stopped
-  when: not capabilities.bill.vote == "blockchain"
+  when: not ethereum_mine_on_boot
 
 - name: start the ethereum blockchain mining service
   service: name=cocorico-blockchain-miner state=started
-  when:
-    - capabilities.bill.vote == "blockchain"
-    - ethereum_mine_on_boot
-
-- name: stop the ethereum blockchain mining service
-  service: name=cocorico-blockchain-miner state=stopped
-  when: capabilities.bill.vote != "blockchain"
-
-- name: install apache configuration
-  template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
-  when: capabilities.bill.vote == "blockchain"
-  notify:
-    - restart apache2 service
+  when: ethereum_mine_on_boot
