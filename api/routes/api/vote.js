@@ -286,8 +286,6 @@ exports.vote = function(req, res)
                     var ballot = Ballot.model({
                         bill: bill,
                         voter: bcrypt.hashSync(req.user.sub, 10),
-                        voterAge: birthdateToAge(req.user.birthdate),
-                        voterGender: req.user.gender,
                         status: config.capabilities.bill.vote == 'blockchain'
                             ? 'queued'
                             : 'complete'
