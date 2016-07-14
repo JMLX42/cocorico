@@ -331,14 +331,14 @@ var SourceTab = React.createClass({
                     </Col>
                 </Row>
                 <Row>
-                    <Col sm={6}>
+                    <Col md={12}>
                         {this.props.editable
                             ? this.renderAddSourceForm()
                             : <p className="hint">
                                     {this.getIntlMessage('bill.TOO_LATE_TO_REVIEW')}
                             </p>}
                     </Col>
-                    <Col sm={6}>
+                    <Col md={12}>
                         {this.renderSourcePageList(
                             this.state.communitySources.length,
                             this.state.communitySourcePage,
