@@ -30,30 +30,7 @@ exports.resultPerDate = function(req, res)
                 || bill.status != 'published')
                 return res.status(403).send();
 
-            Ballot.model.find({bill : bill})
-                .exec(function(err, ballots)
-                {
-                    if (err)
-                        return res.apiError('database error', err);
-
-                    var result = {
-                        yes     : {},
-                        no      : {},
-                        blank   : {}
-                    };
-
-                    for (var ballot of ballots)
-                    {
-                        var date = new Date(ballot.time).toISOString().slice(0, 10);
-
-                        if (!(date in result[ballot.value]))
-                            result[ballot.value][date] = 1;
-                        else
-                            result[ballot.value][date] += 1;
-                    }
-
-                    res.apiResponse({result : result});
-                });
+            res.apiResponse({result : null});
         });
 }
 
@@ -74,24 +51,7 @@ exports.resultPerGender = function(req, res)
                 || bill.status != 'published')
                 return res.status(403).send();
 
-            Ballot.model.find({bill : bill})
-                .exec(function(err, ballots)
-                {
-                    if (err)
-                        return res.apiError('database error', err);
-
-                    var result = {
-                        yes     : {male : 0, female : 0},
-                        no      : {male : 0, female : 0},
-                        blank   : {male : 0, female : 0}
-                    };
-
-                    for (var ballot of ballots)
-                        if (ballot.voterGender)
-                            result[ballot.value][ballot.voterGender] += 1;
-
-                    res.apiResponse({result : result});
-                });
+            res.apiResponse({result : null});
         });
 }
 
@@ -112,28 +72,7 @@ exports.resultPerAge = function(req, res)
                 || bill.status != 'published')
                 return res.status(403).send();
 
-            Ballot.model.find({bill : bill})
-                .exec(function(err, ballots)
-                {
-                    if (err)
-                        return res.apiError('database error', err);
-
-                    var result = {};
-                    for (var ballot of ballots)
-                        if (ballot.voterAge)
-                        {
-                            if (!(ballot.voterAge in result))
-                                result[ballot.voterAge] = {
-                                    yes     : 0,
-                                    no      : 0,
-                                    blank   : 0
-                                };
-
-                            result[ballot.voterAge][ballot.value] += 1;
-                        }
-
-                    res.apiResponse({result : result});
-                });
+            res.apiResponse({result : null});
         });
 }
 
@@ -154,23 +93,17 @@ exports.result = function(req, res)
                 || bill.status != 'published')
                 return res.status(403).send();
 
-            Ballot.model.find({bill : bill})
-                .exec(function(err, ballots)
-                {
-                    if (err)
-                        return res.apiError('database error', err);
+            var web3 = new Web3();
+            web3.setProvider(new web3.providers.HttpProvider(
+                "http://127.0.0.1:8545"
+            ));
 
-                    var result = {
-                        yes     : 0,
-                        no      : 0,
-                        blank   : 0
-                    };
-
-                    for (var ballot of ballots)
-                        result[ballot.value] += 1;
-
-                    res.apiResponse({result : result});
-                });
+            web3.eth.contract(JSON.parse(bill.voteContractABI)).at(
+                bill.voteContractAddress,
+                (err, voteInstance) => res.apiResponse(
+                    {result : voteInstance.getVoteResults().map((s) => parseInt(s))}
+                )
+            );
         });
 }
 

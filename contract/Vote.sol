@@ -19,18 +19,20 @@ contract Vote {
         bool voted;
         uint8 vote;
     }
-    struct Proposal {
-        uint voteCount;
+
+    mapping(address => Voter) voters;
+    address chairperson;
+    uint[] results;
+
+    /* This unnamed function is called whenever someone tries to send ether to it */
+    function () {
+        throw; // Prevents accidental sending of ether
     }
 
-    address chairperson;
-    mapping(address => Voter) voters;
-    Proposal[] proposals;
-
-    // Create a new ballot with $(_numProposals) different proposals.
+    // Create a new vote with $(_numProposals) different results.
     function Vote(uint8 _numProposals) {
         chairperson = msg.sender;
-        proposals.length = _numProposals;
+        results.length = _numProposals;
     }
 
     modifier onlyChairPerson() {
@@ -62,27 +64,25 @@ contract Vote {
     function vote(uint8 proposal) onlyRegisteredVoter {
         Voter voter = voters[msg.sender];
 
-        if (proposal >= proposals.length)
+        if (proposal >= results.length)
             return; // FIXME: emit a BallotError event
 
         voter.voted = true;
         voter.vote = proposal;
-        proposals[proposal].voteCount += 1;
+        results[proposal] += 1;
 
         Ballot(msg.sender, proposal);
     }
 
-    function winningProposal() constant returns (uint8 winningProposal) {
-        uint256 winningVoteCount = 0;
-        for (uint8 proposal = 0; proposal < proposals.length; proposal++)
-            if (proposals[proposal].voteCount > winningVoteCount) {
-                winningVoteCount = proposals[proposal].voteCount;
-                winningProposal = proposal;
-            }
+    function cancelVote() onlyRegisteredVoter {
+        Voter voter = voters[msg.sender];
+
+        results[voter.vote] -= 1;
+
+        voter.voted = false;
     }
 
-    /* This unnamed function is called whenever someone tries to send ether to it */
-    function () {
-        throw; // Prevents accidental sending of ether
+    function getVoteResults() constant returns (uint[]) {
+        return results;
     }
 }
