@@ -211,26 +211,25 @@ var VoteButtonBar = React.createClass({
     {
         var bill = this.props.bill;
 
+        if (bill.status == 'published')
+        {
+            return (
+                <p className="hint">
+                    {this.getIntlMessage('vote.TOO_LATE_TO_VOTE')}
+                </p>
+            );
+        }
+
         if (!this.isAuthenticated())
         {
-            if (bill.status != 'published')
-            {
-                return (
-                    <p className="hint">
-                        {this.renderLoginMessage(this.getIntlMessage('vote.LOGIN_REQUIRED'))}
-                    </p>
-                );
-            }
-            else
-            {
-                return (
-                    <p className="hint">
-                        {this.getIntlMessage('vote.TOO_LATE_TO_VOTE')}
-                    </p>
-                );
-            }
+            return (
+                <p className="hint">
+                    {this.renderLoginMessage(this.getIntlMessage('vote.LOGIN_REQUIRED'))}
+                </p>
+            );
         }
-        else {
+        else
+        {
             VoteAction.startPollingBallot(this.props.bill.id);
         }
 

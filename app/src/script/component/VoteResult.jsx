@@ -7,7 +7,8 @@ var VoteStore = require('../store/VoteStore');
 
 var VoteAction = require('../action/VoteAction');
 
-var VoteResultPieChart = require('./VoteResultPieChart'),
+var LoadingIndicator = require('./LoadingIndicator'),
+    VoteResultPieChart = require('./VoteResultPieChart'),
     VoteResultPerDateLineChart = require('./VoteResultPerDateLineChart'),
     VoteResultPerGenderBarChart = require('./VoteResultPerGenderBarChart'),
     VoteResultPerAgeBarChart = require('./VoteResultPerAgeBarChart');
@@ -53,37 +54,13 @@ module.exports = React.createClass({
             return (
                 <Row>
                     <Col md={12}>
-                        <p>Chargement...</p>
+                        <LoadingIndicator/>
                     </Col>
                 </Row>
             );
 
         return (
             <div>
-                <Row>
-                    <Col md={12}>
-                        <ul className="list-unstyled list-inline">
-                            <li>
-                                {result.yes + result.no + result.blank} votes
-                            </li>
-                            <li>
-                                <span className="cocorico-blue">
-                                    {result.yes} votes 'pour'
-                                </span>
-                            </li>
-                            <li>
-                                <span className="cocorico-red">
-                                    {result.no} votes 'contre'
-                                </span>
-                            </li>
-                            <li>
-                                <span className="cocorico-dark-grey">
-                                    {result.blank} votes 'blanc'
-                                </span>
-                            </li>
-                        </ul>
-                    </Col>
-                </Row>
                 {result
                     ? <Row>
                         <Col md={12}>
@@ -119,10 +96,10 @@ module.exports = React.createClass({
     render: function()
     {
         return (
-            <Grid>
-                <Row className="section">
+            <Grid className="section section-results">
+                <Row>
                     <Col md={12}>
-                        <h2 className="section-title">Résultat du vote</h2>
+                        <h1><i className="icon-piechart"/>Résultats du vote</h1>
                     </Col>
                 </Row>
                 {this.renderChildren()}

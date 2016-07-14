@@ -21,35 +21,39 @@ var VoteResultPieChart = React.createClass({
 
     render: function()
     {
-        var result = this.props.result;
+        var result = {
+            yes: this.props.result[0],
+            blank: this.props.result[1],
+            no: this.props.result[2]
+        };
         var numVotes = result.no + result.yes + result.blank;
 
         var percent = {};
         if (numVotes != 0)
         {
-            percent[this.getIntlMessage('bill.VOTE_YES')] = Math.round(result.yes / numVotes * 100);
-            percent[this.getIntlMessage('bill.VOTE_NO')] = Math.round(result.no / numVotes * 100);
-            percent[this.getIntlMessage('bill.VOTE_BLANK')] = Math.round(result.blank / numVotes * 100);
+            percent[this.getIntlMessage('vote.VOTE_YES')] = Math.round(result.yes / numVotes * 100);
+            percent[this.getIntlMessage('vote.VOTE_NO')] = Math.round(result.no / numVotes * 100);
+            percent[this.getIntlMessage('vote.VOTE_BLANK')] = Math.round(result.blank / numVotes * 100);
         }
         else
         {
-            percent[this.getIntlMessage('bill.VOTE_YES')] = 0;
-            percent[this.getIntlMessage('bill.VOTE_NO')] = 100;
-            percent[this.getIntlMessage('bill.VOTE_BLANK')] = 0;
+            percent[this.getIntlMessage('vote.VOTE_YES')] = 0;
+            percent[this.getIntlMessage('vote.VOTE_NO')] = 100;
+            percent[this.getIntlMessage('vote.VOTE_BLANK')] = 0;
         }
 
         var maxPercent = Math.max(
-            percent[this.getIntlMessage('bill.VOTE_YES')],
-            percent[this.getIntlMessage('bill.VOTE_NO')]
+            percent[this.getIntlMessage('vote.VOTE_YES')],
+            percent[this.getIntlMessage('vote.VOTE_NO')]
         );
 
         var labels = {
-            yes : this.getIntlMessage('bill.VOTE_YES')
-                + ' (' + percent[this.getIntlMessage('bill.VOTE_YES')] + '%)',
-            no : this.getIntlMessage('bill.VOTE_NO')
-                + ' (' + percent[this.getIntlMessage('bill.VOTE_NO')] + '%)',
-            blank : this.getIntlMessage('bill.VOTE_BLANK')
-                + ' (' + percent[this.getIntlMessage('bill.VOTE_BLANK')] + '%)'
+            yes : this.getIntlMessage('vote.VOTE_YES')
+                + ' (' + percent[this.getIntlMessage('vote.VOTE_YES')] + '%)',
+            no : this.getIntlMessage('vote.VOTE_NO')
+                + ' (' + percent[this.getIntlMessage('vote.VOTE_NO')] + '%)',
+            blank : this.getIntlMessage('vote.VOTE_BLANK')
+                + ' (' + percent[this.getIntlMessage('vote.VOTE_BLANK')] + '%)'
         }
 
         var color = {}
