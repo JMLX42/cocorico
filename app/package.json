@@ -27,7 +27,7 @@
     "node-lessify": "0.1.1",
     "d3": "^3.5.3",
     "classnames": "2.2.3",
-    "eth-lightwallet": "2.3.1",
+    "eth-lightwallet": "2.4.3",
     "ethereumjs-tx": "1.1.1",
     "async": "1.5.2",
     "print-html-element": "0.3.4",
