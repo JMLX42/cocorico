@@ -179,7 +179,7 @@ var Bill = React.createClass({
             <Accordion className="hidden-sm hidden-md hidden-lg"
                 activeKey={this.state.activeKey}
                 onSelect={this.tabSelectHandler}>
-                {bill.status == 'debate' || bill.status == 'vote' || bill.status == 'published'
+                {this.state.config.capabilities.argument.read && (bill.status == 'debate' || bill.status == 'vote' || bill.status == 'published')
                     ? <Panel eventKey={eventKey++} header={
                             <div>
                                 <span className="icon-chat"/>
