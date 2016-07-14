@@ -57,9 +57,9 @@ var VoteResultPieChart = React.createClass({
         }
 
         var color = {}
-        color[labels.yes] = '#4285F4';
-        color[labels.no] = '#EB6864';
-        color[labels.blank] = '#999';
+        color[labels.yes] = '#2ecc71';
+        color[labels.no] = '#e74c3c';
+        color[labels.blank] = '#95a5a6';
 
         var data = {values : [
             {x : labels.yes,    y : result.yes},
