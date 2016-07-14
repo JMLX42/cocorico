@@ -73,20 +73,21 @@ module.exports = Reflux.createStore({
                                   voteContractABI,
                                   value)
     {
-        console.log('creating vote transaction');
+        console.log('creating vote transaction with value', value);
 
         var tx = lightwallet.txutils.functionTx(
             JSON.parse(voteContractABI),
             'vote',
-            value,
+            [value],
             {
                 to: voteContractAddress,
                 gasLimit: 999999,
                 gasPrice: 20000000000,
-                value: 0,
                 nonce: 0
             }
         );
+
+        console.log('tx', tx);
 
         var signedTx = '0x' + lightwallet.signing.signTx(
             keystore,
