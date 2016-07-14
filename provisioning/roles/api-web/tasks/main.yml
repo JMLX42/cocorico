@@ -52,6 +52,7 @@
     chdir: "{{ cocorico_api_dir }}"
   register: result
   failed_when: result.stderr
+  changed_when: "'Updated page' in result.stdout"
 
 - name: install upstart script
   template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
