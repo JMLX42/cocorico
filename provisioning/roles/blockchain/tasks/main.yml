@@ -8,12 +8,9 @@
   when: capabilities.bill.vote == "blockchain"
   apt: name=software-properties-common state=present
 
-- name: add ethereum PPAs
+- name: add ethereum PPA
   when: capabilities.bill.vote == "blockchain"
-  apt_repository: repo={{ item }}
-  with_items:
-    - ppa:ethereum/ethereum
-    - ppa:ethereum/ethereum-qt
+  apt_repository: repo=ppa:ethereum/ethereum
 
 - name: install ethereum
   when: capabilities.bill.vote == "blockchain"
@@ -46,16 +43,23 @@
     - ethereum_password_file.changed or not ethereum_keystore_file.stat.exists
 
 - name: extract etherbase address
-  set_fact: ethereum_etherbase_address="{{ result.stdout | regex_replace('^Mining Beneficiary.* (.*)$', '\\1') }}"
+  set_fact: ethereum_etherbase_address="{{ result.stdout | regex_replace('^Address.* \{(.*)\}$', '\\1') }}"
   when:
     - capabilities.bill.vote == "blockchain"
     - ethereum_password_file.changed
 
 - name: install genesis block
   template: src=genesis_block.json.j2 dest={{ project_dir}}/{{ role_name }}/genesis_block.json
+  register: ethereum_genesis_block
   when:
     - capabilities.bill.vote == "blockchain"
     - ethereum_password_file.changed
+
+- name: bootstraps and initializes new genesis block
+  shell: rm -rf {{ project_dir}}/{{ role_name }}/data/chaindata && geth --datadir {{ ethereum_datadir }} init {{ project_dir}}/{{ role_name }}/genesis_block.json
+  when:
+    - capabilities.bill.vote == "blockchain"
+    - ethereum_genesis_block.changed
 
 - name: install upstart script
   template: src=blockchain.upstart.conf.j2 dest=/etc/init/cocorico-blockchain.conf

@@ -17,5 +17,14 @@ pre-start script
 end script
 
 script
-    exec geth --maxpeers 0 --nodiscover --rpc --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}" --unlock 0 --password {{ project_dir }}/{{ role_name }}/password --datadir {{ ethereum_datadir }}
+    exec geth \
+        --maxpeers 0 \
+        --nodiscover \
+        --rpc \
+        --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" \
+        --networkid "{{ ethereum_network_id }}" \
+        --unlock 0 \
+        --password {{ project_dir }}/{{ role_name }}/password \
+        --datadir {{ ethereum_datadir }} \
+        >>{{ log_dir }}/blockchain.log 2>&1
 end script

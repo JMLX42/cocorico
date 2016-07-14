@@ -23,6 +23,18 @@ script
 
     exec testrpc --account="${PRIVATE_KEY},${BALANCE}" --port {{ ethereum_rpc_private_port }}
 {% else %}
-    exec geth --maxpeers 0 --nodiscover --rpc --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" --mine --genesis {{ project_dir }}/{{ role_name }}/genesis_block.json --networkid "{{ ethereum_network_id }}" --unlock 0 --password {{ project_dir }}/{{ role_name }}/password --minerthreads "1" --datadir {{ ethereum_datadir }}
+    exec geth \
+        --maxpeers 0 \
+        --nodiscover \
+        --rpc \
+        --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" \
+        --mine \
+        --minerthreads 1 \
+        --etherbase {{ ethereum_etherbase_address }} \
+        --networkid "{{ ethereum_network_id }}" \
+        --unlock 0 \
+        --password {{ project_dir }}/{{ role_name }}/password \
+        --datadir {{ ethereum_datadir }} \
+        >>{{ log_dir }}/blockchain.log 2>&1
 {% endif %}
 end script
