@@ -1,4 +1,5 @@
 {
+	"createdAt": "2016-07-14T23:26:39.185Z",
 	"file": {
 		"filename": "le-crayon-guidant-le-peuple.jpg",
 		"filetype": "image/jpeg",
@@ -7,5 +8,6 @@
 		"size": 107913
 	},
 	"slug": "le-crayon-guidant-le-peuple",
-	"title": "Le crayon guidant le peuple"
+	"title": "Le crayon guidant le peuple",
+	"updatedAt": "2016-07-14T23:26:39.185Z"
 }

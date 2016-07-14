@@ -5,7 +5,8 @@ var Types = keystone.Field.Types;
 
 var Media = new keystone.List('Media', {
     autokey: { path: 'slug', from: 'title', unique: true },
-    map: { name: 'title' }
+    map: { name: 'title' },
+    track: { createdAt: true, updatedAt: true }
 });
 
 Media.add({

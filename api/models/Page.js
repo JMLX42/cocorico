@@ -5,12 +5,12 @@ var Types = keystone.Field.Types;
 var Page = new keystone.List('Page', {
     autokey: { path: 'slug', from: 'title', unique: true },
     map: { name: 'title' },
+    track: { createdAt: true, updatedAt: true },
     sortable: true
 });
 
 Page.add({
 	title: { type: String, required: true },
-	createdAt: { type: Date, default: Date.now },
     publishedAt: Date,
     published: { type: Boolean, default: false },
     showInNavBar: { type: Boolean, default: false },
