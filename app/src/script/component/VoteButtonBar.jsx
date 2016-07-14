@@ -207,7 +207,7 @@ var VoteButtonBar = React.createClass({
         );
     },
 
-    renderChildren: function()
+    render: function()
     {
         var bill = this.props.bill;
 
@@ -220,17 +220,20 @@ var VoteButtonBar = React.createClass({
             );
         }
 
-        if (!this.isAuthenticated())
+        if (bill.status == 'vote')
         {
-            return (
-                <p className="hint">
-                    {this.renderLoginMessage(this.getIntlMessage('vote.LOGIN_REQUIRED'))}
-                </p>
-            );
-        }
-        else
-        {
-            VoteAction.startPollingBallot(this.props.bill.id);
+            if (this.isAuthenticated())
+            {
+                VoteAction.startPollingBallot(this.props.bill.id);
+            }
+            else
+            {
+                return (
+                    <p className="hint">
+                        {this.renderLoginMessage(this.getIntlMessage('vote.LOGIN_REQUIRED'))}
+                    </p>
+                );
+            }
         }
 
         // If the app takes some time to retrieve the ballot (ex: busy server),
@@ -285,15 +288,7 @@ var VoteButtonBar = React.createClass({
                     ? this.renderVoteStatusMessage()
                     : this.renderVoteButtons()
         );
-    },
-
-    render: function()
-    {
-        if (this.isAuthenticated())
-            VoteAction.startPollingBallot(this.props.bill.id);
-
-		return this.renderChildren();
-	}
+    }
 });
 
 module.exports = VoteButtonBar;
