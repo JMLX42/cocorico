@@ -13,7 +13,7 @@ var Grid = ReactBootstrap.Grid,
 
 var App = React.createClass({
 
-	mixins: [ReactIntl.IntlMixin],
+    mixins: [ReactIntl.IntlMixin],
 
     getDefaultProps: function(){
         return {
@@ -22,18 +22,18 @@ var App = React.createClass({
         };
     },
 
-	render: function()
+    render: function()
     {
-		return (
-			<div>
-				<Header/>
-                    <div id="content">
-                        {this.props.children || <div/>}
-    				</div>
-				<Footer/>
-			</div>
-		);
-	}
+        return (
+            <div>
+                <Header/>
+                <div id="content">
+                    {this.props.children || <div/>}
+                </div>
+                <Footer/>
+            </div>
+        );
+     }
 });
 
 module.exports = App;
