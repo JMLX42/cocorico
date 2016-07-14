@@ -5,7 +5,8 @@ var Reflux = require('reflux');
 
 var VoteAction = require('../action/VoteAction');
 
-var BlockchainAccountStore = require('../store/BlockchainAccountStore');
+var BlockchainAccountStore = require('../store/BlockchainAccountStore'),
+    ConfigStore = require('../store/ConfigStore');
 
 var VoterCardReaderModal = require('./VoterCardReaderModal'),
     LoadingIndicator = require('./LoadingIndicator');
@@ -18,7 +19,8 @@ var RemoveMyVoteButton = React.createClass({
 
     mixins: [
         ReactIntl.IntlMixin,
-        Reflux.connect(BlockchainAccountStore, 'blockchainAccounts')
+        Reflux.connect(BlockchainAccountStore, 'blockchainAccounts'),
+        Reflux.connect(ConfigStore, 'config')
     ],
 
     getDefaultProps: function() {
@@ -46,9 +48,8 @@ var RemoveMyVoteButton = React.createClass({
     },
 
     componentWillUnmount: function() {
-        // if (this._unsubscribe) {
-        //     this._unsubscribe();
-        // }
+        if (!!this._blockchainAccStoreUnsub)
+            this._blockchainAccStoreUnsub();
     },
 
     voterCardReaderSuccess: function(data) {
@@ -57,14 +58,27 @@ var RemoveMyVoteButton = React.createClass({
             unvoting: true
         });
 
+        this._blockchainAccStoreUnsub = BlockchainAccountStore.listen(
+            () => this.removeVote()
+        );
+
         this.removeVote();
     },
 
     removeVote: function() {
-        VoteAction.unvote(
-            this.state.blockchainAccounts.getKeystoreByBillId(this.props.bill.id),
-            this.props.bill.id
-        );
+        var keystore = this.state.blockchainAccounts.getKeystoreByBillId(this.props.bill.id);
+
+        if (!keystore)
+            return;
+
+        this._blockchainAccStoreUnsub();
+
+        var key = this.state.blockchainAccounts.getPwDerivedKeyByBillId(this.props.bill.id);
+        var address = this.state.blockchainAccounts.getAddressByBillId(this.props.bill.id);
+
+        console.log(keystore, key, address);
+
+        VoteAction.unvote(keystore, key, address, this.props.bill);
     },
 
     voterCardReaderCancelled: function() {
@@ -75,6 +89,9 @@ var RemoveMyVoteButton = React.createClass({
 
     render: function()
     {
+        if (!this.state.config.capabilities.vote.cancel)
+            return null;
+
 		return (
             <Button onClick={this.handleClick} className="btn-unvote">
                 {this.props.value
