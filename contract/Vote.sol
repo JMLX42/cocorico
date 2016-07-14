@@ -1,6 +1,11 @@
 contract Vote {
 
-    event Ballot (
+    event BallotAdded (
+        address indexed voter,
+        uint8 proposal
+    );
+
+    event BallotCancelled (
         address indexed voter,
         uint8 proposal
     );
@@ -71,15 +76,16 @@ contract Vote {
         voter.vote = proposal;
         results[proposal] += 1;
 
-        Ballot(msg.sender, proposal);
+        BallotAdded(msg.sender, proposal);
     }
 
     function cancelVote() onlyRegisteredVoter {
         Voter voter = voters[msg.sender];
 
         results[voter.vote] -= 1;
-
         voter.voted = false;
+
+        BallotCancelled(msg.sender, voter.vote);
     }
 
     function getVoteResults() constant returns (uint[]) {

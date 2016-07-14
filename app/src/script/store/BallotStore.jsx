@@ -14,7 +14,7 @@ module.exports = Reflux.createStore({
         jquery.ajaxSetup({ cache: false });
 
         this.listenTo(VoteAction.vote, this._vote);
-        this.listenTo(VoteAction.unvote, this._unvote);
+        this.listenTo(VoteAction.unvote, this._removeVote);
         this.listenTo(VoteAction.startPollingBallot, this._startPollingBallot);
         this.listenTo(VoteAction.stopPollingBallot, this._stopPollingBallot);
         this.listenTo(BillAction.showCurrentUserVote, this._fetchBallotByBillId);
@@ -68,7 +68,6 @@ module.exports = Reflux.createStore({
     _getVoteTransaction: function(keystore,
                                   pwDerivedKey,
                                   address,
-                                  billId,
                                   voteContractAddress,
                                   voteContractABI,
                                   value)
@@ -101,13 +100,38 @@ module.exports = Reflux.createStore({
         return signedTx;
     },
 
+    _getVoteRemovalTransaction: function(keystore,
+                                         pwDerivedKey,
+                                         address,
+                                         voteContractAddress,
+                                         voteContractABI)
+    {
+        var tx = lightwallet.txutils.functionTx(
+            JSON.parse(voteContractABI),
+            'cancelVote',
+            null,
+            {
+                to: voteContractAddress,
+                gasLimit: 999999,
+                gasPrice: 20000000000,
+                nonce: 1
+            }
+        );
+
+        return '0x' + lightwallet.signing.signTx(
+            keystore,
+            pwDerivedKey,
+            tx,
+            address
+        );
+    },
+
     _vote: function(keystore, pwDerivedKey, address, bill, value)
     {
         var tx = this._getVoteTransaction(
             keystore,
             pwDerivedKey,
             address,
-            bill.id,
             bill.voteContractAddress,
             bill.voteContractABI,
             value
@@ -127,32 +151,33 @@ module.exports = Reflux.createStore({
         );
     },
 
-    _removeVote: function(keystore, billId, callback)
+    _removeVote: function(keystore, pwDerivedKey, address, bill)
     {
+        var tx = this._getVoteRemovalTransaction(
+            keystore,
+            pwDerivedKey,
+            address,
+            bill.voteContractAddress,
+            bill.voteContractABI
+        );
+
         jquery.post(
-            '/api/vote/remove/' + billId,
+            '/api/vote/remove/',
             {
                 // voterCardHash: keystore
                 //     ? bcrypt.hashSync(keystore.serialize(), 10)
                 //     : null,
-                transaction: null // FIXME: generate the actual blockchain transaction
+                transaction: tx
             },
             (data) => {
                 // No ballot object => ballot is loading. To make sure the
                 // removed ballot does not make the app hang waiting for a
                 // ballot object, we create a dummy ballot object with an error
                 // state.
-                this._ballots[billId] = {error:'removed'};
-
-                if (callback)
-                    callback(data);
+                this._ballots[bill.id] = {error:'removed'};
+                this.trigger(this);
             }
         );
-    },
-
-    _unvote: function(keystore, billId)
-    {
-        this._removeVote(keystore, billId, (data) => this.trigger(this));
     },
 
     _startPollingBallot: function(billId)

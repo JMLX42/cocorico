@@ -69,7 +69,7 @@ exports = module.exports = function(app) {
 	app.get('/vote/result/per-age/:billId', keystone.middleware.api, routes.api.vote.resultPerAge);
 	app.get('/vote/result/per-date/:billId', keystone.middleware.api, routes.api.vote.resultPerDate);
 	app.post('/vote', keystone.middleware.api, isAuthenticated, routes.api.vote.vote);
-	app.post('/vote/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.remove);
+	app.post('/vote/remove', keystone.middleware.api, isAuthenticated, routes.api.vote.remove);
 
 	app.get('/source/list/:billId', keystone.middleware.api, routes.api.source.list);
 	app.post('/source/add', keystone.middleware.api, isAuthenticated, routes.api.source.add);

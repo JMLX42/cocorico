@@ -6,6 +6,7 @@ var redis = require('redis');
 var EthereumTx = require('ethereumjs-tx');
 var EthereumUtil = require('ethereumjs-util');
 var Web3 = require('web3');
+var async = require('async');
 
 var Bill = keystone.list('Bill'),
     Ballot = keystone.list('Ballot'),
@@ -192,111 +193,112 @@ exports.vote = function(req, res)
     var signedTx = new EthereumTx(req.body.transaction);
     var voteContractAddress = EthereumUtil.bufferToHex(signedTx.to);
 
-	Bill.model.findOne({voteContractAddress:voteContractAddress})
-        .exec(function(err, bill)
-    	{
-    		if (err)
-    			return res.apiError('database error', err);
-    		if (!bill)
-    			return res.apiError('no bill found for contract address ' + voteContractAddress);
+    async.waterfall(
+        [
+            (callback) => Bill.model
+                .findOne({voteContractAddress:voteContractAddress})
+                .exec(callback),
+            (bill, callback) => {
+                if (!bill)
+        			return callback({code: 404, msg: 'bill not found'}, null);
 
-    		if (!BillHelper.billIsReadable(bill, req))
-    			return res.status(403).send();
+        		if (!BillHelper.billIsReadable(bill, req))
+        			return callback({code: 403, msg: 'invalid bill'}, null);
 
-    		BallotHelper.getByBillIdAndVoter(
-    			bill.id,
-    			req.user.sub,
-    			function(err, ballot)
-    			{
-    				if (err)
-    					return res.apiError('database error', err);
+                BallotHelper.getByBillIdAndVoter(
+        			bill.id,
+        			req.user.sub,
+                    (err, ballot) => callback(null, bill, ballot)
+                );
+            },
+            (bill, ballot, callback) => {
+                if (ballot && ballot.status != 'cancelled')
+                    return callback({code: 403, msg: 'user already voted'}, null);
 
-    				if (ballot)
-    					return res.status(403).apiResponse({
-    						error: 'user already voted'
-    					});
+                var ballot = Ballot.model({
+                    bill: bill,
+                    voter: bcrypt.hashSync(req.user.sub, 10),
+                    status: config.capabilities.bill.vote == 'blockchain'
+                        ? 'queued'
+                        : 'complete'
+                });
 
-                    var ballot = Ballot.model({
-                        bill: bill,
-                        voter: bcrypt.hashSync(req.user.sub, 10),
-                        status: config.capabilities.bill.vote == 'blockchain'
-                            ? 'queued'
-                            : 'complete'
-                    });
+                ballot.save((err, ballot) => callback(null, bill, ballot));
+            },
+            (bill, ballot, callback) => pushBallotMessageOnQueue(
+                {
+                    id: ballot.id,
+                    action: 'vote',
+                    transaction: req.body.transaction,
+                    voteContractAddress: bill.voteContractAddress,
+                    voteContractABI: JSON.parse(bill.voteContractABI)
+                },
+                (err, ballotMsg) => callback(null, ballot)
+            )
+        ],
+        (err, ballot) => {
+            if (err)
+                return ballotTransactionError(res, ballot, err);
 
-                    ballot.save(function(err, result)
-                    {
-                        if (err)
-                            return res.apiError('database error', err);
-
-                        pushBallotMessageOnQueue(
-                            {
-                                id: ballot.id,
-                                transaction: req.body.transaction,
-                                voteContractAddress: bill.voteContractAddress,
-                                voteContractABI: JSON.parse(bill.voteContractABI)
-                            },
-                            function(err, ballotMsg)
-                            {
-                                if (err)
-                                    return ballotTransactionError(res, ballot, err);
-
-                                return res.apiResponse({ ballot: ballot });
-                            }
-                        );
-                    });
-    			}
-    		);
-    	});
+            return res.apiResponse({ ballot: ballot });
+        }
+    );
 }
 
 exports.remove = function(req, res)
 {
-    if (!config.capabilities.bill.vote)
+    if (!config.capabilities.vote.cancel)
         return res.status(403).send();
 
-	Bill.model.findById(req.params.id).exec(function(err, bill)
-	{
-		if (err)
-			return res.apiError('database error', err);
-		if (!bill)
-			return res.apiError('not found');
+    var signedTx = new EthereumTx(req.body.transaction);
+    var voteContractAddress = EthereumUtil.bufferToHex(signedTx.to);
 
-		if (!BillHelper.billIsReadable(bill, req))
-			return res.status(403).send();
+    async.waterfall(
+        [
+            (callback) => Bill.model
+                .findOne({voteContractAddress:voteContractAddress})
+                .exec(callback),
+            (bill, callback) => {
+        		if (!bill)
+        			return callback({msg: 'bill not found', code: 404}, null);
 
-		BallotHelper.getByBillIdAndVoter(
-			req.params.id,
-			req.user.sub,
-			function(err, ballot)
-			{
-				if (err)
-					return res.apiError('database error', err);
+        		if (!BillHelper.billIsReadable(bill, req))
+        			return callback({msg: 'invalid bill', code: 403}, null);
 
-				if (!ballot)
-					return res.status(404).apiResponse({
-						error: 'ballot does not exist'
-					});
+                BallotHelper.getByBillIdAndVoter(
+                    bill.id,
+                    req.user.sub,
+                    (err, ballot) => callback(err, bill, ballot)
+                );
+            },
+            (bill, ballot, callback) => {
+                if (!ballot)
+                    return callback({msg: 'ballot not found', code: 404}, null);
 
-				Ballot.model.findById(ballot.id).remove(function(err)
-				{
-					var client = redis.createClient();
-					var key = 'ballot/' + req.params.id + '/' + req.user.sub;
+                if (ballot.status != 'complete' && ballot.status != 'error')
+                    return callback({msg: 'invalid ballot status', code: 403}, null);
 
-					if (err)
-						return res.apiError('database error', err);
+                pushBallotMessageOnQueue(
+                    {
+                        id: ballot.id,
+                        action: 'cancelVote',
+                        transaction: req.body.transaction,
+                        voteContractAddress: bill.voteContractAddress,
+                        voteContractABI: JSON.parse(bill.voteContractABI)
+                    },
+                    callback
+                );
+            }
+        ],
+        (err, result) => {
+            if (err)
+            {
+                if (err.code)
+                    res.status(err.code);
+                return res.apiResponse(err.msg);
+            }
 
-					client.on('connect', function()
-					{
-						client.del(key, function(err, reply)
-						{
-							if (err)
-								console.log(err);
-
-							return res.apiResponse({ ballot: 'removed' });
-						});
-					});
-				});
-			});
-	});
+            return res.apiResponse({ ballot: 'removed' });
+        }
+    );
 }

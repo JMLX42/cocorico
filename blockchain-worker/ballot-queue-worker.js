@@ -128,22 +128,22 @@ function registerVoter(web3, rootAccount, address, voteInstance, callback)
     );
 }
 
-function sendVoteTransaction(web3, voteInstance, transaction, callback)
+function sendTransaction(web3, instance, tx, eventType, callback)
 {
-    var ballotEvent = voteInstance.Ballot();
-    var signedTx = new EthereumTx(transaction);
+    var event = instance[eventType]();
+    var signedTx = new EthereumTx(tx);
     var address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
 
-    ballotEvent.watch((err, e) => {
+    event.watch((err, e) => {
         if (e.args.voter == address)
         {
-            ballotEvent.stopWatching();
+            event.stopWatching();
             callback(err, e);
         }
     });
 
     web3.eth.sendRawTransaction(
-        transaction,
+        tx,
         function(err, txhash)
         {
             if (err)
@@ -151,11 +151,11 @@ function sendVoteTransaction(web3, voteInstance, transaction, callback)
 
             log.info(
                 {
-                    contract: voteInstance.address,
+                    contract: instance[eventType],
                     address: address,
                     transactionHash: txhash
                 },
-                'Vote.vote function call transaction sent'
+                'function call transaction sent'
             );
         }
     );
@@ -193,9 +193,79 @@ function waitForBlockchain(web3, callback)
 
 function handleBallot(ballot, callback)
 {
-    if (!ballot.id || !ballot.voteContractAddress || !ballot.transaction)
+    if (!ballot.id || !ballot.voteContractAddress || !ballot.transaction || !ballot.action)
         return callback('invalid ballot', null);
 
+    switch (ballot.action)
+    {
+        case 'vote':
+            handleVoteAction(ballot, callback);
+            break;
+        case 'cancelVote':
+            handleCancelVoteAction(ballot, callback);
+            break;
+        default:
+            return callback('invalid ballot action', null);
+    }
+}
+
+function handleCancelVoteAction(ballot, callback)
+{
+    var web3 = new Web3();
+    web3.setProvider(new web3.providers.HttpProvider(
+        "http://127.0.0.1:8545"
+    ));
+
+    var signedTx = new EthereumTx(ballot.transaction);
+    var address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
+    var rootAccount = null;
+
+    async.waterfall(
+        [
+            (callback) => updateBallotStatus(
+                ballot,
+                'cancelling',
+                (err, dbBallot) => callback(err)
+            ),
+            // FIXME: account must be empty after the vote transaction
+            // (callback) => accountIsNotInitialized(web3, address, callback),
+            (callback) => web3.eth.getAccounts((err, acc) => {
+                rootAccount = acc[0];
+                callback(err);
+            }),
+            // Step 1: wait for the blockchain to be available.
+            (callback) => waitForBlockchain(web3, () => callback()),
+            // Step 2: the voter account will need some ether to cancelt its
+            // vote. So the "root" account will make a first transaction to the
+            // voter account to initialize it.
+            (callback) => initializeVoterAccount(
+                web3,
+                rootAccount,
+                address,
+                (err, block) => callback()
+            ),
+            // Step 3: get the vote contract instance.
+            (callback) => web3.eth.contract(ballot.voteContractABI).at(
+                ballot.voteContractAddress,
+                callback
+            ),
+            // Step 4: send the vote cancellation transaction
+            (voteInstance, callback) => sendTransaction(
+                web3,
+                voteInstance,
+                ballot.transaction,
+                'BallotCancelled',
+                callback
+            ),
+            // Step 5: update the ballot status.
+            (event, callback) => updateBallotStatus(ballot, 'cancelled', callback)
+        ],
+        callback
+    );
+}
+
+function handleVoteAction(ballot, callback)
+{
     var web3 = new Web3();
     web3.setProvider(new web3.providers.HttpProvider(
         "http://127.0.0.1:8545"
@@ -212,7 +282,7 @@ function handleBallot(ballot, callback)
                 'pending',
                 (err, dbBallot) => callback(err)
             ),
-            // Step 0: we make sure the ballot account is a new account.
+            // Step 0: make sure the ballot account is a new account.
             // Each account is unique: one vote => one account => one address. If
             // the address already has some funds, then it was used before and
             // something fishy is happening:
@@ -225,7 +295,7 @@ function handleBallot(ballot, callback)
                 rootAccount = acc[0];
                 callback(err);
             }),
-            // Step 1: we wait for the blockchain to be available.
+            // Step 1: wait for the blockchain to be available.
             (callback) => waitForBlockchain(web3, () => callback()),
             // Step 2: the voter account will need some ether to vote. So
             // the "root" account will make a first transaction to the voter
@@ -241,7 +311,7 @@ function handleBallot(ballot, callback)
                 'initialized',
                 (err, dbBallot) => callback(err)
             ),
-            // Step 3 : we fetch the vote contract instance from the blockchain.
+            // Step 3 : fetch the vote contract instance from the blockchain.
             (callback) => web3.eth.contract(ballot.voteContractABI).at(
                 ballot.voteContractAddress,
                 callback
@@ -267,14 +337,15 @@ function handleBallot(ballot, callback)
                 'registered',
                 (err, dbBallot) => callback(err, voteInstance)
             ),
-            // Step 5: we call the Vote.vote() contract function by sending
+            // Step 5: call the Vote.vote() contract function by sending
             // the raw transaction built/signed by the client app. We also
             // start listening to the Ballot event to know when the vote has
             // actually been successfully recorded on the blockchain.
-            (voteInstance, callback) => sendVoteTransaction(
+            (voteInstance, callback) => sendTransaction(
                 web3,
                 voteInstance,
                 ballot.transaction,
+                'BallotAdded',
                 callback
             ),
             // Step 6: the Ballot event has been emitted => the vote has been
@@ -366,6 +437,7 @@ require('amqplib/callback_api').connect(
                             log.info(
                                 {
                                     ballot : {
+                                        action: msgObj.ballot.action,
                                         transaction: msgObj.ballot.transaction,
                                         voteContractAddress: msgObj.ballot.voteContractAddress,
                                         voteContractABI: msgObj.ballot.voteContractABI

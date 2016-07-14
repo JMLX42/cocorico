@@ -13,7 +13,13 @@ Ballot.add({
 	time: { type: Types.Datetime, default: Date.now },
 	status: {
 		type: Types.Select,
-		options: ['signing', 'queued', 'pending', 'initialized', 'registered', 'complete', 'error'],
+		options: [
+			'error',
+			// vote process status
+			'signing', 'queued', 'pending', 'initialized', 'registered', 'complete',
+			// vote cancellation process status
+			'cancelling', 'cancelled'
+		],
 		required: true,
 		initial: true
 	},
