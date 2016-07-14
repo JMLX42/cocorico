@@ -132,7 +132,14 @@ module.exports = Reflux.createStore({
             + this.getSerializedBlockchainAccountByBillId(billId)
         );
 
-        this.trigger(this);
-    }
+        var password = 'password'; // FIXME
 
+        lightwallet.keystore.deriveKeyFromPassword(
+            password,
+            (err, pwDerivedKey) => {
+                this._pwDerivedKey[billId] = pwDerivedKey;
+                this.trigger(this);
+            }
+        );
+    }
 });
