@@ -39,6 +39,8 @@ capabilities:
     print: no
     scan: no
     download: yes
+  vote:
+    cancel: no
 
 mongodb_database_name: "{{ project_name }}"
 
