@@ -307,21 +307,23 @@ var SourceTab = React.createClass({
                         <h2>
                             {this.getIntlMessage('bill.COMMUNITY_SOURCES')}
                             &nbsp;({this.state.communitySources ? this.state.communitySources.length : 0})
-                            <select onChange={(e) => this.setCommunitySourceSortFunctionByName(e.target.value)}
-                                className="small sort-function"
-                                value={this.state.communitySourceSortFunctionName}>
-                                <option value="random">
-                                    {this.formatMessage(this.getIntlMessage('sort.SORTED_RANDOMLY'), {gender:'female'})}
-                                </option>
-                                <option value="score">
-                                    {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_POPULARITY'), {gender:'female'})}
-                                </option>
-                                <option value="time">
-                                    {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_TIME'), {gender:'female'})}
-                                </option>
-                            </select>
+                            {!!this.state.communitySources && this.state.communitySources.length != 0
+                                ? <select onChange={(e) => this.setCommunitySourceSortFunctionByName(e.target.value)}
+                                    className="small sort-function"
+                                    value={this.state.communitySourceSortFunctionName}>
+                                    <option value="random">
+                                        {this.formatMessage(this.getIntlMessage('sort.SORTED_RANDOMLY'), {gender:'female'})}
+                                    </option>
+                                    <option value="score">
+                                        {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_POPULARITY'), {gender:'female'})}
+                                    </option>
+                                    <option value="time">
+                                        {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_TIME'), {gender:'female'})}
+                                    </option>
+                                </select>
+                                : null}
                         </h2>
-                        {this.state.communitySources && this.state.communitySources.length
+                        {!!this.state.communitySources && this.state.communitySources.length
                             ? this.renderSourceList(
                                 this.state.communitySources,
                                 this.state.communitySourcePage,
