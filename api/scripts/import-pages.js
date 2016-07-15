@@ -44,11 +44,13 @@ module.exports = function(done)
                     if (err)
                         return callback(err);
 
-                    var time1 = new Date(media.updatedAt).getTime();
-                    var time2 = new Date(mediaData.updatedAt).getTime();
+                    if (media) {
+                        var time1 = new Date(media.updatedAt).getTime();
+                        var time2 = new Date(mediaData.updatedAt).getTime();
 
-                    if (mediaData.updatedAt && time1 == time2)
-                        return callback(null);
+                        if (mediaData.updatedAt && time1 == time2)
+                            return callback(null);
+                    }
 
                     Media.model.update(
                         {slug: mediaData.slug},
@@ -71,11 +73,13 @@ module.exports = function(done)
                             if (err)
                                 return callback(err);
 
-                            var time1 = new Date(page.updatedAt).getTime();
-                            var time2 = new Date(pageData.updatedAt).getTime();
+                            if (page) {
+                                var time1 = new Date(page.updatedAt).getTime();
+                                var time2 = new Date(pageData.updatedAt).getTime();
 
-                            if (pageData.updatedAt && time1 == time2)
+                                if (pageData.updatedAt && time1 == time2)
                                 return callback(null);
+                            }
 
                             if (pageData.contentType == 'HTML')
                                 pageData.html = fs.readFileSync('./db/pages/' + pageData.slug + '.html', 'utf8');
