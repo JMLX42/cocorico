@@ -1,5 +1,4 @@
 # Ignore built css files
 *.min.css
-public/app.js
-public/app.js~
+public/*.js*
 node_modules
