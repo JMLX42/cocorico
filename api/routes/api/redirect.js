@@ -3,20 +3,18 @@ var config = require('../../config.json');
 var http = require('follow-redirects').http,
     url = require('url');
 
-exports.redirect = function(req, res)
-{
+exports.redirect = function(req, res) {
     if (!req.headers['referer'])
         return res.status(400).send();
 
     var ref_parts = url.parse(req.headers['referer'], true);
     if (ref_parts.host != config.hostname)
         return res.status(400).send();
-    
+
     return res.redirect(301, req.query.url);
 }
 
-exports.proxy = function(req, res)
-{
+exports.proxy = function(req, res) {
     if (!req.headers['referer'])
         return res.status(400).send();
 
@@ -25,7 +23,6 @@ exports.proxy = function(req, res)
         return res.status(400).send();
 
     var url_parts = url.parse(req.query.url, true);
-    var query = url_parts.query;
 
     http.request(
         {
@@ -33,15 +30,13 @@ exports.proxy = function(req, res)
             path: url_parts.path
         },
         (response) => {
-            if (response.statusCode === 200)
-            {
+            if (response.statusCode === 200) {
                 res.writeHead(200, {
                     'Content-Type': response.headers['content-type']
                 });
                 response.pipe(res);
             }
-            else
-            {
+            else {
                 res.writeHead(response.statusCode);
                 res.end();
             }
