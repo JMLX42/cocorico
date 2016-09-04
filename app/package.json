@@ -44,8 +44,8 @@
     "npm": ">=1.3.14"
   },
   "scripts": {
-    "build": "NODE_ENV=development browserify -v -t babelify -t node-lessify -d -p [minifyify --output public/app.js.map ] --extension=.jsx src/script/index.js -o public/app.js",
-    "build-release": "NODE_ENV=production browserify -v -t babelify -t node-lessify -d -p [minifyify --output public/app.js.map ] --extension=.jsx src/script/index.js -o public/app.js",
-    "watch": "NODE_ENV=development watchify -v --debug -t babelify -t node-lessify -d -p [minifyify --output public/app.js.map ] --extension=.jsx src/script/index.js --poll=5000 -o public/app.js"
+    "build": "NODE_ENV=development browserify -v -t babelify -t node-lessify -d -p [minifyify --map app.js.map --output public/app.js.map ] --extension=.jsx src/script/index.js -o public/app.js",
+    "build-release": "NODE_ENV=production browserify -v -t babelify -t node-lessify -d -p [minifyify --map app.js.map --output public/app.js.map ] --extension=.jsx src/script/index.js -o public/app.js",
+    "watch": "NODE_ENV=development watchify -v --debug -t babelify -t node-lessify -d -p [minifyify --map app.js.map --output public/app.js.map ] --extension=.jsx src/script/index.js --poll=5000 -o public/app.js"
   }
 }

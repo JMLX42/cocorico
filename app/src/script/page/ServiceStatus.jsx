@@ -122,15 +122,15 @@ module.exports = React.createClass({
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td>Read Bill</td>
-                                            <td className={this.getStatusClassNames(capabilities.readBill)}>
-                                                {capabilities.readBill ? 'OK' : 'KO'}
+                                            <td>Read Vote</td>
+                                            <td className={this.getStatusClassNames(capabilities.readVote)}>
+                                                {capabilities.readVote ? 'OK' : 'KO'}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td>Create Bill</td>
-                                            <td className={this.getStatusClassNames(capabilities.createBill)}>
-                                                {capabilities.createBill ? 'OK' : 'KO'}
+                                            <td>Create Vote</td>
+                                            <td className={this.getStatusClassNames(capabilities.createVote)}>
+                                                {capabilities.createVote ? 'OK' : 'KO'}
                                             </td>
                                         </tr>
                                     </tbody>

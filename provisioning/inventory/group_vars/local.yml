@@ -3,12 +3,12 @@ front_hostname: local.cocorico.cc
 front_web_public_host: "{{ front_hostname }}"
 hostname: "{{ front_hostname }}-{{ environment_name }}"
 is_development_environment: yes
-http_protocol_prefix: http
+http_protocol_prefix: https
 
 capabilities:
   bill:
-    create: no
-    edit: no
+    create: yes
+    edit: yes
     read: yes
     favorite: no
     vote: yes
@@ -40,7 +40,9 @@ capabilities:
     scan: no
     download: yes
   vote:
+    enabled: yes
     cancel: no
+    check_referer: no
 
 mongodb_database_name: "{{ project_name }}"
 
@@ -48,11 +50,11 @@ franceconnect_client_id: 10e0a74c752107f712b890e6183b03b179146eb682189c3158370cb
 franceconnect_client_secret: 9ecc4856675778548fae7c3042b07df78a5134f3ab9ae09b91543965b24f04a3
 franceconnect_url: https://fcp.integ01.dev-franceconnect.fr
 
-facebook_client_id: 142422522809982
-facebook_client_secret: 8f0812597bdc510a32f27e79b77f4b21
+facebook_client_id: #142422522809982
+facebook_client_secret: #8f0812597bdc510a32f27e79b77f4b21
 
-google_client_id: 1048827102701-6gbl2i586oqoj9a9p1u620u0pom399gu.apps.googleusercontent.com
-google_client_secret: U5YibRB5qJn1tvJ-C_3M_I8b
+google_client_id: #1048827102701-6gbl2i586oqoj9a9p1u620u0pom399gu.apps.googleusercontent.com
+google_client_secret: #U5YibRB5qJn1tvJ-C_3M_I8b
 
 home_web_admin_email: "admin@{{ front_hostname }}"
 home_web_admin_password: admin

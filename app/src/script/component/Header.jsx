@@ -83,13 +83,6 @@ var Header = React.createClass({
                             })}
         			    </Nav>
                         <Nav pullRight>
-                            <li>
-                                {!!currentUser && (this.state.config.capabilities.bill.create || this.state.config.capabilities.bill.edit)
-                                    ? <Link to={this.getIntlMessage('route.MY_BILLS')} activeClassName="active">
-                                        {this.getIntlMessage('page.myBills.TITLE')}
-                                    </Link>
-                                    : <div />}
-                            </li>
                             <li>{!!currentUser ? <AccountDropdown fullName={currentUser.firstName + ' ' + currentUser.lastName}/> : ''}</li>
                             <li>{!currentUser ? <LoginButton /> : ''}</li>
                         </Nav>

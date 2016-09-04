@@ -8,13 +8,11 @@ var Source = new keystone.List('Source', {
 });
 
 Source.add({
-	url: { type: String, default: '', required: true, initial: true },
+	url: { type: String, required: true, initial: true },
 	time: { type: Types.Datetime, default: Date.now },
-	author: { type: String, required: false, default: '' },
-	bill: { type: Types.Relationship, ref: 'Bill', required: true, initial: true },
-	auto: { type: Types.Boolean, required: true, default: false },
+	vote: { type: Types.Relationship, ref: 'Vote', required: true, initial: true },
 	likes: { type: Types.Relationship, ref: 'Like', many: true, noedit: true },
-	score: { type: Types.Number, required: true, default: 0, format: false },
+	score: { type: Types.Number, required: true, default: 1, format: false },
 	title: { type: String },
 	description: { type: String },
 	image: { type: Types.Url },
@@ -25,5 +23,5 @@ Source.add({
 
 transform.toJSON(Source);
 
-Source.defaultColumns = 'title, score';
+Source.defaultColumns = 'title, score, url';
 Source.register();

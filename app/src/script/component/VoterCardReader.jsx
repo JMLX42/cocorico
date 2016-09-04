@@ -49,7 +49,7 @@ var VoterCardReader = React.createClass({
 
     qrCodeReaderSuccess: function(data) {
         // FIXME: actual check of the proof of vote content and format
-        BlockchainAccountAction.import(this.props.billId, data);
+        BlockchainAccountAction.import(this.props.voteId, data);
         this.props.onSuccess(data);
     },
 
@@ -67,7 +67,7 @@ var VoterCardReader = React.createClass({
             var data = pof[1];
 
             if (!!data) {
-                BlockchainAccountAction.import(this.props.billId, data);
+                BlockchainAccountAction.import(this.props.voteId, data);
                 this.props.onSuccess(data);
             }
         };

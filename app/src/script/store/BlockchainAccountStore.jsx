@@ -20,49 +20,49 @@ module.exports = Reflux.createStore({
         return this;
     },
 
-    getKeystoreByBillId: function(billId) {
-        if (!(billId in this._keystore)) {
+    getKeystoreByVoteId: function(voteId) {
+        if (!(voteId in this._keystore)) {
             return null;
         }
 
-        return this._keystore[billId];
+        return this._keystore[voteId];
     },
 
-    getPwDerivedKeyByBillId: function(billId) {
-        if (!(billId in this._pwDerivedKey)) {
+    getPwDerivedKeyByVoteId: function(voteId) {
+        if (!(voteId in this._pwDerivedKey)) {
             return null;
         }
 
-        return this._pwDerivedKey[billId];
+        return this._pwDerivedKey[voteId];
     },
 
-    getVoterCardByBillId: function(billId) {
-        if (!(billId in this._voterCard)) {
+    getVoterCardByVoteId: function(voteId) {
+        if (!(voteId in this._voterCard)) {
             return null;
         }
 
-        return this._voterCard[billId];
+        return this._voterCard[voteId];
     },
 
-    getAddressByBillId: function(billId) {
-        if (!(billId in this._keystore)) {
+    getAddressByVoteId: function(voteId) {
+        if (!(voteId in this._keystore)) {
             return null;
         }
 
-        return this._keystore[billId].getAddresses()[0];
+        return this._keystore[voteId].getAddresses()[0];
     },
 
-    getSerializedBlockchainAccountByBillId: function(billId) {
-        if (!(billId in this._keystore) || !this._keystore[billId]) {
+    getSerializedBlockchainAccountByVoteId: function(voteId) {
+        if (!(voteId in this._keystore) || !this._keystore[voteId]) {
             return null;
         }
 
-        return this._keystore[billId].serialize();
+        return this._keystore[voteId].serialize();
     },
 
-    _deleteKeystore: function(billId) {
-        delete this._keystore[billId];
-        delete this._pwDerivedKey[billId];
+    _deleteKeystore: function(voteId) {
+        delete this._keystore[voteId];
+        delete this._pwDerivedKey[voteId];
 
         console.log('deleted keystore');
     },
@@ -72,17 +72,17 @@ module.exports = Reflux.createStore({
         this._pwDerivedKey = {};
     },
 
-    _getKeystore: function(billId, callback) {
+    _getKeystore: function(voteId, callback) {
         var secretSeed = lightwallet.keystore.generateRandomSeed();
         var password = 'password'; // FIXME
 
         lightwallet.keystore.deriveKeyFromPassword(password, (err, pwDerivedKey) => {
             var ks = new lightwallet.keystore(secretSeed, pwDerivedKey);
 
-            ks.passwordProvider = (callback) => password;
+            ks.passwordProvider = () => password;
 
             console.log('BlockchainAccountStore: created new keystore');
-            callback(ks, pwDerivedKey);
+            callback(err, ks, pwDerivedKey);
         });
     },
 
@@ -96,15 +96,20 @@ module.exports = Reflux.createStore({
         return svg.replace('</svg>', '<desc>' + voterCardData + '</desc></svg>');
     },
 
-    _createAccount: function(billId) {
-        // // if (billId in this._keystore)
+    _createAccount: function(voteId) {
+        // // if (voteId in this._keystore)
         // //     return this.trigger(this);
         //
-        // this._keystore[billId] = false;
+        // this._keystore[voteId] = false;
 
-        this._getKeystore(billId, (ks, pwDerivedKey) => {
-            this._keystore[billId] = ks;
-            this._pwDerivedKey[billId] = pwDerivedKey;
+        this._getKeystore(voteId, (err, ks, pwDerivedKey) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+
+            this._keystore[voteId] = ks;
+            this._pwDerivedKey[voteId] = pwDerivedKey;
 
             ks.generateNewAddress(pwDerivedKey);
 
@@ -116,20 +121,20 @@ module.exports = Reflux.createStore({
                 + ' with private key ' + ks.exportPrivateKey(address, pwDerivedKey)
             );
 
-            this._voterCard[billId] = this._generateVoterCard(ks);
+            this._voterCard[voteId] = this._generateVoterCard(ks);
 
             this.trigger(this);
         });
     },
 
-    _importSerializedAccount: function(billId, serializedAccount) {
-        this._keystore[billId] = lightwallet.keystore.deserialize(
+    _importSerializedAccount: function(voteId, serializedAccount) {
+        this._keystore[voteId] = lightwallet.keystore.deserialize(
             serializedAccount
         );
 
         console.log(
             'BlockchainAccountStore: imported serialized keystore '
-            + this.getSerializedBlockchainAccountByBillId(billId)
+            + this.getSerializedBlockchainAccountByVoteId(voteId)
         );
 
         var password = 'password'; // FIXME
@@ -137,7 +142,7 @@ module.exports = Reflux.createStore({
         lightwallet.keystore.deriveKeyFromPassword(
             password,
             (err, pwDerivedKey) => {
-                this._pwDerivedKey[billId] = pwDerivedKey;
+                this._pwDerivedKey[voteId] = pwDerivedKey;
                 this.trigger(this);
             }
         );

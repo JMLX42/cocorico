@@ -4,7 +4,7 @@ var RedirectLink = React.createClass({
 
     getDefaultProps() {
         return {
-            'target': '_self',
+            'target': '_blank',
             'className': ''
         };
     },

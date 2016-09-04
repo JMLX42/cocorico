@@ -18,11 +18,11 @@ Ballot.add({
 		initial: true
 	},
 	voter: { type: String, required: true, initial: true },
-	bill: { type: Types.Relationship, ref: 'Bill', required: true, initial: true },
+	vote: { type: Types.Relationship, ref: 'Vote', required: true, initial: true },
 	error: { type: String }
 });
 
 transform.toJSON(Ballot);
 
-Ballot.defaultColumns = 'time, status, voterAge, voterGender';
+Ballot.defaultColumns = 'time, status, vote';
 Ballot.register();

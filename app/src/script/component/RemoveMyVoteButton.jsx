@@ -66,19 +66,19 @@ var RemoveMyVoteButton = React.createClass({
     },
 
     removeVote: function() {
-        var keystore = this.state.blockchainAccounts.getKeystoreByBillId(this.props.bill.id);
+        var keystore = this.state.blockchainAccounts.getKeystoreByVoteId(this.props.vote.id);
 
         if (!keystore)
             return;
 
         this._blockchainAccStoreUnsub();
 
-        var key = this.state.blockchainAccounts.getPwDerivedKeyByBillId(this.props.bill.id);
-        var address = this.state.blockchainAccounts.getAddressByBillId(this.props.bill.id);
+        var key = this.state.blockchainAccounts.getPwDerivedKeyByVoteId(this.props.vote.id);
+        var address = this.state.blockchainAccounts.getAddressByVoteId(this.props.vote.id);
 
         console.log(keystore, key, address);
 
-        VoteAction.unvote(keystore, key, address, this.props.bill);
+        VoteAction.unvote(keystore, key, address, this.props.vote);
     },
 
     voterCardReaderCancelled: function() {
@@ -99,7 +99,7 @@ var RemoveMyVoteButton = React.createClass({
                     : this.getIntlMessage('vote.REMOVE_MY_VOTE')}
                 {this.state.showVoterCardReader
                     ? <VoterCardReaderModal
-                        billId={this.props.bill.id}
+                        voteId={this.props.vote.id}
                         onSuccess={this.voterCardReaderSuccess}
                         onCancel={this.voterCardReaderCancelled}/>
                     : <span/>}

@@ -10,7 +10,10 @@
   apt_repository: repo=ppa:ethereum/ethereum
 
 - name: install ethereum
-  apt: name=ethereum update_cache=yes
+  apt: name={{ item }} update_cache=yes
+  with_items:
+    - ethereum
+    - solc
 
 - name: install testrpc
   command: npm install -g ethereumjs-testrpc --unsafe-perm

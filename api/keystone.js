@@ -34,8 +34,9 @@ keystone.set('locals', {
 keystone.set('routes', require('./routes'));
 keystone.set('nav', {
 	'users': 'users',
-	'bills': 'bills',
-	'pages': 'pages'
+	'apps': 'apps',
+	'pages': 'pages',
+	'votes': 'votes'
 });
 
 keystone.start();

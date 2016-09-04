@@ -26,8 +26,8 @@ var VoterCardDownloadButton = React.createClass({
     },
 
     onClick: function(e) {
-        var voterCard = this.state.blockchainAccounts.getVoterCardByBillId(
-            this.props.billId
+        var voterCard = this.state.blockchainAccounts.getVoterCardByVoteId(
+            this.props.voteId
         );
 
         // IE workaround for not supporting the download anchor attribute
@@ -39,8 +39,8 @@ var VoterCardDownloadButton = React.createClass({
     },
 
     render: function() {
-        var voterCard = this.state.blockchainAccounts.getVoterCardByBillId(
-            this.props.billId
+        var voterCard = this.state.blockchainAccounts.getVoterCardByVoteId(
+            this.props.voteId
         );
 
         if (!voterCard) {

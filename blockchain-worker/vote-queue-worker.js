@@ -9,7 +9,7 @@ keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
 keystone.import('../api/models');
 
-var Bill = keystone.list('Bill');
+var Vote = keystone.list('Vote');
 
 function whenTransactionMined(web3, tx, callback)
 {
@@ -149,21 +149,21 @@ function handleVote(vote, callback)
         if (err)
             return callback(err, null);
 
-        Bill.model.findById(vote.id)
-            .exec(function(err, bill)
+        Vote.model.findById(vote.id)
+            .exec(function(err, vote)
             {
                 if (err)
                     return callback(err, null);
 
-            	bill.voteContractABI = JSON.stringify(abi);
-                bill.voteContractAddress = contract.address;
+            	vote.voteContractABI = JSON.stringify(abi);
+                vote.voteContractAddress = contract.address;
 
-                bill.save(function(err, bill)
+                vote.save(function(err, vote)
                 {
                     if (err)
                         return callback(err, null);
 
-                    callback(null, bill);
+                    return callback(null, vote);
                 });
             });
     });
@@ -181,9 +181,9 @@ require('amqplib/callback_api').connect(
             if (err != null)
                 return console.error(err);
 
-            ch.assertQueue('pending-votes');
+            ch.assertQueue('votes');
             ch.consume(
-                'pending-votes',
+                'votes',
                 function(msg)
                 {
                     if (msg !== null)
@@ -197,7 +197,7 @@ require('amqplib/callback_api').connect(
 
                         if (obj.vote)
                         {
-                            handleVote(obj.vote, function(err, bill)
+                            handleVote(obj.vote, function(err, vote)
                             {
                                 if (err)
                                     console.log({err: err});

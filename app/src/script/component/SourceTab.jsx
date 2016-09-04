@@ -7,15 +7,15 @@ var Reflux = require('reflux');
 var ForceAuthMixin = require('../mixin/ForceAuthMixin'),
     ProxyMixin = require('../mixin/ProxyMixin');
 
-var BillAction = require('../action/BillAction'),
-    SourceAction = require('../action/SourceAction');
+var SourceAction = require('../action/SourceAction');
 
 var SourceStore = require('../store/SourceStore'),
     ConfigStore = require('../store/ConfigStore');
 
 var LikeButtons = require('./LikeButtons'),
     LoadingIndicator = require('./LoadingIndicator'),
-    RedirectLink = require('./RedirectLink');
+    RedirectLink = require('./RedirectLink'),
+    Icon = require('./Icon');
 
 var Link = ReactRouter.Link;
 
@@ -42,32 +42,28 @@ var SourceTab = React.createClass({
 
     getInitialState: function() {
         return {
-            showAddSourceForm: false,
-            newSourceURL: '',
+            sourceList: [],
             moderatedSourcesToShow: [],
-            communitySourceSortFunctionName: 'random',
-            communitySourceSortFunction: this.randomSort,
-            communitySources: [],
-            communitySourcePage: 0
+            sortFunctionName: 'random',
+            sortFunction: this.randomSort,
+            page: 0
         };
     },
 
     componentWillMount: function() {
-        BillAction.showSources(this.props.bill.id);
+        SourceAction.show(this.props.vote.id);
 
         this._unsubSourceStore = SourceStore.listen((store) => {
-            if (!this.state.sources)
+            var sources = store.getSourcesByVoteId(this.props.vote.id);
+
+            if (!sources) {
                 return;
+            }
 
-            var sources = this.state.sources.getSourcesByBillId(this.props.bill.id);
-            var communitySources = sources
-                ? sources.filter((source) => !source.auto)
-                : null;
-
-            if (communitySources.length != this.state.communitySources.length
-                || this.state.communitySourceSortFunctionName == 'score')
+            if (sources.length != this.state.sourceList.length
+                || this.state.sortFunctionName == 'score')
                 this.setState({
-                    communitySources: communitySources.sort(this.state.communitySourceSortFunction)
+                    sourceList: sources.sort(this.state.sortFunction)
                 });
 
             var moderatedSources = this.state.moderatedSourcesToShow;
@@ -83,22 +79,6 @@ var SourceTab = React.createClass({
 
     componentWillUnmount: function() {
         this._unsubSourceStore();
-    },
-
-    addSourceButtonClickHandler: function(event) {
-        this.setState({
-            showAddSourceForm: true,
-            newSourceURL: ''
-        });
-    },
-
-    submitSourceClickHandler: function(event) {
-        BillAction.addSource(this.props.bill.id, this.state.newSourceURL);
-        this.setState({
-            showAddSourceForm: false,
-            communitySourcePage: 0
-        });
-        this.setCommunitySourceSortFunctionByName('time');
     },
 
     showModeratedSource: function(source) {
@@ -136,14 +116,9 @@ var SourceTab = React.createClass({
     renderSourceActionList: function(source) {
         return (
             <ul className="source-actions list-unstyled list-inline">
-                <li>
-                    <a href="#" className="btn btn-xs btn-outline">
-                        <i className="icon-flag"/>Signaler
-                    </a>
-                </li>
                 {source.type == 'activity' && source.latitude != 0.0 && source.longitude != 0.0
                     ? <li>
-                        <RedirectLink target="_blank" className="btn btn-xs btn-outline"
+                        <RedirectLink className="btn btn-xs btn-outline"
                             href={'https://maps.google.com/?q=' + source.latitude + ',' + source.longitude}>
                             <i className="icon-map"/>&nbsp;Voir sur une carte
                         </RedirectLink>
@@ -165,15 +140,19 @@ var SourceTab = React.createClass({
         var description = source.description && source.description.length > 200
             ? source.description.substr(0, 200) + '...'
             : source.description;
+        var hasImage = !!source.image;
+        var imageUrl = hasImage && source.image.indexOf('http') == 0
+            ? this.proxifyURL(source.image)
+            : '/img/screenshot/' + source.image;
 
         return (
             <li className="source-item" key={source.url}>
                 <Row>
-                    {!!source.image
-                        ? <Col md={2} mdPush={10}>
-                            <RedirectLink href={source.url} target="_blank">
+                    <Col md={2}>
+                        {hasImage
+                            ? <RedirectLink href={source.url}>
                                 <div style={{
-                                        backgroundImage: "url('" + this.proxifyURL(source.image) + "')"
+                                        backgroundImage: "url('" + imageUrl + "')"
                                     }}
                                     className="source-image text-center">
                                         {source.type == 'video'
@@ -181,10 +160,10 @@ var SourceTab = React.createClass({
                                             : null}
                                 </div>
                             </RedirectLink>
-                        </Col>
-                        : null}
-                    <Col md={10} mdPull={!!source.image ? 2 : 0}>
-                        <RedirectLink href={source.url} className="source-link" target="_blank">
+                            : null}
+                    </Col>
+                    <Col md={10}>
+                        <RedirectLink href={source.url} className="source-link">
                             {source.title ? source.title : source.url}
                         </RedirectLink>
                         <LikeButtons likeAction={SourceAction.like}
@@ -203,7 +182,12 @@ var SourceTab = React.createClass({
         )
     },
 
-    renderSourceList: function(sources, page, numItemsPerPage) {
+    renderSourceList: function() {
+        var sources = this.state.sourceList;
+        var page = this.state.page;
+        var numItemsPerPage = this.state.config.capabilities.source
+            .num_items_per_page;
+
         return (
             <ul className="source-list">
                 {sources.slice(page * numItemsPerPage, (page + 1) * numItemsPerPage).map((source) => {
@@ -215,61 +199,54 @@ var SourceTab = React.createClass({
         );
     },
 
-    renderSourcePageList: function(numSources, page, numItemsPerPage, state) {
-        if (numSources < numItemsPerPage)
+    renderSourcePageList: function() {
+        var page = this.state.page;
+        var numSources = this.state.sourceList.length;
+        var numItemsPerPage = this.state.config.capabilities.source
+            .num_items_per_page;
+
+        if (!this.state.sourceList || numSources < numItemsPerPage) {
             return null;
+        }
 
         var pages = [];
-
         for (var i = 0; i < numSources; i += numItemsPerPage)
             pages.push(Math.floor(i / numItemsPerPage));
 
         return (
-            <ul className="list-inline list-unstyled pull-right">
-                <li>Pages :</li>
-                {page != 0 && pages.length > 2
-                    ? <li>
-                        <a onClick={(e)=>this.setState({[state] : page - 1})}>
-                            &lsaquo;
-                        </a>
-                    </li>
-                    : null}
-                {pages.map((pageNumber) => {
-                    return (
-                        <li>
-                            {pageNumber != page
-                                ? <a onClick={(e)=>this.setState({[state] : pageNumber})}>
-                                    {pageNumber + 1}
-                                </a>
-                                : pageNumber + 1}
-                        </li>
-                    );
-                })}
-                {page < pages.length - 1 && pages.length > 2
-                    ? <li>
-                        <a onClick={(e)=>this.setState({[state] : page + 1})}>
-                            &rsaquo;
-                        </a>
-                    </li>
-                    : null}
-            </ul>
-        );
-    },
-
-    renderBillSourceList: function(billSources) {
-        return (
             <Row>
                 <Col md={12}>
-                    <h2>
-                        {this.getIntlMessage('bill.BILL_SOURCES')}
-                        &nbsp;({billSources ? billSources.length : 0})
-                    </h2>
-                    {billSources && billSources.length
-                        ? this.renderSourceList(billSources, 0, 2)
-                        : <p>{this.getIntlMessage('bill.NO_SOURCE')}</p>}
+                    <ul className="list-inline list-unstyled pull-right">
+                        <li>Pages :</li>
+                        {page != 0 && pages.length > 2
+                            ? <li>
+                                <a onClick={(e)=>this.setState({'page' : page - 1})}>
+                                    &lsaquo;
+                                </a>
+                            </li>
+                            : null}
+                        {pages.map((pageNumber) => {
+                            return (
+                                <li>
+                                    {pageNumber != page
+                                        ? <a onClick={(e)=>this.setState({'page' : pageNumber})}>
+                                            {pageNumber + 1}
+                                        </a>
+                                        : pageNumber + 1}
+                                </li>
+                            );
+                        })}
+                        {page < pages.length - 1 && pages.length > 2
+                            ? <li>
+                                <a onClick={(e)=>this.setState({'page' : page + 1})}>
+                                    &rsaquo;
+                                </a>
+                            </li>
+                            : null}
+                    </ul>
                 </Col>
             </Row>
-        )
+        );
     },
 
     randomSort: function(a, b) {
@@ -293,138 +270,77 @@ var SourceTab = React.createClass({
         var fn = fns[name];
 
         this.setState({
-            communitySourceSortFunctionName: name,
-            communitySourceSortFunction: fn,
-            communitySources: this.state.communitySources.sort(fn)
+            sortFunctionName: name,
+            sortFunction: fn,
+            sourceList: this.state.sourceList.sort(fn)
         });
     },
 
-    renderCommunitySourceList: function() {
+    renderSources: function() {
         return (
             <div>
                 <Row>
                     <Col md={12}>
-                        <h2>
-                            {this.getIntlMessage('bill.COMMUNITY_SOURCES')}
-                            &nbsp;({this.state.communitySources ? this.state.communitySources.length : 0})
-                            {!!this.state.communitySources && this.state.communitySources.length != 0
-                                ? <select onChange={(e) => this.setCommunitySourceSortFunctionByName(e.target.value)}
-                                    className="small sort-function"
-                                    value={this.state.communitySourceSortFunctionName}>
-                                    <option value="random">
-                                        {this.formatMessage(this.getIntlMessage('sort.SORTED_RANDOMLY'), {gender:'female'})}
-                                    </option>
-                                    <option value="score">
-                                        {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_POPULARITY'), {gender:'female'})}
-                                    </option>
-                                    <option value="time">
-                                        {this.formatMessage(this.getIntlMessage('sort.SORTED_BY_TIME'), {gender:'female'})}
-                                    </option>
-                                </select>
-                                : null}
-                        </h2>
-                        {!!this.state.communitySources && this.state.communitySources.length
-                            ? this.renderSourceList(
-                                this.state.communitySources,
-                                this.state.communitySourcePage,
-                                this.state.config.capabilities.source.num_items_per_page
-                            )
-                            : <p>{this.getIntlMessage('bill.NO_SOURCE')}</p>}
+                        {!!this.state.sourceList && !!this.state.sourceList.length
+                            ? this.renderSourceList()
+                            : <p>{this.getIntlMessage('vote.NO_SOURCE')}</p>}
                     </Col>
                 </Row>
-                <Row>
-                    <Col md={12}>
-                        {this.props.editable
-                            ? this.renderAddSourceForm()
-                            : <p className="hint">
-                                    {this.getIntlMessage('bill.TOO_LATE_TO_REVIEW')}
-                            </p>}
-                    </Col>
-                    <Col md={12}>
-                        {this.renderSourcePageList(
-                            this.state.communitySources.length,
-                            this.state.communitySourcePage,
-                            this.state.config.capabilities.source.num_items_per_page,
-                            'communitySourcePage'
-                        )}
-                    </Col>
-                </Row>
+                {!!this.state.sourceList && !!this.state.sourceList.length
+                    ? <Row>
+                        <Col md={12}>
+                            {this.renderSourcePageList()}
+                        </Col>
+                    </Row>
+                    : null}
             </div>
         );
     },
 
-    renderAddSourceForm: function() {
-        var sourceError = this.state.sources.getError();
-
-        return (
-            !this.isAuthenticated()
-                ? <p className="hint">
-                    {this.renderLoginMessage(this.getIntlMessage('bill.ADD_SOURCE_LOGIN'))}
-                </p>
-                : this.state.showAddSourceForm
-                    ? <Well>
-                        <form id="form-add-source">
-                            <h3>{this.getIntlMessage('bill.ADD_SOURCE_FORM_TITLE')}</h3>
-                            <p>{this.getIntlMessage('bill.ADD_SOURCE_URL_HINT')}</p>
-                            <Input type="bill" placeholder="http://www.exemple.com"
-                                id="input-source-url" value={this.state.newSourceURL}
-                                onChange={(e)=>this.setState({newSourceURL: e.target.value})}/>
-                                {sourceError
-                                    ? <p>{this.getIntlMessage(sourceError.error)}</p>
-                                    : <div/>}
-                            <ButtonToolbar>
-                                <Button bsStyle="primary" onClick={this.submitSourceClickHandler}>
-                                    <i className="icon-add_circle_outline"/>
-                                    {this.getIntlMessage('bill.ADD_SOURCE_SUBMIT_BUTTON')}
-                                </Button>
-                                <Button bsStyle="link"
-                                    onClick={(e) => this.setState({showAddSourceForm:false})}>
-                                    {this.getIntlMessage('bill.ADD_SOURCE_CANCEL_BUTTON')}
-                                </Button>
-                            </ButtonToolbar>
-                        </form>
-                    </Well>
-                    : <Button bsStyle="primary" onClick={this.addSourceButtonClickHandler}
-                          id="btn-add-source">
-                        <i className="icon-add_circle_outline"/>
-                        {this.getIntlMessage('bill.ADD_SOURCE_BUTTON')}
-                    </Button>
-        );
-    },
-
     render: function() {
-        if (!this.state || !this.state.sources)
+        if (!this.state || !this.state.sources) {
             return null;
-
-        if (this.state.sources
-            && this.state.sources.billSourceLoading(this.props.bill.id))
-            return (
-                <Grid>
-                    <Row>
-                        <Col md={12}>
-                            <LoadingIndicator/>
-                        </Col>
-                    </Row>
-                </Grid>
-            );
-
-        var sources = this.state.sources.getSourcesByBillId(this.props.bill.id);
-
-        if (!sources)
-            return null;
-
-        var billSources = sources
-            ? sources.filter((source) => source.auto)
-            : null;
+        }
 
         return (
             <Grid>
-                {this.state.config.capabilities.source.bill
-                    ? this.renderBillSourceList(billSources)
-                    : null}
-                {this.state.config.capabilities.source.community
-                    ? this.renderCommunitySourceList()
-                    : null}
+                <Row>
+                    <Col xs={12}>
+                        <h2>
+                            <Icon name="pull-request"/>
+                            {this.getIntlMessage('vote.SOURCES')}
+                            &nbsp;({!!this.state.sourceList ? this.state.sourceList.length : 0})
+                            {!!this.state.sourceList && this.state.sourceList.length > 1
+                                ? <select
+                                    onChange={(e) => this.setCommunitySourceSortFunctionByName(e.target.value)}
+                                    className="small sort-function"
+                                    value={this.state.sortFunctionName}>
+                                    <option value="random">
+                                        {this.formatMessage(
+                                            this.getIntlMessage('sort.SORTED_RANDOMLY'),
+                                            {gender:'female'}
+                                        )}
+                                    </option>
+                                    <option value="score">
+                                        {this.formatMessage(
+                                            this.getIntlMessage('sort.SORTED_BY_POPULARITY'),
+                                            {gender:'female'}
+                                        )}
+                                    </option>
+                                    <option value="time">
+                                        {this.formatMessage(
+                                            this.getIntlMessage('sort.SORTED_BY_TIME'),
+                                            {gender:'female'}
+                                        )}
+                                    </option>
+                                </select>
+                                : null}
+                        </h2>
+                    </Col>
+                </Row>
+                {this.state.sources.voteSourceLoading(this.props.vote.id)
+                    ? <LoadingIndicator/>
+                    : this.renderSources()}
             </Grid>
 		);
 	}

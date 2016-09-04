@@ -2,14 +2,13 @@ var config = require('../../config.json');
 
 var keystone = require('keystone');
 var bcrypt = require('bcrypt');
+var metafetch = require('metafetch');
 
 var Source = keystone.list('Source'),
     Like = keystone.list('Like'),
-    Bill = keystone.list('Bill');
+    Vote = keystone.list('Vote');
 
-var BillHelper = require('../../helpers/BillHelper'),
-    SourceHelper = require('../../helpers/SourceHelper'),
-    LikeHelper = require('../../helpers/LikeHelper');
+var LikeHelper = require('../../helpers/LikeHelper');
 
 exports.addLike = LikeHelper.getAddLikeFunc(Source, 'ERROR_SOURCE_NOT_FOUND', 'ERROR_SOURCE_ALREADY_LIKED');
 
@@ -20,19 +19,16 @@ exports.list = function(req, res)
     if (!config.capabilities.source.read)
         return res.status(403).send();
 
-    Bill.model.findById(req.params.billId)
-        .exec(function(err, bill)
+    Vote.model.findById(req.params.voteId)
+        .exec(function(err, vote)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!bill)
+            if (!vote)
                 return res.status(404).apiResponse();
 
-            if (!BillHelper.billIsReadable(bill, req))
-    			return res.status(403).send();
-
-            Source.model.find({bill : bill})
+            Source.model.find({vote : vote})
                 .populate('likes')
                 .sort('-score')
                 .exec(function(err, sources)
@@ -53,20 +49,16 @@ exports.add = function(req, res)
     if (!config.capabilities.source.create)
         return res.status(403).send();
 
-    Bill.model.findById(req.body.billId)
-        .exec(function(err, bill)
+    Vote.model.findById(req.body.voteId)
+        .exec(function(err, vote)
         {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!bill)
+            if (!vote)
                 return res.status(404).apiResponse();
 
-            if (!BillHelper.billIsReadable(bill, req)
-                || bill.status != 'review')
-    			return res.status(403).send();
-
-            Source.model.findOne({url: req.body.url, bill: bill})
+            Source.model.findOne({url: req.body.url, vote: vote})
                 .exec(function(err, source)
                 {
                     if (err)
@@ -77,8 +69,12 @@ exports.add = function(req, res)
                             error: 'ERROR_SOURCE_ALREADY_EXISTS'
                         });
 
-                    SourceHelper.fetchURLMeta(
+                    metafetch.fetch(
                         decodeURIComponent(req.body.url),
+                        {
+                            flags: { images: false, links: false },
+                            http: { timeout: 30000 }
+                        },
                         (err, meta) => {
                             if (err)
                                 return res.apiError('invalid source URL');
@@ -86,13 +82,10 @@ exports.add = function(req, res)
                             var newSource = Source.model({
                                 title: meta.title,
                                 url: meta.url,
-                                author: bcrypt.hashSync(req.user.sub, 10),
-                                bill: bill.id,
+                                vote: vote.id,
                                 description: meta.description,
                                 image: meta.image,
-                                type: meta.type,
-                                latitude: meta.latitude,
-                                longitude: meta.longitude
+                                type: meta.type
                             });
 
                             newSource.save((err) => {

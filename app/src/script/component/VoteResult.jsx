@@ -29,25 +29,25 @@ module.exports = React.createClass({
 
     componentWillMount : function()
     {
-        VoteAction.showBillVoteResult(this.props.billId);
+        VoteAction.showVoteVoteResult(this.props.voteId);
     },
 
     renderChildren: function()
     {
         var result = this.state.votes
-            ? this.state.votes.getVoteResultByBillId(this.props.billId)
+            ? this.state.votes.getVoteResultByVoteId(this.props.voteId)
             : null;
 
         var resultPerDate = this.state.votes
-            ? this.state.votes.getVoteResultPerDateByBillId(this.props.billId)
+            ? this.state.votes.getVoteResultPerDateByVoteId(this.props.voteId)
             : null;
 
         var resultPerGender = this.state.votes
-            ? this.state.votes.getVoteResultPerGenderByBillId(this.props.billId)
+            ? this.state.votes.getVoteResultPerGenderByVoteId(this.props.voteId)
             : null;
 
         var resultPerAge = this.state.votes
-            ? this.state.votes.getVoteResultPerAgeByBillId(this.props.billId)
+            ? this.state.votes.getVoteResultPerAgeByVoteId(this.props.voteId)
             : null;
 
         if (!result)

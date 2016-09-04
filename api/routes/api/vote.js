@@ -1,105 +1,214 @@
 var config = require('../../config.json');
 
 var keystone = require('keystone');
-var bcrypt = require('bcrypt');
-var redis = require('redis');
-var EthereumTx = require('ethereumjs-tx');
-var EthereumUtil = require('ethereumjs-util');
 var Web3 = require('web3');
+var async = require('async');
+var metafetch = require('metafetch');
+var fetch = require('node-fetch');
+var webshot = require('webshot');
+var md5 = require('md5');
 
-var Bill = keystone.list('Bill'),
-    Ballot = keystone.list('Ballot'),
+var Vote = keystone.list('Vote'),
+    App = keystone.list('App'),
+    Source = keystone.list('Source');
 
-    BillHelper = require('../../helpers/BillHelper'),
-	BallotHelper = require('../../helpers/BallotHelper');
-
-exports.resultPerDate = function(req, res)
-{
-    var billId = req.params.billId;
-
-    Bill.model.findById(billId)
-        .exec(function(err, bill)
-        {
+exports.list = function(req, res) {
+    Vote.model.find()
+        .exec((err, votes) => {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!bill)
+            return res.apiResponse({votes: votes});
+        });
+}
+
+exports.get = function(req, res) {
+    Vote.model.findById(req.params.voteId)
+        .exec((err, vote) => {
+            if (err)
+                return res.apiError('database error', err);
+
+            if (!vote)
                 return res.status(404).send();
 
-            if (!BillHelper.billIsReadable(bill, req)
-                || bill.status != 'published')
-                return res.status(403).send();
+            return res.apiResponse({vote: vote});
+        });
+}
+
+exports.getBySlug = function(req, res) {
+    Vote.model.findOne({slug: req.params.voteSlug})
+        .exec((err, vote) => {
+            if (err)
+                return res.apiError('database error', err);
+
+            if (!vote)
+                return res.status(404).send();
+
+            return res.apiResponse({vote: vote});
+        });
+}
+
+function pushVoteOnQueue(vote, callback) {
+	require('amqplib/callback_api').connect(
+		'amqp://localhost',
+		(err, conn) => {
+			if (err != null)
+				return callback(err, null);
+
+			conn.createChannel(function(err, ch)
+			{
+				if (err != null)
+					return callback(err, null);
+
+				var voteMsg = { vote : { id : vote.id } };
+
+				ch.assertQueue('votes');
+				ch.sendToQueue(
+					'votes',
+					new Buffer(JSON.stringify(voteMsg)),
+					{ persistent : true }
+				);
+
+				callback(null, voteMsg);
+			});
+		}
+	);
+}
+
+exports.create = function(req, res) {
+    var app = req.user;
+
+    var url = decodeURIComponent(req.body.url);
+    if (!url) {
+        return res.status(400).send({error: 'missing url'});
+    }
+
+    async.waterfall(
+        [
+            // Step 1: check the app exists and that both the URL and the
+            // referer match one of the app valid URLs.
+            (callback) => {
+                if (config.capabilities.vote.check_referer
+                    && !app.isValidURL(req.headers.referer)) {
+                    return callback(
+                        {code: 403, error: 'invalid referer'},
+                        null
+                    );
+                }
+                if (!app.isValidURL(url)) {
+                    return callback(
+                        {code: 403, error: 'invalid url'},
+                        null
+                    );
+                }
+                return Vote.model.findOne({url: url})
+                    .exec((err, vote) => callback(err, app, vote));
+            },
+            // Step 2: check there is no vote for this URL and fetch meta fields
+            // if there is not.
+            (app, vote, callback) => !!vote
+                ? callback({code: 400, error: 'invalid url'}, null)
+                : metafetch.fetch(
+                    url,
+                    {
+                        flags: { images: false, links: false },
+                        http: { timeout: 30000 }
+                    },
+                    (err, meta) => callback(err, app, meta)
+                ),
+            // Step 3: create the vote with the meta fields and save it.
+            (app, meta, callback) => Vote.model({
+                app: app.id,
+                title: meta.title,
+                description: meta.description,
+                url: meta.url,
+                image: meta.image
+            }).save((err, vote) => callback(err, vote)),
+            // Step 4: push the vote on the queue for the smart contract to be
+            // mined.
+            (vote, callback) => pushVoteOnQueue(
+                vote,
+                (err, msg) => callback(err, vote)
+            )
+        ],
+        (err, vote) => {
+            if (err) {
+                if (err.code) {
+                    res.status(err.code);
+                }
+                if (err.error) {
+                    return res.apiError(err.error);
+                }
+                return res.apiError(err);
+            }
+            return res.apiResponse({vote: vote});
+        }
+    );
+}
+
+exports.resultPerDate = function(req, res) {
+    var voteId = req.params.voteId;
+
+    Vote.model.findById(voteId)
+        .exec((err, vote) => {
+            if (err)
+                return res.apiError('database error', err);
+
+            if (!vote)
+                return res.status(404).send();
 
             res.apiResponse({result : null});
         });
 }
 
-exports.resultPerGender = function(req, res)
-{
-    var billId = req.params.billId;
+exports.resultPerGender = function(req, res) {
+    var voteId = req.params.voteId;
 
-    Bill.model.findById(billId)
-        .exec(function(err, bill)
-        {
+    Vote.model.findById(voteId)
+        .exec((err, vote) => {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!bill)
+            if (!vote)
                 return res.status(404).send();
-
-            if (!BillHelper.billIsReadable(bill, req)
-                || bill.status != 'published')
-                return res.status(403).send();
 
             res.apiResponse({result : null});
         });
 }
 
-exports.resultPerAge = function(req, res)
-{
-    var billId = req.params.billId;
+exports.resultPerAge = function(req, res) {
+    var voteId = req.params.voteId;
 
-    Bill.model.findById(billId)
-        .exec(function(err, bill)
-        {
+    Vote.model.findById(voteId)
+        .exec((err, vote) => {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!bill)
+            if (!vote)
                 return res.status(404).send();
-
-            if (!BillHelper.billIsReadable(bill, req)
-                || bill.status != 'published')
-                return res.status(403).send();
 
             res.apiResponse({result : null});
         });
 }
 
-exports.result = function(req, res)
-{
-    var billId = req.params.billId;
+exports.result = function(req, res) {
+    var voteId = req.params.voteId;
 
-    Bill.model.findById(billId)
-        .exec(function(err, bill)
-        {
+    Vote.model.findById(voteId)
+        .exec((err, vote) => {
             if (err)
                 return res.apiError('database error', err);
 
-            if (!bill)
+            if (!vote)
                 return res.status(404).send();
-
-            if (!BillHelper.billIsReadable(bill, req)
-                || bill.status != 'published')
-                return res.status(403).send();
 
             var web3 = new Web3();
             web3.setProvider(new web3.providers.HttpProvider(
                 "http://127.0.0.1:8545"
             ));
 
-            web3.eth.contract(JSON.parse(bill.voteContractABI)).at(
-                bill.voteContractAddress,
+            web3.eth.contract(JSON.parse(vote.voteContractABI)).at(
+                vote.voteContractAddress,
                 (err, voteInstance) => res.apiResponse(
                     {result : voteInstance.getVoteResults().map((s) => parseInt(s))}
                 )
@@ -107,196 +216,94 @@ exports.result = function(req, res)
         });
 }
 
-function pushBallotMessageOnQueue(data, callback)
-{
-    if (config.capabilities.bill.vote != 'blockchain')
-        return callback(null, null);
+exports.embed = function(req, res) {
+    if (!req.headers.referer) {
+        return res.status(400).send({error : 'missing referer'});
+    }
 
-    try {
-        require('amqplib/callback_api').connect(
-            'amqp://localhost',
-            function(err, conn)
-            {
-                if (err != null)
-                    return callback(err, null);
-
-                conn.createChannel(function(err, ch)
+    async.waterfall(
+        [
+            (callback) => Vote.model.findById(req.params.voteId).exec(callback),
+            (vote, callback) => !vote
+                ? callback({code: 404, msg: 'vote not found'}, null)
+                : callback(null, vote),
+            // Step 0: fetch the page meta to get the unique URL
+            (vote, callback) => metafetch.fetch(
+                req.headers.referer,
                 {
-                    if (err != null)
-                        return callback(err, null);
+                    flags: { images: false, links: false },
+                    http: { timeout: 30000 }
+                },
+                (err, meta) => callback(err, vote, meta)
+            ),
+            // Step 1: find the corresponding Source
+            (vote, meta, callback) => Source.model.findOne({url: meta.url})
+                .exec((err, source) => callback(err, vote, meta, source)),
+            // Step 2: continue if the source does not exist
+            (vote, meta, source, callback) => !!source
+                ? callback({code: 400, msg: 'already listed'}, null)
+                : callback(null, vote, meta, source),
+            // Step 3: fetch the content of the page to check that the vote
+            // button embed code is present
+            (vote, meta, source, callback) => fetch(meta.url)
+                .then((res) => {
+                    if (!res.ok || res.status != 200) {
+                        return callback({code: 400, msg: 'unable to fetch page'}, null);
+                    }
+                    if (res.headers.get('content-type').indexOf('text/html') < 0) {
+                        return callback({code: 400, msg: 'invalid content type'}, null);
+                    }
 
-                    var ballotObj = { ballot : data };
+                    return res.text();
+                })
+                .then((html) => {
+                    // FIXME: check the actual vote button embed button
+                    if (html.indexOf('<iframe') < 0) {
+                        return callback({code: 400, msg: 'missing embed code'});
+                    }
 
-                    ch.assertQueue('ballots');
-                    ch.sendToQueue(
-                        'ballots',
-                        new Buffer(JSON.stringify(ballotObj)),
-                        { persistent : true }
-                    );
+                    if (!meta.image) {
+                        var filename = md5(meta.url) + '.jpg';
+                        webshot(
+                            meta.url,
+                            '/vagrant/app/public/img/screenshot' + filename,
+                            (err) => {
+                                if (!err) {
+                                    meta.image = filename;
+                                }
+                                return callback(err, vote, meta, source);
+                            });
+                    }
+                    else {
+                        return callback(null, vote, meta, source);
+                    }
 
-                    callback(null, ballotObj);
-                });
+                }),
+            (vote, meta, source, callback) => Source.model({
+                    url: meta.url,
+                    vote: vote,
+                    title: meta.title,
+                    description: meta.description,
+                    type: meta.type,
+                    image: meta.image
+                }).save(callback)
+        ],
+        (err, source) => {
+            if (err) {
+                if (err.code) {
+                    res.status(err.code);
+                    if (err.msg) {
+                        return res.send({error : err.msg});
+                    }
+                    return res.send();
+                }
+                return res.apiError(err);
             }
-        );
-    }
-    catch (e) {
-        callback(e, null);
-    }
-}
-
-function getVoteContractInstance(web3, address, callback)
-{
-    var Vote = require('/opt/cocorico/blockchain/Vote.json');
-    var voteContract = web3.eth.contract(eval(Vote.contracts.Vote.abi));
-    var voteInstance = voteContract.at(
-        address,
-        function(err, voteInstance)
-        {
-            if (err)
-                return callback(err, null);
-
-            return callback(null, voteInstance);
+            return res.apiResponse({source: source});
         }
-    );
-}
+    )
 
-function ballotTransactionError(res, ballot, msg)
-{
-    ballot.status = 'error';
-    ballot.error = JSON.stringify(msg);
-    ballot.save(function(err)
-    {
-        if (err)
-            return res.apiError('database error', err);
+    ;
 
-        return res.status(400).send({error:msg});
-    });
-}
 
-function birthdateToAge(birthdate)
-{
-    if (!birthdate)
-        return 0;
-
-    return Math.floor(
-        (Date.now() - new Date(birthdate)) / 1000
-        / (60 * 60 * 24) / 365.25
-    );
-}
-
-exports.vote = function(req, res)
-{
-    if (!config.capabilities.bill.vote)
-        return res.status(403).send();
-
-    var signedTx = new EthereumTx(req.body.transaction);
-    var voteContractAddress = EthereumUtil.bufferToHex(signedTx.to);
-
-	Bill.model.findOne({voteContractAddress:voteContractAddress})
-        .exec(function(err, bill)
-    	{
-    		if (err)
-    			return res.apiError('database error', err);
-    		if (!bill)
-    			return res.apiError('no bill found for contract address ' + voteContractAddress);
-
-    		if (!BillHelper.billIsReadable(bill, req))
-    			return res.status(403).send();
-
-    		BallotHelper.getByBillIdAndVoter(
-    			bill.id,
-    			req.user.sub,
-    			function(err, ballot)
-    			{
-    				if (err)
-    					return res.apiError('database error', err);
-
-    				if (ballot)
-    					return res.status(403).apiResponse({
-    						error: 'user already voted'
-    					});
-
-                    var ballot = Ballot.model({
-                        bill: bill,
-                        voter: bcrypt.hashSync(req.user.sub, 10),
-                        status: config.capabilities.bill.vote == 'blockchain'
-                            ? 'queued'
-                            : 'complete'
-                    });
-
-                    ballot.save(function(err, result)
-                    {
-                        if (err)
-                            return res.apiError('database error', err);
-
-                        pushBallotMessageOnQueue(
-                            {
-                                id: ballot.id,
-                                transaction: req.body.transaction,
-                                voteContractAddress: bill.voteContractAddress,
-                                voteContractABI: JSON.parse(bill.voteContractABI)
-                            },
-                            function(err, ballotMsg)
-                            {
-                                if (err)
-                                    return ballotTransactionError(res, ballot, err);
-
-                                return res.apiResponse({ ballot: ballot });
-                            }
-                        );
-                    });
-    			}
-    		);
-    	});
-}
-
-exports.remove = function(req, res)
-{
-    if (!config.capabilities.bill.vote)
-        return res.status(403).send();
-
-	Bill.model.findById(req.params.id).exec(function(err, bill)
-	{
-		if (err)
-			return res.apiError('database error', err);
-		if (!bill)
-			return res.apiError('not found');
-
-		if (!BillHelper.billIsReadable(bill, req))
-			return res.status(403).send();
-
-		BallotHelper.getByBillIdAndVoter(
-			req.params.id,
-			req.user.sub,
-			function(err, ballot)
-			{
-				if (err)
-					return res.apiError('database error', err);
-
-				if (!ballot)
-					return res.status(404).apiResponse({
-						error: 'ballot does not exist'
-					});
-
-				Ballot.model.findById(ballot.id).remove(function(err)
-				{
-					var client = redis.createClient();
-					var key = 'ballot/' + req.params.id + '/' + req.user.sub;
-
-					if (err)
-						return res.apiError('database error', err);
-
-					client.on('connect', function()
-					{
-						client.del(key, function(err, reply)
-						{
-							if (err)
-								console.log(err);
-
-							return res.apiResponse({ ballot: 'removed' });
-						});
-					});
-				});
-			});
-	});
 }

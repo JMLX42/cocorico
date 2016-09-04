@@ -12,7 +12,7 @@ module.exports = function(userEmail, userPassword, userIsAdmin, userName, done)
             {
                 var newUser = new User.model({
                 	email: userEmail,
-                  name: userName,
+                    name: userName,
                 	password: userPassword,
                 	isAdmin: userIsAdmin == 'true'
                 });

@@ -4,43 +4,21 @@ var bcrypt = require('bcrypt');
 
 var	Ballot = keystone.list('Ballot');
 
-exports.getByBillIdAndVoter = function(billId, voter, callback)
+exports.getByVoteIdAndVoter = function(voteId, voter, callback)
 {
-	// var client = redis.createClient();
-	var key = 'ballot/' + billId + '/' + voter;
+	Ballot.model.find({vote: voteId})
+		.exec(function(err, ballots)
+		{
+			if (err)
+				return callback(err, null);
 
-	// client.on('connect', function()
-	// {
-	// 	client.get(key, function(err, reply)
-	// 	{
-	// 		if (!err && reply)
-	// 			return callback(null, JSON.parse(reply));
+			var found = false;
+			if (ballots && ballots.length != 0)
+				for (var ballot of ballots)
+					if (bcrypt.compareSync(voter, ballot.voter))
+						return callback(null, ballot);
 
-			Ballot.model.find()
-				.where('bill', billId)
-				.exec(function(err, ballots)
-				{
-					if (err)
-						return callback(err, null);
-
-					var found = false;
-					if (ballots && ballots.length != 0)
-						for (var ballot of ballots)
-							if (bcrypt.compareSync(voter, ballot.voter))
-							{
-								// client.set(key, JSON.stringify(ballot.toJSON()), function(err, reply)
-								// {
-									callback(err, err ? null : ballot);
-								// });
-								found = true;
-								break;
-							}
-
-					if (!found)
-						callback(null, null);
-				});
-		// });
-
-	// });
-
+			if (!found)
+				callback(null, null);
+		});
 }

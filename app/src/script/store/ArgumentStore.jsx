@@ -6,7 +6,7 @@ var ArgumentAction = require('../action/ArgumentAction');
 module.exports = Reflux.createStore({
     init: function()
     {
-        this.listenTo(ArgumentAction.showBillArguments, this._fetchArgumentsByBillId);
+        this.listenTo(ArgumentAction.showVoteArguments, this._fetchArgumentsByVoteId);
         this.listenTo(ArgumentAction.like, this._likeHandler);
         this.listenTo(ArgumentAction.add, this._addHandler);
 
@@ -15,47 +15,47 @@ module.exports = Reflux.createStore({
 
     getArgumentById: function(argumentId)
     {
-        for (var billId in this._arguments)
-            if (this._arguments[billId] !== true)
-                for (var arg of this._arguments[billId])
+        for (var voteId in this._arguments)
+            if (this._arguments[voteId] !== true)
+                for (var arg of this._arguments[voteId])
                     if (arg.id == argumentId)
                         return arg;
 
         return null;
     },
 
-    getArgumentsByBillId: function(billId)
+    getArgumentsByVoteId: function(voteId)
     {
-        if (this._arguments[billId] && this._arguments[billId] !== true)
-            return this._arguments[billId];
+        if (this._arguments[voteId] && this._arguments[voteId] !== true)
+            return this._arguments[voteId];
 
         return null;
     },
 
-    billArgumentLoading: function(billId)
+    voteArgumentLoading: function(voteId)
     {
-        return this._arguments[billId] === true;
+        return this._arguments[voteId] === true;
     },
 
-    _fetchArgumentsByBillId: function(billId)
+    _fetchArgumentsByVoteId: function(voteId)
     {
-        if (this._arguments[billId])
+        if (this._arguments[voteId])
         {
             this.trigger(this);
             return false;
         }
 
-        this._arguments[billId] = true;
+        this._arguments[voteId] = true;
 
         jquery.get(
-            '/api/argument/list/' + billId,
+            '/api/argument/list/' + voteId,
             (data) => {
-                this._arguments[billId] = data.arguments;
+                this._arguments[voteId] = data.arguments;
                 this.trigger(this);
             }
-        ).error((xhr, billStatus, err) => {
-            this._arguments[billId] = { error: xhr.status };
-            this.trigger(this, this._arguments[billId]);
+        ).error((xhr, voteStatus, err) => {
+            this._arguments[voteId] = { error: xhr.status };
+            this.trigger(this, this._arguments[voteId]);
         });
 
         return true;
@@ -78,7 +78,7 @@ module.exports = Reflux.createStore({
 
                     this.trigger(this);
                 }
-            ).error((xhr, billStatus, err) => {
+            ).error((xhr, voteStatus, err) => {
                 this.trigger(this);
             });
         }
@@ -96,27 +96,27 @@ module.exports = Reflux.createStore({
 
                 this.trigger(this);
             }
-        ).error((xhr, billStatus, err) => {
+        ).error((xhr, voteStatus, err) => {
             this.trigger(this);
         });
     },
 
-    _addHandler: function(billId, value, title, content)
+    _addHandler: function(voteId, value, title, content)
     {
         jquery.post(
             '/api/argument/add',
             {
-                billId  : billId,
+                voteId  : voteId,
                 value   : value,
                 title   : title,
                 content : content
             },
             (data) => {
-                this._arguments[billId].push(data.argument);
+                this._arguments[voteId].push(data.argument);
 
                 this.trigger(this);
             }
-        ).error((xhr, billStatus, err) => {
+        ).error((xhr, voteStatus, err) => {
             this.trigger(this);
         });
     }

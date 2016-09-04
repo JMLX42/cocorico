@@ -17,5 +17,14 @@ Vagrant.autoconfigure({
     :vars => {
       :hostname => "local.cocorico.cc"
     }
+  },
+  :prod => {
+    :provider => "managed",
+    :hosts => ["164.132.226.123"],
+    :vars => {
+      :hostname => "cocorico.cc",
+      :ansible_ssh_user => "root",
+      :ansible_ssh_private_key_file => "key/cocorico.cc"
+    }
   }
 })

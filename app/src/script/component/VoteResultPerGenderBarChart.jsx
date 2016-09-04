@@ -38,8 +38,8 @@ module.exports = React.createClass({
 
         var result = this.props.result;
         var genderLabel = {
-            male    : this.getIntlMessage('bill.VOTER_GENDER_MALE'),
-            female  : this.getIntlMessage('bill.VOTER_GENDER_FEMALE')
+            male    : this.getIntlMessage('vote.VOTER_GENDER_MALE'),
+            female  : this.getIntlMessage('vote.VOTER_GENDER_FEMALE')
         };
         var data = [];
 

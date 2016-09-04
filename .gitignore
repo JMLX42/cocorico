@@ -4,3 +4,4 @@ provisioning/generated/hosts.json
 npm-debug*
 .node*
 provision.retry
+key

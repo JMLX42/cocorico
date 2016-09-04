@@ -37,7 +37,7 @@ var VoterCardReaderModal = React.createClass({
                     {this.getIntlMessage('proofOfVoteReader.PROVIDE_VOTER_CARD')}
                 </Modal.Header>
                 <Modal.Body>
-                    <VoterCardReader billId={this.props.billId}
+                    <VoterCardReader voteId={this.props.voteId}
                         onSuccess={this.props.onSuccess}
                         onError={this.props.onError}/>
                 </Modal.Body>

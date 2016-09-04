@@ -21,5 +21,5 @@ Page.add({
 
 transform.toJSON(Page);
 
-Page.defaultColumns = 'title, state|20%, author, publishedAt|15%';
+Page.defaultColumns = 'title';
 Page.register();

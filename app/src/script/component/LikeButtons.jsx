@@ -48,7 +48,6 @@ var LikeButtons = React.createClass({
                             'icon-btn-active' : this.props.resource.likes.length && this.props.resource.likes[0].value,
                             'icon-btn' : this.props.editable
                         })}
-                        title={this.getIntlMessage('bill.LIKE_BUTTON_TITLE')}
                         onClick={(e)=>this.props.editable && this.props.likeAction(this.props.resource, true)}/>
                     : <span/>}
                 {this.displayDislikeButton()
@@ -57,7 +56,6 @@ var LikeButtons = React.createClass({
                             'icon-btn-active' : this.props.resource.likes.length && !this.props.resource.likes[0].value,
                             'icon-btn' : this.props.editable
                         })}
-                        title={this.getIntlMessage('bill.DISLIKE_BUTTON_TITLE')}
                         onClick={(e)=>this.props.editable && this.props.likeAction(this.props.resource, false)}/>
                     : <span/>}
                 {this.props.showScore

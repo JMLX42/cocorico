@@ -12,8 +12,8 @@ var VoterCard = React.createClass({
     ],
 
     render: function() {
-        var voterCard = this.state.blockchainAccounts.getVoterCardByBillId(
-            this.props.billId
+        var voterCard = this.state.blockchainAccounts.getVoterCardByVoteId(
+            this.props.voteId
         );
 
         if (!voterCard) {

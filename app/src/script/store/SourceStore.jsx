@@ -1,20 +1,22 @@
 var Reflux = require('reflux');
 var jquery = require('jquery');
 
-var BillAction = require('../action/BillAction'),
+var VoteAction = require('../action/VoteAction'),
     SourceAction = require('../action/SourceAction');
 
 module.exports = Reflux.createStore({
     init: function()
     {
-        this.listenTo(BillAction.showSources, this._fetchSourcesByBillId);
-        this.listenTo(BillAction.save, this._billSaveHandler);
-        this.listenTo(BillAction.addSource, this._addSourceHandler);
+        this.listenTo(SourceAction.show, this._fetchSourcesByVoteId);
         this.listenTo(SourceAction.like, this._likeHandler);
 
         this._sources = {};
 
         this.clearError();
+    },
+
+    getInitialState: function() {
+        return this;
     },
 
     getError: function()
@@ -29,77 +31,52 @@ module.exports = Reflux.createStore({
 
     getSourceById: function(sourceId)
     {
-        for (var billId in this._sources)
-            if (this._sources[billId] !== true)
-                for (var source of this._sources[billId])
+        for (var voteId in this._sources)
+            if (this._sources[voteId] !== true)
+                for (var source of this._sources[voteId])
                     if (source.id == sourceId)
                         return source;
 
         return null;
     },
 
-    getSourcesByBillId: function(billId)
+    getSourcesByVoteId: function(voteId)
     {
-        if (this._sources[billId] && this._sources[billId] !== true)
-            return this._sources[billId];
+        if (this._sources[voteId] && this._sources[voteId] !== true)
+            return this._sources[voteId];
 
         return null;
     },
 
-    billSourceLoading: function(billId)
+    voteSourceLoading: function(voteId)
     {
-        return this._sources[billId] === true;
+        return this._sources[voteId] === true;
     },
 
-    _fetchSourcesByBillId: function(billId)
+    _fetchSourcesByVoteId: function(voteId)
     {
         this.clearError();
 
-        if (this._sources[billId])
+        if (this._sources[voteId])
         {
             this.trigger(this);
             return false;
         }
 
-        this._sources[billId] = true;
+        this._sources[voteId] = true;
 
         jquery.get(
-            '/api/source/list/' + billId,
+            '/api/source/' + voteId,
             (data) => {
-                this._sources[billId] = data.sources;
+                this._sources[voteId] = data.sources;
                 this.trigger(this);
             }
-        ).error((xhr, billStatus, err) => {
-            this._sources[billId] = { error: xhr.status };
+        ).error((xhr, voteStatus, err) => {
+            this._sources[voteId] = { error: xhr.status };
             this.trigger(this);
         });
 
         return true;
-    },
-
-    _billSaveHandler: function(billId, title, content)
-    {
-        delete this._sources[billId];
-    },
-
-    _addSourceHandler: function(billId, url)
-    {
-        this.clearError();
-
-        jquery.post(
-            '/api/source/add/',
-            {
-                billId: billId,
-                url: url
-            },
-            (data) => {
-                this._sources[billId].push(data.source);
-                this.trigger(this);
-            }
-        ).error((xhr, billStatus, err) => {
-            this._error = xhr.responseJSON;
-            this.trigger(this);
-        });
     },
 
     _likeHandler: function(source, value)
@@ -119,7 +96,7 @@ module.exports = Reflux.createStore({
 
                     this.trigger(this);
                 }
-            ).error((xhr, billStatus, err) => {
+            ).error((xhr, voteStatus, err) => {
                 this.trigger(this);
             });
         }
@@ -137,7 +114,7 @@ module.exports = Reflux.createStore({
 
                 this.trigger(this);
             }
-        ).error((xhr, billStatus, err) => {
+        ).error((xhr, voteStatus, err) => {
             this.trigger(this);
         });
     }

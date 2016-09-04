@@ -1,6 +1,7 @@
-var config = require('../config.json');
 var keystone = require('keystone');
 var passport = require('passport');
+
+var config = require('../config.json');
 
 var importRoutes = keystone.importer(__dirname);
 
@@ -17,69 +18,50 @@ function isAuthenticated(req, res, next)
 	next();
 }
 
-function checkCSRFToken(req, res, next)
-{
-	if (!keystone.security.csrf.validate(req))
-		return res.status(400).apiResponse({ 'error': 'invalid CSRF token' });
-
-	next();
-}
-
 // Setup Route Bindings
 exports = module.exports = function(app) {
 
 	app.use(passport.initialize());
 	app.use(passport.session());
 
+	app.post('/oauth/token', routes.api.oauth.token);
+
 	app.get('/auth/providers', keystone.middleware.api, routes.api.auth.providers);
 	app.get('/auth/logout', keystone.middleware.api, routes.api.auth.logout);
-	if (config.franceConnect)
-	{
+	if (config.franceConnect) {
 		app.get('/auth/france-connect/login', keystone.middleware.api, routes.api.auth.franceConnectLogin);
 		app.get('/auth/france-connect/callback', keystone.middleware.api, routes.api.auth.franceConnectCallback);
 	}
-	if (config.facebook)
-	{
+	if (config.facebook) {
 		app.get('/auth/facebook/login',  keystone.middleware.api, routes.api.auth.facebookLogin);
 		app.get('/auth/facebook/callback', keystone.middleware.api, routes.api.auth.facebookCallback);
 	}
-	if (config.google)
-	{
+	if (config.google) {
 		app.get('/auth/google/login',  keystone.middleware.api, routes.api.auth.googleLogin);
 		app.get('/auth/google/callback', keystone.middleware.api, routes.api.auth.googleCallback);
 	}
-	if (config.env == 'development')
+	if (config.env == 'development') {
 		app.get('/auth/fakeLogin', keystone.middleware.api, routes.api.auth.fakeLogin);
+	}
 
-	app.get('/bill/list', keystone.middleware.api, routes.api.bill.list);
-	app.get('/bill/latest', keystone.middleware.api, routes.api.bill.latest);
-	app.get('/bill/:id', keystone.middleware.api, routes.api.bill.get);
-	app.get('/bill/getBySlug/:slug', keystone.middleware.api, routes.api.bill.getBySlug);
-	app.get('/bill/ballot/:id', keystone.middleware.api, isAuthenticated, routes.api.bill.getBallot);
-	app.post('/bill/save', keystone.middleware.api, isAuthenticated, routes.api.bill.save);
-	// app.get('/bill/delete/:id', keystone.middleware.api, isAuthenticated, routes.api.bill.delete);
-	app.get('/bill/status/:id/:status', keystone.middleware.api, isAuthenticated, routes.api.bill.status);
-	app.get('/bill/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.bill.addLike);
-	app.get('/bill/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.bill.removeLike);
-	app.get('/bill/part/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.bill.addBillPartLike);
-	app.get('/bill/part/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.bill.removeBillPartLike);
+	app.get('/vote/list', keystone.middleware.api, routes.api.vote.list);
+	app.get('/vote/:voteId', keystone.middleware.api, routes.api.vote.get);
+	app.get('/vote/by-slug/:voteSlug', keystone.middleware.api, routes.api.vote.getBySlug);
+	app.post('/vote', keystone.middleware.api, routes.api.oauth.checkAccessToken, routes.api.vote.create);
+	app.get('/vote/result/:voteId', keystone.middleware.api, routes.api.vote.result);
+	app.get('/vote/result/per-gender/:voteId', keystone.middleware.api, routes.api.vote.resultPerGender);
+	app.get('/vote/result/per-age/:voteId', keystone.middleware.api, routes.api.vote.resultPerAge);
+	app.get('/vote/result/per-date/:voteId', keystone.middleware.api, routes.api.vote.resultPerDate);
+	app.get('/vote/embed/:voteId', keystone.middleware.api, routes.api.vote.embed);
 
-	app.get('/vote/result/:billId', keystone.middleware.api, routes.api.vote.result);
-	app.get('/vote/result/per-gender/:billId', keystone.middleware.api, routes.api.vote.resultPerGender);
-	app.get('/vote/result/per-age/:billId', keystone.middleware.api, routes.api.vote.resultPerAge);
-	app.get('/vote/result/per-date/:billId', keystone.middleware.api, routes.api.vote.resultPerDate);
-	app.post('/vote', keystone.middleware.api, isAuthenticated, routes.api.vote.vote);
-	app.post('/vote/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.vote.remove);
+	app.get('/ballot/list', keystone.middleware.api, isAuthenticated, routes.api.ballot.list);
+	app.get('/ballot/:voteId', keystone.middleware.api, isAuthenticated, routes.api.ballot.get);
+	app.post('/ballot/:voteId', keystone.middleware.api, isAuthenticated, routes.api.ballot.vote);
+	// app.post('/ballot/cancel/:voteId', keystone.middleware.api, isAuthenticated, routes.api.ballot.cancel);
 
-	app.get('/source/list/:billId', keystone.middleware.api, routes.api.source.list);
-	app.post('/source/add', keystone.middleware.api, isAuthenticated, routes.api.source.add);
-	app.get('/source/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.source.addLike);
-	app.get('/source/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.source.removeLike);
-
-	app.get('/argument/list/:billId', keystone.middleware.api, routes.api.argument.list);
-	app.post('/argument/add', keystone.middleware.api, isAuthenticated, routes.api.argument.add);
-	app.get('/argument/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.argument.addLike);
-	app.get('/argument/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.argument.removeLike);
+	app.get('/source/:voteId', keystone.middleware.api, routes.api.source.list);
+	// app.post('/source/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.source.addLike);
+	// app.post('/source/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.source.removeLike);
 
 	app.get('/page/list', keystone.middleware.api, routes.api.page.list);
 	app.get('/page/navbar', keystone.middleware.api, routes.api.page.navbar);
@@ -87,7 +69,6 @@ exports = module.exports = function(app) {
 	app.get('/page/getBySlug/:slug', keystone.middleware.api, routes.api.page.getBySlug);
 
 	app.get('/user/me', keystone.middleware.api, isAuthenticated, routes.api.user.me);
-	app.get('/user/bills', keystone.middleware.api, isAuthenticated, routes.api.user.bills);
 
 	app.get('/service/status', keystone.middleware.api, routes.api.service.getStatus);
 

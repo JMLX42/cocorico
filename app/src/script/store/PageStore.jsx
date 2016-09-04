@@ -73,12 +73,12 @@ module.exports = Reflux.createStore({
 
         jquery.get(
             '/api/page/getBySlug/' + slug,
-            (data, billStatus, xhr) => {
+            (data, voteStatus, xhr) => {
                 delete this._loadingPages[slug];
                 this._pages.push(data.page);
                 this.trigger(this);
             }
-        ).error((xhr, billStatus, err) => {
+        ).error((xhr, voteStatus, err) => {
             delete this._loadingPages[slug];
             this._pages.push({ slug: slug, error: xhr.status });
             this.trigger(this);

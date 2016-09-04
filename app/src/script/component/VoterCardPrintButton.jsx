@@ -29,7 +29,7 @@ var VoterCardPrintButton = React.createClass({
 
     getInitialState: function() {
         return {
-            elementId: 'proof-of-vote-' + this.props.billId
+            elementId: 'proof-of-vote-' + this.props.voteId
         };
     },
 
@@ -43,8 +43,8 @@ var VoterCardPrintButton = React.createClass({
     },
 
     render: function() {
-        var voterCard = this.state.blockchainAccounts.getVoterCardByBillId(
-            this.props.billId
+        var voterCard = this.state.blockchainAccounts.getVoterCardByVoteId(
+            this.props.voteId
         );
 
         if (!voterCard) {
@@ -63,7 +63,7 @@ var VoterCardPrintButton = React.createClass({
                 </Button>
                 <div className="visible-print-block" id={this.state.elementId}
                     style={{width:'50%'}}>
-                    <VoterCard billId={this.props.billId}/>
+                    <VoterCard voteId={this.props.voteId}/>
                 </div>
             </span>
         );

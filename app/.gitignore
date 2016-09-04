@@ -2,3 +2,4 @@
 *.min.css
 public/*.js*
 node_modules
+public/img/screenshot/*.jpg

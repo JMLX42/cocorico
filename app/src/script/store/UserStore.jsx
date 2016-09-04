@@ -62,7 +62,7 @@ module.exports = Reflux.createStore({
                 this._currentUser = data.user;
                 this.trigger(this);
             }
-        ).error((xhr, billStatus, err) => {
+        ).error((xhr, voteStatus, err) => {
             this._currentUser = {error: xhr.status};
             this.trigger(this);
         });
@@ -84,7 +84,7 @@ module.exports = Reflux.createStore({
                 this._authProviders = data.providers;
                 this.trigger(this);
             }
-        ).error((xhr, billStatus, err) => {
+        ).error((xhr, voteStatus, err) => {
             this._authProviders = {error: xhr.status};
             this.trigger(this);
         });

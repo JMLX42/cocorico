@@ -78,7 +78,7 @@ var Login = React.createClass({
                                         <ul className="list-unstyled text-center">
                                             {authProviders && authProviders.map((provider) => {
                                                 return (
-                                                    <li>
+                                                    <li key={provider.name}>
                                                         <a href={provider.url + redirect}>
                                                             <Button className={"btn-login btn-login-" + provider.name}>
                                                                 <span className={"icon-" + provider.name}/>
