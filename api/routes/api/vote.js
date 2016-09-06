@@ -146,7 +146,7 @@ exports.create = function(req, res) {
     );
 }
 
-exports.resultPerDate = function(req, res) {
+exports.update = function(req, res) {
     var voteId = req.params.voteId;
 
     Vote.model.findById(voteId)
@@ -157,39 +157,69 @@ exports.resultPerDate = function(req, res) {
             if (!vote)
                 return res.status(404).send();
 
-            res.apiResponse({result : null});
+            if (vote.app != req.user.id) {
+                return res.status(403).send();
+            }
+
+            for (propertyName in vote) {
+                if (propertyName in req.body) {
+                    vote[propertyName] = req.body[propertyName];
+                }
+            }
+
+            vote.save((err) => {
+                if (err)
+                    return res.apiError('database error', err);
+
+                return res.apiResponse({vote: vote});
+            });
         });
 }
 
-exports.resultPerGender = function(req, res) {
-    var voteId = req.params.voteId;
-
-    Vote.model.findById(voteId)
-        .exec((err, vote) => {
-            if (err)
-                return res.apiError('database error', err);
-
-            if (!vote)
-                return res.status(404).send();
-
-            res.apiResponse({result : null});
-        });
-}
-
-exports.resultPerAge = function(req, res) {
-    var voteId = req.params.voteId;
-
-    Vote.model.findById(voteId)
-        .exec((err, vote) => {
-            if (err)
-                return res.apiError('database error', err);
-
-            if (!vote)
-                return res.status(404).send();
-
-            res.apiResponse({result : null});
-        });
-}
+// exports.resultPerDate = function(req, res) {
+//     var voteId = req.params.voteId;
+//
+//     Vote.model.findById(voteId)
+//         .exec((err, vote) => {
+//             if (err)
+//                 return res.apiError('database error', err);
+//
+//             if (!vote)
+//                 return res.status(404).send();
+//
+//             res.apiResponse({result : null});
+//         });
+// }
+//
+// exports.resultPerGender = function(req, res) {
+//     var voteId = req.params.voteId;
+//
+//     Vote.model.findById(voteId)
+//         .exec((err, vote) => {
+//             if (err)
+//                 return res.apiError('database error', err);
+//
+//             if (!vote)
+//                 return res.status(404).send();
+//
+//             res.apiResponse({result : null});
+//         });
+// }
+//
+// exports.resultPerAge = function(req, res) {
+//     var voteId = req.params.voteId;
+//
+//     Vote.model.findById(voteId)
+//         .exec((err, vote) => {
+//             if (err)
+//                 return res.apiError('database error', err);
+//
+//             if (!vote)
+//                 return res.status(404).send();
+//
+//             res.apiResponse({result : null});
+//         });
+// }
 
 exports.result = function(req, res) {
     var voteId = req.params.voteId;

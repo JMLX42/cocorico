@@ -48,10 +48,11 @@ exports = module.exports = function(app) {
 	app.get('/vote/:voteId', keystone.middleware.api, routes.api.vote.get);
 	app.get('/vote/by-slug/:voteSlug', keystone.middleware.api, routes.api.vote.getBySlug);
 	app.post('/vote', keystone.middleware.api, routes.api.oauth.checkAccessToken, routes.api.vote.create);
+	app.put('/vote/:voteId', keystone.middleware.api, routes.api.oauth.checkAccessToken, routes.api.vote.update);
 	app.get('/vote/result/:voteId', keystone.middleware.api, routes.api.vote.result);
-	app.get('/vote/result/per-gender/:voteId', keystone.middleware.api, routes.api.vote.resultPerGender);
-	app.get('/vote/result/per-age/:voteId', keystone.middleware.api, routes.api.vote.resultPerAge);
-	app.get('/vote/result/per-date/:voteId', keystone.middleware.api, routes.api.vote.resultPerDate);
+	// app.get('/vote/result/per-gender/:voteId', keystone.middleware.api, routes.api.vote.resultPerGender);
+	// app.get('/vote/result/per-age/:voteId', keystone.middleware.api, routes.api.vote.resultPerAge);
+	// app.get('/vote/result/per-date/:voteId', keystone.middleware.api, routes.api.vote.resultPerDate);
 	app.get('/vote/embed/:voteId', keystone.middleware.api, routes.api.vote.embed);
 
 	app.get('/ballot/list', keystone.middleware.api, isAuthenticated, routes.api.ballot.list);
