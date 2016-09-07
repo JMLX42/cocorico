@@ -27,7 +27,7 @@ var App = React.createClass({
         return (
             <div>
                 <Header/>
-                <div id="content">
+                <div class="content">
                     {this.props.children || <div/>}
                 </div>
                 <Footer/>

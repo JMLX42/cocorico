@@ -28,12 +28,17 @@
 
 // @import "./Source Sans Pro.less";
 @import "./icons.less";
+@import "./embed.less";
 
 // @font-family-sans-serif: "Source Sans Pro", "Arial Narrow", sans-serif;
 // @font-family-serif: Georgia, "Times New Roman", Times, serif;
 
+html {
+    height: 100%;
+}
+
 body {
-    background-color: @cocorico-light-grey;
+    height: 100%;
     font-family: @font-family-sans-serif;
     // color: @text-color;
     font-size: floor(@font-size-base * 1.2);
@@ -153,7 +158,8 @@ li.active {
 }
 
 #app {
-    background-color: white;
+    height: 100%;
+    background-color: @cocorico-light-grey;
 }
 
 .positive {
@@ -243,32 +249,33 @@ li.active {
     }
 }
 
-#content {
+.content {
     padding-top: @navbar-height;
-}
-
-#content-embed {
-    padding-top: 0;
+    background-color: white;
 }
 
 #footer {
     min-height: 200px;
     background-color: @cocorico-light-grey;
     color: @cocorico-dark-grey;
-    margin-top: 40px;
     font-size: @font-size-base;
 
     .list-inline li {
         margin-right: 20px;
+    }
 
-        a {
-            margin-top: 20px;
-            display: inline-block;
-            color: @cocorico-dark-grey;
+    .text-right .list-inline li {
+        margin-right: 0;
+        margin-left: 20px;
+    }
 
-            &:hover {
-                color: @link-color;
-            }
+    a {
+        margin-top: 20px;
+        display: inline-block;
+        color: @cocorico-dark-grey;
+
+        &:hover {
+            color: @link-color;
         }
     }
 }
@@ -282,7 +289,7 @@ li.active {
 }
 
 .page {
-    margin: 50px 0;
+    padding: 50px 0;
 
     & > .loading-indicator {
         display: block;
@@ -551,6 +558,10 @@ ul.argument-list {
             color: @btn-warning-bg;
         }
     }
+
+    .btn-toolbar {
+        margin-top: 5px;
+    }
 }
 
 .proof-of-vote {
@@ -810,16 +821,16 @@ ul.source-list {
         background-repeat: no-repeat;
         background-size: cover;
         background-position: center;
-        -webkit-filter: blur(20px);
-        -moz-filter: blur(20px);
-        filter: blur(20px);
+        // -webkit-filter: blur(20px);
+        // -moz-filter: blur(20px);
+        // filter: blur(20px);
     }
 
     &-overlay {
         width: 100%;
         height: 100%;
         background: black;
-        opacity: 0.35;
+        opacity: 0.65;
         display: block;
         margin-top: -300px;
     }

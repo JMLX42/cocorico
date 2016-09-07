@@ -1,0 +1,60 @@
+div.embed {
+    height: 100%;
+    background-color: white;
+
+    .content {
+        padding-top: 0;
+        padding-bottom: 37px;
+    }
+
+    .callout {
+        font-size: 0.7em;
+        padding: 10px;
+        margin-top: 10px;
+
+        h3 {
+            font-size: 15px;
+        }
+
+        p {
+            display: inline;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        .btn {
+            .btn-xs();
+        }
+    }
+
+    .vote-widget {
+        .vote-step-actions {
+            margin-top: 10px;
+        }
+    }
+
+    div#footer {
+        border-top: 1px solid @cocorico-grey;
+        position: fixed;
+        bottom: -1px;
+        height: 37px;
+        width: 100%;
+        min-height: 0;
+        margin-top: 0;
+
+        div.container {
+            width: 100%;
+        }
+
+        li {
+            // .hidden-xs();
+            // .hidden-sm();
+        }
+
+        a {
+            margin-top: 5px;
+        }
+    }
+}

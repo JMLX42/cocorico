@@ -22,10 +22,8 @@ var Embed = React.createClass({
     render: function()
     {
         return (
-            <div>
-                <div id="content-embed">
-                    {this.props.children || <div/>}
-                </div>
+            <div className="embed">
+                {this.props.children || <div/>}
             </div>
         );
      }

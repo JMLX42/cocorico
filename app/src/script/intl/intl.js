@@ -45,7 +45,8 @@ var Intl = {
 		footer: {
 			PRIVACY_POLICY: "Politique de Confidentialité",
 			SOURCE_CODE: "Code Source",
-			SERVICE_STATUS: "Etat du Système"
+			SERVICE_STATUS: "Etat du Système",
+			POWERED_BY: "Propulsé par {productName}"
 		},
 
 		sort: {

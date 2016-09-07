@@ -3,6 +3,8 @@ var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var ReactRouter = require('react-router');
 
+var FormattedMessage = ReactIntl.FormattedMessage;
+
 var Link = ReactRouter.Link;
 
 var Grid = ReactBootstrap.Grid,
@@ -13,28 +15,56 @@ var Footer = React.createClass({
 
     mixins: [ReactIntl.IntlMixin],
 
+    contextTypes: {
+        location: React.PropTypes.object,
+        history: React.PropTypes.object
+    },
+
     render: function()
     {
+        var isEmbed = this.context.location.pathname.indexOf('/embed') == 0;
+        var target = isEmbed ? '_blank' : '_self';
+
 		return (
             <div id="footer">
                 <Grid>
                     <Row>
-                        <Col md={12}>
+                        <Col md={9} sm={9} xsHidden>
                             <ul className="list-unstyled list-inline">
                                 <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
-                                    <Link to={this.getIntlMessage('route.PRIVACY_POLICY')}>
+                                    <Link to={this.getIntlMessage('route.PRIVACY_POLICY')}
+                                        target={target}>
                                         {this.getIntlMessage('footer.PRIVACY_POLICY')}
                                     </Link>
                                 </li>
                                 <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
-                                    <a href="https://github.com/promethe42/cocorico">
+                                    <a href="https://github.com/promethe42/cocorico"
+                                        target="_blank">
                                         {this.getIntlMessage('footer.SOURCE_CODE')}
                                     </a>
                                 </li>
                                 <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
-                                    <Link to={this.getIntlMessage('route.SERVICE_STATUS')}>
+                                    <Link to={this.getIntlMessage('route.SERVICE_STATUS')}
+                                        target={target}>
                                         {this.getIntlMessage('footer.SERVICE_STATUS')}
                                     </Link>
+                                </li>
+                            </ul>
+                        </Col>
+                        <Col md={3} sm={3} xs={12} className="text-right">
+                            <ul className="list-unstyled list-inline">
+                                <li className="visible-xs-inline hidden-sm hidden-md hidden-lg">
+                                    <Link to={this.getIntlMessage('route.PRIVACY_POLICY')}
+                                        target={target}>
+                                        {this.getIntlMessage('footer.PRIVACY_POLICY')}
+                                    </Link>
+                                </li>
+                                <li>
+                                    <a href="/" target={target}>
+                                        <FormattedMessage
+                                            message={this.getIntlMessage('footer.POWERED_BY')}
+                                            productName="Cocorico"/>
+                                    </a>
                                 </li>
                             </ul>
                         </Col>

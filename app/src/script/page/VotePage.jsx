@@ -65,13 +65,8 @@ var VotePage = React.createClass({
                             style={{backgroundImage: 'url(' + this.proxifyURL(vote.image) + ')'}}/>
                         <div className="vote-banner-overlay"/>
                     </div>
-                    <Grid style={{
-                            marginTop: '-100px',
-                            background: 'white',
-                            position: 'relative',
-                            borderRadius: '5px'
-                        }}>
-                        <Row style={{'marginBottom': '50px'}}>
+                    <Grid >
+                        <Row>
                             <Col xs={12}>
                                 <h1>
                                     {vote.title}
@@ -97,6 +92,7 @@ var VotePage = React.createClass({
                         <Row>
                             <Col xs={12}>
                                 <h2>
+                                    <Icon name="megaphone"/>
                                     Militer
                                 </h2>
                             </Col>

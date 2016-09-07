@@ -411,7 +411,6 @@ var VoteWidget = React.createClass({
     {
         return (
             <div className="vote-step-description">
-                <Page slug="astuce-etape-vote"/>
                 <div className="vote-step-actions">
                     <VoteButtonBar vote={this.props.vote}
                         onVote={this.voteHandler}/>
@@ -447,11 +446,13 @@ var VoteWidget = React.createClass({
                         <FormattedMessage
                             message={this.getIntlMessage('vote.DENY_VOTER_ID')}/>
                     </a>
-                    <Button bsStyle="link"
-                        disabled={this.state.blockchainAccountCreated}
-                        onClick={(e)=>this.props.onCancel(e)}>
-                        {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
-                    </Button>
+                    {this.props.modal
+                        ? <Button bsStyle="link"
+                            disabled={this.state.blockchainAccountCreated}
+                            onClick={(e)=>this.props.onCancel(e)}>
+                            {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+                        </Button>
+                        : null}
                 </ButtonToolbar>
                 <Hint style="warning" pageSlug="attention-usurpation-didentite"/>
             </div>
@@ -489,10 +490,12 @@ var VoteWidget = React.createClass({
                                     <FormattedMessage
                                         message={this.getIntlMessage('vote.USE_EXISTING_VOTE_CARD')}/>
                                 </Button>
-                                <Button bsStyle="link"
-                                    onClick={(e)=>this.props.onCancel(e)}>
-                                    {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
-                                </Button>
+                                {this.props.modal
+                                    ? <Button bsStyle="link"
+                                        onClick={(e)=>this.props.onCancel(e)}>
+                                        {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+                                    </Button>
+                                    : null}
                             </ButtonToolbar>
                             : <ButtonToolbar className="vote-step-actions">
                                 <LoadingIndicator text={this.getIntlMessage('vote.CREATING_NEW_VOTE_CARD')}/>
@@ -564,40 +567,40 @@ var VoteWidget = React.createClass({
     renderConfirmDialog: function()
     {
         return (
-            <div>
-                <div className="vote-step-description">
-                    <p>
-                        <FormattedMessage
-                            message={this.getIntlMessage('vote.CONFIRM_VOTE_MESSAGE')}
-                            value={
-                                <strong>
-                                    <span className={classNames({
-                                            'positive': this.state.ballotValue == 0,
-                                            'neutral': this.state.ballotValue == 1,
-                                            'negative': this.state.ballotValue == 2
-                                        })}>
-                                    {this.getVoteValueDisplayMessage()}
-                                    </span>
-                                </strong>
-                            }
-                            vote={
-                                <strong>
-                                    <Title text={this.props.vote.title}/>
-                                </strong>
-                            }/>
-                    </p>
-                    <ButtonToolbar className="vote-step-actions">
-                        {this.state.confirmedVote
-                            ? <LoadingIndicator text="Envoi de votre vote en cours..."/>
-                            : <div>
-                                {this.renderConfirmVoteButton()}
-                                <Button bsStyle="link"
+            <div className="vote-step-description">
+                <p>
+                    <FormattedMessage
+                        message={this.getIntlMessage('vote.CONFIRM_VOTE_MESSAGE')}
+                        value={
+                            <strong>
+                                <span className={classNames({
+                                        'positive': this.state.ballotValue == 0,
+                                        'neutral': this.state.ballotValue == 1,
+                                        'negative': this.state.ballotValue == 2
+                                    })}>
+                                {this.getVoteValueDisplayMessage()}
+                                </span>
+                            </strong>
+                        }
+                        vote={
+                            <strong>
+                                <Title text={this.props.vote.title}/>
+                            </strong>
+                        }/>
+                </p>
+                <ButtonToolbar className="vote-step-actions">
+                    {this.state.confirmedVote
+                        ? <LoadingIndicator text="Envoi de votre vote en cours..."/>
+                        : <div>
+                            {this.renderConfirmVoteButton()}
+                            {this.props.modal
+                                ? <Button bsStyle="link"
                                     onClick={(e)=>this.props.onCancel(e)}>
                                     {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
                                 </Button>
-                            </div>}
-                    </ButtonToolbar>
-                </div>
+                                : null}
+                        </div>}
+                </ButtonToolbar>
                 {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
                     ? <Hint style="warning"
                         pageSlug="attention-recuperer-carte-de-vote-2">
@@ -606,7 +609,7 @@ var VoteWidget = React.createClass({
                             {this.renderVoterCardDownloadButton('btn btn-warning')}
                         </ButtonToolbar>
                     </Hint>
-                    : <span/>}
+                    : null}
             </div>
         );
     },
@@ -694,16 +697,35 @@ var VoteWidget = React.createClass({
         );
     },
 
-    renderModalFooter: function()
+    renderVoterIdModalFooter: function()
     {
         return (
+            <Button
+                bsStyle="link"
+                onClick={(e)=>this.props.onCancel(e)}>
+                {this.getIntlMessage('vote.CANCEL_MY_VOTE')}>
+                Annuler
+            </Button>
+        );
+    },
+
+    renderModalFooter: function()
+    {
+        if (!this.props.modal) {
+            return null;
+        }
+
+        return (
             <div>
+                {this.state.step == VoteWidget.STEP_VOTER_ID
+                    ? this.renderVoterIdModalFooter()
+                    : null}
                 {this.state.step == VoteWidget.STEP_VOTE_CARD
                     ? this.renderVoterCardModalFooter()
-                    : <span/>}
+                    : null}
                 {this.state.step == VoteWidget.STEP_COMPLETE
                     ? this.renderCompleteModalFooter()
-                    : <span/>}
+                    : null}
             </div>
         );
     },
