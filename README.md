@@ -6,6 +6,7 @@ Cocorico is a democracy engine powered by the blockchain.
 
 * [Install](./doc/Install.md)
 * [Building and running](./doc/Building_and_running.md)
+* [REST API](https://cocorico.cc/documentation/index.html)
 
 ## Licence
 
