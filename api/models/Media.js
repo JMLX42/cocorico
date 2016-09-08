@@ -9,11 +9,19 @@ var Media = new keystone.List('Media', {
     track: { createdAt: true, updatedAt: true }
 });
 
+var storage = new keystone.Storage({
+    adapter: keystone.Storage.Adapters.FS,
+    fs: {
+        path: keystone.expandPath('../app/public/'+ config.uploadDir),
+        publicPath: '/' + config.uploadDir
+    }
+});
+
 Media.add({
 	title: { type: String, required: true },
     file: {
-        type: Types.LocalFile,
-        dest: '../app/public/' + config.uploadDir,
+        type: Types.File,
+        storage: storage,
         allowedTypes: [
             'image/jpeg',
             'image/png',
