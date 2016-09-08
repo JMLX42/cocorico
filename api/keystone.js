@@ -5,6 +5,7 @@ keystone.init({
 
 	'name': 'cocorico',
 	'brand': 'cocorico',
+	'admin path': 'admin',
 
 	'views': 'templates/views',
 	'view engine': 'jade',

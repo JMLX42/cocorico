@@ -8,7 +8,7 @@ ProxyPreserveHost   On
     ProxyPassReverse    http://127.0.0.1:3000/
 </LocationMatch>
 
-<LocationMatch "/keystone">
-    ProxyPass           http://127.0.0.1:3000/keystone retry=0
-    ProxyPassReverse    http://127.0.0.1:3000/keystone
+<LocationMatch "/admin">
+    ProxyPass           http://127.0.0.1:3000/admin retry=0
+    ProxyPassReverse    http://127.0.0.1:3000/admin
 </LocationMatch>
