@@ -24,6 +24,23 @@ exports = module.exports = function(app) {
 	app.use(passport.initialize());
 	app.use(passport.session());
 
+	/**
+	 * @api {post} /oauth/token Request an OAuth access token
+	 * @apiName GetOAuthToken
+	 * @apiGroup OAuth
+	 * @apiVersion 0.0.1
+	 *
+	 * @apiHeader {String} Authorization The HTTP Basic authentication token: `base64(appId:secret)`
+	 * @apiExample {curl} cURL example:
+	 * 		curl -X POST
+	 *			-H "Authorization: Basic NTdjYzI2NDYzMGI2NWMxZTA0YWNjMDlhOm1lZXR1cA=="
+	 *			-F "grant_type=client_credentials"
+	 *			"https://cocorico.cc/api/oauth/token"
+	 *
+	 * @apiSuccess {String} auth_token OAuth access token.
+	 * @apiSuccess {Number} expires_in Expiration delay.
+	 * @apiSuccess {String} token_type Acess token type.
+	 */
 	app.post('/oauth/token', routes.api.oauth.token);
 
 	app.get('/auth/providers', keystone.middleware.api, routes.api.auth.providers);
@@ -44,12 +61,101 @@ exports = module.exports = function(app) {
 		app.get('/auth/fakeLogin', keystone.middleware.api, routes.api.auth.fakeLogin);
 	}
 
-	app.get('/vote/list', keystone.middleware.api, routes.api.vote.list);
-	app.get('/vote/:voteId', keystone.middleware.api, routes.api.vote.get);
-	app.get('/vote/by-slug/:voteSlug', keystone.middleware.api, routes.api.vote.getBySlug);
+	/**
+	 * @api {post} /vote Create a new vote
+	 * @apiName CreateNewVote
+	 * @apiGroup Vote
+	 * @apiVersion 0.0.1
+	 *
+	 * @apiHeader {String} Authorization The OAuth access token fetched with `/oauth/token`.
+	 * @apiExample {curl} cURL example:
+	 * 		curl -X POST
+	 *			-H "Authorization: Bearer i45dj3ii2kkvhlgsjfh2hhce4wkk06tx5"
+	 *			-F "url=https://www.meetup.com/fr-FR/promenades-et-randonnees/"
+	 *			"https://cocorico.cc/api/vote"
+	 *
+	 * @apiSuccess {Object} vote The newly created vote.
+	 * @apiSuccess {String} vote.id The ID of the vote.
+	 * @apiSuccess {Object} vote.vote The newly created Vote.
+	 * @apiSuccess {String} vote.app The ID of the App that created the vote.
+	 * @apiSuccess {Number} vote.description The description of the vote.
+	 * @apiSuccess {String} vote.image The image of the vote.
+	 * @apiSuccess {String} vote.slug The slug of the vote.
+	 * @apiSuccess {String} vote.title The title of the vote.
+	 * @apiSuccess {String} vote.url The URL passed to create the vote.
+	 * @apiSuccess {String} vote.status The status of the vote.
+	 * @apiSuccess {Object[]} vote.voteContractABI The ABI of the vote blockchain smart contract.
+	 * @apiSuccess {String} vote.voteContractAddress The blockchain block address of the vote smart contract.
+	 */
 	app.post('/vote', keystone.middleware.api, routes.api.oauth.checkAccessToken, routes.api.vote.create);
-	app.put('/vote/:voteId', keystone.middleware.api, routes.api.oauth.checkAccessToken, routes.api.vote.update);
+
+	/**
+	 * @api {get} /vote List all votes
+	 * @apiName ListAllVotes
+	 * @apiGroup Vote
+	 * @apiVersion 0.0.1
+	 *
+	 * @apiExample {curl} cURL example:
+	 * 		curl -X GET "https://cocorico.cc/api/vote"
+	 *
+	 * @apiSuccess {Object[]} votes List of votes.
+	 * @apiSuccess {String} votes.id The ID of the vote.
+	 * @apiSuccess {Object} votes.vote The newly created Vote.
+	 * @apiSuccess {String} votes.app The ID of the App that created the vote.
+	 * @apiSuccess {Number} votes.description The description of the vote.
+	 * @apiSuccess {String} votes.image The image of the vote.
+	 * @apiSuccess {String} votes.slug The slug of the vote.
+	 * @apiSuccess {String} votes.title The title of the vote.
+	 * @apiSuccess {String} votes.url The URL passed to create the vote.
+	 * @apiSuccess {String} votes.status The status of the vote.
+	 * @apiSuccess {Object[]} votes.voteContractABI The ABI of the vote blockchain smart contract.
+	 * @apiSuccess {String} votes.voteContractAddress The blockchain block address of the vote smart contract.
+	 */
+	app.get('/vote', keystone.middleware.api, routes.api.vote.list);
+
+	/**
+	 * @api {get} /vote/:voteId Get a specific vote
+	 * @apiName GetSpecificVote
+	 * @apiGroup Vote
+	 * @apiVersion 0.0.1
+	 *
+	 * @apiParam {String} voteId The ID of the vote.
+	 *
+	 * @apiExample {curl} cURL example:
+	 * 		curl -X GET "https://cocorico.cc/api/vote/57cc487608875ef57ac75ff1"
+	 *
+	 * @apiSuccess {Object} vote The requested vote.
+	 * @apiSuccess {String} vote.id The ID of the vote.
+	 * @apiSuccess {Object} vote.vote The newly created Vote.
+	 * @apiSuccess {String} vote.app The ID of the App that created the vote.
+	 * @apiSuccess {Number} vote.description The description of the vote.
+	 * @apiSuccess {String} vote.image The image of the vote.
+	 * @apiSuccess {String} vote.slug The slug of the vote.
+	 * @apiSuccess {String} vote.title The title of the vote.
+	 * @apiSuccess {String} vote.url The URL passed to create the vote.
+	 * @apiSuccess {String} vote.status The status of the vote.
+	 * @apiSuccess {Object[]} vote.voteContractABI The ABI of the vote blockchain smart contract.
+	 * @apiSuccess {String} vote.voteContractAddress The blockchain block address of the vote smart contract.
+	 */
+	app.get('/vote/:voteId', keystone.middleware.api, routes.api.vote.get);
+
+	/**
+	 * @api {get} /vote/result/:voteId Get a vote result
+	 * @apiName GetVoteResult
+	 * @apiGroup Vote
+	 * @apiVersion 0.0.1
+	 *
+	 * @apiParam {String} voteId The ID of the vote.
+	 *
+	 * @apiExample {curl} cURL example:
+	 * 		curl -X GET "https://cocorico.cc/api/vote/result/57cc487608875ef57ac75ff1"
+	 *
+	 * @apiSuccess {Object} vote The requested vote result.
+	 */
 	app.get('/vote/result/:voteId', keystone.middleware.api, routes.api.vote.result);
+
+	app.get('/vote/by-slug/:voteSlug', keystone.middleware.api, routes.api.vote.getBySlug);
+	app.put('/vote/:voteId', keystone.middleware.api, routes.api.oauth.checkAccessToken, routes.api.vote.update);
 	// app.get('/vote/result/per-gender/:voteId', keystone.middleware.api, routes.api.vote.resultPerGender);
 	// app.get('/vote/result/per-age/:voteId', keystone.middleware.api, routes.api.vote.resultPerAge);
 	// app.get('/vote/result/per-date/:voteId', keystone.middleware.api, routes.api.vote.resultPerDate);

@@ -32,6 +32,7 @@
     - { name: json, version: 9.0.3 }
     - { name: watchify, version: 3.7.0 }
     - { name: browserify, version: 11.2.0 }
+    - { name: apidoc, version: 0.16.1 }
   register: result
   failed_when: no
   changed_when: result.stdout != "{{ item.version }}"

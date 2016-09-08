@@ -1,5 +1,6 @@
 # Ignore built css files
 *.min.css
 public/*.js*
-node_modules
 public/img/screenshot/*.jpg
+public/documentation
+node_modules
