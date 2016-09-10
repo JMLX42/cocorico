@@ -188,6 +188,8 @@ exports = module.exports = function(app) {
 	// app.get('/vote/result/per-date/:voteId', keystone.middleware.api, routes.api.vote.resultPerDate);
 	app.get('/vote/embed/:voteId', keystone.middleware.api, routes.api.vote.embed);
 
+	app.get('/vote/permissions/:voteId', keystone.middleware.api, routes.api.vote.permissions);
+
 	// app.get('/ballot/list', keystone.middleware.api, isAuthenticated, routes.api.ballot.list);
 
 	/**
