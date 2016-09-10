@@ -91,12 +91,21 @@
   get_url:
     url: https://dl.eff.org/certbot-auto
     dest: /opt/certbot
+  when:
+    - http_protocol_prefix == 'https'
+    - environment_name == 'prod'
 
 - name: make certbot executable
   file: path=/opt/certbot/certbot-auto mode=a+x
+  when:
+    - http_protocol_prefix == 'https'
+    - environment_name == 'prod'
 
 - name: create cron job to renew letsencrypt certificates
   cron: name="renew letsencrypt certificates" state=present special_time=daily job="/opt/certbot/certbot-auto renew --quiet --no-self-upgrade"
+  when:
+    - http_protocol_prefix == 'https'
+    - environment_name == 'prod'
 
 - name: remove unused sites
   file: path=/etc/apache2/sites-available/{{ item }} state=absent
