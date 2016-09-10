@@ -11,11 +11,9 @@ var routes = {
 
 function isAuthenticated(req, res, next)
 {
-	passport.authenticate('jwt', { session: false})(req, res, () => {
-		if (!req.isAuthenticated() || !req.user.sub)
-			return res.status(401).apiResponse({ 'error': 'not logged in' });
-		next();
-	});
+	if (!req.isAuthenticated() || !req.user.sub)
+		return res.status(401).apiResponse({ 'error': 'not logged in' });
+	next();
 }
 
 // Setup Route Bindings
@@ -23,6 +21,15 @@ exports = module.exports = function(app) {
 
 	app.use(passport.initialize());
 	app.use(passport.session());
+
+	// JWT authentication does not use sessions, so we have to check for a user
+	// without throwing an error if there is none.
+	app.use((req, res, next) => passport.authenticate('jwt', (err, user, info) => {
+		if (err) { return next(err); }
+    	if (!user) { return next(); }
+
+		req.logIn(user, { session: false }, next);
+	})(req, res, next));
 
 	/**
 	 * @apiDefine user A user that has been properly logged in using any of the `/auth` endpoints.
