@@ -102,14 +102,6 @@ function ballotTransactionError(res, ballot, msg)
     });
 }
 
-function userIsAuthorizedToVote(user, vote)
-{
-    return (!user.iss || user.iss == vote.app)
-        && (!user.authorizedVotes
-            || !user.authorizedVotes.length
-            || user.authorizedVotes.indexOf(vote.id) >= 0);
-}
-
 exports.vote = function(req, res) {
     if (!config.capabilities.vote.enabled)
         return res.status(403).send();
@@ -125,7 +117,7 @@ exports.vote = function(req, res) {
                 if (!vote)
         			return callback({code: 404, error: 'vote not found'});
                 // FIXME: log the unauthorized attempt
-                if (!userIsAuthorizedToVote(user, vote))
+                if (!vote.userIsAuthorizedToVote(user))
                     return callback({code: 403, error: 'unauthorized user'});
                 if (vote.voteContractAddress != voteContractAddress)
                     return callback({code: 300, error: 'contract address mismatch'});
