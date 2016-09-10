@@ -104,9 +104,10 @@ function ballotTransactionError(res, ballot, msg)
 
 function userIsAuthorizedToVote(user, vote)
 {
-    return !user.authorizedVotes
-        || !user.authorizedVotes.length
-        || user.authorizedVotes.indexOf(vote.id) >= 0;
+    return (!user.iss || user.iss == vote.app)
+        && (!user.authorizedVotes
+            || !user.authorizedVotes.length
+            || user.authorizedVotes.indexOf(vote.id) >= 0);
 }
 
 exports.vote = function(req, res) {
