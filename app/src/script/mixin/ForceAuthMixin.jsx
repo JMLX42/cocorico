@@ -29,7 +29,7 @@ var ForceAuthMixin = {
     componentDidMount: function()
     {
         this.listenTo(UserStore, (store) => {
-            this.setState({isAuthenticated: store.isAuthenticated()})
+            this.setState({isAuthenticated: store.isAuthenticated()});
         });
         UserAction.requireLogin();
     },
