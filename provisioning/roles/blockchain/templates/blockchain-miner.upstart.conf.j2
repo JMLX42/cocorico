@@ -1,6 +1,6 @@
 description "{{ role_name }}"
 
-{% if ethereum_mine_on_boot and capabilities.bill.vote %}
+{% if ethereum_mine_on_boot and capabilities.vote.enabled %}
 {% if is_development_environment %}
 start on vagrant-mounted
 {% else %}
