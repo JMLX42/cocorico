@@ -1,3 +1,5 @@
+var config = require('../config.json');
+
 var keystone = require('keystone');
 var transform = require('model-transform');
 
@@ -21,6 +23,18 @@ Vote.add({
 
 Vote.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'vote' });
 Vote.relationship({ path: 'sources', ref: 'Source', refPath: 'vote' });
+
+Vote.schema.methods.userIsAuthorizedToVote = function(user)
+{
+    return config.capabilities.vote.enabled
+        && this.status == 'open'
+        && !!user
+        && (!user.iss || user.iss == this.app)
+        && (!user.authorizedVotes
+            || !user.authorizedVotes.length
+            || user.authorizedVotes.indexOf(this.id) >= 0);
+}
+
 
 transform.toJSON(Vote);
 
