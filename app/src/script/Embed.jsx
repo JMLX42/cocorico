@@ -12,7 +12,15 @@ var Embed = React.createClass({
 
     mixins: [ReactIntl.IntlMixin],
 
-    getDefaultProps: function(){
+    childContextTypes: {
+        location: React.PropTypes.object
+    },
+
+    getChildContext() {
+        return { location: this.props.location }
+    },
+
+    getDefaultProps: function() {
         return {
             locales: Intl.locales,
             messages: Intl.messages

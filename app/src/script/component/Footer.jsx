@@ -16,8 +16,7 @@ var Footer = React.createClass({
     mixins: [ReactIntl.IntlMixin],
 
     contextTypes: {
-        location: React.PropTypes.object,
-        history: React.PropTypes.object
+        location: React.PropTypes.object
     },
 
     render: function()

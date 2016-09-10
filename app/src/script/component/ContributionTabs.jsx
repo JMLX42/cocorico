@@ -35,11 +35,6 @@ var Bill = React.createClass({
         Reflux.connect(ConfigStore, 'config')
     ],
 
-    contextTypes: {
-        history: React.PropTypes.object,
-        location: React.PropTypes.object
-    },
-
     getInitialState: function()
     {
         return {
@@ -87,7 +82,7 @@ var Bill = React.createClass({
 
     tabSelectHandler: function(key)
     {
-        this.context.history.replace(
+        this.context.router.replace(
             this.getIntlMessage('route.VIEW_BILL')
             + '/' + this.props.bill.slug
             + '/' + this.getTabSlugByKey(key)

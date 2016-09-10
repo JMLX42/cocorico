@@ -15,6 +15,14 @@ var App = React.createClass({
 
     mixins: [ReactIntl.IntlMixin],
 
+    childContextTypes: {
+        location: React.PropTypes.object
+    },
+
+    getChildContext() {
+        return { location: this.props.location }
+    },
+
     getDefaultProps: function(){
         return {
             locales: Intl.locales,
@@ -27,7 +35,7 @@ var App = React.createClass({
         return (
             <div>
                 <Header/>
-                <div class="content">
+                <div className="content">
                     {this.props.children || <div/>}
                 </div>
                 <Footer/>

@@ -4,7 +4,6 @@ require('babel-polyfill');
 var React = require('react');
 var ReactRouter = require('react-router');
 var ReactDOM = require('react-dom');
-var History = require('history');
 var messages = require('./intl/intl').messages;
 
 var Router = ReactRouter.Router,
@@ -19,10 +18,16 @@ var Router = ReactRouter.Router,
     Login = require('./page/Login'),
     ServiceStatus = require('./page/ServiceStatus'),
     VotePage = require('./page/VotePage'),
-    EmbedVoteWidgetPage = require('./page/embed/VoteWidgetPage');
+    EmbedVoteWidgetPage = require('./page/embed/VoteWidgetPage'),
+
+    RouteAction = require('./action/RouteAction');
+
+browserHistory.listen((location, action) => {
+  RouteAction.change(location, action);
+});
 
 ReactDOM.render(
-    <Router history={History.createHistory()}>
+    <Router history={browserHistory}>
         <Route path='/' component={App}>
             <IndexRoute component={Home}/>
             <Route path={messages.route.SIGN_IN} component={Login}/>

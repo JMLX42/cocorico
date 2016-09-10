@@ -2,6 +2,9 @@ var React = require('react');
 var ReactIntl = require('react-intl');
 var ReactRouter = require('react-router');
 var ReactBootstrap = require('react-bootstrap');
+var Reflux = require('reflux');
+
+var RouteAction = require('../action/RouteAction');
 
 var Link = ReactRouter.Link;
 
@@ -9,16 +12,22 @@ var Glyphicon = ReactBootstrap.Glyphicon
 
 var LoginButton = React.createClass({
 
-    mixins: [ReactIntl.IntlMixin],
+    mixins: [
+        Reflux.ListenerMixin,
+        ReactIntl.IntlMixin
+    ],
 
     contextTypes: {
-        location: React.PropTypes.object,
-        history: React.PropTypes.object
+        location: React.PropTypes.object
     },
 
     componentWillMount: function()
     {
-        this._historyListener = this.context.history.listenBefore(this.onTransition);
+        this._routeChangeUnsub = this.listenTo(RouteAction.change, (location) => {
+            this.setState({
+                path: location.pathname
+            });
+        });
 
         // http://stackoverflow.com/questions/7131909/facebook-callback-appends-to-return-url
         if (window.location.hash == '#_=_')
@@ -29,7 +38,9 @@ var LoginButton = React.createClass({
 
     componentWillUnmount: function()
     {
-        this._historyListener();
+        if (this._routeChangeUnsub) {
+            this._routeChangeUnsub();
+        }
     },
 
     getInitialState: function()
@@ -37,13 +48,6 @@ var LoginButton = React.createClass({
         return {
             path: this.context.location.pathname
         }
-    },
-
-    onTransition: function(location)
-    {
-        this.setState({
-            path: location.pathname
-        });
     },
 
     render: function()
