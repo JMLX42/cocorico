@@ -9,6 +9,7 @@ module.exports = Reflux.createStore({
         this.listenTo(VoteAction.showResults, this._fetchVoteResults);
         this.listenTo(VoteAction.show, this._fetch);
         this.listenTo(VoteAction.showPage, this._fetchBySlug);
+        this.listenTo(VoteAction.getPermissions, this._fetchPermissions);
 
         this._loading = {};
         this._votes = [];
@@ -112,6 +113,7 @@ module.exports = Reflux.createStore({
                 this.trigger(this);
             }
         ).error((xhr, voteStatus, err) => {
+            delete this._loading[uri];
             this._votes.push({ error : xhr.status });
             this.trigger(this);
         });
@@ -131,7 +133,30 @@ module.exports = Reflux.createStore({
                 this.trigger(this);
             }
         ).error((xhr, voteStatus, err) => {
+            delete this._loading[uri];
             this._votes.push({ error : xhr.status });
+            this.trigger(this);
+        });
+    },
+
+    _fetchPermissions: function(voteId) {
+        var uri = '/api/vote/permissions/' + voteId;
+
+        if (uri in this._loading) {
+            return;
+        }
+        this._loading[uri] = true;
+
+        jquery.get(
+            uri,
+            (data) => {
+                delete this._loading[uri];
+                this.getById(voteId).permissions = data.permissions;
+                this.trigger(this);
+            }
+        ).error((xhr, voteStatus, err) => {
+            delete this._loading[uri];
+            this.getById(voteId).permissions = { error : xhr.status };
             this.trigger(this);
         });
     }
