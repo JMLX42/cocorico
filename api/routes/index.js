@@ -11,11 +11,11 @@ var routes = {
 
 function isAuthenticated(req, res, next)
 {
-	// FIXME: users should be able to login without FranceConnect for offline dev
-	if (!req.isAuthenticated() || !req.user.sub)
-		return res.status(401).apiResponse({ 'error': 'not logged in' });
-
-	next();
+	passport.authenticate('jwt', { session: false})(req, res, () => {
+		if (!req.isAuthenticated() || !req.user.sub)
+			return res.status(401).apiResponse({ 'error': 'not logged in' });
+		next();
+	});
 }
 
 // Setup Route Bindings
@@ -25,7 +25,15 @@ exports = module.exports = function(app) {
 	app.use(passport.session());
 
 	/**
-	 * @api {post} /oauth/token Request an OAuth access token
+	 * @apiDefine user A user that has been properly logged in using any of the `/auth` endpoints.
+	 */
+
+	/**
+	 * @apiDefine app A registered 3rd party app providing a valid OAuth token fetched using `/oauth/token`.
+	 */
+
+	/**
+	 * @api {post} /oauth/token Get an OAuth access token
 	 * @apiName GetOAuthToken
 	 * @apiGroup OAuth
 	 * @apiVersion 0.0.1
@@ -66,6 +74,7 @@ exports = module.exports = function(app) {
 	 * @apiName CreateNewVote
 	 * @apiGroup Vote
 	 * @apiVersion 0.0.1
+	 * @apiPermission app
 	 *
 	 * @apiHeader {String} Authorization The OAuth access token fetched with `/oauth/token`.
 	 * @apiExample {curl} cURL example:
@@ -155,14 +164,85 @@ exports = module.exports = function(app) {
 	app.get('/vote/result/:voteId', keystone.middleware.api, routes.api.vote.result);
 
 	app.get('/vote/by-slug/:voteSlug', keystone.middleware.api, routes.api.vote.getBySlug);
+
+	/**
+	 * @api {put} /vote/:voteId Update a vote
+	 * @apiName UpdateVote
+	 * @apiGroup Vote
+	 * @apiVersion 0.0.1
+	 * @apiPermission app
+	 *
+	 * @apiParam {String} voteId The ID of the vote.
+	 */
 	app.put('/vote/:voteId', keystone.middleware.api, routes.api.oauth.checkAccessToken, routes.api.vote.update);
+
 	// app.get('/vote/result/per-gender/:voteId', keystone.middleware.api, routes.api.vote.resultPerGender);
 	// app.get('/vote/result/per-age/:voteId', keystone.middleware.api, routes.api.vote.resultPerAge);
 	// app.get('/vote/result/per-date/:voteId', keystone.middleware.api, routes.api.vote.resultPerDate);
 	app.get('/vote/embed/:voteId', keystone.middleware.api, routes.api.vote.embed);
 
-	app.get('/ballot/list', keystone.middleware.api, isAuthenticated, routes.api.ballot.list);
+	// app.get('/ballot/list', keystone.middleware.api, isAuthenticated, routes.api.ballot.list);
+
+	/**
+	 * @api {get} /ballot/:voteId Get a ballot
+	 * @apiName GetBallot
+	 * @apiGroup Ballot
+	 * @apiVersion 0.0.1
+	 * @apiPermission user
+	 *
+	 * @apiParam {String} voteId The ID of the vote.
+	 */
 	app.get('/ballot/:voteId', keystone.middleware.api, isAuthenticated, routes.api.ballot.get);
+
+	/**
+	 * @api {post} /ballot/:voteId Send a ballot
+	 * @apiName SendBallot
+	 * @apiGroup Ballot
+	 * @apiVersion 0.0.1
+	 * @apiPermission user
+	 *
+	 * @apiDescription Send the user's ballot for a specific vote.
+	 *
+	 * The ballot is represented as a blockchain transaction signed with a client-side generated public/private key pair.
+	 * This blockchain transaction must call the corresponding vote smart contract instance
+	 * `vote()` method.
+	 *
+	 * @apiExample {javascript} JavaScript example:
+	 *
+	 * 		var jquery = require('jquery');
+	 *		var lightwallet = require('eth-lightwallet');
+	 *
+	 * 		var tx = lightwallet.txutils.functionTx(
+	 *			voteContractABI,
+	 *			'vote',
+	 *			[ballotValue],
+	 *			{
+	 *				to: voteContractAddress,
+	 *				gasLimit: 999999,
+	 * 				gasPrice: 20000000000,
+	 * 				nonce: 0
+	 * 			}
+	 * 		);
+	 * 		var signedTx = '0x' + lightwallet.signing.signTx(
+	 *			keystore,
+	 *			pwDerivedKey,
+	 *			tx,
+	 *			address
+	 *		);
+	 *
+	 * 		jquery.post(
+	 * 			'/api/ballot/' + voteId,
+	 * 			{ transaction: signedTx },
+	 * 			(data) => {
+	 * 				console.log('ballot transaction sent');
+	 * 			}
+	 * 		);
+	 *
+	 * @apiParam {String} voteId The ID of the vote.
+	 *
+	 * @apiParam (POST) {String} transaction The blockchain transaction of the ballot.
+	 *
+	 */
 	app.post('/ballot/:voteId', keystone.middleware.api, isAuthenticated, routes.api.ballot.vote);
 	// app.post('/ballot/cancel/:voteId', keystone.middleware.api, isAuthenticated, routes.api.ballot.cancel);
 

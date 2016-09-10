@@ -1,7 +1,11 @@
 var passport = require('passport');
 var keystone = require('keystone');
 var bcrypt = require('bcrypt');
-var User = keystone.list('User');
+var JwtStrategy = require('passport-jwt').Strategy;
+var ExtractJwt = require('passport-jwt').ExtractJwt;
+
+var User = keystone.list('User'),
+    App = keystone.list('App');
 
 var config = require('../../config.json');
 
@@ -198,3 +202,50 @@ if (config.google)
 
     exports.googleCallback = getLoginCallbackFunction('google');
 }
+
+var opts = {}
+opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
+// secretOrKey is not really important since we will set it dynamically according
+// to the "Cocorico-App-Id" HTTP header. But it still has to be != false.
+opts.secretOrKey = 'secret';
+
+// JwtStrategy reads the JWT secret from the option object above. But
+// we need the secret to be the one set for the corresponding App.
+// Thus, we override the JwtStrategy.prototype.authenticate method in order to set
+// the secret according to the App found using the "Cocorico-App-Id" header.
+var authenticate = JwtStrategy.prototype.authenticate;
+JwtStrategy.prototype.authenticate = function(req, options) {
+    var appId = req.headers['cocorico-app-id'];
+
+    if (!appId) {
+        return this.fail(new Error("Missing Cocorico-App-Id header"));
+    }
+
+    App.model.findById(appId).exec((err, app) => {
+        if (err) {
+            return this.fail(err);
+        }
+
+        if (!app) {
+            return this.fail(new Error("Invalid app id"));
+        }
+
+        this._verifOpts.issuer = app.id;
+        this._secretOrKey = app.secret;
+
+        return authenticate.call(this, req, options);
+    });
+}
+
+passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+    if (!!jwt_payload.sub) {
+        // At this point, we know for sure the secret and the issuer are correct.
+        // So we can safely assume that jwt_payload.iss is the right App ID and
+        // use it to make sure the "sub" is unique across multiple apps.
+        jwt_payload.sub = jwt_payload.iss + ':' + jwt_payload.sub;
+
+        return done(null, jwt_payload);
+    }
+
+    return done(null, false);
+}));
