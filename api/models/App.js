@@ -1,5 +1,6 @@
 var keystone = require('keystone');
 var transform = require('model-transform');
+var srs = require('secure-random-string');
 
 var Types = keystone.Field.Types;
 
@@ -8,7 +9,7 @@ var App = new keystone.List('App', {
 
 App.add({
     title: { type: String, required: true, initial: true },
-    secret: { type: Types.Password, required: true, initial: true },
+    secret: { type: Types.Key, required: true, default: () => srs(32) },
     validURLs: { type: Types.TextArray }
 });
 

@@ -43,9 +43,9 @@ passport.use("clientBasic", new BasicStrategy((clientId, clientSecret, done) => 
             return done(null, false);
         }
 
-        app._.secret.compare(clientSecret, (err, result) => {
+        if (clientSecret == app.secret) {
             return done(null, result ? app : false);
-        });
+        }
     });
 }));
 
