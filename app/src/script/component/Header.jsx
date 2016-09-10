@@ -50,11 +50,25 @@ var Header = React.createClass({
         }, false);
     },
 
-    render: function()
+    renderLoginButtonOrAccountDropDown()
     {
+        if (!this.state.config.capabilities.user.sign_in) {
+            return;
+        }
+
         var currentUser = this.state.users
             ? this.state.users.getCurrentUser()
             : null;
+
+        return (
+            !!currentUser
+                ? <AccountDropdown fullName={currentUser.firstName + ' ' + currentUser.lastName}/>
+                : <LoginButton />
+        );
+    },
+
+    render: function()
+    {
 
 		return (
             <div id="header">
@@ -83,8 +97,9 @@ var Header = React.createClass({
                             })}
         			    </Nav>
                         <Nav pullRight>
-                            <li>{!!currentUser ? <AccountDropdown fullName={currentUser.firstName + ' ' + currentUser.lastName}/> : ''}</li>
-                            <li>{!currentUser ? <LoginButton /> : ''}</li>
+                            <li>
+                                {this.renderLoginButtonOrAccountDropDown()}
+                            </li>
                         </Nav>
                     </Navbar.Collapse>
     		  	</Navbar>
