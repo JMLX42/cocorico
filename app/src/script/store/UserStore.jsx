@@ -1,16 +1,20 @@
-var Reflux = require('reflux')
+var Reflux = require('reflux');
 var jquery = require('jquery');
 
-var UserAction = require('../action/UserAction.jsx');
+var UserAction = require('../action/UserAction'),
+    RouteAction = require('../action/RouteAction');
 
 module.exports = Reflux.createStore({
     init: function()
     {
         this.listenTo(UserAction.requireLogin, this._requireLoginHandler);
         this.listenTo(UserAction.listAuthProviders, this._fetchAuthProviders);
+        this.listenTo(RouteAction.change, this._routeChangeHandler);
 
         this._currentUser = null;
         this._authProviders = null;
+
+        jquery.ajaxPrefilter(this._ajaxPrefilter);
     },
 
     getInitialState: function()
@@ -88,5 +92,20 @@ module.exports = Reflux.createStore({
             this._authProviders = {error: xhr.status};
             this.trigger(this);
         });
+    },
+
+    _routeChangeHandler: function(location, action)
+    {
+        if (!!location.query.user && !!location.query.appId) {
+            this._jwt = location.query.user;
+            this._appId = location.query.appId;
+        }
+    },
+
+    _ajaxPrefilter: function(options, originalOptions, jqXHR) {
+        if (!!this._jwt && !!this._appId) {
+            jqXHR.setRequestHeader('Authorization', 'JWT ' + this._jwt);
+            jqXHR.setRequestHeader('Cocorico-App-Id', this._appId);
+        }
     }
 });
