@@ -26,11 +26,17 @@ var Login = React.createClass({
         Reflux.connect(UserStore, 'users')
     ],
 
+    contextTypes: {
+        location: React.PropTypes.object
+    },
+
     getInitialState: function()
     {
         return {
-            redirect: this.props.location && this.props.location.query.redirect
-                ? this.props.location.query.redirect
+            redirect: this.context.location
+                ? !!this.context.location.query.redirect
+                    ? this.context.location.query.redirect
+                    : '/' + this.context.location.pathname
                 : this.props.redirect
         };
     },
