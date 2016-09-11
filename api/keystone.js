@@ -20,7 +20,7 @@ keystone.init({
 	'auto update': false,
 	'session': true,
 	'auth': true,
-	'user model': 'User',
+	'user model': 'Admin',
 	'cookie secret': srs(64)
 });
 
@@ -35,7 +35,6 @@ keystone.set('locals', {
 
 keystone.set('routes', require('./routes'));
 keystone.set('nav', {
-	'users': 'users',
 	'apps': 'apps',
 	'pages': 'pages',
 	'votes': 'votes'

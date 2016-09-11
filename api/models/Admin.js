@@ -2,9 +2,9 @@ var keystone = require('keystone');
 var transform = require('model-transform');
 var Types = keystone.Field.Types;
 
-var User = new keystone.List('User');
+var Admin = new keystone.List('Admin');
 
-User.add({
+Admin.add({
 	name: { type: String, initial: true },
 	email: { type: Types.Email, initial: true, index: true },
 	password: { type: Types.Password, initial: true }
@@ -13,11 +13,11 @@ User.add({
 });
 
 // Provide access to Keystone
-User.schema.virtual('canAccessKeystone').get(function() {
+Admin.schema.virtual('canAccessKeystone').get(function() {
 	return this.isAdmin;
 });
 
-transform.toJSON(User);
+transform.toJSON(Admin);
 
-User.defaultColumns = 'hash, name, email, isAdmin';
-User.register();
+Admin.defaultColumns = 'hash, name, email, isAdmin';
+Admin.register();

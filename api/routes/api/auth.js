@@ -4,8 +4,7 @@ var bcrypt = require('bcrypt');
 var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
 
-var User = keystone.list('User'),
-    App = keystone.list('App');
+var App = keystone.list('App');
 
 var config = require('../../config.json');
 
