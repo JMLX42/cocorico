@@ -1,5 +1,6 @@
 var config = require('./config.json');
 var keystone = require('keystone');
+var srs = require('secure-random-string');
 
 keystone.init({
 
@@ -20,7 +21,7 @@ keystone.init({
 	'session': true,
 	'auth': true,
 	'user model': 'User',
-	'cookie secret': '0T=?C|`ed@N&amp;,&lt;!)BQ&lt;Nh/7+e3TeO&#34;$^cl{7Z$7i@mfnybN1{*H.ETQ=(-&gt;75^MB'
+	'cookie secret': srs(64)
 });
 
 keystone.import('models');
