@@ -4,6 +4,10 @@ var transform = require('model-transform');
 var Types = keystone.Field.Types;
 
 var AccessToken = new keystone.List('AccessToken', {
+    hidden: true,
+    noedit: true,
+    nodelete: true,
+    nocreate: true
 });
 
 AccessToken.add({
