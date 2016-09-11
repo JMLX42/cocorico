@@ -5,60 +5,70 @@ var UserAction = require('../action/UserAction'),
     RouteAction = require('../action/RouteAction');
 
 module.exports = Reflux.createStore({
-    init: function()
-    {
+    init: function() {
         this.listenTo(UserAction.requireLogin, this._requireLoginHandler);
         this.listenTo(UserAction.listAuthProviders, this._fetchAuthProviders);
         this.listenTo(RouteAction.change, this._routeChangeHandler);
 
         this._currentUser = null;
         this._authProviders = null;
+        this._authError = null;
 
         jquery.ajaxPrefilter(this._ajaxPrefilter);
     },
 
-    getInitialState: function()
-    {
+    jwtUserAvailable() {
+        return !!this._jwt && !!this._appId;
+    },
+
+    getInitialState: function() {
         return this;
     },
 
-    getCurrentUser: function()
-    {
-        return this._currentUser && !this._currentUser.error
+    getCurrentUser: function() {
+        return this._currentUser && this._currentUser !== true
             ? this._currentUser
             : null;
     },
 
-    isAuthenticated: function()
-    {
+    getAuthenticationError: function() {
+        return this._authError && this._authError !== true
+            ? this._authError
+            : null;
+    },
+
+    authenticationFailed: function() {
+        return !!this._authError && !!this._authError.code
+            && this._authError.code == 401
+            && this._authError.error == 'authentification failed';
+    },
+
+    isAuthenticated: function() {
         return typeof(this._currentUser) == 'object' && !!this._currentUser
             && !this._currentUser.error;
     },
 
-    getAuthProviders: function()
-    {
+    getAuthProviders: function() {
         return this._authProviders && this._authProviders !== true
             ? this._authProviders
             : null;
     },
 
-    _requireLoginHandler: function()
-    {
+    _requireLoginHandler: function() {
         if (!this.isAuthenticated())
             this._fetchCurrentUser();
         else
             this.trigger(this);
     },
 
-    _fetchCurrentUser: function()
-    {
-        if (this._currentUser === true)
+    _fetchCurrentUser: function() {
+        if (this._authError === true)
             return;
 
-        if (this._currentUser)
+        if (this._authError)
             return this.trigger(this);
 
-        this._currentUser = true;
+        this._authError = true;
 
         jquery.get(
             '/api/user/me',
@@ -67,13 +77,16 @@ module.exports = Reflux.createStore({
                 this.trigger(this);
             }
         ).error((xhr, voteStatus, err) => {
-            this._currentUser = {error: xhr.status};
+            this._authError = { code: xhr.status };
+            if (xhr.responseJSON) {
+                this._authError.error = xhr.responseJSON.error;
+                this._authError.message = xhr.responseJSON.message;
+            }
             this.trigger(this);
         });
     },
 
-    _fetchAuthProviders: function()
-    {
+    _fetchAuthProviders: function() {
         if (this._authProviders === true)
             return;
 
@@ -94,11 +107,19 @@ module.exports = Reflux.createStore({
         });
     },
 
-    _routeChangeHandler: function(location, action)
-    {
+    _routeChangeHandler: function(history, location, action) {
         if (!!location.query.user && !!location.query.appId) {
-            this._jwt = location.query.user;
-            this._appId = location.query.appId;
+            if (this._jwt != location.query.user || this._appId != location.query.appId) {
+                this._jwt = location.query.user;
+                this._appId = location.query.appId;
+                this._fetchCurrentUser();
+            }
+        } else if (!!this._jwt || !!this._appId) {
+            this._currentUser = null;
+            this._authError = null;
+            this._jwt = null;
+            this._appId = null;
+            this.trigger(this);
         }
     },
 

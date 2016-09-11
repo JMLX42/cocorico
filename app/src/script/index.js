@@ -23,7 +23,7 @@ var Router = ReactRouter.Router,
     RouteAction = require('./action/RouteAction');
 
 browserHistory.listen((location, action) => {
-  RouteAction.change(location, action);
+  RouteAction.change(browserHistory, location, action);
 });
 
 ReactDOM.render(

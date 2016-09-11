@@ -23,7 +23,7 @@ var LoginButton = React.createClass({
 
     componentWillMount: function()
     {
-        this._routeChangeUnsub = this.listenTo(RouteAction.change, (location) => {
+        this._routeChangeUnsub = this.listenTo(RouteAction.change, (history, location) => {
             this.setState({
                 path: location.pathname
             });
