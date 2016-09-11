@@ -48,33 +48,6 @@ exports.getBySlug = function(req, res) {
         });
 }
 
-function pushVoteOnQueue(vote, callback) {
-	require('amqplib/callback_api').connect(
-		'amqp://localhost',
-		(err, conn) => {
-			if (err != null)
-				return callback(err, null);
-
-			conn.createChannel(function(err, ch)
-			{
-				if (err != null)
-					return callback(err, null);
-
-				var voteMsg = { vote : { id : vote.id } };
-
-				ch.assertQueue('votes');
-				ch.sendToQueue(
-					'votes',
-					new Buffer(JSON.stringify(voteMsg)),
-					{ persistent : true }
-				);
-
-				callback(null, voteMsg);
-			});
-		}
-	);
-}
-
 exports.create = function(req, res) {
     var app = req.user;
 
@@ -108,28 +81,10 @@ exports.create = function(req, res) {
             // if there is not.
             (app, vote, callback) => !!vote
                 ? callback({code: 400, error: 'invalid url'}, null)
-                : metafetch.fetch(
-                    url,
-                    {
-                        flags: { images: false, links: false },
-                        http: { timeout: 30000 }
-                    },
-                    (err, meta) => callback(err, app, meta)
-                ),
-            // Step 3: create the vote with the meta fields and save it.
-            (app, meta, callback) => Vote.model({
-                app: app.id,
-                title: meta.title,
-                description: meta.description,
-                url: meta.url,
-                image: meta.image
-            }).save((err, vote) => callback(err, vote)),
-            // Step 4: push the vote on the queue for the smart contract to be
-            // mined.
-            (vote, callback) => pushVoteOnQueue(
-                vote,
-                (err, msg) => callback(err, vote)
-            )
+                : Vote.model({
+                    app: app.id,
+                    url: url
+                }).save((err, vote) => callback(err, vote)),
         ],
         (err, vote) => {
             if (err) {

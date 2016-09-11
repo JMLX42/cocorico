@@ -2,30 +2,37 @@ var config = require('../config.json');
 
 var keystone = require('keystone');
 var transform = require('model-transform');
+var metafetch = require('metafetch');
+var async = require('async');
 
 var Types = keystone.Field.Types;
 
 var Vote = new keystone.List('Vote', {
     autokey: { path: 'slug', from: 'title', unique: true },
-    map: { name: 'title' }
+    // map: { name: 'title' },
+    track: { createdAt: true, updatedAt: true },
+    sortable: true
 });
 
 Vote.add({
-    app: { type: Types.Relationship, ref: 'App', required: true, initial: true, noedit: true },
-	title: { type: String, required: true, noedit: true },
-    url: { type: Types.Url, required: true, initial: true, noedit: true },
+    app: { type: Types.Relationship, ref: 'App', initial: true },
+    url: { type: Types.Url, initial: true },
+	title: { type: Types.Text, noedit: true },
     description: { type: Types.Textarea, noedit: true },
-    image: { type: Types.Url, initial: true, noedit: true },
-    status: { type: Types.Select, options: ['open', 'complete', 'error'], default: 'open' },
-    voteContractAddress: { type: String, noedit: true },
-    voteContractABI: { type: String, noedit: true }
+    image: { type: Types.Url, noedit: true },
+    status: {
+        type: Types.Select,
+        options: ['initializing', 'open', 'complete', 'error'],
+        noedit: true
+    },
+    voteContractAddress: { type: Types.Text, noedit: true },
+    voteContractABI: { type: Types.Text, noedit: true }
 });
 
 Vote.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'vote' });
 Vote.relationship({ path: 'sources', ref: 'Source', refPath: 'vote' });
 
-Vote.schema.methods.userIsAuthorizedToVote = function(user)
-{
+Vote.schema.methods.userIsAuthorizedToVote = function(user) {
     return config.capabilities.vote.enabled
         && this.status == 'open'
         && !!user
@@ -35,6 +42,70 @@ Vote.schema.methods.userIsAuthorizedToVote = function(user)
             || user.authorizedVotes.indexOf(this.id) >= 0);
 }
 
+function pushVoteOnQueue(vote, callback) {
+	require('amqplib/callback_api').connect(
+		'amqp://localhost',
+		(err, conn) => {
+			if (err != null)
+				return callback(err, null);
+
+			conn.createChannel(function(err, ch)
+			{
+				if (err != null)
+					return callback(err, null);
+
+				var voteMsg = { vote : { id : vote.id } };
+
+				ch.assertQueue('votes');
+				ch.sendToQueue(
+					'votes',
+					new Buffer(JSON.stringify(voteMsg)),
+					{ persistent : true }
+				);
+
+				callback(null, voteMsg);
+			});
+		}
+	);
+}
+
+Vote.schema.pre('validate', function(next) {
+    var self = this;
+
+    if (!self.url) {
+        return next();
+    }
+
+    async.waterfall(
+        [
+            (callback) => !metafetch.fetch(
+                self.url,
+                {
+                    flags: { images: false, links: false },
+                    http: { timeout: 30000 }
+                },
+                (err, meta) => {
+                    self.title = meta.title;
+                    self.description = meta.description;
+                    self.image = meta.image;
+
+                    callback(null);
+                }
+            ),
+            (callback) => {
+                if (!self.status) {
+                    self.status = 'initializing';
+                    pushVoteOnQueue(self, (err, msg) => callback(err));
+                } else {
+                    callback(null);
+                }
+            }
+        ],
+        (err) => {
+            next(err);
+        }
+    );
+});
 
 transform.toJSON(Vote);
 

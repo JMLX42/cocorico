@@ -155,6 +155,7 @@ function handleVote(vote, callback)
                 if (err)
                     return callback(err, null);
 
+                vote.status = 'open';
             	vote.voteContractABI = JSON.stringify(abi);
                 vote.voteContractAddress = contract.address;
 
