@@ -215,6 +215,11 @@ opts.secretOrKey = 'secret';
 // the secret according to the App found using the "Cocorico-App-Id" header.
 var authenticate = JwtStrategy.prototype.authenticate;
 JwtStrategy.prototype.authenticate = function(req, options) {
+    var token = this._jwtFromRequest(req);
+    if (!token) {
+        return this.fail();
+    }
+
     var appId = req.headers['cocorico-app-id'];
 
     if (!appId) {
