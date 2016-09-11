@@ -59,7 +59,6 @@ exports.get = function(req, res)
 
 function pushBallotMessageOnQueue(data, callback)
 {
-    console.log('pushing ballot on queue');
     try {
         require('amqplib/callback_api').connect(
             'amqp://localhost',
