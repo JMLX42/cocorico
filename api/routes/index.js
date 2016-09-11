@@ -12,7 +12,7 @@ var routes = {
 function isAuthenticated(req, res, next)
 {
 	if (!req.isAuthenticated() || !req.user.sub)
-		return res.status(401).apiResponse({ 'error': 'not logged in' });
+		return res.status(401).apiResponse({error: 'not authenticated'});
 	next();
 }
 
@@ -22,11 +22,22 @@ exports = module.exports = function(app) {
 	app.use(passport.initialize());
 	app.use(passport.session());
 
+	app.use(keystone.middleware.api);
+
 	// JWT authentication does not use sessions, so we have to check for a user
 	// without throwing an error if there is none.
 	app.use((req, res, next) => passport.authenticate('jwt', (err, user, info) => {
 		if (err) { return next(err); }
-    	if (!user) { return next(); }
+    	if (!user) {
+			// if the JWT authentification failed
+			if (info) {
+				return res.status(401).apiResponse({
+					error: 'authentification failed',
+					message: info.message
+				});
+			}
+			return next();
+		}
 
 		req.logIn(user, { session: false }, next);
 	})(req, res, next));
@@ -58,22 +69,22 @@ exports = module.exports = function(app) {
 	 */
 	app.post('/oauth/token', routes.api.oauth.token);
 
-	app.get('/auth/providers', keystone.middleware.api, routes.api.auth.providers);
-	app.get('/auth/logout', keystone.middleware.api, routes.api.auth.logout);
+	app.get('/auth/providers', routes.api.auth.providers);
+	app.get('/auth/logout', routes.api.auth.logout);
 	if (config.franceConnect) {
-		app.get('/auth/france-connect/login', keystone.middleware.api, routes.api.auth.franceConnectLogin);
-		app.get('/auth/france-connect/callback', keystone.middleware.api, routes.api.auth.franceConnectCallback);
+		app.get('/auth/france-connect/login', routes.api.auth.franceConnectLogin);
+		app.get('/auth/france-connect/callback', routes.api.auth.franceConnectCallback);
 	}
 	if (config.facebook) {
-		app.get('/auth/facebook/login',  keystone.middleware.api, routes.api.auth.facebookLogin);
-		app.get('/auth/facebook/callback', keystone.middleware.api, routes.api.auth.facebookCallback);
+		app.get('/auth/facebook/login',  routes.api.auth.facebookLogin);
+		app.get('/auth/facebook/callback', routes.api.auth.facebookCallback);
 	}
 	if (config.google) {
-		app.get('/auth/google/login',  keystone.middleware.api, routes.api.auth.googleLogin);
-		app.get('/auth/google/callback', keystone.middleware.api, routes.api.auth.googleCallback);
+		app.get('/auth/google/login',  routes.api.auth.googleLogin);
+		app.get('/auth/google/callback', routes.api.auth.googleCallback);
 	}
 	if (config.env == 'development') {
-		app.get('/auth/fakeLogin', keystone.middleware.api, routes.api.auth.fakeLogin);
+		app.get('/auth/fakeLogin', routes.api.auth.fakeLogin);
 	}
 
 	/**
@@ -103,7 +114,7 @@ exports = module.exports = function(app) {
 	 * @apiSuccess {Object[]} vote.voteContractABI The ABI of the vote blockchain smart contract.
 	 * @apiSuccess {String} vote.voteContractAddress The blockchain block address of the vote smart contract.
 	 */
-	app.post('/vote', keystone.middleware.api, routes.api.oauth.checkAccessToken, routes.api.vote.create);
+	app.post('/vote', routes.api.oauth.checkAccessToken, routes.api.vote.create);
 
 	/**
 	 * @api {get} /vote List all votes
@@ -127,7 +138,7 @@ exports = module.exports = function(app) {
 	 * @apiSuccess {Object[]} votes.voteContractABI The ABI of the vote blockchain smart contract.
 	 * @apiSuccess {String} votes.voteContractAddress The blockchain block address of the vote smart contract.
 	 */
-	app.get('/vote', keystone.middleware.api, routes.api.vote.list);
+	app.get('/vote', routes.api.vote.list);
 
 	/**
 	 * @api {get} /vote/:voteId Get a specific vote
@@ -153,7 +164,7 @@ exports = module.exports = function(app) {
 	 * @apiSuccess {Object[]} vote.voteContractABI The ABI of the vote blockchain smart contract.
 	 * @apiSuccess {String} vote.voteContractAddress The blockchain block address of the vote smart contract.
 	 */
-	app.get('/vote/:voteId', keystone.middleware.api, routes.api.vote.get);
+	app.get('/vote/:voteId', routes.api.vote.get);
 
 	/**
 	 * @api {get} /vote/result/:voteId Get a vote result
@@ -168,9 +179,9 @@ exports = module.exports = function(app) {
 	 *
 	 * @apiSuccess {Object} vote The requested vote result.
 	 */
-	app.get('/vote/result/:voteId', keystone.middleware.api, routes.api.vote.result);
+	app.get('/vote/result/:voteId', routes.api.vote.result);
 
-	app.get('/vote/by-slug/:voteSlug', keystone.middleware.api, routes.api.vote.getBySlug);
+	app.get('/vote/by-slug/:voteSlug', routes.api.vote.getBySlug);
 
 	/**
 	 * @api {put} /vote/:voteId Update a vote
@@ -181,16 +192,16 @@ exports = module.exports = function(app) {
 	 *
 	 * @apiParam {String} voteId The ID of the vote.
 	 */
-	app.put('/vote/:voteId', keystone.middleware.api, routes.api.oauth.checkAccessToken, routes.api.vote.update);
+	app.put('/vote/:voteId', routes.api.oauth.checkAccessToken, routes.api.vote.update);
 
-	// app.get('/vote/result/per-gender/:voteId', keystone.middleware.api, routes.api.vote.resultPerGender);
-	// app.get('/vote/result/per-age/:voteId', keystone.middleware.api, routes.api.vote.resultPerAge);
-	// app.get('/vote/result/per-date/:voteId', keystone.middleware.api, routes.api.vote.resultPerDate);
-	app.get('/vote/embed/:voteId', keystone.middleware.api, routes.api.vote.embed);
+	// app.get('/vote/result/per-gender/:voteId', routes.api.vote.resultPerGender);
+	// app.get('/vote/result/per-age/:voteId', routes.api.vote.resultPerAge);
+	// app.get('/vote/result/per-date/:voteId', routes.api.vote.resultPerDate);
+	app.get('/vote/embed/:voteId', routes.api.vote.embed);
 
-	app.get('/vote/permissions/:voteId', keystone.middleware.api, routes.api.vote.permissions);
+	app.get('/vote/permissions/:voteId', routes.api.vote.permissions);
 
-	// app.get('/ballot/list', keystone.middleware.api, isAuthenticated, routes.api.ballot.list);
+	// app.get('/ballot/list', isAuthenticated, routes.api.ballot.list);
 
 	/**
 	 * @api {get} /ballot/:voteId Get a ballot
@@ -201,7 +212,7 @@ exports = module.exports = function(app) {
 	 *
 	 * @apiParam {String} voteId The ID of the vote.
 	 */
-	app.get('/ballot/:voteId', keystone.middleware.api, isAuthenticated, routes.api.ballot.get);
+	app.get('/ballot/:voteId', isAuthenticated, routes.api.ballot.get);
 
 	/**
 	 * @api {post} /ballot/:voteId Send a ballot
@@ -252,22 +263,22 @@ exports = module.exports = function(app) {
 	 * @apiParam (POST) {String} transaction The blockchain transaction of the ballot.
 	 *
 	 */
-	app.post('/ballot/:voteId', keystone.middleware.api, isAuthenticated, routes.api.ballot.vote);
-	// app.post('/ballot/cancel/:voteId', keystone.middleware.api, isAuthenticated, routes.api.ballot.cancel);
+	app.post('/ballot/:voteId', isAuthenticated, routes.api.ballot.vote);
+	// app.post('/ballot/cancel/:voteId', isAuthenticated, routes.api.ballot.cancel);
 
-	app.get('/source/:voteId', keystone.middleware.api, routes.api.source.list);
-	// app.post('/source/like/add/:id/:value', keystone.middleware.api, isAuthenticated, routes.api.source.addLike);
-	// app.post('/source/like/remove/:id', keystone.middleware.api, isAuthenticated, routes.api.source.removeLike);
+	app.get('/source/:voteId', routes.api.source.list);
+	// app.post('/source/like/add/:id/:value', isAuthenticated, routes.api.source.addLike);
+	// app.post('/source/like/remove/:id', isAuthenticated, routes.api.source.removeLike);
 
-	app.get('/page/list', keystone.middleware.api, routes.api.page.list);
-	app.get('/page/navbar', keystone.middleware.api, routes.api.page.navbar);
-	app.get('/page/:id', keystone.middleware.api, routes.api.page.get);
-	app.get('/page/getBySlug/:slug', keystone.middleware.api, routes.api.page.getBySlug);
+	app.get('/page/list', routes.api.page.list);
+	app.get('/page/navbar', routes.api.page.navbar);
+	app.get('/page/:id', routes.api.page.get);
+	app.get('/page/getBySlug/:slug', routes.api.page.getBySlug);
 
-	app.get('/user/me', keystone.middleware.api, isAuthenticated, routes.api.user.me);
+	app.get('/user/me', isAuthenticated, routes.api.user.me);
 
-	app.get('/service/status', keystone.middleware.api, routes.api.service.getStatus);
+	app.get('/service/status', routes.api.service.getStatus);
 
-	app.get('/redirect', keystone.middleware.api, routes.api.redirect.redirect);
+	app.get('/redirect', routes.api.redirect.redirect);
 	app.get('/redirect/proxy', routes.api.redirect.proxy);
 };
