@@ -100,8 +100,9 @@ module.exports = Reflux.createStore({
     },
 
     _fetch: function(voteId) {
-        if (voteId in this._loading)
+        if (voteId in this._loading) {
             return;
+        }
 
         this._loading[voteId] = true;
 
@@ -109,19 +110,20 @@ module.exports = Reflux.createStore({
             '/api/vote/' + voteId,
             (data) => {
                 delete this._loading[voteId];
-                this._votes.push(data.vote);
+                this._updateOrInsertVote('id', voteId, data.vote);
                 this.trigger(this);
             }
         ).error((xhr, voteStatus, err) => {
-            delete this._loading[uri];
-            this._votes.push({ error : xhr.status });
+            delete this._loading[voteId];
+            this._updateOrInsertVote('id', voteId, { error : xhr.status });
             this.trigger(this);
         });
     },
 
     _fetchBySlug: function(voteSlug) {
-        if (voteSlug in this._loading)
+        if (voteSlug in this._loading) {
             return;
+        }
 
         this._loading[voteSlug] = true;
 
@@ -129,19 +131,28 @@ module.exports = Reflux.createStore({
             '/api/vote/by-slug/' + voteSlug,
             (data) => {
                 delete this._loading[voteSlug];
-                this._votes.push(data.vote);
+                this._updateOrInsertVote('id', data.vote.id, data.vote);
                 this.trigger(this);
             }
         ).error((xhr, voteStatus, err) => {
-            delete this._loading[uri];
-            this._votes.push({ error : xhr.status });
+            delete this._loading[voteSlug];
+            this._updateOrInsertVote('slug', voteSlug, { error : xhr.status });
             this.trigger(this);
         });
     },
 
+    _updateOrInsertVote: function(field, value, data) {
+        var vote = this._getByPropertyValue(field, value);
+
+        if (!vote) {
+            this._votes.push(vote = {[field] : value});
+        }
+
+        return Object.assign(vote, data);
+    },
+
     _fetchPermissions: function(voteId) {
         var uri = '/api/vote/permissions/' + voteId;
-
         if (uri in this._loading) {
             return;
         }
@@ -151,12 +162,12 @@ module.exports = Reflux.createStore({
             uri,
             (data) => {
                 delete this._loading[uri];
-                this.getById(voteId).permissions = data.permissions;
+                this._updateOrInsertVote('id', voteId, data);
                 this.trigger(this);
             }
         ).error((xhr, voteStatus, err) => {
             delete this._loading[uri];
-            this.getById(voteId).permissions = { error : xhr.status };
+            this._updateOrInsertVote('id', voteId, { permissions : { error : xhr.status } });
             this.trigger(this);
         });
     }
