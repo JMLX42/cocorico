@@ -74,4 +74,4 @@
     - restart apache2 service
 
 - name: start the service
-  service: name=cocorico-api-web state=started
+  service: name=cocorico-api-web state=restarted
