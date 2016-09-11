@@ -73,17 +73,19 @@ module.exports = Reflux.createStore({
     },
 
     _getKeystore: function(voteId, callback) {
-        var secretSeed = lightwallet.keystore.generateRandomSeed();
         var password = 'password'; // FIXME
 
-        lightwallet.keystore.deriveKeyFromPassword(password, (err, pwDerivedKey) => {
-            var ks = new lightwallet.keystore(secretSeed, pwDerivedKey);
+        lightwallet.keystore.createVault(
+            { password: password },
+            (err, ks) => {
+                ks.keyFromPassword(password, (err, pwDerivedKey) => {
+                    ks.passwordProvider = (cb) => password;
 
-            ks.passwordProvider = () => password;
-
-            console.log('BlockchainAccountStore: created new keystore');
-            callback(err, ks, pwDerivedKey);
-        });
+                    console.log('BlockchainAccountStore: created new keystore');
+                    callback(err, ks, pwDerivedKey);
+                });
+            }
+        );
     },
 
     _generateVoterCard: function(ks) {
@@ -128,9 +130,9 @@ module.exports = Reflux.createStore({
     },
 
     _importSerializedAccount: function(voteId, serializedAccount) {
-        this._keystore[voteId] = lightwallet.keystore.deserialize(
-            serializedAccount
-        );
+        var ks = lightwallet.keystore.deserialize(serializedAccount);
+
+        this._keystore[voteId] = ks
 
         console.log(
             'BlockchainAccountStore: imported serialized keystore '
@@ -139,12 +141,9 @@ module.exports = Reflux.createStore({
 
         var password = 'password'; // FIXME
 
-        lightwallet.keystore.deriveKeyFromPassword(
-            password,
-            (err, pwDerivedKey) => {
-                this._pwDerivedKey[voteId] = pwDerivedKey;
-                this.trigger(this);
-            }
-        );
+        ks.keyFromPassword(password, (err, pwDerivedKey) => {
+            this._pwDerivedKey[voteId] = pwDerivedKey;
+            this.trigger(this);
+        });
     }
 });
