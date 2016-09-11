@@ -44,7 +44,7 @@ passport.use("clientBasic", new BasicStrategy((clientId, clientSecret, done) => 
         }
 
         if (clientSecret == app.secret) {
-            return done(null, result ? app : false);
+            return done(null, app ? app : false);
         }
     });
 }));
