@@ -15,6 +15,7 @@
 @link-color: #2980b9;
 @headings-color: @text-color;
 @component-active-bg: #3498db;
+@brand-danger: @color-negative;
 @btn-danger-bg: @color-negative;
 @btn-danger-border: @color-negative-dark;
 @btn-primary-bg: #4285F4;
@@ -34,11 +35,9 @@
 // @font-family-serif: Georgia, "Times New Roman", Times, serif;
 
 html {
-    height: 100%;
 }
 
 body {
-    height: 100%;
     font-family: @font-family-sans-serif;
     // color: @text-color;
     font-size: floor(@font-size-base * 1.2);
@@ -299,6 +298,7 @@ li.active {
 
     &-home {
         margin: 0;
+        padding-top: 0;
     }
 
     .embed-responsive {
@@ -600,6 +600,10 @@ ul.argument-list {
         width: 100%;
     }
 
+    .vote-step-indicator {
+        margin-bottom: 20px;
+    }
+
     .vote-step-progress {
         margin: 0;
         padding: 0;
@@ -659,16 +663,11 @@ ul.argument-list {
         }
     }
 
-    .modal-body {
-        .vote-step-description {
-            padding: 10px 0;
+    .vote-step {
+        &-description {
         }
-    }
 
-    .vote-step-description {
-        padding: 20px 10px;
-
-        .btn-toolbar.vote-step-actions {
+        &-actions.btn-toolbar {
             margin-top: 30px;
             margin-left: 0;
 
@@ -684,6 +683,21 @@ ul.argument-list {
                 line-height: 1.42857143;
                 vertical-align: middle;
                 display: inline-block;
+            }
+        }
+    }
+
+
+    &-error {
+        .progress-bar {
+            background-color: @brand-danger !important;
+        }
+
+        .vote-step-counter-active {
+            color: @brand-danger !important;
+
+            .vote-step-number {
+                border: 1px solid @brand-danger !important;
             }
         }
     }
