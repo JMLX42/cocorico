@@ -21,6 +21,7 @@ var FormattedMessage = ReactIntl.FormattedMessage,
     FormattedHTMLMessage = ReactIntl.FormattedHTMLMessage;
 
 var BallotAction = require('../action/BallotAction'),
+    VoteAction = require('../action/VoteAction'),
     BlockchainAccountAction = require('../action/BlockchainAccountAction');
 
 var LoadingIndicator = require('./LoadingIndicator'),
@@ -38,7 +39,8 @@ var LoadingIndicator = require('./LoadingIndicator'),
 
 var ConfigStore = require('../store/ConfigStore'),
     BallotStore = require('../store/BallotStore'),
-    // UserStore = require('../store/UserStore'),
+    UserStore = require('../store/UserStore'),
+    VoteStore = require('../store/VoteStore'),
     BlockchainAccountStore = require('../store/BlockchainAccountStore');
 
 var ForceAuthMixin = require('../mixin/ForceAuthMixin');
@@ -46,11 +48,14 @@ var ForceAuthMixin = require('../mixin/ForceAuthMixin');
 var VoteWidget = React.createClass({
 
     mixins: [
+        ForceAuthMixin,
         Reflux.connect(ConfigStore, 'config'),
+        Reflux.connect(UserStore, 'users'),
         Reflux.connect(BallotStore, 'ballots'),
         Reflux.connect(BlockchainAccountStore, 'blockchainAccounts'),
-        // Reflux.connect(UserStore, 'users'),
-        ForceAuthMixin,
+        Reflux.listenTo(VoteStore, 'voteStoreChanged'),
+        Reflux.listenTo(BallotStore, 'ballotStoreChanged'),
+        Reflux.listenTo(UserStore, 'userStoreChanged'),
         ReactIntl.IntlMixin
     ],
 
@@ -62,45 +67,55 @@ var VoteWidget = React.createClass({
         STEP_COMPLETE:      4,
         STEP_ERROR:         5,
 
+        ERROR_NONE:         0,
+        ERROR_UNAUTHORIZED: 1,
+        ERROR_BALLOT_ERROR: 2,
+
         COUNTDOWN:          10
     },
 
-    getInitialState: function()
-    {
+    getInitialState: function() {
         return {
+            vote: null,
             step: 0,
             blockchainAccountCreated: false,
             confirmVoteButtonEnabled: false,
             skipVoterCardButtonEnabled: false,
-            fetchedVoterCard: false
+            fetchedVoterCard: false,
+            error: VoteWidget.ERROR_NONE
         };
     },
 
-    getDefaultProps: function()
-    {
+    getDefaultProps: function() {
         return {
-            onCancel: (e) => {},
-            onComplete: (e) => {},
+            onCancel: (v) => {},
+            onComplete: (v) => {},
+            onError: (v) => {},
+            onSuccess: (v) => {},
             modal: true
         };
     },
 
-    componentWillReceiveProps: function(nextProps)
-    {
+    componentWillReceiveProps: function(nextProps) {
         this.setState({
             visible: nextProps.visible,
             ballotValue: this.props.ballotValue
         });
+
+        var user = this.state.users.getCurrentUser();
+        if (!!user && !this.userIsAuthorizedToVote()) {
+            this.error(VoteWidget.ERROR_UNAUTHORIZED);
+        }
     },
 
-    goToBallotStep: function(ballot)
-    {
+    goToBallotStep: function(ballot) {
         if (!ballot) {
             return ;
         }
 
-        if (ballot.error) {
+        if (!!ballot.error) {
             // FIXME: this.goToStep(VoteWidget.STEP_ERROR)
+            // this.error(VoteWidget.ERROR_BALLOT_ERROR);
             return;
         }
 
@@ -108,46 +123,62 @@ var VoteWidget = React.createClass({
             'queued', 'pending', 'initialized', 'registered', 'complete'
         ];
         if (completeStatus.indexOf(ballot.status) >= 0) {
+            BallotAction.stopPolling();
             return this.goToStep(VoteWidget.STEP_COMPLETE);
+        } else {
+            BallotAction.startPolling(this.props.voteId);
         }
     },
 
-    componentWillMount: function()
-    {
-        this.checkBallot();
-        this._ballotStoreUnsubscribe = BallotStore.listen(
-            (store) => this.checkBallot()
-        );
-        // this._blockchainAccountStoreUnsubscribe = BlockchainAccountStore.listen(
-        //     (store) => this.goToStep(VoteWidget.STEP_CONFIRM)
-        // );
+    voteStoreChanged: function(votes) {
+        var vote = votes.getById(this.props.voteId);
+
+        if (!!vote) {
+            this.setState({vote: vote});
+        }
     },
 
-    componentDidMount: function()
-    {
+    ballotStoreChanged: function(ballots) {
+        this.checkBallot();
+    },
+
+    userStoreChanged: function(users) {
+        var user = this.state.users.getCurrentUser();
+        if (!!user) {
+            VoteAction.getPermissions(this.props.voteId);
+        }
+    },
+
+    componentWillMount: function() {
+        if (this.props.voteId) {
+            VoteAction.show(this.props.voteId);
+            BallotAction.showCurrentUserBallot(this.props.voteId, true);
+            VoteAction.getPermissions(this.props.voteId);
+        }
+        // FIXME: handle this.props.voteSlug ?
+
+        this.checkBallot();
+    },
+
+    componentDidMount: function() {
         // this.listenTo(BallotAction.unvote, (voteId) => {
         //     this.goToStep(VoteWidget.STEP_CONFIRM);
         // });
+        BallotAction.stopPolling();
     },
 
-    componentWillUnmount: function()
-    {
+    componentWillUnmount: function() {
         this.goToStep(0);
-
-        this._ballotStoreUnsubscribe();
-        // this._blockchainAccountStoreUnsubscribe();
 
         window.onbeforeunload = null;
 
         delete this._completeTimeout;
     },
 
-    checkBallot: function()
-    {
-        var ballot = this.state.ballots.getByVoteId(this.props.vote.id);
+    checkBallot: function() {
+        var ballot = this.state.ballots.getByVoteId(this.props.voteId);
 
-        if (!!ballot && this.state.ballotStatus != ballot.status)
-        {
+        if (!!ballot && this.state.ballotStatus != ballot.status) {
             this.setState({
                 ballotStatus: ballot.status,
                 ballotProgressOffset: 0.0
@@ -157,55 +188,58 @@ var VoteWidget = React.createClass({
         this.goToBallotStep(ballot);
     },
 
-    voterCardDownloaded: function()
-    {
+    error: function(err) {
+        var vote = this.state.vote;
+
+        this.setState({error:err});
+        this.props.onError(vote);
+    },
+
+    voterCardDownloaded: function() {
         this.setState({fetchedVoterCard: true});
         if (this.state.step == VoteWidget.STEP_VOTE_CARD) {
             this.goToNextStep();
         }
     },
 
-    voterCardPrinted: function()
-    {
+    voterCardPrinted: function() {
         this.setState({fetchedVoterCard: true});
         if (this.state.step == VoteWidget.STEP_VOTE_CARD) {
             this.goToNextStep();
         }
     },
 
-    voteHandler: function(e, proposal)
-    {
+    voteHandler: function(e, proposal) {
         this.setState({
             ballotValue: proposal
         });
         this.goToNextStep();
     },
 
-    confirmVoteValue: function()
-    {
+    confirmVoteValue: function() {
         var keystore = this.state.blockchainAccounts.getKeystoreByVoteId(
-            this.props.vote.id
+            this.props.voteId
         );
         var pwDerivedKey = this.state.blockchainAccounts.getPwDerivedKeyByVoteId(
-            this.props.vote.id
+            this.props.voteId
         );
         var address = this.state.blockchainAccounts.getAddressByVoteId(
-            this.props.vote.id
+            this.props.voteId
         );
 
-        BallotAction.send(keystore, pwDerivedKey, address, this.props.vote, this.state.ballotValue);
+        var vote = this.state.vote;
+
+        BallotAction.send(keystore, pwDerivedKey, address, vote, this.state.ballotValue);
         this.setState({confirmedVote:true});
         // this.goToNextStep();
     },
 
-    createNewVoterCard: function()
-    {
+    createNewVoterCard: function() {
         this.setState({blockchainAccountCreated:true});
-        BlockchainAccountAction.create(this.props.vote.id);
+        BlockchainAccountAction.create(this.props.voteId);
     },
 
-    goToStep: function(step)
-    {
+    goToStep: function(step) {
         if (step != this.state.step) {
             this.setState({step: step});
 
@@ -215,20 +249,17 @@ var VoteWidget = React.createClass({
         }
     },
 
-    goToPreviousStep: function()
-    {
+    goToPreviousStep: function() {
         this.goToStep(this.state.step - 1);
     },
 
-    goToNextStep: function()
-    {
+    goToNextStep: function() {
         this.goToStep(this.state.step + 1);
     },
 
-    renderProgressBar: function()
-    {
+    renderProgressBar: function() {
         var voterCard = this.state.blockchainAccounts.getVoterCardByVoteId(
-            this.props.vote.id
+            this.props.voteId
         );
 
         return (
@@ -347,8 +378,7 @@ var VoteWidget = React.createClass({
         );
     },
 
-    getVoteValueDisplayMessage: function()
-    {
+    getVoteValueDisplayMessage: function() {
         var voteDisplay = [
             this.getIntlMessage('vote.VOTE_YES'),
             this.getIntlMessage('vote.VOTE_BLANK'),
@@ -358,28 +388,29 @@ var VoteWidget = React.createClass({
         return voteDisplay[this.state.ballotValue];
     },
 
-    renderVoterCardPrintButton: function(className)
-    {
-        if (!this.state.config.capabilities.vote_card.print)
+    renderVoterCardPrintButton: function(className) {
+        if (!this.state.config.capabilities.vote_card.print) {
             return null;
+        }
 
         return (
             <VoterCardPrintButton
                 className={className ? className : 'btn btn-primary'}
-                voteId={this.props.vote.id}
+                voteId={this.props.voteId}
                 onClick={this.voterCardPrinted}/>
         );
     },
 
-    renderVoterCardDownloadButton: function(className)
-    {
+    renderVoterCardDownloadButton: function(className) {
         if (!this.state.config.capabilities.vote_card.download)
             return null;
 
-        // var ballot = this.state.ballots.getByVoteId(this.props.vote.id);
+        var vote = this.state.vote;
+
+        // var ballot = this.state.ballots.getByVoteId(this.props.voteId);
         // var date = new Date(ballot.time);
         var date = new Date();
-        var filename = 'cocorico_' + this.props.vote.title
+        var filename = 'cocorico_' + vote.title
             + '_'  + date.toLocaleDateString()
             + '_'  + date.toLocaleTimeString()
             + '.svg';
@@ -393,13 +424,12 @@ var VoteWidget = React.createClass({
             <VoterCardDownloadButton
                 filename={filename}
                 className={className ? className : 'btn btn-primary'}
-                voteId={this.props.vote.id}
+                voteId={this.props.voteId}
                 onClick={this.voterCardDownloaded}/>
         );
     },
 
-    renderLoginDialog: function()
-    {
+    renderLoginDialog: function() {
         return (
             <div className="vote-step-description">
                 <LoginPage />
@@ -407,62 +437,78 @@ var VoteWidget = React.createClass({
         );
     },
 
-    renderVoteDialog: function()
-    {
+    renderVoteDialog: function() {
+        var vote = this.state.vote;
+
         return (
-            <div className="vote-step-description">
-                <div className="vote-step-actions">
-                    <VoteButtonBar vote={this.props.vote}
-                        onVote={this.voteHandler}/>
-                </div>
-            </div>
+            <Grid>
+                <Row>
+                    <Col xs={12}>
+                        <div className="vote-step-description">
+                            <div className="vote-step-actions">
+                                <VoteButtonBar vote={vote} onVote={this.voteHandler}/>
+                            </div>
+                        </div>
+                    </Col>
+                </Row>
+            </Grid>
         );
     },
 
-    renderVoterIdDialog: function()
-    {
-        if (!this.isAuthenticated())
+    userIsAuthorizedToVote: function() {
+        var vote = this.state.vote;
+
+        return !vote.permissions || vote.permissions.vote;
+    },
+
+    renderVoterIdDialog: function() {
+        if (!this.state.users.isAuthenticated())
             return this.renderLoginDialog();
 
         var user = this.state.users.getCurrentUser();
         var birthdate = new Date(user.birthdate);
 
         return (
-            <div className="vote-step-description">
-                <Page slug="vote-carte-didentite"/>
-                <p>
-                    <FormattedHTMLMessage
-                        message={this.getIntlMessage('vote.ANNOUNCE_VOTER_ID')}
-                        name={user.firstName + ' ' + user.lastName}
-                        birthdate={birthdate.toLocaleDateString()}/> :
-                </p>
-                <ButtonToolbar className="vote-step-actions">
-                    <Button bsStyle="primary" onClick={(e)=>this.goToNextStep()}>
-                        <FormattedMessage
-                            message={this.getIntlMessage('vote.CONFIRM_VOTER_ID')}
-                            name={user.firstName + ' ' + user.lastName}/>
-                    </Button>
-                    <a href="/api/auth/logout" className="btn btn-default">
-                        <FormattedMessage
-                            message={this.getIntlMessage('vote.DENY_VOTER_ID')}/>
-                    </a>
-                    {this.props.modal
-                        ? <Button bsStyle="link"
-                            disabled={this.state.blockchainAccountCreated}
-                            onClick={(e)=>this.props.onCancel(e)}>
-                            {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
-                        </Button>
-                        : null}
-                </ButtonToolbar>
-                <Hint style="warning" pageSlug="attention-usurpation-didentite"/>
-            </div>
+            <Grid>
+                <Row>
+                    <Col xs={12}>
+                        <div className="vote-step-description">
+                            <Page slug="vote-carte-didentite"/>
+                            <p>
+                                <FormattedHTMLMessage
+                                    message={this.getIntlMessage('vote.ANNOUNCE_VOTER_ID')}
+                                    name={user.firstName + ' ' + user.lastName}
+                                    birthdate={birthdate.toLocaleDateString()}/> :
+                            </p>
+                            <ButtonToolbar className="vote-step-actions">
+                                <Button bsStyle="primary" onClick={(e)=>this.goToNextStep()}>
+                                    <FormattedMessage
+                                        message={this.getIntlMessage('vote.CONFIRM_VOTER_ID')}
+                                        name={user.firstName + ' ' + user.lastName}/>
+                                </Button>
+                                <a href="/api/auth/logout" className="btn btn-default">
+                                    <FormattedMessage
+                                        message={this.getIntlMessage('vote.DENY_VOTER_ID')}/>
+                                </a>
+                                {this.props.modal
+                                    ? <Button bsStyle="link"
+                                        disabled={this.state.blockchainAccountCreated}
+                                        onClick={(e)=>this.props.onCancel(e)}>
+                                        {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+                                    </Button>
+                                    : null}
+                            </ButtonToolbar>
+                            <Hint style="warning" pageSlug="attention-usurpation-didentite"/>
+                        </div>
+                    </Col>
+                </Row>
+            </Grid>
         );
     },
 
-    renderVoterCardDialog: function()
-    {
+    renderVoterCardDialog: function() {
         var voterCard = this.state.blockchainAccounts.getVoterCardByVoteId(
-            this.props.vote.id
+            this.props.voteId
         );
 
         if (this.state.blockchainAccountCreated && !!voterCard) {
@@ -470,75 +516,101 @@ var VoteWidget = React.createClass({
         }
 
         return (
-            <div className="vote-step-description">
+            <Grid>
+                <Row>
+                    <Col xs={12}>
+                        <div className="vote-step-description">
+                            {this.state.showVoterCardReader
+                                ? <div>
+                                    <VoterCardReader voteId={this.props.voteId}
+                                        onSuccess={(e)=>this.goToNextStep()}/>
+                                </div>
+                                : <Page slug="vote-carte-de-vote"/>}
+                        </div>
+                    </Col>
+                </Row>
                 {this.state.showVoterCardReader
-                    ? <div>
-                        <VoterCardReader voteId={this.props.vote.id}
-                            onSuccess={(e)=>this.goToNextStep()}/>
-                    </div>
-                    : <div>
-                        <Page slug="vote-carte-de-vote"/>
-                        {!this.state.blockchainAccountCreated
-                            ? <ButtonToolbar className="vote-step-actions">
-                                <Button bsStyle="primary"
-                                    onClick={this.createNewVoterCard}>
-                                    <FormattedMessage
-                                        message={this.getIntlMessage('vote.CREATE_NEW_VOTE_CARD')}/>
-                                </Button>
-                                <Button bsStyle="default"
-                                    onClick={(e)=>this.setState({showVoterCardReader:true})}>
-                                    <FormattedMessage
-                                        message={this.getIntlMessage('vote.USE_EXISTING_VOTE_CARD')}/>
-                                </Button>
-                                {this.props.modal
-                                    ? <Button bsStyle="link"
-                                        onClick={(e)=>this.props.onCancel(e)}>
-                                        {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+                    ? null
+                    : <Row>
+                        <Col xs={12}>
+                            {!this.state.blockchainAccountCreated
+                                ? <ButtonToolbar className="vote-step-actions">
+                                    <Button bsStyle="primary"
+                                        onClick={this.createNewVoterCard}>
+                                        <FormattedMessage
+                                            message={this.getIntlMessage('vote.CREATE_NEW_VOTE_CARD')}/>
                                     </Button>
-                                    : null}
-                            </ButtonToolbar>
-                            : <ButtonToolbar className="vote-step-actions">
-                                <LoadingIndicator text={this.getIntlMessage('vote.CREATING_NEW_VOTE_CARD')}/>
-                            </ButtonToolbar>}
-                        <Hint pageSlug="astuce-carte-de-vote-a-usage-unique"/>
-                    </div>}
-            </div>
+                                    <Button bsStyle="default"
+                                        onClick={(e)=>this.setState({showVoterCardReader:true})}>
+                                        <FormattedMessage
+                                            message={this.getIntlMessage('vote.USE_EXISTING_VOTE_CARD')}/>
+                                    </Button>
+                                    {this.props.modal
+                                        ? <Button bsStyle="link"
+                                            onClick={(e)=>this.props.onCancel(e)}>
+                                            {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+                                        </Button>
+                                        : null}
+                                </ButtonToolbar>
+                                : <ButtonToolbar className="vote-step-actions">
+                                    <LoadingIndicator text={this.getIntlMessage('vote.CREATING_NEW_VOTE_CARD')}/>
+                                </ButtonToolbar>}
+                        </Col>
+                    </Row>}
+                {!this.state.showVoterCardReader
+                    ? <Row>
+                        <Col xs={12}>
+                            <Hint pageSlug="astuce-carte-de-vote-a-usage-unique"/>
+                        </Col>
+                    </Row>
+                    : null}
+            </Grid>
         );
     },
 
-    renderDownloadOrPrintVoterCardDialog: function()
-    {
+    renderDownloadOrPrintVoterCardDialog: function() {
         window.onbeforeunload = () => this.getIntlMessage('vote.BEFORE_UNLOAD_MESSAGE');
 
         return (
-            <div>
-                <div className="vote-step-description">
-                    <Page slug="vote-nouvelle-carte-de-vote"/>
-                    <ButtonToolbar className="vote-step-actions">
-                        {this.renderVoterCardPrintButton()}
-                        {this.renderVoterCardDownloadButton()}
-                        <Button bsStyle="link"
-                            disabled={!this.state.skipVoterCardButtonEnabled}
-                            onClick={(e)=>this.goToNextStep()}>
-                            <Countdown count={VoteWidget.COUNTDOWN}
-                                format={(c) => c
-                                    ? this.getIntlMessage('vote.IGNORE') + ' ('
-                                        + c + ')'
-                                    : this.getIntlMessage('vote.IGNORE') + ' ('
-                                        + this.getIntlMessage('vote.NOT_RECOMMENDED')
-                                        + ')'}
-                                onComplete={()=>this.setState({skipVoterCardButtonEnabled:true})}/>
-                        </Button>
-                    </ButtonToolbar>
-                    <Hint style="warning"
-                        pageSlug="attention-recuperer-carte-de-vote-1"/>
-                </div>
-            </div>
+            <Grid>
+                <Row>
+                    <Col xs={12}>
+                        <div className="vote-step-description">
+                            <Page slug="vote-nouvelle-carte-de-vote"/>
+                        </div>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={12}>
+                        <ButtonToolbar className="vote-step-actions">
+                            {this.renderVoterCardPrintButton()}
+                            {this.renderVoterCardDownloadButton()}
+                            <Button bsStyle="link"
+                                disabled={!this.state.skipVoterCardButtonEnabled}
+                                onClick={(e)=>this.goToNextStep()}>
+                                <Countdown count={VoteWidget.COUNTDOWN}
+                                    format={(c) => c
+                                        ? this.getIntlMessage('vote.IGNORE') + ' ('
+                                            + c + ')'
+                                        : this.getIntlMessage('vote.IGNORE') + ' ('
+                                            + this.getIntlMessage('vote.NOT_RECOMMENDED')
+                                            + ')'}
+                                    onComplete={()=>this.setState({skipVoterCardButtonEnabled:true})}/>
+                            </Button>
+                        </ButtonToolbar>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={12}>
+                        <Hint style="warning"
+                                pageSlug="attention-recuperer-carte-de-vote-1"/>
+                    </Col>
+                </Row>
+            </Grid>
         );
     },
 
-    renderConfirmVoteButton: function()
-    {
+    renderConfirmVoteButton: function() {
         return (
             <Button className={classNames({
                     'btn-positive': this.state.ballotValue == 0,
@@ -564,102 +636,119 @@ var VoteWidget = React.createClass({
         );
     },
 
-    renderConfirmDialog: function()
-    {
+    renderConfirmDialog: function() {
+        var vote = this.state.vote;
+
         return (
-            <div className="vote-step-description">
-                <p>
-                    <FormattedMessage
-                        message={this.getIntlMessage('vote.CONFIRM_VOTE_MESSAGE')}
-                        value={
-                            <strong>
-                                <span className={classNames({
-                                        'positive': this.state.ballotValue == 0,
-                                        'neutral': this.state.ballotValue == 1,
-                                        'negative': this.state.ballotValue == 2
-                                    })}>
-                                {this.getVoteValueDisplayMessage()}
-                                </span>
-                            </strong>
-                        }
-                        vote={
-                            <strong>
-                                <Title text={this.props.vote.title}/>
-                            </strong>
-                        }/>
-                </p>
-                <ButtonToolbar className="vote-step-actions">
-                    {this.state.confirmedVote
-                        ? <LoadingIndicator text="Envoi de votre vote en cours..."/>
-                        : <div>
-                            {this.renderConfirmVoteButton()}
-                            {this.props.modal
-                                ? <Button bsStyle="link"
-                                    onClick={(e)=>this.props.onCancel(e)}>
-                                    {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
-                                </Button>
-                                : null}
-                        </div>}
-                </ButtonToolbar>
-                {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
-                    ? <Hint style="warning"
-                        pageSlug="attention-recuperer-carte-de-vote-2">
-                        <ButtonToolbar>
-                            {this.renderVoterCardPrintButton('btn btn-warning')}
-                            {this.renderVoterCardDownloadButton('btn btn-warning')}
+            <Grid>
+                <Row className="vote-step-description">
+                    <Col xs={12}>
+                        <p>
+                            <FormattedMessage
+                                message={this.getIntlMessage('vote.CONFIRM_VOTE_MESSAGE')}
+                                value={
+                                    <strong>
+                                        <span className={classNames({
+                                                'positive': this.state.ballotValue == 0,
+                                                'neutral': this.state.ballotValue == 1,
+                                                'negative': this.state.ballotValue == 2
+                                            })}>
+                                        {this.getVoteValueDisplayMessage()}
+                                        </span>
+                                    </strong>
+                                }
+                                vote={
+                                    <strong>
+                                        <Title text={vote.title}/>
+                                    </strong>
+                                }/>
+                        </p>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={12}>
+                        <ButtonToolbar className="vote-step-actions">
+                            {this.state.confirmedVote
+                                ? <LoadingIndicator text="Envoi de votre vote en cours..."/>
+                                : <div>
+                                    {this.renderConfirmVoteButton()}
+                                    {this.props.modal
+                                        ? <Button bsStyle="link"
+                                            onClick={(e)=>this.props.onCancel(e)}>
+                                            {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+                                        </Button>
+                                        : null}
+                                </div>}
                         </ButtonToolbar>
-                    </Hint>
-                    : null}
-            </div>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={12}>
+                        {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
+                            ? <Hint style="warning"
+                                pageSlug="attention-recuperer-carte-de-vote-2">
+                                <ButtonToolbar>
+                                    {this.renderVoterCardPrintButton('btn btn-warning')}
+                                    {this.renderVoterCardDownloadButton('btn btn-warning')}
+                                </ButtonToolbar>
+                            </Hint>
+                            : null}
+                    </Col>
+                </Row>
+            </Grid>
         );
     },
 
-    renderVoteCompleteDialog: function()
-    {
+    renderVoteCompleteDialog: function() {
         if (this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard)
             window.onbeforeunload = () => this.getIntlMessage('vote.BEFORE_UNLOAD_MESSAGE');
         else
             window.onbeforeunload = null;
 
         return (
-            <div>
-                <div className="vote-step-description">
-                    <p>
-                        <FormattedMessage
-                            message={this.getIntlMessage('vote.YOUR_VOTE_IS_COMPLETE')}
-                            value={
-                                <strong>
-                                    <span className={classNames({
-                                            'positive': this.state.ballotValue == 0,
-                                            'neutral': this.state.ballotValue == 1,
-                                            'negative': this.state.ballotValue == 2
-                                        })}>
-                                        {this.getVoteValueDisplayMessage()}
-                                    </span>
-                                </strong>
-                            }
-                            vote={
-                                <strong>
-                                    <Title text={this.props.vote.title}/>
-                                </strong>
-                            }/>
-                    </p>
-                </div>
-                {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
-                    ? <Hint style="warning"
-                        pageSlug="attention-recuperer-carte-de-vote-3">
-                        <ButtonToolbar>
-                            {this.renderVoterCardPrintButton('btn btn-warning')}
-                            {this.renderVoterCardDownloadButton('btn btn-warning')}
-                        </ButtonToolbar>
-                    </Hint>
-                    : <span/>}
-            </div>
+            <Grid>
+                <Row className="vote-step-description">
+                    <Col xs={12}>
+                        <p>
+                            <FormattedMessage
+                                message={this.getIntlMessage('vote.YOUR_VOTE_IS_COMPLETE')}
+                                value={
+                                    <strong>
+                                        <span className={classNames({
+                                                'positive': this.state.ballotValue == 0,
+                                                'neutral': this.state.ballotValue == 1,
+                                                'negative': this.state.ballotValue == 2
+                                            })}>
+                                            {this.getVoteValueDisplayMessage()}
+                                        </span>
+                                    </strong>
+                                }
+                                vote={
+                                    <strong>
+                                        <Title text={this.state.vote.title}/>
+                                    </strong>
+                                }/>
+                        </p>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={12}>
+                        {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
+                            ? <Hint style="warning"
+                                pageSlug="attention-recuperer-carte-de-vote-3">
+                                <ButtonToolbar>
+                                    {this.renderVoterCardPrintButton('btn btn-warning')}
+                                    {this.renderVoterCardDownloadButton('btn btn-warning')}
+                                </ButtonToolbar>
+                            </Hint>
+                            : null}
+                    </Col>
+                </Row>
+            </Grid>
         );
     },
 
-    complete: function(e)
-    {
+    complete: function(e) {
         window.onbeforeunload = null;
         // this.goToStep(VoteWidget.STEP_INIT);
         // this.setState({voteModalClosed:true});
@@ -697,8 +786,7 @@ var VoteWidget = React.createClass({
         );
     },
 
-    renderVoterIdModalFooter: function()
-    {
+    renderVoterIdModalFooter: function() {
         return (
             <Button
                 bsStyle="link"
@@ -709,8 +797,7 @@ var VoteWidget = React.createClass({
         );
     },
 
-    renderModalFooter: function()
-    {
+    renderModalFooter: function() {
         if (!this.props.modal) {
             return null;
         }
@@ -730,83 +817,71 @@ var VoteWidget = React.createClass({
         );
     },
 
-    renderModal: function()
-    {
-        var showModalFooter = this.state.step == VoteWidget.STEP_COMPLETE
-            || this.state.step == VoteWidget.STEP_VOTE_CARD;
-
+    renderContent: function() {
         return (
-            <Modal bsSize="large" show={true} dialogClassName="vote-widget">
-                <Modal.Header>
-                    <h1 className="vote-title">
-                        <Icon name="enveloppe"/>
-                        <Title text={this.props.vote.title}/>
-                    </h1>
-                </Modal.Header>
-                {this.renderProgressBar()}
-                <Modal.Body>
-                    {this.state.step == VoteWidget.STEP_VOTE
-                        ? this.renderVoteDialog()
-                        : null}
-                    {this.state.step == VoteWidget.STEP_VOTER_ID
-                        ? this.renderVoterIdDialog()
-                        : null}
-                    {this.state.step == VoteWidget.STEP_VOTE_CARD
-                        ? this.renderVoterCardDialog()
-                        : null}
-                    {this.state.step == VoteWidget.STEP_CONFIRM
-                        ? this.renderConfirmDialog()
-                        : null}
-                    {this.state.step == VoteWidget.STEP_COMPLETE
-                        ? this.renderVoteCompleteDialog()
-                        : null}
-                </Modal.Body>
-                {showModalFooter
-                    ? <Modal.Footer>
-                        {this.renderModalFooter()}
-                    </Modal.Footer>
-                    : <span/>}
-            </Modal>
+            <div>
+                {this.state.step == VoteWidget.STEP_VOTE
+                    ? this.renderVoteDialog()
+                    : null}
+                {this.state.step == VoteWidget.STEP_VOTER_ID
+                    ? this.renderVoterIdDialog()
+                    : null}
+                {this.state.step == VoteWidget.STEP_VOTE_CARD
+                    ? this.renderVoterCardDialog()
+                    : null}
+                {this.state.step == VoteWidget.STEP_CONFIRM
+                    ? this.renderConfirmDialog()
+                    : null}
+                {this.state.step == VoteWidget.STEP_COMPLETE
+                    ? this.renderVoteCompleteDialog()
+                    : null}
+            </div>
         );
     },
 
-    render: function()
-    {
-        if (this.props.modal)
-            return this.renderModal();
+    renderError: function() {
+        return (
+            <Grid>
+                <Row>
+                    <Col xs={12}>
+                        <Hint style="danger">
+                            <h3>Ohoo... :(</h3>
+                            <p>Vous n'êtes pas autorisé à participer à ce vote.</p>
+                        </Hint>
+                    </Col>
+                </Row>
+            </Grid>
+        );
+    },
 
-        var showFooter = this.state.step == VoteWidget.STEP_COMPLETE
-            || this.state.step == VoteWidget.STEP_VOTE_CARD;
+    render: function() {
+        var vote = this.state.vote;
+
+        if (!vote || !vote.title || !vote.permissions) {
+            return (
+                <div className="text-center" style={{paddingTop:'200px'}}>
+                    <LoadingIndicator/>
+                </div>
+            );
+        }
 
         return (
-            <div className="vote-widget">
+            <div className={classNames({
+                    "vote-widget": true,
+                    "vote-widget-error": this.state.error != VoteWidget.ERROR_NONE
+                })}>
                 <h1 className="vote-title">
                     <Icon name="enveloppe"/>
-                    <Title text={this.props.vote.title}/>
+                    <Title text={vote.title}/>
                 </h1>
                 <div>
                     {this.renderProgressBar()}
                 </div>
-                <div>
-                    {this.state.step == VoteWidget.STEP_VOTE
-                        ? this.renderVoteDialog()
-                        : null}
-                    {this.state.step == VoteWidget.STEP_VOTER_ID
-                        ? this.renderVoterIdDialog()
-                        : null}
-                    {this.state.step == VoteWidget.STEP_VOTE_CARD
-                        ? this.renderVoterCardDialog()
-                        : null}
-                    {this.state.step == VoteWidget.STEP_CONFIRM
-                        ? this.renderConfirmDialog()
-                        : null}
-                    {this.state.step == VoteWidget.STEP_COMPLETE
-                        ? this.renderVoteCompleteDialog()
-                        : null}
+                <div className="vote-step">
+                    {this.state.error != VoteWidget.ERROR_NONE
+                        ? this.renderError()
+                        : this.renderContent()}
                 </div>
-                {showFooter
-                    ? this.renderModalFooter()
-                    : null}
             </div>
         );
     }
