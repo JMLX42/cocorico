@@ -1,3 +1,5 @@
+var config = require('../config.json');
+
 var keystone = require('keystone');
 var transform = require('model-transform');
 
@@ -6,7 +8,7 @@ var Types = keystone.Field.Types;
 var Ballot = new keystone.List('Ballot', {
 	defaultSort: '-updatedAt',
 	track: { createdAt: true, updatedAt: true },
-	nodelete: true,
+	nodelete: config.env != 'development',
 	nocreate: true
 });
 
@@ -25,5 +27,5 @@ Ballot.add({
 
 transform.toJSON(Ballot);
 
-Ballot.defaultColumns = 'time, status, vote';
+Ballot.defaultColumns = 'time, status, vote, createdAt, updatedAt';
 Ballot.register();
