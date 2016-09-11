@@ -6,12 +6,8 @@ is_development_environment: yes
 http_protocol_prefix: https
 
 capabilities:
-  bill:
-    create: yes
-    edit: yes
-    read: yes
-    favorite: no
-    vote: yes
+  user:
+    sign_in: yes
   step:
     draft: yes
     review: yes
@@ -40,6 +36,10 @@ capabilities:
     scan: no
     download: yes
   vote:
+    create: yes
+    read: yes
+    update: yes
+    delete: no
     enabled: yes
     cancel: no
     check_referer: no
