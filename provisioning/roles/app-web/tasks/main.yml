@@ -26,7 +26,7 @@
     chdir: "{{ cocorico_app_dir }}"
   register: result
   failed_when: result.stderr
-  when: is_development_environment and app_config.changed
+  when: is_development_environment # and app_config.changed
 
 - name: build release app
   shell: npm run build-release
@@ -34,7 +34,7 @@
     chdir: "{{ cocorico_app_dir }}"
   register: result
   failed_when: result.stderr
-  when: not is_development_environment and app_config.changed
+  when: not is_development_environment # and app_config.changed
 
 - name: install site configuration
   template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
