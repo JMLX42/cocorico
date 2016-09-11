@@ -83,7 +83,7 @@ var VoterCardReader = React.createClass({
                         {this.state.config.capabilities.vote_card.scan
                             ? <Button className="btn btn-primary"
                                 onClick={(e)=>this.setState({readFromVideo:true})}>
-                                {this.getIntlMessage('proofOfVoteReader.SCAN_PRINTED_FILE')}
+                                {this.getIntlMessage('voterCard.SCAN_PRINTED_FILE')}
                             </Button>
                             : <span/>}
                     </Col>
@@ -94,7 +94,7 @@ var VoterCardReader = React.createClass({
                                     style={{display:'none'}}
                                     onChange={this.onFileInputChange}/>
                                 <label htmlFor="file" className="btn btn-primary">
-                                    {this.getIntlMessage('proofOfVoteReader.SEND_DOWNLOADED_FILE')}
+                                    {this.getIntlMessage('voterCard.SEND_DOWNLOADED_FILE')}
                                 </label>
                             </span>
                             : <span/>}
