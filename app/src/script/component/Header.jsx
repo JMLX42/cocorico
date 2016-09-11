@@ -31,6 +31,10 @@ var Header = React.createClass({
         ReactIntl.IntlMixin
     ],
 
+    componentWillMount: function() {
+        PageAction.showNavBar();
+    },
+
     componentDidMount: function()
     {
         UserAction.requireLogin();
@@ -69,7 +73,6 @@ var Header = React.createClass({
 
     render: function()
     {
-
 		return (
             <div id="header">
                 <Navbar fixedTop>
