@@ -10,40 +10,50 @@ var StringHelper = require('../../helper/StringHelper');
 var VoteAction = require('../../action/VoteAction'),
     BallotAction = require('../../action/BallotAction');
 
-var VoteStore = require('../../store/VoteStore');
+var VoteStore = require('../../store/VoteStore'),
+    UserStore = require('../../store/UserStore');
 
 var VoteWidget = require('../../component/VoteWidget'),
-    Footer = require('../../component/Footer'),
-    LoadingIndicator = require("../../component/LoadingIndicator");
+    EmbeddedPage = require('../../component/EmbeddedPage'),
+    LoadingIndicator = require("../../component/LoadingIndicator"),
+    AuthenticationError = require('../../component/AuthenticationError');
 
 var VoteWidgetPage = React.createClass({
 
     mixins: [
-        ReactIntl.IntlMixin,
-        Reflux.connect(VoteStore, 'votes')
+        Reflux.connect(VoteStore, 'votes'),
+        ReactIntl.IntlMixin
     ],
 
     componentWillMount: function() {
-        VoteAction.show(this.props.params.voteId);
-        BallotAction.showCurrentUserBallot(this.props.params.voteId, true);
+    },
+
+    postMessage: function(msg, vote) {
+        if (!!window.parent) {
+            window.parent.postMessage(msg, vote.url);
+        }
     },
 
     render: function() {
         var vote = this.state.votes.getById(this.props.params.voteId);
+        var title = !!vote && !!vote.title
+            ? StringHelper.toTitleCase(vote.title) + ' - ' + this.getIntlMessage('site.TITLE')
+            : this.getIntlMessage('site.TITLE');
 
         return (
-            <div>
-                {!!vote
-                    ? <ReactDocumentTitle title={StringHelper.toTitleCase(vote.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
-                        <div className="content">
-                            <VoteWidget modal={false} vote={vote}/>
-                        </div>
-                    </ReactDocumentTitle>
-                    : <div className="text-center" style={{paddingTop:'200px'}}>
-                        <LoadingIndicator/>
-                    </div>}
-                <Footer/>
-            </div>
+            <EmbeddedPage>
+                <ReactDocumentTitle title={title}>
+                    <div className="content">
+                        <VoteWidget
+                            modal={false}
+                            voteId={this.props.params.voteId}
+                            onSuccess={(v) => this.postMessage('voteSuccess', v)}
+                            onError={(v) => this.postMessage('voteError', v)}
+                            onComplete={(v) => this.postMessage('voteComplete', v)}
+                            onCancel={(v) => this.postMessage('voteCanceled', v)}/>
+                    </div>
+                </ReactDocumentTitle>
+            </EmbeddedPage>
         );
     }
 });
