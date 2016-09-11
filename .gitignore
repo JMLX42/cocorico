@@ -1,8 +1,9 @@
 .vagrant
 provisioning/generated/hosts.json
+provisioning/inventory/group_vars/prod.yml
+*.tmp
 *.log
 npm-debug*
 .node*
 provision.retry
 key
-*.tmp
