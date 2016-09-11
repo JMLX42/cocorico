@@ -59,6 +59,7 @@ exports.get = function(req, res)
 
 function pushBallotMessageOnQueue(data, callback)
 {
+    console.log('pushing ballot on queue');
     try {
         require('amqplib/callback_api').connect(
             'amqp://localhost',
@@ -117,7 +118,7 @@ exports.vote = function(req, res) {
                 if (!vote)
         			return callback({code: 404, error: 'vote not found'});
                 // FIXME: log the unauthorized attempt
-                if (!vote.userIsAuthorizedToVote(user))
+                if (!vote.userIsAuthorizedToVote(req.user))
                     return callback({code: 403, error: 'unauthorized user'});
                 if (vote.voteContractAddress != voteContractAddress)
                     return callback({code: 300, error: 'contract address mismatch'});
