@@ -38,7 +38,7 @@ contract Vote {
     modifier onlyChairPerson() {
         if (msg.sender != chairperson)
             throw;
-        _
+        _;
     }
 
     modifier onlyRegisteredVoter() {
@@ -46,7 +46,7 @@ contract Vote {
 
         if (voter.voted || !voter.registered)
             throw;
-        _
+        _;
     }
 
     function registerVoter(address voterAddress) onlyChairPerson {
