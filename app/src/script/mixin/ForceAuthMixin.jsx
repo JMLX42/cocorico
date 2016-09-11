@@ -6,7 +6,8 @@ var UserStore = require('../store/UserStore');
 
 var UserAction = require('../action/UserAction');
 
-var LoginButton = require('../component/LoginButton');
+var LoginButton = require('../component/LoginButton'),
+    AuthenticationError = require('../component/AuthenticationError');
 
 var Login = require('../page/Login');
 
@@ -16,31 +17,40 @@ var Grid = ReactBootstrap.Grid,
 
 var ForceAuthMixin = {
     mixins: [
-        Reflux.connect(UserStore, 'users')
+        Reflux.listenTo(UserStore, 'userStoreChangedHandler')
     ],
 
-    getInitialState: function()
-    {
+    getInitialState: function() {
         return {
             isAuthenticated: false
         }
     },
 
-    componentDidMount: function()
-    {
-        this.listenTo(UserStore, (store) => {
-            this.setState({isAuthenticated: store.isAuthenticated()});
-        });
+    componentWillMount: function() {
         UserAction.requireLogin();
     },
 
-    isAuthenticated: function()
-    {
+    userStoreChangedHandler: function(store) {
+        this.setState({
+            isAuthenticated: store.isAuthenticated()
+        });
+
+        if (store.authenticationFailed()) {
+            this.render = this.renderAuthenticationError;
+        }
+    },
+
+    isAuthenticated: function() {
         return this.state.isAuthenticated;
     },
 
-    renderLoginPage: function(message)
-    {
+    renderAuthenticationError: function() {
+        return (
+            <AuthenticationError/>
+        );
+    },
+
+    renderLoginPage: function(message) {
         return <div className="page">
             <Grid>
                 <Row>
@@ -52,8 +62,7 @@ var ForceAuthMixin = {
         </div>
     },
 
-    renderLoginMessage: function(message)
-    {
+    renderLoginMessage: function(message) {
         return (<span>{message} <LoginButton /></span>);
     }
 };
