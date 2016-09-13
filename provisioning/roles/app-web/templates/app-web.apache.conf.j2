@@ -9,6 +9,10 @@
     RewriteCond  %{DOCUMENT_ROOT}/app-web/$1 -f
     RewriteRule  ^(.*)$ /app-web/$1 [L,QSA]
 
+    RewriteCond  %{DOCUMENT_ROOT}/app-web/$1 -d
+    RewriteCond  %{DOCUMENT_ROOT}/app-web/$1/index.html -f
+    RewriteRule  ^(.*)$ /app-web/$1/index.html [L,QSA]
+
     RewriteCond  %{REQUEST_URI} !^/app-web
     RewriteRule  ^(.*)$ /app-web/index.html [L,QSA]
 </Directory>
