@@ -29,7 +29,7 @@ var VoteWidgetPage = React.createClass({
     },
 
     postMessage: function(msg, vote) {
-        if (!!window.parent) {
+        if (!!window.parent && !!vote && !!vote.url) {
             window.parent.postMessage(msg, vote.url);
         }
     },
