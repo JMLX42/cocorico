@@ -4,5 +4,6 @@
 {% else %}
     "env": "production",
 {% endif %}
-    "capabilities" : {{ capabilities | to_json }}
+    "capabilities" : {{ capabilities | to_json }},
+    "supportedWebBrowsers": {{ supported_web_browsers | to_json }}
 }
