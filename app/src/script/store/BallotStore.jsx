@@ -1,7 +1,6 @@
 var Reflux = require('reflux');
 var jquery = require('jquery');
 var lightwallet = require('eth-lightwallet');
-var Tx = require('ethereumjs-tx');
 var async = require('async');
 // var bcrypt = require('bcryptjs');
 
@@ -67,7 +66,6 @@ module.exports = Reflux.createStore({
     _getVoteTransaction: function(keystore,
                                   pwDerivedKey,
                                   address,
-                                  voteId,
                                   voteContractAddress,
                                   voteContractABI,
                                   value)
@@ -106,7 +104,6 @@ module.exports = Reflux.createStore({
             keystore,
             pwDerivedKey,
             address,
-            vote.id,
             vote.voteContractAddress,
             vote.voteContractABI,
             value
