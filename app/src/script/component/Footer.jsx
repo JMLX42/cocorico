@@ -58,13 +58,15 @@ var Footer = React.createClass({
                                         {this.getIntlMessage('footer.PRIVACY_POLICY')}
                                     </Link>
                                 </li>
-                                <li>
-                                    <a href="/" target={target}>
-                                        <FormattedMessage
-                                            message={this.getIntlMessage('footer.POWERED_BY')}
-                                            productName="Cocorico"/>
-                                    </a>
-                                </li>
+                                {isEmbed
+                                    ? <li>
+                                        <a href="/" target={target}>
+                                            <FormattedMessage
+                                                message={this.getIntlMessage('footer.POWERED_BY')}
+                                                productName="Cocorico"/>
+                                        </a>
+                                    </li>
+                                    : null}
                             </ul>
                         </Col>
                     </Row>
