@@ -17,7 +17,7 @@ module.exports = Reflux.createStore({
         jquery.ajaxPrefilter(this._ajaxPrefilter);
     },
 
-    jwtUserAvailable() {
+    attemptedJWTAuthentication() {
         return !!this._jwt && !!this._appId;
     },
 

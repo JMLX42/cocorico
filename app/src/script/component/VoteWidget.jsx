@@ -43,7 +43,8 @@ var ConfigStore = require('../store/ConfigStore'),
     VoteStore = require('../store/VoteStore'),
     BlockchainAccountStore = require('../store/BlockchainAccountStore');
 
-var ForceAuthMixin = require('../mixin/ForceAuthMixin');
+var ForceAuthMixin = require('../mixin/ForceAuthMixin'),
+    ForceBrowserCompatibility = require('../mixin/ForceBrowserCompatibility');
 
 var VoteWidget = React.createClass({
 
@@ -56,7 +57,8 @@ var VoteWidget = React.createClass({
         Reflux.listenTo(VoteStore, 'voteStoreChanged'),
         Reflux.listenTo(BallotStore, 'ballotStoreChanged'),
         Reflux.listenTo(UserStore, 'userStoreChanged'),
-        ReactIntl.IntlMixin
+        ReactIntl.IntlMixin,
+        ForceBrowserCompatibility
     ],
 
     statics: {
@@ -102,8 +104,12 @@ var VoteWidget = React.createClass({
             ballotValue: this.props.ballotValue
         });
 
+        var vote = this.state.vote;
         var user = this.state.users.getCurrentUser();
-        if (!!user && !this.userIsAuthorizedToVote()) {
+        // if there is a user and it's not authorized to vote
+        // or there is no JWT user and the vote is restricted to 3rd party users
+        if ((!!user && !this.userIsAuthorizedToVote())
+            || (!this.state.users.attemptedJWTAuthentication() && vote.restricted)) {
             this.error(VoteWidget.ERROR_UNAUTHORIZED);
         }
     },
@@ -839,7 +845,7 @@ var VoteWidget = React.createClass({
         );
     },
 
-    renderError: function() {
+    renderAuthorizationError: function() {
         return (
             <Grid>
                 <Row>
@@ -879,7 +885,7 @@ var VoteWidget = React.createClass({
                 </div>
                 <div className="vote-step">
                     {this.state.error != VoteWidget.ERROR_NONE
-                        ? this.renderError()
+                        ? this.renderAuthorizationError()
                         : this.renderContent()}
                 </div>
             </div>
