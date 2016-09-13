@@ -17,11 +17,10 @@
 - name: install headstone
   npm: name=headstone version=1.1.0 global=yes
 
-- name: create the documentation directory
-  file: path={{ documentation_dir }} state=directory
-
 - name: generate the documentation
-  shell: apidoc -i {{ cocorico_api_dir }}/routes/ -o {{ documentation_dir }} -c {{ cocorico_api_dir }}
+  shell: npm run doc
+  args:
+    chdir: "{{ cocorico_api_dir }}"
 
 # headstone will read the mongo URI from the .env file
 - name: generate .env file
