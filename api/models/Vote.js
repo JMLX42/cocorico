@@ -26,7 +26,8 @@ Vote.add({
         noedit: true
     },
     voteContractAddress: { type: Types.Text, noedit: true },
-    voteContractABI: { type: Types.Text, noedit: true }
+    voteContractABI: { type: Types.Text, noedit: true },
+    restricted: { type: Types.Boolean, default: false }
 });
 
 Vote.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'vote' });
@@ -36,7 +37,7 @@ Vote.schema.methods.userIsAuthorizedToVote = function(user) {
     return config.capabilities.vote.enabled
         && this.status == 'open'
         && !!user
-        && (!user.iss || user.iss == this.app)
+        && (!this.restricted || (!!user.iss && user.iss == this.app))
         && (!user.authorizedVotes
             || !user.authorizedVotes.length
             || user.authorizedVotes.indexOf(this.id) >= 0);
