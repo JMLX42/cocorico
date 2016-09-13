@@ -83,7 +83,8 @@ exports.create = function(req, res) {
                 ? callback({code: 400, error: 'invalid url'}, null)
                 : Vote.model({
                     app: app.id,
-                    url: url
+                    url: url,
+                    restricted: req.body.restricted == 'true'
                 }).save((err, vote) => callback(err, vote)),
         ],
         (err, vote) => {

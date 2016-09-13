@@ -95,6 +95,10 @@ exports = module.exports = function(app) {
 	 * @apiPermission app
 	 *
 	 * @apiHeader {String} Authorization The OAuth access token fetched with `/oauth/token`.
+	 *
+	 * @apiParam (POST) {Boolean} restricted (Optionnal) Restrict the vote to
+	 * the users provided by the app. Default value is `false`.
+	 *
 	 * @apiExample {curl} cURL example:
 	 * 		curl -X POST
 	 *			-H "Authorization: Bearer i45dj3ii2kkvhlgsjfh2hhce4wkk06tx5"
