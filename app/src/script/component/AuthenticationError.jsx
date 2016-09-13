@@ -5,9 +5,7 @@ var PropTypes = React.PropTypes;
 
 var Hint = require('./Hint');
 
-var Grid = ReactBootstrap.Grid,
-    Row = ReactBootstrap.Row,
-    Col = ReactBootstrap.Col;
+var Grid = ReactBootstrap.Grid;
 
 var AuthenticationError = React.createClass({
 
