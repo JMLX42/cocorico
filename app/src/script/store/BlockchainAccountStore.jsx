@@ -72,7 +72,7 @@ module.exports = Reflux.createStore({
         this._pwDerivedKey = {};
     },
 
-    _getKeystore: function(voteId, callback) {
+    _createKeystore: function(voteId, callback) {
         var password = 'password'; // FIXME
 
         lightwallet.keystore.createVault(
@@ -104,7 +104,7 @@ module.exports = Reflux.createStore({
         //
         // this._keystore[voteId] = false;
 
-        this._getKeystore(voteId, (err, ks, pwDerivedKey) => {
+        this._createKeystore(voteId, (err, ks, pwDerivedKey) => {
             if (err) {
                 console.error(err);
                 return;
@@ -116,7 +116,7 @@ module.exports = Reflux.createStore({
             ks.generateNewAddress(pwDerivedKey);
 
             var addresses = ks.getAddresses();
-            var address = '0x' + addresses[addresses.length - 1];
+            var address = addresses[addresses.length - 1];
 
             console.log(
                 'BlockchainAccountStore: generated new address ' + address
