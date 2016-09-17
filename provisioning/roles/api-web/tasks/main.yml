@@ -37,9 +37,9 @@
 - name: link app configuration
   file: src={{ project_dir }}/{{ role_name }}/config.json dest={{ cocorico_api_dir }}/config.json state=link
 
-- name: create admin user
+- name: create admin
   when: is_development_environment
-  shell: headstone {{ cocorico_api_dir }}/scripts/add-user.js
+  shell: headstone {{ cocorico_api_dir }}/scripts/add-admin.js
     --cwd={{ cocorico_api_dir }}
     --userEmail={{ home_web_admin_email }}
     --userPassword={{ home_web_admin_password }}

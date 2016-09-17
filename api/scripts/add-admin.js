@@ -1,23 +1,23 @@
 var config = require('../config.json');
 var keystone = require('keystone');
-var User = keystone.list('User');
+var Admin = keystone.list('Admin');
 
 module.exports = function(userEmail, userPassword, userIsAdmin, userName, done)
 {
-    User.model.find()
+    Admin.model.find()
         .where('email', userEmail)
         .exec(function(err, users)
         {
             if (users.length == 0)
             {
-                var newUser = new User.model({
+                var newAdmin = new Admin.model({
                 	email: userEmail,
                     name: userName,
                 	password: userPassword,
                 	isAdmin: userIsAdmin == 'true'
                 });
 
-                newUser.save(function(err)
+                newAdmin.save(function(err)
                 {
                     if (err)
                     {
@@ -25,13 +25,13 @@ module.exports = function(userEmail, userPassword, userIsAdmin, userName, done)
                       return done(err);
                     }
 
-                    console.log('User created.');
+                    console.log('Admin created.');
                     done();
                 });
             }
             else
             {
-                console.log('User already exists.');
+                console.log('Admin already exists.');
                 done();
             }
         });
