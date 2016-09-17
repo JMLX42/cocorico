@@ -35,6 +35,7 @@ var LoadingIndicator = require('./LoadingIndicator'),
     VoterCardPrintButton = require('./VoterCardPrintButton'),
     VoterCardReader = require('./VoterCardReader'),
     VoteButtonBar = require('./VoteButtonBar'),
+    VoteRadioButtons = require('./VoteRadioButtons'),
     LoginPage = require('../page/Login');
 
 var ConfigStore = require('../store/ConfigStore'),
@@ -385,13 +386,41 @@ var VoteWidget = React.createClass({
     },
 
     getVoteValueDisplayMessage: function() {
-        var voteDisplay = [
-            this.getIntlMessage('vote.VOTE_YES'),
-            this.getIntlMessage('vote.VOTE_BLANK'),
-            this.getIntlMessage('vote.VOTE_NO')
-        ];
+        var vote = this.state.vote;
 
-        return voteDisplay[this.state.ballotValue];
+        var labels = (!!vote.labels && vote.labels.length != 0)
+            ? vote.labels
+            : [
+                this.getIntlMessage('vote.VOTE_YES'),
+                this.getIntlMessage('vote.VOTE_BLANK'),
+                this.getIntlMessage('vote.VOTE_NO')
+            ];
+
+        return labels[this.state.ballotValue];
+    },
+
+    getVoteValueMessageClassNames: function() {
+        var vote = this.state.vote;
+        var hasLabels = (!!vote.labels && vote.labels.length != 0);
+
+        return {
+            'positive': !hasLabels && this.state.ballotValue == 0,
+            'neutral': hasLabels || this.state.ballotValue == 1,
+            'negative': !hasLabels && this.state.ballotValue == 2,
+        };
+    },
+
+    getVoteValueButtonClassNames: function() {
+        var vote = this.state.vote;
+        var hasLabels = (!!vote.labels && vote.labels.length != 0);
+
+        return {
+            'btn-positive': !hasLabels && this.state.ballotValue == 0,
+            'btn-neutral': !hasLabels && this.state.ballotValue == 1,
+            'btn-negative': !hasLabels && this.state.ballotValue == 2,
+            'btn-primary': hasLabels,
+            'btn-vote': true,
+        };
     },
 
     renderVoterCardPrintButton: function(className) {
@@ -452,7 +481,9 @@ var VoteWidget = React.createClass({
                     <Col xs={12}>
                         <div className="vote-step-description">
                             <div className="vote-step-actions">
-                                <VoteButtonBar vote={vote} onVote={this.voteHandler}/>
+                            {!!vote.labels && vote.labels.length != 0
+                                ? <VoteRadioButtons vote={vote} onVote={this.voteHandler}/>
+                                : <VoteButtonBar vote={vote} onVote={this.voteHandler}/>}
                             </div>
                         </div>
                     </Col>
@@ -618,12 +649,7 @@ var VoteWidget = React.createClass({
 
     renderConfirmVoteButton: function() {
         return (
-            <Button className={classNames({
-                    'btn-positive': this.state.ballotValue == 0,
-                    'btn-neutral': this.state.ballotValue == 1,
-                    'btn-negative': this.state.ballotValue == 2,
-                    'btn-vote': true
-                })}
+            <Button className={classNames(this.getVoteValueButtonClassNames())}
                 disabled={!this.state.confirmVoteButtonEnabled}
                 onClick={(e)=>this.confirmVoteValue()}>
                     <Countdown count={VoteWidget.COUNTDOWN}
@@ -654,11 +680,7 @@ var VoteWidget = React.createClass({
                                 message={this.getIntlMessage('vote.CONFIRM_VOTE_MESSAGE')}
                                 value={
                                     <strong>
-                                        <span className={classNames({
-                                                'positive': this.state.ballotValue == 0,
-                                                'neutral': this.state.ballotValue == 1,
-                                                'negative': this.state.ballotValue == 2
-                                            })}>
+                                        <span className={this.getVoteValueMessageClassNames()}>
                                         {this.getVoteValueDisplayMessage()}
                                         </span>
                                     </strong>
@@ -720,11 +742,7 @@ var VoteWidget = React.createClass({
                                 message={this.getIntlMessage('vote.YOUR_VOTE_IS_COMPLETE')}
                                 value={
                                     <strong>
-                                        <span className={classNames({
-                                                'positive': this.state.ballotValue == 0,
-                                                'neutral': this.state.ballotValue == 1,
-                                                'negative': this.state.ballotValue == 2
-                                            })}>
+                                        <span className={classNames(this.getVoteValueMessageClassNames())}>
                                             {this.getVoteValueDisplayMessage()}
                                         </span>
                                     </strong>
