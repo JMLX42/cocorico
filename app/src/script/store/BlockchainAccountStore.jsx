@@ -1,6 +1,5 @@
 var Reflux = require('reflux');
 var lightwallet = require('eth-lightwallet');
-var Tx = require('ethereumjs-tx');
 var qr = require('qr-image');
 
 var BlockchainAccountAction = require('../action/BlockchainAccountAction');
