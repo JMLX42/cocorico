@@ -98,6 +98,7 @@ exports = module.exports = function(app) {
 	 *
 	 * @apiParam (POST) {Boolean} restricted (Optionnal) Restrict the vote to
 	 * the users provided by the app. Default value is `false`.
+	 * @apiParam (POST) {String[]} labels (Optionnal) The vote proposal labels.
 	 *
 	 * @apiExample {curl} cURL example:
 	 * 		curl -X POST

@@ -27,7 +27,8 @@ Vote.add({
     },
     voteContractAddress: { type: Types.Text, noedit: true },
     voteContractABI: { type: Types.Text, noedit: true },
-    restricted: { type: Types.Boolean, default: false }
+    restricted: { type: Types.Boolean, default: false },
+    labels: { type: Types.TextArray, noedit: true }
 });
 
 Vote.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'vote' });

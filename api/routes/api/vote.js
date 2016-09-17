@@ -56,6 +56,18 @@ exports.create = function(req, res) {
         return res.status(400).send({error: 'missing url'});
     }
 
+    var labels = [];
+
+    if (req.body.labels) {
+        try {
+            labels = JSON.parse(req.body.labels);
+        } catch (e) {
+            return res.status(400).send({
+                error: 'invalid labels with error \'' + e.message + '\''
+            });
+        }
+    }
+
     async.waterfall(
         [
             // Step 1: check the app exists and that both the URL and the
@@ -84,7 +96,8 @@ exports.create = function(req, res) {
                 : Vote.model({
                     app: app.id,
                     url: url,
-                    restricted: req.body.restricted == 'true'
+                    restricted: req.body.restricted == 'true',
+                    labels: labels
                 }).save((err, vote) => callback(err, vote)),
         ],
         (err, vote) => {
