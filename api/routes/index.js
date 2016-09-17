@@ -57,6 +57,8 @@ exports = module.exports = function(app) {
 	 * @apiVersion 0.0.1
 	 *
 	 * @apiHeader {String} Authorization The HTTP Basic authentication token: `base64(appId:secret)`
+	 * @apiParam (POST) {String} grant_type Must be "client_credentials".
+	 *
 	 * @apiExample {curl} cURL example:
 	 * 		curl -X POST
 	 *			-H "Authorization: Basic NTdjYzI2NDYzMGI2NWMxZTA0YWNjMDlhOm1lZXR1cA=="
