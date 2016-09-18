@@ -4,6 +4,7 @@ var keystone = require('keystone');
 var transform = require('model-transform');
 var metafetch = require('metafetch');
 var async = require('async');
+var Web3 = require('web3');
 
 var Types = keystone.Field.Types;
 
@@ -46,6 +47,37 @@ Vote.schema.methods.userIsAuthorizedToVote = function(user) {
             || user.authorizedVotes.indexOf(this.id) >= 0);
 }
 
+function completeVote(vote, next) {
+    if (!vote.voteContractAddress) {
+        next(null);
+    }
+
+    var web3 = new Web3();
+    web3.setProvider(new web3.providers.HttpProvider(
+        "http://127.0.0.1:8545"
+    ));
+
+    async.waterfall(
+        [
+            (callback) => web3.eth.getAccounts(callback),
+            (accounts, callback) => web3.eth.contract(
+                    JSON.parse(vote.voteContractABI)
+                )
+                .at(
+                    vote.voteContractAddress,
+                    (err, instance) => callback(err, accounts, instance)
+                ),
+            (accounts, instance, callback) => instance.end
+                .sendTransaction({from: accounts[0]}, (err, txhash) => {
+                    callback(err, txhash);
+                })
+        ],
+        (err, txhash) => {
+            next(err);
+        }
+    );
+}
+
 function pushVoteOnQueue(vote, callback) {
 	require('amqplib/callback_api').connect(
 		'amqp://localhost',
@@ -78,6 +110,10 @@ Vote.schema.pre('validate', function(next) {
 
     if (!self.url) {
         return next();
+    }
+
+    if (self.isModified('status') && self.status == 'complete') {
+        return completeVote(self, next);
     }
 
     async.waterfall(
