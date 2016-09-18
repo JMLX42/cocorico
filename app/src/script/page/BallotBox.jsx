@@ -73,9 +73,9 @@ var BallotBox = React.createClass({
             <table className="table table-hover table-ellipsis">
                 <thead>
                     <tr>
-                        <th>Transaction Hash</th>
-                        <th>Voter</th>
-                        <th>Proposal</th>
+                        <th>{this.getIntlMessage('vote.TRANSACTION_HASH')}</th>
+                        <th>{this.getIntlMessage('vote.VOTER')}</th>
+                        <th>{this.getIntlMessage('vote.PROPOSAL')}</th>
                     </tr>
                 </thead>
                 <tbody>
