@@ -70,25 +70,10 @@ exports.create = function(req, res) {
 
     async.waterfall(
         [
-            // Step 1: check the app exists and that both the URL and the
-            // referer match one of the app valid URLs.
-            (callback) => {
-                if (config.capabilities.vote.check_referer
-                    && !app.isValidURL(req.headers.referer)) {
-                    return callback(
-                        {code: 403, error: 'invalid referer'},
-                        null
-                    );
-                }
-                if (!app.isValidURL(url)) {
-                    return callback(
-                        {code: 403, error: 'invalid url'},
-                        null
-                    );
-                }
-                return Vote.model.findOne({url: url})
-                    .exec((err, vote) => callback(err, app, vote));
-            },
+            (callback) => !app.isValidURL(url)
+                ? callback({code: 403, error: 'invalid url'}, null)
+                : Vote.model.findOne({url: url})
+                    .exec((err, vote) => callback(err, app, vote)),
             // Step 2: check there is no vote for this URL and fetch meta fields
             // if there is not.
             (app, vote, callback) => !!vote
