@@ -818,7 +818,8 @@ var VoteWidget = React.createClass({
                 onClick={(e) => this.props.onComplete(this.getSafeContext())}>
                 {this.getIntlMessage('vote.EXIT')}
             </Button>
-            : <Button bsStyle="danger"
+            : <Button bsStyle="outline"
+                disabled={!!this.state.confirmedVote}
                 onClick={(e) => this.props.onCancel(this.getSafeContext())}>
                 {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
             </Button>
