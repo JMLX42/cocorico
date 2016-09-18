@@ -28,7 +28,8 @@ var Intl = {
 			PRIVACY_POLICY: "/politique-de-confidentialite",
 			POLL: "/vote",
 			CREATE_BILL: "/texte/nouveau",
-			SERVICE_STATUS: "/systeme/etat"
+			SERVICE_STATUS: "/systeme/etat",
+			BALLOT_BOX: "/vote/urne"
 		},
 
 		login: {

@@ -310,3 +310,44 @@ exports.permissions = function(req, res) {
             });
         });
 }
+
+exports.getTransactions = function(req, res) {
+
+    var voteId = req.params.voteId;
+
+    Vote.model.findById(voteId)
+        .exec((err, vote) => {
+            if (err) {
+                return res.apiError('database error', err);
+            }
+
+            if (!vote) {
+                return res.status(404).send();
+            }
+
+            // Fix me : Add 403 if vote.status != complete
+
+            var web3 = new Web3();
+            web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
+
+            web3.eth.contract(JSON.parse(vote.voteContractABI))
+                .at(
+                    vote.voteContractAddress,
+                    (err, instance) => {
+                        if (err) {
+                            return res.apiError('blockchain error', err);
+                        }
+
+                        var ballotEvent = instance.Ballot(null, {fromBlock:0, toBlock: 'latest'});
+                        ballotEvent.get(function(err, result) {
+                            if (err) {
+                                return res.apiError('blockchain error', err);
+                            }
+
+                            return res.apiResponse({transactions:result});
+                        });
+                    }
+                );
+
+        });
+}

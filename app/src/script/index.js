@@ -19,6 +19,7 @@ var Router = ReactRouter.Router,
     ServiceStatus = require('./page/ServiceStatus'),
     VotePage = require('./page/VotePage'),
     EmbedVoteWidgetPage = require('./page/embed/VoteWidgetPage'),
+    BallotBox = require('./page/BallotBox'),
 
     RouteAction = require('./action/RouteAction');
 
@@ -33,6 +34,7 @@ ReactDOM.render(
             <Route path={messages.route.SIGN_IN} component={Login}/>
             <Route path={messages.route.SERVICE_STATUS} component={ServiceStatus}/>
             <Route path='vote/:slug' component={VotePage}/>
+            <Route path={messages.route.BALLOT_BOX + '/:voteId'} component={BallotBox}/>
         </Route>
         <Route path='/embed' component={Embed}>
             <Route path='vote-widget/:voteId' component={EmbedVoteWidgetPage}/>

@@ -15,10 +15,11 @@
 @link-color: #2980b9;
 @headings-color: @text-color;
 @component-active-bg: #3498db;
+@brand-primary: #4285F4;
 @brand-danger: @color-negative;
 @btn-danger-bg: @color-negative;
 @btn-danger-border: @color-negative-dark;
-@btn-primary-bg: #4285F4;
+@btn-primary-bg: @brand-primary;
 @btn-primary-border: #0d64f3;
 @btn-success-bg: @color-positive;
 @btn-success-border: @color-positive-dark;
@@ -183,6 +184,10 @@ li.active {
 
 .positive-background {
     background-color: @color-positive;
+}
+
+.neutral-background {
+    background-color: @cocorico-dark-grey;
 }
 
 .negative-background {
@@ -872,4 +877,17 @@ ul.source-list {
         display: block;
         margin-top: -300px;
     }
+}
+
+.table-ellipsis td {
+    width: 200px;
+    font-size: 14px;
+}
+
+.table-ellipsis td.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -ms-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
 }
