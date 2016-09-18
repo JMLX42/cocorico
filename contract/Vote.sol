@@ -54,8 +54,10 @@ contract Vote {
     function registerVoter(address voterAddress) onlyChairPerson {
         Voter voter = voters[voterAddress];
 
-        if (voter.voted || voter.registered)
+        if (voter.voted || voter.registered) {
+            VoteError(voterAddress, 'already registered');
             throw;
+        }
 
         voter.registered = true;
 
