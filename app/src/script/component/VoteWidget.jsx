@@ -405,7 +405,7 @@ var VoteWidget = React.createClass({
 
         return {
             'positive': !hasLabels && this.state.ballotValue == 0,
-            'neutral': hasLabels || this.state.ballotValue == 1,
+            'neutral': !hasLabels || this.state.ballotValue == 1,
             'negative': !hasLabels && this.state.ballotValue == 2,
         };
     },

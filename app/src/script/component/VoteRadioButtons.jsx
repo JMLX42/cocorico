@@ -3,9 +3,9 @@ var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var classNames = require('classnames');
 
-var Button = ReactBootstrap.Button;
-var FormattedMessage = ReactIntl.FormattedMessage;
+var Title = require('./Title');
 
+var Button = ReactBootstrap.Button;
 
 var VoteRadioButtons = React.createClass({
 
@@ -28,19 +28,20 @@ var VoteRadioButtons = React.createClass({
                 <ul className="list-unstyled" >
                     {labels.map((label, index) => { return (
                         <li>
-                            <input type="radio" name="ballot" value={index}
-                                onChange={(e) => this.setState({ballotValue: index})}/>
-                            &nbsp;&nbsp;
-                            <FormattedMessage
-                                message={this.getIntlMessage('vote.VOTE_RADIO_BUTTON')}
-                                value={label}/>
+                            <label className="vote-label">
+                                <input type="radio" name="ballot" value={index}
+                                    onChange={(e) => this.setState({ballotValue: index})}/>
+                                <i>
+                                    <Title text={label}/>
+                                </i>
+                            </label>
                         </li>
                     ); })}
                 </ul>
                 <Button
                     className="btn-vote btn-primary"
                     onClick={(e) => this.props.onVote(e, this.state.ballotValue)}>
-                        {this.getIntlMessage('vote.VOTE_VALIDATE')}
+                        {this.getIntlMessage('vote.VALIDATE_BALLOT')}
                 </Button>
             </form>
         );
