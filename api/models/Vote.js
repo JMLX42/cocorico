@@ -20,18 +20,17 @@ var Vote = new keystone.List('Vote', {
 Vote.add({
     app: { type: Types.Relationship, ref: 'App', initial: true },
     url: { type: Types.Url, initial: true },
-	title: { type: Types.Text, noedit: true },
-    description: { type: Types.Textarea, noedit: true },
-    image: { type: Types.Url, noedit: true },
+	title: { type: Types.Text },
+    description: { type: Types.Textarea },
+    image: { type: Types.Url },
     status: {
         type: Types.Select,
-        options: ['initializing', 'open', 'complete', 'error'],
-        noedit: true
+        options: ['initializing', 'open', 'complete', 'error']
     },
     voteContractAddress: { type: Types.Text, noedit: true },
     voteContractABI: { type: Types.Text, noedit: true },
     restricted: { type: Types.Boolean, default: false },
-    labels: { type: Types.TextArray, noedit: true }
+    labels: { type: Types.TextArray }
 });
 
 Vote.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'vote' });
