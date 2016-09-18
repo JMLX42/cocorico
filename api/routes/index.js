@@ -174,6 +174,19 @@ exports = module.exports = function(app) {
 	app.get('/vote/:voteId', routes.api.vote.get);
 
 	/**
+	 * @api {get} /vote/transactions/:voteId Get transactions from voteId
+	 * @apiName GetTransactions
+	 * @apiGroup Vote
+	 * @apiVersion 0.0.1
+	 *
+	 * @apiParam {String} voteId The ID of the vote.
+	 *
+	 * @apiExample {curl} cURL example:
+	 * 		curl -X GET "https://cocorico.cc/api/vote/transactions/57cc487608875ef57ac75ff1"
+	 */
+	app.get('/vote/transactions/:voteId', routes.api.vote.getTransactions);
+
+	/**
 	 * @api {get} /vote/result/:voteId Get a vote result
 	 * @apiName GetVoteResult
 	 * @apiGroup Vote
