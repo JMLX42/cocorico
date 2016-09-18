@@ -29,6 +29,9 @@ supported_web_browsers:
     version: "52.0"
     updateLink: "https://support.google.com/chrome/answer/95414?co=GENIE.Platform%3DDesktop"
     installLink: "https://www.google.com/chrome/browser/desktop/"
+  chrome mobile:
+    name: "Google Chrome Mobile"
+    version: "46.0"
   microsoft edge:
     name: "Microsoft Edge"
     version: "14.14393"
