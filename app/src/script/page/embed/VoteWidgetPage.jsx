@@ -45,7 +45,6 @@ var VoteWidgetPage = React.createClass({
                 <ReactDocumentTitle title={title}>
                     <div className="content">
                         <VoteWidget
-                            modal={false}
                             voteId={this.props.params.voteId}
                             onSuccess={(v) => this.postMessage('voteSuccess', v)}
                             onError={(v) => this.postMessage('voteError', v)}
