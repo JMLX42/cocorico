@@ -20,8 +20,19 @@ var VoteRadioButtons = React.createClass({
         };
     },
 
+    getInitialState() {
+        return {
+            ballotValue: null,
+        }
+    },
+
     render: function() {
         var labels = this.props.vote.labels;
+
+        var button_opts = {};
+        if (this.state.ballotValue == null) {
+            button_opts['disabled'] = 'disabled';
+        }
 
         return (
             <form>
@@ -38,7 +49,7 @@ var VoteRadioButtons = React.createClass({
                         </li>
                     ); })}
                 </ul>
-                <Button
+                <Button {...button_opts}
                     className="btn-vote btn-primary"
                     onClick={(e) => this.props.onVote(e, this.state.ballotValue)}>
                         {this.getIntlMessage('vote.VALIDATE_BALLOT')}
