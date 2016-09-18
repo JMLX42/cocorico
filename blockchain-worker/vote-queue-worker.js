@@ -4,6 +4,9 @@ var async = require('async');
 var Web3 = require('web3');
 var fs = require('fs');
 var md5 = require('md5');
+var bunyan = require('bunyan');
+
+var log = bunyan.createLogger({name: "vote-queue-worker"});
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
@@ -50,10 +53,12 @@ function waitForBlockchain(callback)
         {
             var connected = web3.isConnected();
 
-            if (!connected && !errorLogged)
-                console.log({error : 'unable to connect to the blockchain'});
-            if (connected && errorLogged)
-                console.log({log : 'successfully connected to the blockchain'});
+            if (!connected && !errorLogged) {
+                log.error('unable to connect to the blockchain');
+            }
+            if (connected && errorLogged) {
+                log.error('successfully connected to the blockchain');
+            }
 
             return !connected;
         },
@@ -73,11 +78,12 @@ function getCompiledVoteContract(web3, callback)
     var source = fs.readFileSync('/vagrant/contract/Vote.sol', {encoding: 'utf-8'});
 
     web3.eth.compile.solidity(source, (error, compiled) => {
-        if (!error)
-            console.log({
-                log: 'compiled Vote.sol smart contract',
-                md5Hash: md5(source)
-            });
+        if (!error) {
+            log.info(
+                { md5Hash: md5(source) },
+                'compiled smart contract'
+            );
+        }
 
         callback(error, compiled);
     });
@@ -102,7 +108,10 @@ function mineVoteContract(callback)
                 var code = compiled.Vote.code;
                 var abi = compiled.Vote.info.abiDefinition;
 
-                console.log({log:'start mining contract', address:accounts[0]});
+                log.info(
+                    { address: accounts[0] },
+                    'start mining contract'
+                );
 
                 web3.eth.contract(abi).new(
                     3, // num proposals
@@ -126,11 +135,13 @@ function mineVoteContract(callback)
                         else
                         {
                             // tx mined
-                            console.log({
-                                log: 'contract transaction mined',
-                                hash: hash,
-                                contractAddress: contract.address
-                            });
+                            log.info(
+                                {
+                                    hash: hash,
+                                    contractAddress: contract.address
+                                },
+                                'contract transaction mined'
+                            );
 
                             callback(null, contract, abi);
                         }
@@ -175,12 +186,12 @@ require('amqplib/callback_api').connect(
     function(err, conn)
     {
         if (err != null)
-            return console.error(err);
+            return log.error({error: err}, 'error');
 
         conn.createChannel(function(err, ch)
         {
             if (err != null)
-                return console.error(err);
+                return log.error({error: err}, 'error');
 
             ch.assertQueue('votes');
             ch.consume(
@@ -191,17 +202,16 @@ require('amqplib/callback_api').connect(
                     {
                         var obj = JSON.parse(msg.content.toString());
 
-                        console.log({
-                            log: 'vote received',
-                            vote: obj
-                        });
+                        log.info({ vote: obj }, 'vote received');
 
                         if (obj.vote)
                         {
                             handleVote(obj.vote, function(err, vote)
                             {
-                                if (err)
-                                    console.log({err: err});
+                                if (err) {
+                                    log.error({error: err}, 'error');
+                                    ch.nack(msg);
+                                }
                                 else
                                     ch.ack(msg);
                             });
