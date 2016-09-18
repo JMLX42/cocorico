@@ -804,7 +804,6 @@ var VoteWidget = React.createClass({
             vote: this.state.vote,
             step: this.state.step,
             userAuthenticated: this.state.isAuthenticated,
-            ballotValue: this.state.ballotValue,
             error: this.state.error,
         };
     },
