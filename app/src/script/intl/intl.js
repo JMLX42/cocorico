@@ -99,7 +99,10 @@ var Intl = {
 			STEP_3_NAME: 'Confirmation',
 			STEP_4_NAME: 'A voté !',
 			STEP_TITLE: 'Étape { step }/{ total } : { title }',
-			REMOVING_VOTE: 'Suppression de votre vote en cours...'
+			REMOVING_VOTE: 'Suppression de votre vote en cours...',
+			TRANSACTION_HASH: "Transaction",
+			VOTER: "Votant",
+			PROPOSAL: "Choix"
 		},
 
 		voterCard : {
