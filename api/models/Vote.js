@@ -11,7 +11,10 @@ var Vote = new keystone.List('Vote', {
     autokey: { path: 'slug', from: 'title', unique: true },
     // map: { name: 'title' },
     track: { createdAt: true, updatedAt: true },
-    sortable: true
+    sortable: true,
+    noedit: config.env != 'development',
+    nocreate: config.env != 'development',
+    nodelete: config.env != 'development'
 });
 
 Vote.add({
