@@ -374,10 +374,10 @@ require('amqplib/callback_api').connect(
                                 'ballot received'
                             );
 
-                            handleBallot(msgObj.ballot, function(err, ballot)
-                            {
-                                if (err)
-                                    return ballotError(msgObj.ballot, err, function() {ch.ack(msg)});
+                            handleBallot(msgObj.ballot, (err, ballot) => {
+                                if (err) {
+                                    return ballotError(msgObj.ballot, err, () => ch.nack(msg));
+                                }
 
                                 ch.ack(msg);
                             });
