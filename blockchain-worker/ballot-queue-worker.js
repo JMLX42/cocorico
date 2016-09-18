@@ -14,6 +14,12 @@ keystone.import('../api/models');
 
 var Ballot = keystone.list('Ballot');
 
+function noRetryError(err) {
+    err.noRetry = true;
+
+    return err;
+}
+
 function whenTransactionMined(web3, tx, callback)
 {
     async.during(
@@ -80,7 +86,10 @@ function initializeVoterAccount(web3, rootAccount, address, callback)
 
                     log.info(
                         {
-                            address : address
+                            from : rootAccount,
+                            value : value,
+                            address: address,
+                            balance: web3.eth.getBalance(address)
                         },
                         'account initialized'
                     );
@@ -94,13 +103,22 @@ function initializeVoterAccount(web3, rootAccount, address, callback)
 
 function registerVoter(web3, rootAccount, address, voteInstance, callback)
 {
-    var voteRegisteredEvent = voteInstance.VoterRegistered();
+    var voterRegisteredEvent = voteInstance.VoterRegistered();
+    var voteErrorEvent = voteInstance.VoteError();
 
-    voteRegisteredEvent.watch((err, e) => {
-        if (e.args.voter == address)
-        {
-            voteRegisteredEvent.stopWatching();
-            callback(err, e);
+    voterRegisteredEvent.watch((err, e) => {
+        if (e.args.voter == address) {
+            voterRegisteredEvent.stopWatching();
+            voteErrorEvent.stopWatching();
+            callback(noRetryError(e), null);
+        }
+    });
+
+    voteErrorEvent.watch((err, e) => {
+        if (e.args.voter == address) {
+            voteErrorEvent.stopWatching();
+            voterRegisteredEvent.stopWatching();
+            callback(noRetryError(e), null);
         }
     });
 
@@ -220,13 +238,13 @@ function handleBallot(ballot, callback)
             // 2) the worker stopped/crashed after initializing the account but
             // before sending the vote transaction to the blockchain: not cool, but
             // it's safer to throw an error and ask the user to vote again.
-            (callback) => accountIsNotInitialized(web3, address, callback),
+            // (callback) => accountIsNotInitialized(web3, address, callback),
             (callback) => web3.eth.getAccounts((err, acc) => {
                 rootAccount = acc[0];
                 callback(err);
             }),
             // Step 1: we wait for the blockchain to be available.
-            (callback) => waitForBlockchain(web3, () => callback()),
+            // (callback) => waitForBlockchain(web3, () => callback()),
             // Step 2: the voter account will need some ether to vote. So
             // the "root" account will make a first transaction to the voter
             // account to initialize it.
@@ -304,8 +322,9 @@ function updateBallotStatus(ballot, status, callback)
             if (err)
                 return callback(err, null);
 
-            if (!dbBallot)
+            if (!dbBallot) {
                 return callback('unknown ballot with id ' + ballot.id, null);
+            }
 
             dbBallot.status = status;
 
@@ -343,12 +362,12 @@ require('amqplib/callback_api').connect(
     function(err, conn)
     {
         if (err != null)
-            return console.error(err);
+            return log.error({error: err}, 'error');
 
         conn.createChannel(function(err, ch)
         {
             if (err != null)
-                return console.error(err);
+                return log.error({error: err}, 'error');
 
             ch.assertQueue('ballots');
             ch.consume(
@@ -360,6 +379,10 @@ require('amqplib/callback_api').connect(
                         var msgObj = JSON.parse(msg.content.toString());
 
                         // return ch.ack(msg);
+
+                        if (!!msgObj.lastTriedAt && Date.now() / 1000 - msgObj.lastTriedAt < 1) {
+                            return ch.nack(msg);
+                        }
 
                         if (msgObj.ballot)
                         {
@@ -376,7 +399,22 @@ require('amqplib/callback_api').connect(
 
                             handleBallot(msgObj.ballot, (err, ballot) => {
                                 if (err) {
-                                    return ballotError(msgObj.ballot, err, () => ch.nack(msg));
+                                    log.error({error: err}, 'error');
+
+                                    if (err.noRetry) {
+                                        return ch.ack(msg);
+                                    }
+
+                                    msgObj.lastTriedAt = Date.now() / 1000;
+
+                                    return ballotError(msgObj.ballot, err, () => {
+                                        ch.sendToQueue(
+                        					'ballots',
+                        					new Buffer(JSON.stringify(msgObj)),
+                        					{ persistent : true }
+                                        );
+                                        ch.ack(msg);
+                                    });
                                 }
 
                                 ch.ack(msg);

@@ -14,68 +14,15 @@ keystone.import('../api/models');
 
 var Vote = keystone.list('Vote');
 
-function whenTransactionMined(web3, tx, callback)
-{
-    async.during(
-        function(callback)
-        {
-            web3.eth.getTransaction(
-                tx,
-                function(e, r)
-                {
-                    if (r && r.blockHash)
-                        return callback(e, false, r);
-
-                    return callback(e, true, null);
-                }
-            );
-        },
-        function(callback)
-        {
-            setTimeout(callback, 1000);
-        },
-        function(err, r)
-        {
-            callback(err, r);
-        }
-    );
-}
-
-function waitForBlockchain(callback)
-{
-    var errorLogged = false;
-
-    var web3 = new Web3();
-    web3.setProvider(new web3.providers.HttpProvider("http://127.0.0.1:8545"));
-
-    async.whilst(
-        function()
-        {
-            var connected = web3.isConnected();
-
-            if (!connected && !errorLogged) {
-                log.error('unable to connect to the blockchain');
-            }
-            if (connected && errorLogged) {
-                log.error('successfully connected to the blockchain');
-            }
-
-            return !connected;
-        },
-        function(callback)
-        {
-            setTimeout(callback, 5000);
-        },
-        function(err)
-        {
-            callback();
-        }
-    );
-}
-
 function getCompiledVoteContract(web3, callback)
 {
-    var source = fs.readFileSync('/vagrant/contract/Vote.sol', {encoding: 'utf-8'});
+    var path = '/vagrant/contract/Vote.sol';
+    var source = fs.readFileSync(path, {encoding: 'utf-8'});
+
+    log.info(
+        { path: path },
+        'compiling smart contract'
+    );
 
     web3.eth.compile.solidity(source, (error, compiled) => {
         if (!error) {
@@ -120,20 +67,18 @@ function mineVoteContract(callback)
                         data: code,
                         gas: 999999
                     },
-                    function(error, contract)
-                    {
-                        if (error)
+                    (error, contract) => {
+                        if (error) {
                             return callback(error, null, null);
-
-                        if (!contract)
-                            return;
-
-                        if (!contract.address)
-                        {
-                            hash = contract.transactionHash
                         }
-                        else
-                        {
+
+                        if (!contract) {
+                            return;
+                        }
+
+                        if (!contract.address) {
+                            hash = contract.transactionHash
+                        } else {
                             // tx mined
                             log.info(
                                 {
@@ -155,28 +100,22 @@ function mineVoteContract(callback)
 
 function handleVote(vote, callback)
 {
-    mineVoteContract(function(err, contract, abi)
-    {
-        if (err)
+    mineVoteContract((err, contract, abi) => {
+        if (err) {
             return callback(err, null);
+        }
 
         Vote.model.findById(vote.id)
-            .exec(function(err, vote)
-            {
-                if (err)
+            .exec((err, vote) => {
+                if (err) {
                     return callback(err, null);
+                }
 
                 vote.status = 'open';
             	vote.voteContractABI = JSON.stringify(abi);
                 vote.voteContractAddress = contract.address;
 
-                vote.save(function(err, vote)
-                {
-                    if (err)
-                        return callback(err, null);
-
-                    return callback(null, vote);
-                });
+                vote.save(callback);
             });
     });
 }
@@ -185,35 +124,37 @@ require('amqplib/callback_api').connect(
     'amqp://localhost',
     function(err, conn)
     {
-        if (err != null)
+        if (err != null) {
             return log.error({error: err}, 'error');
+        }
+
+        log.info('connecting');
 
         conn.createChannel(function(err, ch)
         {
-            if (err != null)
+            if (err != null) {
                 return log.error({error: err}, 'error');
+            }
+
+            log.info('connected');
 
             ch.assertQueue('votes');
             ch.consume(
                 'votes',
-                function(msg)
-                {
-                    if (msg !== null)
-                    {
+                (msg) =>{
+                    if (msg !== null) {
                         var obj = JSON.parse(msg.content.toString());
 
                         log.info({ vote: obj }, 'vote received');
 
-                        if (obj.vote)
-                        {
-                            handleVote(obj.vote, function(err, vote)
-                            {
-                                if (err) {
+                        if (obj.vote) {
+                            handleVote(obj.vote, (err, vote) => {
+                                if (!!err) {
                                     log.error({error: err}, 'error');
-                                    ch.nack(msg);
+                                    return ch.nack(msg);
                                 }
-                                else
-                                    ch.ack(msg);
+
+                                return ch.ack(msg);
                             });
                         }
                     }
