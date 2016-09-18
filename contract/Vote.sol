@@ -89,4 +89,8 @@ contract Vote {
     function getVoteResults() constant returns (uint[]) {
         return results;
     }
+
+    function end() onlyChairPerson {
+        selfdestruct(chairperson);
+    }
 }
