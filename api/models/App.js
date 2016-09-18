@@ -5,6 +5,7 @@ var srs = require('secure-random-string');
 var Types = keystone.Field.Types;
 
 var App = new keystone.List('App', {
+    map: { name: 'title' }
 });
 
 App.add({
