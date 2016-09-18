@@ -10,7 +10,7 @@ var App = new keystone.List('App', {
 
 App.add({
     title: { type: String, required: true, initial: true },
-    secret: { type: Types.Key, required: true, default: () => srs(32) },
+    secret: { type: Types.Key, required: true, default: () => srs(32).toLowerCase() },
     validURLs: { type: Types.TextArray }
 });
 
