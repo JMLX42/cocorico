@@ -58,7 +58,7 @@ var VotePage = React.createClass({
             <ReactDocumentTitle title={StringHelper.toTitleCase(vote.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
                 <div>
                     {this.state.showVoteWidget
-                        ? <VoteWidget vote={vote} modal={true}/>
+                        ? <VoteWidget vote={vote}/>
                         : null}
                     <div className="vote-banner">
                         <div className="vote-banner-img"

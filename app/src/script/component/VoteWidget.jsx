@@ -11,8 +11,7 @@ var Button = ReactBootstrap.Button,
     Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row,
     Col = ReactBootstrap.Col,
-    ProgressBar = ReactBootstrap.ProgressBar,
-    Modal = ReactBootstrap.Modal;
+    ProgressBar = ReactBootstrap.ProgressBar;
 
 var Link = ReactRouter.Link;
 
@@ -95,7 +94,6 @@ var VoteWidget = React.createClass({
             onComplete: (v) => {},
             onError: (v) => {},
             onSuccess: (v) => {},
-            modal: true
         };
     },
 
@@ -252,6 +250,9 @@ var VoteWidget = React.createClass({
 
             if (step < 0) {
                 this.setState(this.getInitialState());
+            }
+            if (step == VoteWidget.STEP_COMPLETE) {
+                this.props.onSuccess(this.getSafeContext());
             }
         }
     },
@@ -523,17 +524,10 @@ var VoteWidget = React.createClass({
                                         message={this.getIntlMessage('vote.CONFIRM_VOTER_ID')}
                                         name={user.firstName + ' ' + user.lastName}/>
                                 </Button>
-                                <a href="/api/auth/logout" className="btn btn-default">
+                                <a className="btn btn-default" onClick={(e) => this.props.onCancel(this.getSafeContext())}>
                                     <FormattedMessage
                                         message={this.getIntlMessage('vote.DENY_VOTER_ID')}/>
                                 </a>
-                                {this.props.modal
-                                    ? <Button bsStyle="link"
-                                        disabled={this.state.blockchainAccountCreated}
-                                        onClick={(e)=>this.props.onCancel(e)}>
-                                        {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
-                                    </Button>
-                                    : null}
                             </ButtonToolbar>
                             <Hint style="warning" pageSlug="attention-usurpation-didentite"/>
                         </div>
@@ -582,12 +576,6 @@ var VoteWidget = React.createClass({
                                         <FormattedMessage
                                             message={this.getIntlMessage('vote.USE_EXISTING_VOTE_CARD')}/>
                                     </Button>
-                                    {this.props.modal
-                                        ? <Button bsStyle="link"
-                                            onClick={(e)=>this.props.onCancel(e)}>
-                                            {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
-                                        </Button>
-                                        : null}
                                 </ButtonToolbar>
                                 : <ButtonToolbar className="vote-step-actions">
                                     <LoadingIndicator text={this.getIntlMessage('vote.CREATING_NEW_VOTE_CARD')}/>
@@ -700,12 +688,6 @@ var VoteWidget = React.createClass({
                                 ? <LoadingIndicator text="Envoi de votre vote en cours..."/>
                                 : <div>
                                     {this.renderConfirmVoteButton()}
-                                    {this.props.modal
-                                        ? <Button bsStyle="link"
-                                            onClick={(e)=>this.props.onCancel(e)}>
-                                            {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
-                                        </Button>
-                                        : null}
                                 </div>}
                         </ButtonToolbar>
                     </Col>
@@ -775,70 +757,7 @@ var VoteWidget = React.createClass({
     complete: function(e) {
         window.onbeforeunload = null;
         // this.goToStep(VoteWidget.STEP_INIT);
-        // this.setState({voteModalClosed:true});
         this.props.onComplete(e);
-    },
-
-    renderCompleteModalFooter: function() {
-        return (
-            <Button
-                onClick={(e)=>this.complete(e)}
-                disabled={!this.state.fetchedVoterCard && this.state.confirmedVote && !this.state.exitButtonEnabled}>
-                {this.state.fetchedVoterCard || !this.state.confirmedVote
-                    ? this.getIntlMessage('vote.EXIT')
-                    : <Countdown
-                        count={VoteWidget.COUNTDOWN}
-                        format={(c) => c != 0
-                            ? this.getIntlMessage('vote.EXIT_WITHOUT_VOTER_CARD') + ' (' + c + ')'
-                            : this.getIntlMessage('vote.EXIT_WITHOUT_VOTER_CARD')}
-                        onComplete={()=>this.setState({exitButtonEnabled:true})}/>}
-            </Button>
-        );
-    },
-
-    renderVoterCardModalFooter: function() {
-        if (!this.state.showVoterCardReader) {
-            return null;
-        }
-
-        return (
-            <Button
-                bsStyle="link"
-                onClick={(e)=>this.setState({showVoterCardReader:false})}>
-                Retour
-            </Button>
-        );
-    },
-
-    renderVoterIdModalFooter: function() {
-        return (
-            <Button
-                bsStyle="link"
-                onClick={(e)=>this.props.onCancel(e)}>
-                {this.getIntlMessage('vote.CANCEL_MY_VOTE')}>
-                Annuler
-            </Button>
-        );
-    },
-
-    renderModalFooter: function() {
-        if (!this.props.modal) {
-            return null;
-        }
-
-        return (
-            <div>
-                {this.state.step == VoteWidget.STEP_VOTER_ID
-                    ? this.renderVoterIdModalFooter()
-                    : null}
-                {this.state.step == VoteWidget.STEP_VOTE_CARD
-                    ? this.renderVoterCardModalFooter()
-                    : null}
-                {this.state.step == VoteWidget.STEP_COMPLETE
-                    ? this.renderCompleteModalFooter()
-                    : null}
-            </div>
-        );
     },
 
     renderContent: function() {
@@ -878,6 +797,33 @@ var VoteWidget = React.createClass({
         );
     },
 
+    getSafeContext: function() {
+        // Return a mapping containing only values that are safe to pass to
+        // parent window when posting event messages.
+        return {
+            vote: this.state.vote,
+            step: this.state.step,
+            userAuthenticated: this.state.isAuthenticated,
+            ballotValue: this.state.ballotValue,
+            error: this.state.error,
+        };
+    },
+
+    renderExitButton: function() {
+        // Render top-right button that allows the user to either cancel his
+        // vote or terminate the voting workflow once his vote has successfully
+        // been register.
+        return (!!this.state.step && this.state.step == VoteWidget.STEP_COMPLETE)
+            ? <Button bsStyle="success"
+                onClick={(e) => this.props.onComplete(this.getSafeContext())}>
+                {this.getIntlMessage('vote.EXIT')}
+            </Button>
+            : <Button bsStyle="danger"
+                onClick={(e) => this.props.onCancel(this.getSafeContext())}>
+                {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+            </Button>
+    },
+
     render: function() {
         var vote = this.state.vote;
 
@@ -898,6 +844,9 @@ var VoteWidget = React.createClass({
                     <Icon name="enveloppe"/>
                     <Title text={vote.title}/>
                 </h1>
+                <div className="vote-exit">
+                    {this.renderExitButton()}
+                </div>
                 <div>
                     {this.renderProgressBar()}
                 </div>

@@ -29,6 +29,7 @@ var VoteWidgetPage = React.createClass({
     },
 
     postMessage: function(msg, vote) {
+        console.log('postMessage: ' + msg, vote);
         if (!!window.parent && !!vote && !!vote.url) {
             window.parent.postMessage(msg, vote.url);
         }
@@ -45,7 +46,6 @@ var VoteWidgetPage = React.createClass({
                 <ReactDocumentTitle title={title}>
                     <div className="content">
                         <VoteWidget
-                            modal={false}
                             voteId={this.props.params.voteId}
                             onSuccess={(v) => this.postMessage('voteSuccess', v)}
                             onError={(v) => this.postMessage('voteError', v)}
