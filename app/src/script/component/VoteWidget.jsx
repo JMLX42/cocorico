@@ -521,15 +521,10 @@ var VoteWidget = React.createClass({
                                         message={this.getIntlMessage('vote.CONFIRM_VOTER_ID')}
                                         name={user.firstName + ' ' + user.lastName}/>
                                 </Button>
-                                <a href="/api/auth/logout" className="btn btn-default">
+                                <a className="btn btn-default" onClick={(e) => this.props.onCancel(this.getSafeContext())}>
                                     <FormattedMessage
                                         message={this.getIntlMessage('vote.DENY_VOTER_ID')}/>
                                 </a>
-                                <Button bsStyle="link"
-                                    disabled={this.state.blockchainAccountCreated}
-                                    onClick={(e)=>this.props.onCancel(e)}>
-                                    {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
-                                </Button>
                             </ButtonToolbar>
                             <Hint style="warning" pageSlug="attention-usurpation-didentite"/>
                         </div>
@@ -577,10 +572,6 @@ var VoteWidget = React.createClass({
                                         onClick={(e)=>this.setState({showVoterCardReader:true})}>
                                         <FormattedMessage
                                             message={this.getIntlMessage('vote.USE_EXISTING_VOTE_CARD')}/>
-                                    </Button>
-                                    <Button bsStyle="link"
-                                        onClick={(e)=>this.props.onCancel(e)}>
-                                        {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
                                     </Button>
                                 </ButtonToolbar>
                                 : <ButtonToolbar className="vote-step-actions">
@@ -694,10 +685,6 @@ var VoteWidget = React.createClass({
                                 ? <LoadingIndicator text="Envoi de votre vote en cours..."/>
                                 : <div>
                                     {this.renderConfirmVoteButton()}
-                                   <Button bsStyle="link"
-                                       onClick={(e)=>this.props.onCancel(e)}>
-                                       {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
-                                   </Button>
                                 </div>}
                         </ButtonToolbar>
                     </Col>
@@ -807,6 +794,33 @@ var VoteWidget = React.createClass({
         );
     },
 
+    getSafeContext: function() {
+        // Return a mapping containing only values that are safe to pass to
+        // parent window when posting event messages.
+        return {
+            vote: this.state.vote,
+            step: this.state.step,
+            userAuthenticated: this.state.isAuthenticated,
+            ballotValue: this.state.ballotValue,
+            error: this.state.error,
+        };
+    },
+
+    renderExitButton: function() {
+        // Render top-right button that allows the user to either cancel his
+        // vote or terminate the voting workflow once his vote has successfully
+        // been register.
+        return (!!this.state.step && this.state.step == VoteWidget.STEP_COMPLETE)
+            ? <Button bsStyle="success"
+                onClick={(e) => this.props.onComplete(this.getSafeContext())}>
+                {this.getIntlMessage('vote.EXIT')}
+            </Button>
+            : <Button bsStyle="danger"
+                onClick={(e) => this.props.onCancel(this.getSafeContext())}>
+                {this.getIntlMessage('vote.CANCEL_MY_VOTE')}
+            </Button>
+    },
+
     render: function() {
         var vote = this.state.vote;
 
@@ -827,6 +841,9 @@ var VoteWidget = React.createClass({
                     <Icon name="enveloppe"/>
                     <Title text={vote.title}/>
                 </h1>
+                <div className="vote-exit">
+                    {this.renderExitButton()}
+                </div>
                 <div>
                     {this.renderProgressBar()}
                 </div>
