@@ -251,6 +251,9 @@ var VoteWidget = React.createClass({
             if (step < 0) {
                 this.setState(this.getInitialState());
             }
+            if (step == VoteWidget.STEP_COMPLETE) {
+                this.props.onSuccess(this.getSafeContext());
+            }
         }
     },
 
