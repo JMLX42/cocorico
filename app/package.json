@@ -25,12 +25,12 @@
     "qrcode-npm": "0.0.3",
     "qrcode-reader": "0.1.1",
     "react": "^0.14.6",
-    "react-bootstrap": "^0.28.2",
+    "react-bootstrap": "^0.30.3",
     "react-cookie": "0.4.3",
     "react-d3-components": "0.6.0",
     "react-document-title": "2.0.1",
     "react-dom": "^0.14.6",
-    "react-intl": "1.2.0",
+    "react-intl": "1.2.2",
     "react-remarkable": "1.1.1",
     "react-router": "2.8.0",
     "reflux": "0.3.0"
@@ -46,9 +46,9 @@
     ]
   },
   "scripts": {
-    "build": "NODE_ENV=development browserify -v -t babelify -t node-lessify -d -p [minifyify --map /app.js.map --output public/app.js.map ] --extension=.jsx src/script/index.js -o public/app.js",
-    "build-release": "NODE_ENV=production browserify -v -t babelify -t node-lessify -d -p [minifyify --map /app.js.map --output public/app.js.map ] --extension=.jsx src/script/index.js -o public/app.js",
-    "start": "NODE_ENV=development watchify -v --debug -t babelify -t node-lessify -d -p [minifyify --map /app.js.map --output public/app.js.map ] --extension=.jsx src/script/index.js --poll=5000 -o public/app.js"
+    "build": "NODE_ENV=development browserify -v -t babelify -t node-lessify -d --extension=.jsx src/script/index.js -o public/app.js",
+    "build-release": "NODE_ENV=production browserify -v -t babelify -t node-lessify -d --extension=.jsx src/script/index.js -o public/app.js",
+    "start": "NODE_ENV=development watchify -v --debug -t babelify -t node-lessify -d --extension=.jsx src/script/index.js --poll=5000 -o public/app.js"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.14.0",

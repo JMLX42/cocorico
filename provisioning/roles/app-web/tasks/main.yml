@@ -9,6 +9,11 @@
 - name: link www project root folder
   file: src={{ cocorico_app_dir }}/public dest={{ www_dir }}/{{ role_name }} state=link
 
+- name: install site configuration
+  template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
+  notify:
+    - restart apache2 service
+
 # Windows hosts won't handle creating an actual dir, but it's ok to create a symlink
 - file: path={{ project_dir }}/{{ role_name }}/node_modules state=directory recurse=yes
 - file: src={{ project_dir }}/{{ role_name }}/node_modules dest={{ cocorico_app_dir }}/node_modules state=link
@@ -18,7 +23,9 @@
 
 - name: generate app configuration
   template: src=config.json.j2 dest={{ project_dir }}/{{ role_name }}/config.json
-  register: app_config
+
+- name: install locale messages
+  template: src=messages.js.j2 dest={{ project_dir }}/{{ role_name }}/messages.js
 
 - name: build debug app
   shell: npm run build
@@ -26,7 +33,7 @@
     chdir: "{{ cocorico_app_dir }}"
   register: result
   failed_when: result.stderr
-  when: is_development_environment # and app_config.changed
+  when: is_development_environment
 
 - name: build release app
   shell: npm run build-release
@@ -34,9 +41,4 @@
     chdir: "{{ cocorico_app_dir }}"
   register: result
   failed_when: result.stderr
-  when: not is_development_environment # and app_config.changed
-
-- name: install site configuration
-  template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
-  notify:
-    - restart apache2 service
+  when: not is_development_environment

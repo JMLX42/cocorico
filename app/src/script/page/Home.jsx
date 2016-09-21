@@ -1,14 +1,18 @@
 var React = require('react');
+var ReactIntl = require('react-intl');
 
 var Page = require("../component/Page");
 
 var Home = React.createClass({
 
-    render: function()
-    {
+    mixins: [
+        ReactIntl.IntlMixin
+    ],
+
+    render: function() {
 		return (
             <div className="page page-home">
-                <Page slug="accueil" setDocumentTitle={true}/>
+                <Page slug={this.getIntlMessage('slug.HOME')} setDocumentTitle={true}/>
             </div>
 		);
 	}

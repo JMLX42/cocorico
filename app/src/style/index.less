@@ -42,6 +42,7 @@ body {
     font-family: @font-family-sans-serif;
     // color: @text-color;
     font-size: floor(@font-size-base * 1.2);
+    background-color: @cocorico-light-grey;
 
     // https://github.com/twbs/bootstrap/issues/14040
     &.modal-open {
@@ -70,8 +71,6 @@ img {
 }
 
 ul {
-    margin-top: 10px;
-
     &.list-inline {
         margin-top: 0;
     }
@@ -127,10 +126,6 @@ ul {
     box-shadow: none;
     background-color: @cocorico-light-grey;
     border-color: @cocorico-grey;
-}
-
-.modal-footer .btn-toolbar .btn {
-    margin: 0;
 }
 
 .btn-outline {
@@ -272,16 +267,16 @@ li.active {
     color: @cocorico-dark-grey;
     font-size: @font-size-base;
 
-    .list-inline li {
+    .list-inline > li {
         margin-right: 20px;
     }
 
-    .text-right .list-inline li {
+    .text-right .list-inline > li {
         margin-right: 0;
         margin-left: 20px;
     }
 
-    a {
+    ul > li > a {
         margin-top: 20px;
         display: inline-block;
         color: @cocorico-dark-grey;

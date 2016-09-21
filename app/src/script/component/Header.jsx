@@ -35,8 +35,7 @@ var Header = React.createClass({
         PageAction.showNavBar();
     },
 
-    componentDidMount: function()
-    {
+    componentDidMount: function() {
         UserAction.requireLogin();
 
         const navBar = ReactDOM.findDOMNode(this).querySelector('nav.navbar');
@@ -45,8 +44,7 @@ var Header = React.createClass({
 
         navBar.addEventListener('click', (evt) => {
             if (evt.target.tagName !== 'A' || evt.target.classList.contains('dropdown-toggle')
-                || ! collapsibleNav.classList.contains('in'))
-            {
+                || ! collapsibleNav.classList.contains('in')) {
                 return;
             }
 
@@ -54,8 +52,7 @@ var Header = React.createClass({
         }, false);
     },
 
-    renderLoginButtonOrAccountDropDown()
-    {
+    renderLoginButtonOrAccountDropDown() {
         if (!this.state.config.capabilities.user.sign_in) {
             return;
         }
@@ -71,8 +68,7 @@ var Header = React.createClass({
         );
     },
 
-    render: function()
-    {
+    render: function() {
 		return (
             <div id="header">
                 <Navbar fixedTop>
@@ -89,15 +85,12 @@ var Header = React.createClass({
                     </Navbar.Header>
                     <Navbar.Collapse ref="headerMenu">
                         <Nav>
-                            {!this.state.pages ? '' : this.state.pages.navBar().map(function(page) {
-                                return (
-                                    <li key={page.slug}>
-                                        <Link to={'/' + page.slug} activeClassName="active">
-                                            {page.title}
-                                        </Link>
-                                    </li>
-                                )
-                            })}
+                            <li>
+                                <Link to={this.getIntlMessage('route.ABOUT')}
+                                    activeClassName="active">
+                                    {this.getIntlMessage('title.ABOUT')}
+                                </Link>
+                            </li>
         			    </Nav>
                         <Nav pullRight>
                             <li>

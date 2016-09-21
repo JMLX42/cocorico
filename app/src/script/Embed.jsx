@@ -3,8 +3,6 @@ var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var ReactRouter = require('react-router');
 
-var Intl = require('./intl/intl');
-
 var Grid = ReactBootstrap.Grid,
     Row = ReactBootstrap.Row;
 
@@ -22,8 +20,7 @@ var Embed = React.createClass({
 
     getDefaultProps: function() {
         return {
-            locales: Intl.locales,
-            messages: Intl.messages
+            messages: require('./intl/locale.js').getCurrentLocaleMessages()
         };
     },
 

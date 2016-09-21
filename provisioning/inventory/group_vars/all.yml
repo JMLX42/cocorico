@@ -35,3 +35,7 @@ supported_web_browsers:
   microsoft edge:
     name: "Microsoft Edge"
     version: "14.14393"
+
+supported_locales:
+  fr-FR: Français
+  en-US: English

@@ -33,19 +33,19 @@ var Footer = React.createClass({
                                 <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
                                     <Link to={this.getIntlMessage('route.PRIVACY_POLICY')}
                                         target={target}>
-                                        {this.getIntlMessage('footer.PRIVACY_POLICY')}
+                                        {this.getIntlMessage('title.PRIVACY_POLICY')}
                                     </Link>
                                 </li>
                                 <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
                                     <a href="https://github.com/promethe42/cocorico"
                                         target="_blank">
-                                        {this.getIntlMessage('footer.SOURCE_CODE')}
+                                        {this.getIntlMessage('title.SOURCE_CODE')}
                                     </a>
                                 </li>
                                 <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
                                     <Link to={this.getIntlMessage('route.SERVICE_STATUS')}
                                         target={target}>
-                                        {this.getIntlMessage('footer.SERVICE_STATUS')}
+                                        {this.getIntlMessage('title.SERVICE_STATUS')}
                                     </Link>
                                 </li>
                             </ul>
@@ -55,14 +55,14 @@ var Footer = React.createClass({
                                 <li className="visible-xs-inline hidden-sm hidden-md hidden-lg">
                                     <Link to={this.getIntlMessage('route.PRIVACY_POLICY')}
                                         target={target}>
-                                        {this.getIntlMessage('footer.PRIVACY_POLICY')}
+                                        {this.getIntlMessage('title.PRIVACY_POLICY')}
                                     </Link>
                                 </li>
                                 {isEmbed
                                     ? <li>
                                         <a href="/" target={target}>
                                             <FormattedMessage
-                                                message={this.getIntlMessage('footer.POWERED_BY')}
+                                                message={this.getIntlMessage('title.POWERED_BY')}
                                                 productName="Cocorico"/>
                                         </a>
                                     </li>
