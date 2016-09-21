@@ -27,7 +27,6 @@ var LoadingIndicator = require('./LoadingIndicator'),
     Hint = require('./Hint'),
     Countdown = require('./Countdown'),
     Title = require('./Title'),
-    Page = require('./Page'),
     VoterCard = require('./VoterCard'),
     Icon = require('./Icon'),
     VoterCardDownloadButton = require('./VoterCardDownloadButton'),
@@ -316,7 +315,7 @@ var VoteWidget = React.createClass({
                                     {VoteWidget.STEP_VOTER_ID + 1}
                                 </div>
                                 <span className="vote-step-name">
-                                    {this.getIntlMessage('vote.STEP_1_NAME')}
+                                    {this.getIntlMessage('vote.STEP_0_NAME')}
                                 </span>
                             </div>
                         </div>
@@ -331,7 +330,7 @@ var VoteWidget = React.createClass({
                                     {VoteWidget.STEP_VOTE + 1}
                                 </div>
                                 <span className="vote-step-name">
-                                    {this.getIntlMessage('vote.STEP_0_NAME')}
+                                    {this.getIntlMessage('vote.STEP_1_NAME')}
                                 </span>
                             </div>
                         </div>
@@ -511,7 +510,8 @@ var VoteWidget = React.createClass({
                 <Row>
                     <Col xs={12}>
                         <div className="vote-step-description">
-                            <Page slug="vote-carte-didentite"/>
+                            <FormattedHTMLMessage
+                                message={this.getIntlMessage('vote.STEP_0_DESCRIPTION')}/>
                             <p>
                                 <FormattedHTMLMessage
                                     message={this.getIntlMessage('vote.ANNOUNCE_VOTER_ID')}
@@ -529,7 +529,10 @@ var VoteWidget = React.createClass({
                                         message={this.getIntlMessage('vote.DENY_VOTER_ID')}/>
                                 </a>
                             </ButtonToolbar>
-                            <Hint style="warning" pageSlug="attention-usurpation-didentite"/>
+                            <Hint style="warning">
+                                <FormattedHTMLMessage
+                                    message={this.getIntlMessage('vote.STEP_0_WARNING')}/>
+                            </Hint>
                         </div>
                     </Col>
                 </Row>
@@ -556,7 +559,8 @@ var VoteWidget = React.createClass({
                                     <VoterCardReader voteId={this.props.voteId}
                                         onSuccess={(e)=>this.goToNextStep()}/>
                                 </div>
-                                : <Page slug="vote-carte-de-vote"/>}
+                                : <FormattedHTMLMessage
+                                    message={this.getIntlMessage('vote.STEP_2_DESCRIPTION')}/>}
                         </div>
                     </Col>
                 </Row>
@@ -585,7 +589,10 @@ var VoteWidget = React.createClass({
                 {!this.state.showVoterCardReader
                     ? <Row>
                         <Col xs={12}>
-                            <Hint pageSlug="astuce-carte-de-vote-a-usage-unique"/>
+                            <Hint>
+                                <FormattedHTMLMessage
+                                    message={this.getIntlMessage('vote.STEP_2_HINT')}/>
+                            </Hint>
                         </Col>
                     </Row>
                     : null}
@@ -601,7 +608,8 @@ var VoteWidget = React.createClass({
                 <Row>
                     <Col xs={12}>
                         <div className="vote-step-description">
-                            <Page slug="vote-nouvelle-carte-de-vote"/>
+                            <FormattedHTMLMessage
+                                message={this.getIntlMessage('vote.STEP_2_NEW_CARD')}/>
                         </div>
                     </Col>
                 </Row>
@@ -627,8 +635,10 @@ var VoteWidget = React.createClass({
                 </Row>
                 <Row>
                     <Col xs={12}>
-                        <Hint style="warning"
-                                pageSlug="attention-recuperer-carte-de-vote-1"/>
+                        <Hint style="warning">
+                            <FormattedHTMLMessage
+                                message={this.getIntlMessage('vote.WARNING_FETCH_VOTE_CARD')}/>
+                        </Hint>
                     </Col>
                 </Row>
             </Grid>
@@ -685,7 +695,8 @@ var VoteWidget = React.createClass({
                     <Col xs={12}>
                         <ButtonToolbar className="vote-step-actions">
                             {this.state.confirmedVote
-                                ? <LoadingIndicator text="Envoi de votre vote en cours..."/>
+                                ? <LoadingIndicator
+                                        text={this.getIntlMessage('vote.PENDING_BALLOT_TRANSACTION')}/>
                                 : <div>
                                     {this.renderConfirmVoteButton()}
                                 </div>}
@@ -694,9 +705,14 @@ var VoteWidget = React.createClass({
                 </Row>
                 <Row>
                     <Col xs={12}>
+                        <Hint style="warning">
+                            <FormattedHTMLMessage
+                                message={this.getIntlMessage('vote.STEP_3_WARNING')}/>
+                        </Hint>
                         {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
-                            ? <Hint style="warning"
-                                pageSlug="attention-recuperer-carte-de-vote-2">
+                            ? <Hint style="warning">
+                                <FormattedHTMLMessage
+                                    message={this.getIntlMessage('vote.WARNING_FETCH_VOTE_CARD')}/>
                                 <ButtonToolbar>
                                     {this.renderVoterCardPrintButton('btn btn-warning')}
                                     {this.renderVoterCardDownloadButton('btn btn-warning')}
@@ -739,9 +755,14 @@ var VoteWidget = React.createClass({
                 </Row>
                 <Row>
                     <Col xs={12}>
+                        <Hint>
+                            <FormattedHTMLMessage
+                                message={this.getIntlMessage('vote.STEP_4_HINT')}/>
+                        </Hint>
                         {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
-                            ? <Hint style="warning"
-                                pageSlug="attention-recuperer-carte-de-vote-3">
+                            ? <Hint style="warning">
+                                <FormattedHTMLMessage
+                                    message={this.getIntlMessage('vote.WARNING_FETCH_VOTE_CARD')}/>
                                 <ButtonToolbar>
                                     {this.renderVoterCardPrintButton('btn btn-warning')}
                                     {this.renderVoterCardDownloadButton('btn btn-warning')}
