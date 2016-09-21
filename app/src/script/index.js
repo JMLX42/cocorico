@@ -4,7 +4,6 @@ require('babel-polyfill');
 var React = require('react');
 var ReactRouter = require('react-router');
 var ReactDOM = require('react-dom');
-var messages = require('./intl/intl').messages;
 
 var Router = ReactRouter.Router,
     Route = ReactRouter.Route,
@@ -26,6 +25,8 @@ var Router = ReactRouter.Router,
 browserHistory.listen((location, action) => {
   RouteAction.change(browserHistory, location, action);
 });
+
+var messages = require('./intl/locale.js').getCurrentLocaleMessages();
 
 ReactDOM.render(
     <Router history={browserHistory}>
