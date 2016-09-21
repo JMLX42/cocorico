@@ -1,1 +1,0 @@
-Votre carte d'identité numérique permet de garantir que vous ne votez qu'une seule fois : elle est utilisée pour créer la signature numérique qui sera écrite dans le bordereau d'émargement numérique. Votre carte d'identité numérique permet de retrouver vos signatures numériques, mais pas l'inverse : **votre vote est donc 100% anonyme**.
