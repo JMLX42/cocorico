@@ -12,8 +12,7 @@ var AccountDropdown = React.createClass({
 
     mixins: [ReactIntl.IntlMixin],
 
-    render: function()
-    {
+    render: function() {
 		return (
             <DropdownButton title={this.props.fullName} className="account-dropdown" id="account-dropdown">
                 <MenuItem eventKey="1" href="/api/auth/logout">
