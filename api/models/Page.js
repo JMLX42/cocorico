@@ -13,7 +13,6 @@ Page.add({
 	title: { type: String, required: true },
     publishedAt: Date,
     published: { type: Boolean, default: false },
-    showInNavBar: { type: Boolean, default: false },
     contentType: { type: Types.Select, options: ['Markdown', 'HTML'] },
     markdown: { type: Types.Markdown, wysiwyg: true, height: 400, dependsOn: { contentType : 'Markdown' } },
     html: { type: Types.Html, wysiwyg: true, height: 400, dependsOn: { contentType : 'HTML' } }
