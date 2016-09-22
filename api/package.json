@@ -19,7 +19,6 @@
     "md5": "2.1.0",
     "metafetch": "1.2.11",
     "model-transform": "^1.1.0",
-    "mongoose-deep-populate": "2.0.3",
     "node-fetch": "1.5.3",
     "oauth": "~0.9.12",
     "oauth2-server": "^2.4.1",
