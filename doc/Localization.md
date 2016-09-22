@@ -1,6 +1,6 @@
 # Localization
 
-## Editing an existing locale
+## Editing messages for an existing locale
 
 Existing locale messages can be modified by editing the corresponding file in
 the `app/src/script/intl` directory.
@@ -47,8 +47,49 @@ Then check the result in your local instance by going to
 ## Translating pages
 
 Pages are not stored in the JSON localization message files. They are stored in
-the database and must be created through the CMS. To do so, for each translated
-page you want to create:
+the database and must be created/edited through the CMS.
+
+### Editing an existing page
+
+#### With the CMS (recommended)
+
+If the translated page already exists, you can directly edit its content:
+
+* make sure your local instance is running with `vagrant up`
+* in your Web browser, go to `https://local.cocorico.cc/admin/pages` and
+login if necessary
+* open the page you want to edit
+* edit the page content
+* click on "Save"
+
+You can check the result in your local instance by going to
+`https://local.cocorico.cc` in your Web browser.
+
+When you are done editing the translated pages, don't forget to export them from
+the database:
+
+```shell
+vagrant ssh --command "cd /vagrant/api && ./scripts/save-pages.js"
+```
+
+#### Without the CMS (not recommended)
+
+You can directly edit the corresponding exported page HTML/Markdown file. They
+are located in the `api/db/pages` directory.
+
+To check the result when you are done editing the translated pages, you must
+first import your changes in the CMS:
+
+```shell
+vagrant ssh --command "cd /vagrant/api && ./scripts/import-pages.js"
+```
+
+then by go to `https://local.cocorico.cc` in your Web browser.
+
+### Creating a new translation for a page
+
+If the translated page does not already exists, you must create it from scratch.
+To do so, for each translated page you want to create:
 
 * make sure your local instance is running with `vagrant up`
 * in your Web browser, go to `https://local.cocorico.cc/admin/pages?create` and
