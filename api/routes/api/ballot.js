@@ -7,22 +7,10 @@ var EthereumUtil = require('ethereumjs-util');
 var async = require('async');
 
 var Vote = keystone.list('Vote'),
-    Ballot = keystone.list('Ballot'),
+    Ballot = keystone.list('Ballot');
 
-    BallotHelper = require('../../helpers/BallotHelper');
-
-exports.list = function(req, res) {
-    Ballot.find().exec((err, ballots) => {
-        if (err)
-            return res.apiError('database error', err);
-
-        return res.apiResponse({ballots: ballots});
-    });
-}
-
-exports.get = function(req, res)
-{
-	BallotHelper.getByVoteIdAndVoter(
+exports.get = function(req, res) {
+	Ballot.getByVoteIdAndUser(
 		req.params.voteId,
 		req.user.sub,
 		(err, ballot) => {
@@ -57,8 +45,7 @@ exports.get = function(req, res)
 	// 	});
 }
 
-function pushBallotMessageOnQueue(data, callback)
-{
+function pushBallotMessageOnQueue(data, callback) {
     try {
         require('amqplib/callback_api').connect(
             'amqp://localhost',
@@ -89,8 +76,7 @@ function pushBallotMessageOnQueue(data, callback)
     }
 }
 
-function ballotTransactionError(res, ballot, msg)
-{
+function ballotTransactionError(res, ballot, msg) {
     ballot.status = 'error';
     ballot.error = JSON.stringify(msg);
     ballot.save(function(err)
@@ -112,6 +98,7 @@ exports.vote = function(req, res) {
     async.waterfall(
         [
             (callback) => Vote.model.findById(req.params.voteId)
+                .populate('app')
                 .exec(callback),
             (vote, callback) => {
                 if (!vote)
@@ -122,7 +109,7 @@ exports.vote = function(req, res) {
                 if (vote.voteContractAddress != voteContractAddress)
                     return callback({code: 300, error: 'contract address mismatch'});
 
-                BallotHelper.getByVoteIdAndVoter(
+                Ballot.getByVoteIdAndUser(
                     vote.id,
                     req.user.sub,
                     (err, ballot) => callback(err, vote, ballot)
@@ -133,8 +120,7 @@ exports.vote = function(req, res) {
                     return callback({code: 403, error: 'user already voted'});
 
                 var ballot = Ballot.model({
-                    vote: vote,
-                    voter: bcrypt.hashSync(req.user.sub, 10),
+                    voter: Ballot.getHash(vote.id, user),
                     status: 'queued'
                 });
 
@@ -143,6 +129,7 @@ exports.vote = function(req, res) {
             (vote, ballot, callback) => pushBallotMessageOnQueue(
                 {
                     id: ballot.id,
+                    app: vote.app,
                     transaction: req.body.transaction,
                     voteContractAddress: vote.voteContractAddress,
                     voteContractABI: JSON.parse(vote.voteContractABI)
@@ -168,8 +155,7 @@ exports.vote = function(req, res) {
     );
 }
 
-exports.cancel = function(req, res)
-{
+exports.cancel = function(req, res) {
     if (!config.capabilities.vote.vote)
         return res.status(403).send();
 

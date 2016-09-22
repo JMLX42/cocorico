@@ -221,8 +221,6 @@ exports = module.exports = function(app) {
 
 	app.get('/vote/permissions/:voteId', routes.api.vote.permissions);
 
-	// app.get('/ballot/list', isAuthenticated, routes.api.ballot.list);
-
 	/**
 	 * @api {get} /ballot/:voteId Get a ballot
 	 * @apiName GetBallot
