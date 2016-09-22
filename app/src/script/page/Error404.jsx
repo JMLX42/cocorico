@@ -10,15 +10,16 @@ var Error404 = React.createClass({
 
     mixins: [ReactIntl.IntlMixin],
 
-    render: function()
-    {
+    render: function() {
         return (
             <div className="error-404">
                 <Grid>
                     <Row>
-                        <div className="error-message">
-                            {this.getIntlMessage('error.ERROR_404')}
-                        </div>
+                        <Col xs={12}>
+                            <div className="error-message">
+                                {this.getIntlMessage('error.ERROR_404')}
+                            </div>
+                        </Col>
                     </Row>
                 </Grid>
             </div>
