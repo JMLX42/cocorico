@@ -67,7 +67,7 @@
 			"VALIDATE_BALLOT": "Validate your ballot",
 
 			"STEP_2_NAME": "Vote Card",
-			"STEP_2_DESCRIPTION": "<p>To guarantee your votes are anonymous, they are linked to a <string>digital vote card which is held <strong>solely by you</strong>. You can use the same vote card for all or some of your votes or <strong>create a new vote card for each vote (recommended)</strong>. You'll be able to use the selected vote card to check that your digital ballot is actually in the digital ballot box.</p>",
+			"STEP_2_DESCRIPTION": "<p>To guarantee your votes are anonymous, they are linked to a <string>digital vote card which is held solely by you</strong>. You can use the same vote card for all or some of your votes or <strong>create a new vote card for each vote (recommended)</strong>. You'll be able to use the selected vote card to check that your digital ballot is actually in the digital ballot box.</p>",
 			"STEP_2_HINT": "<h3>To guarantee your privacy...</h3><p>Each time you use the same vote card, your vote is linked to it. Your votes will always be anonymous. But it is possible to trace all the votes back to the vote card that was used. Thus, it is recommended to create a new vote card for every vote</p>",
 			"STEP_2_NEW_CARD": "<p><strong>A new digital vote card has been created for your.</strong> Your upcoming vote will be linked to this vote card. You can have as many digital vote card as you wish: this new vote card will not affect the one you eventually created previously. You must now fetch this new vote card:",
 			"CREATE_NEW_VOTE_CARD": "Create a new vote card (recommended)",
