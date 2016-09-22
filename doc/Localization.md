@@ -85,8 +85,8 @@ vagrant ssh --command "cd /vagrant/api && ./scripts/save-pages.js"
 ## Submitting your work
 
 When you're all set and all your pages are exported, you can create a new GIT
-branch, add your files to repository and commit them. Here is an example to commit
-and push new pages for the "es-ES" (Spanish) locale:
+branch, add your files to the repository and commit them. Here is an example to
+commit and push new pages for the "es-ES" (Spanish) locale:
 
 ```shell
 git checkout -b localization/es-ES
