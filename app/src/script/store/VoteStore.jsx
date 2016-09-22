@@ -152,6 +152,11 @@ module.exports = Reflux.createStore({
     },
 
     _fetchPermissions: function(voteId) {
+        var vote = this.getById(voteId);
+        if (!!vote && 'permissions' in vote) {
+            return this.trigger(this);
+        }
+
         var uri = '/api/vote/permissions/' + voteId;
         if (uri in this._loading) {
             return;
