@@ -13,7 +13,8 @@ var PageAction = require('../action/PageAction'),
     UserAction = require('../action/UserAction');
 
 var LoginButton = require('./LoginButton'),
-    AccountDropdown = require('./AccountDropdown');
+    AccountDropdown = require('./AccountDropdown'),
+    Title = require('./Title');
 
 var Navbar = ReactBootstrap.Navbar,
     Collapse = Navbar.Collapse,
@@ -86,9 +87,9 @@ var Header = React.createClass({
                     <Navbar.Collapse ref="headerMenu">
                         <Nav>
                             <li>
-                                <Link to={this.getIntlMessage('route.ABOUT')}
+                                <Link to={this.getIntlMessage('slug.ABOUT')}
                                     activeClassName="active">
-                                    {this.getIntlMessage('title.ABOUT')}
+                                    <Title text={this.getIntlMessage('title.ABOUT')}/>
                                 </Link>
                             </li>
         			    </Nav>

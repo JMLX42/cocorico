@@ -2,29 +2,28 @@
 	"messages": {
 		"site": {
 			"TITLE": "Cocorico",
-			"LOADING": "Cargando"
+			"LOADING": "Cargando",
+			"POWERED_BY": "Con tecnología de {productName}"
 		},
 
 		"route": {
-			"ABOUT": "/saber_mas",
-			"SIGN_IN": "/iniciar_sesion",
-			"PRIVACY_POLICY": "/privacidad",
-			"POLL": "/voto",
-			"CREATE_BILL": "/texto/nuevo",
+			"SIGN_IN": "/iniciar-sesion",
+			"VOTE": "/voto",
 			"SERVICE_STATUS": "/systema/estado",
 			"BALLOT_BOX": "/voto/urna"
 		},
 
 		"slug": {
-			"HOME": "portada"
+			"HOME": "portada",
+			"ABOUT": "acerca-de-esto",
+			"PRIVACY_POLICY": "politica-de-privacidad"
 		},
-		
+
 		"title": {
 			"ABOUT": "Acerca de esto",
 			"PRIVACY_POLICY": "Política de privacidad",
 			"SOURCE_CODE": "Codigo fuente",
-			"SERVICE_STATUS": "Estado del sistema",
-			"POWERED_BY": "Con tecnología de {productName}"
+			"SERVICE_STATUS": "Estado del sistema"
 		},
 
 		"login": {

@@ -2,28 +2,28 @@
 	"messages": {
 		"site": {
 			"TITLE": "Cocorico",
-			"LOADING": "Loading"
+			"LOADING": "Loading",
+			"POWERED_BY": "Powered by {productName}"
 		},
 
 		"route": {
-			"ABOUT": "/about",
 			"SIGN_IN": "/sign-in",
-			"PRIVACY_POLICY": "/privacy-policy",
-			"POLL": "/vote",
+			"VOTE": "/vote",
 			"SERVICE_STATUS": "/system/status",
 			"BALLOT_BOX": "/vote/ballot-box"
 		},
 
 		"slug": {
-			"HOME": "home"
+			"HOME": "home",
+			"ABOUT": "about",
+			"PRIVACY_POLICY": "privacy-policy",
 		},
 
 		"title": {
 			"ABOUT": "About",
 			"PRIVACY_POLICY": "Privacy Policy",
 			"SOURCE_CODE": "Source Code",
-			"SERVICE_STATUS": "System Status",
-			"POWERED_BY": "Powered by {productName}"
+			"SERVICE_STATUS": "System Status"
 		},
 
 		"login": {

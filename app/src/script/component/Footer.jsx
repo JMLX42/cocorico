@@ -3,6 +3,8 @@ var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var ReactRouter = require('react-router');
 
+var Title = require('./Title');
+
 var FormattedMessage = ReactIntl.FormattedMessage;
 
 var Link = ReactRouter.Link;
@@ -31,9 +33,9 @@ var Footer = React.createClass({
                         <Col md={9} sm={9} xsHidden>
                             <ul className="list-unstyled list-inline">
                                 <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
-                                    <Link to={this.getIntlMessage('route.PRIVACY_POLICY')}
+                                    <Link to={this.getIntlMessage('slug.PRIVACY_POLICY')}
                                         target={target}>
-                                        {this.getIntlMessage('title.PRIVACY_POLICY')}
+                                        <Title text={this.getIntlMessage('title.PRIVACY_POLICY')}/>
                                     </Link>
                                 </li>
                                 <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
@@ -45,7 +47,7 @@ var Footer = React.createClass({
                                 <li className="visible-xs-block visible-sm-inline visible-md-inline visible-lg-inline">
                                     <Link to={this.getIntlMessage('route.SERVICE_STATUS')}
                                         target={target}>
-                                        {this.getIntlMessage('title.SERVICE_STATUS')}
+                                        <Title text={this.getIntlMessage('title.SERVICE_STATUS')}/>
                                     </Link>
                                 </li>
                             </ul>
@@ -53,9 +55,9 @@ var Footer = React.createClass({
                         <Col md={3} sm={3} xs={12} className="text-right">
                             <ul className="list-unstyled list-inline">
                                 <li className="visible-xs-inline hidden-sm hidden-md hidden-lg">
-                                    <Link to={this.getIntlMessage('route.PRIVACY_POLICY')}
+                                    <Link to={this.getIntlMessage('slug.PRIVACY_POLICY')}
                                         target={target}>
-                                        {this.getIntlMessage('title.PRIVACY_POLICY')}
+                                        <Title text={this.getIntlMessage('title.PRIVACY_POLICY')}/>
                                     </Link>
                                 </li>
                                 {isEmbed
