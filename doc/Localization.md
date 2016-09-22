@@ -82,17 +82,24 @@ the database:
 vagrant ssh --command "cd /vagrant/api && ./scripts/save-pages.js"
 ```
 
+## Submitting your work
+
 When you're all set and all your pages are exported, you can create a new GIT
-branch, add them to the repository and commit them. Here is an example to commit
+branch, add your files to repository and commit them. Here is an example to commit
 and push new pages for the "es-ES" (Spanish) locale:
 
 ```shell
-git checkout -b translation/es-ES
-git add api/db/pages/*
-git commit api/db/pages/*
-git push origin translation/es-ES
+git checkout -b localization/es-ES
+git add api/db/pages/* app/src/script/intl/*.json
+git commit api/db/pages/* app/src/script/intl/*.json
+git push origin localization/es-ES
 ```
+
+Feel free to set the branch name ("localization/es-ES" in the example above) to
+better reflect your proposed changes and additions, but try to always:
+* prefix it with "localization/";
+* indicate the ISO code of the locale you changed.
 
 When your branch has been pushed, go to Github and
 [create a pull request](https://help.github.com/articles/creating-a-pull-request/).
-The community will then be able to review it and merge your translated pages.
+The community will then be able to review it and merge your work.
