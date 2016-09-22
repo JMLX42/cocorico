@@ -34,12 +34,13 @@ Vote.add({
     labels: { type: Types.TextArray }
 });
 
-Vote.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'vote' });
 Vote.relationship({ path: 'sources', ref: 'Source', refPath: 'vote' });
 
 Vote.schema.methods.userIsAuthorizedToVote = function(user) {
     return config.capabilities.vote.enabled
         && this.status == 'open'
+        && !!this.voteContractAddress
+        && !!this.voteContractABI
         && !!user
         && (!this.restricted || (!!user.iss && user.iss == this.app))
         && (!user.authorizedVotes
