@@ -13,8 +13,8 @@ vagrant ssh --command "cd /vagrant/app && npm run build-release"
 
 ## Adding a new locale
 
-Edit the `supported_locales` dictionary to add the new locale. Here an example
-to add the `es-ES` locale:
+In `provisioning/inventory/group_vars/all.yml`, edit the `supported_locales`
+dictionary to add the new locale. Here an example to add the `es-ES` locale:
 
 ```yml
 supported_locales:
