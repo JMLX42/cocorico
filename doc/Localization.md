@@ -2,8 +2,8 @@
 
 ## Editing an existing locale
 
-Existing locale messages can be edited by editing the corresponding file in the
-`app/src/script/intl` directory.
+Existing locale messages can be modified by editing the corresponding file in
+the `app/src/script/intl` directory.
 
 To test your changes, rebuild the app:
 
@@ -11,10 +11,13 @@ To test your changes, rebuild the app:
 vagrant ssh --command "cd /vagrant/app && npm run build-release"
 ```
 
+then check the result in your local instance by going to
+`https://local.cocorico.cc` in your Web browser.
+
 ## Adding a new locale
 
 In `provisioning/inventory/group_vars/all.yml`, edit the `supported_locales`
-dictionary to add the new locale. Here an example to add the `es-ES` locale:
+dictionary to add the new locale. Here is an example to add the `es-ES` locale:
 
 ```yml
 supported_locales:
@@ -27,12 +30,19 @@ Add the corresponding JSON localization file in the `app/src/script/intl`
 directory. For example, for the `es-ES` locale, add and fill the
 `app/src/script/intl/es-ES.json` file.
 
-Then provision the machine to automatically update the locale list and
-rebuild the app:
+Instead of creating that file out of nothing, we recommend to copy an
+existing JSON localization file - such as `en-US.json` - and translate its
+content.
+
+When you're done filling up the JSON file, provision the machine to
+automatically update the locale list and rebuild the app:
 
 ```shell
 vagrant provision
 ```
+
+Then check the result in your local instance by going to
+`https://local.cocorico.cc` in your Web browser.
 
 ## Translating pages
 
@@ -46,6 +56,24 @@ login if necessary
 * fill the text input with the name of your translated page and click "Create"
 * configure the newly created page and write its content
 * click on "Save"
+
+**Attention!** You have to make sure the slug of your translated page - which is
+automatically generated from its title - fits the one specified in the
+corresponding JSON localization file (if any). For example, for the "Accueil"
+French page, the generated slug is "accueil" and the JSON localization file
+contains:
+
+```json
+"slug" : {
+    "HOME": "accueil"
+}
+```
+
+You can either change the JSON localization file or the page title to make sure
+the slugs match.
+
+If the page you are translating is not listed in the `slug` section of the JSON
+localization file, then you don't have to worry about its title/slug.
 
 When all your translated pages are set, don't forget to export them from
 the database:
