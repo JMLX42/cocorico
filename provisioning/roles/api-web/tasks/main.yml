@@ -53,6 +53,8 @@
 
 - name: import pages
   shell: headstone {{ cocorico_api_dir }}/scripts/import-pages.js
+    --cwd={{ cocorico_api_dir }}/src
+    --mongoUri=mongodb://{{ home_db_private_host }}/{{ mongodb_database_name }}
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: result

@@ -26,8 +26,8 @@ function find(startPath,filter) {
 }
 
 module.exports = function(done) {
-  var pageFiles = find('./db/pages', '.json');
-  var mediaFiles = find('./db/media', '.json');
+  var pageFiles = find('../db/pages', '.json');
+  var mediaFiles = find('../db/media', '.json');
 
   async.waterfall(
     mediaFiles.map((mediaFile) => (callback) => {
