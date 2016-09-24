@@ -1,14 +1,15 @@
 sudo: required
 dist: trusty
 
-language: node_js
-
-node_js:
-  - "4.5.0"
+install:
+  - pip install ansible
 
 env:
-  - TEST_DIR=api
-  - TEST_DIR=app
+  - PLAYBOOK="provisioning/provision.yml"
+  - INVENTORY="provisioning/inventory"
+  - LIMIT="local"
+  - SKIP_TAGS=""
+  - VERBOSE="vvv"
 
 script:
-  - cd $TEST_DIR && npm install && npm run build && npm test
+  - cd /vagrant && source "deployment/ansible.sh"
