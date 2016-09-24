@@ -45,8 +45,8 @@ if [ ! -x /usr/local/bin/ansible-playbook ]; then
         export DEBIAN_FRONTEND=noninteractive
         apt-get update -qq
         apt-get install -qq -y software-properties-common apt-transport-https
-        apt-add-repository ppa:fkrull/deadsnakes-python2.7
-        apt-add-repository ppa:ansible/ansible
+        apt-add-repository -y ppa:fkrull/deadsnakes-python2.7
+        apt-add-repository -y ppa:ansible/ansible
         apt-get update -qq
         apt-get install -qq -y python2.7 python-pip
         pip install markupsafe ansible
