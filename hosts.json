@@ -11,7 +11,7 @@
   },
   "travis": {
     "hosts": [
-      "127.0.0.1"
+      "localhost"
     ],
     "vars": {
       "hostname": "local.cocorico.cc"
