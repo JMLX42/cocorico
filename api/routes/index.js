@@ -6,41 +6,42 @@ var config = require('../config.json');
 var importRoutes = keystone.importer(__dirname);
 
 var routes = {
-	api: importRoutes('./api')
+  api: importRoutes('./api'),
 };
 
-function isAuthenticated(req, res, next)
-{
-	if (!req.isAuthenticated() || !req.user.sub)
-		return res.status(401).apiResponse({error: 'not authenticated'});
-	next();
+function isAuthenticated(req, res, next) {
+  if (!req.isAuthenticated() || !req.user.sub)
+    return res.status(401).apiResponse({error: 'not authenticated'});
+  return next();
 }
 
 // Setup Route Bindings
 exports = module.exports = function(app) {
 
-	app.use(passport.initialize());
-	app.use(passport.session());
+  app.use(passport.initialize());
+  app.use(passport.session());
 
-	app.use(keystone.middleware.api);
+  app.use(keystone.middleware.api);
 
 	// JWT authentication does not use sessions, so we have to check for a user
 	// without throwing an error if there is none.
-	app.use((req, res, next) => passport.authenticate('jwt', (err, user, info) => {
-		if (err) { return next(err); }
-    	if (!user) {
+  app.use((req, res, next) => passport.authenticate('jwt', (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
 			// if the JWT authentification failed
-			if (info) {
-				return res.status(401).apiResponse({
-					error: 'authentification failed',
-					message: info.message
-				});
-			}
-			return next();
-		}
+      if (info) {
+        return res.status(401).apiResponse({
+          error: 'authentification failed',
+          message: info.message,
+        });
+      }
+      return next();
+    }
 
-		req.logIn(user, { session: false }, next);
-	})(req, res, next));
+    return req.logIn(user, { session: false }, next);
+  })(req, res, next));
 
 	/**
 	 * @apiDefine user A user that has been properly logged in using any of the `/auth` endpoints.
@@ -69,25 +70,25 @@ exports = module.exports = function(app) {
 	 * @apiSuccess {Number} expires_in Expiration delay.
 	 * @apiSuccess {String} token_type Acess token type.
 	 */
-	app.post('/oauth/token', routes.api.oauth.token);
+  app.post('/oauth/token', routes.api.oauth.token);
 
-	app.get('/auth/providers', routes.api.auth.providers);
-	app.get('/auth/logout', routes.api.auth.logout);
-	if (config.franceConnect) {
-		app.get('/auth/france-connect/login', routes.api.auth.franceConnectLogin);
-		app.get('/auth/france-connect/callback', routes.api.auth.franceConnectCallback);
-	}
-	if (config.facebook) {
-		app.get('/auth/facebook/login',  routes.api.auth.facebookLogin);
-		app.get('/auth/facebook/callback', routes.api.auth.facebookCallback);
-	}
-	if (config.google) {
-		app.get('/auth/google/login',  routes.api.auth.googleLogin);
-		app.get('/auth/google/callback', routes.api.auth.googleCallback);
-	}
-	if (config.env == 'development') {
-		app.get('/auth/fakeLogin', routes.api.auth.fakeLogin);
-	}
+  app.get('/auth/providers', routes.api.auth.providers);
+  app.get('/auth/logout', routes.api.auth.logout);
+  if (config.franceConnect) {
+    app.get('/auth/france-connect/login', routes.api.auth.franceConnectLogin);
+    app.get('/auth/france-connect/callback', routes.api.auth.franceConnectCallback);
+  }
+  if (config.facebook) {
+    app.get('/auth/facebook/login', routes.api.auth.facebookLogin);
+    app.get('/auth/facebook/callback', routes.api.auth.facebookCallback);
+  }
+  if (config.google) {
+    app.get('/auth/google/login', routes.api.auth.googleLogin);
+    app.get('/auth/google/callback', routes.api.auth.googleCallback);
+  }
+  if (config.env === 'development') {
+    app.get('/auth/fakeLogin', routes.api.auth.fakeLogin);
+  }
 
 	/**
 	 * @api {post} /vote Create a new vote
@@ -121,7 +122,7 @@ exports = module.exports = function(app) {
 	 * @apiSuccess {Object[]} vote.voteContractABI The ABI of the vote blockchain smart contract.
 	 * @apiSuccess {String} vote.voteContractAddress The blockchain block address of the vote smart contract.
 	 */
-	app.post('/vote', routes.api.oauth.checkAccessToken, routes.api.vote.create);
+  app.post('/vote', routes.api.oauth.checkAccessToken, routes.api.vote.create);
 
 	/**
 	 * @api {get} /vote List all votes
@@ -145,7 +146,7 @@ exports = module.exports = function(app) {
 	 * @apiSuccess {Object[]} votes.voteContractABI The ABI of the vote blockchain smart contract.
 	 * @apiSuccess {String} votes.voteContractAddress The blockchain block address of the vote smart contract.
 	 */
-	app.get('/vote', routes.api.vote.list);
+  app.get('/vote', routes.api.vote.list);
 
 	/**
 	 * @api {get} /vote/:voteId Get a specific vote
@@ -171,7 +172,7 @@ exports = module.exports = function(app) {
 	 * @apiSuccess {Object[]} vote.voteContractABI The ABI of the vote blockchain smart contract.
 	 * @apiSuccess {String} vote.voteContractAddress The blockchain block address of the vote smart contract.
 	 */
-	app.get('/vote/:voteId', routes.api.vote.get);
+  app.get('/vote/:voteId', routes.api.vote.get);
 
 	/**
 	 * @api {get} /vote/transactions/:voteId Get transactions from voteId
@@ -184,7 +185,7 @@ exports = module.exports = function(app) {
 	 * @apiExample {curl} cURL example:
 	 * 		curl -X GET "https://cocorico.cc/api/vote/transactions/57cc487608875ef57ac75ff1"
 	 */
-	app.get('/vote/transactions/:voteId', routes.api.vote.getTransactions);
+  app.get('/vote/transactions/:voteId', routes.api.vote.getTransactions);
 
 	/**
 	 * @api {get} /vote/result/:voteId Get a vote result
@@ -199,9 +200,9 @@ exports = module.exports = function(app) {
 	 *
 	 * @apiSuccess {Object} vote The requested vote result.
 	 */
-	app.get('/vote/result/:voteId', routes.api.vote.result);
+  app.get('/vote/result/:voteId', routes.api.vote.result);
 
-	app.get('/vote/by-slug/:voteSlug', routes.api.vote.getBySlug);
+  app.get('/vote/by-slug/:voteSlug', routes.api.vote.getBySlug);
 
 	/**
 	 * @api {put} /vote/:voteId Update a vote
@@ -212,14 +213,14 @@ exports = module.exports = function(app) {
 	 *
 	 * @apiParam {String} voteId The ID of the vote.
 	 */
-	app.put('/vote/:voteId', routes.api.oauth.checkAccessToken, routes.api.vote.update);
+  app.put('/vote/:voteId', routes.api.oauth.checkAccessToken, routes.api.vote.update);
 
 	// app.get('/vote/result/per-gender/:voteId', routes.api.vote.resultPerGender);
 	// app.get('/vote/result/per-age/:voteId', routes.api.vote.resultPerAge);
 	// app.get('/vote/result/per-date/:voteId', routes.api.vote.resultPerDate);
-	app.get('/vote/embed/:voteId', routes.api.vote.embed);
+  app.get('/vote/embed/:voteId', routes.api.vote.embed);
 
-	app.get('/vote/permissions/:voteId', routes.api.vote.permissions);
+  app.get('/vote/permissions/:voteId', routes.api.vote.permissions);
 
 	/**
 	 * @api {get} /ballot/:voteId Get a ballot
@@ -230,7 +231,7 @@ exports = module.exports = function(app) {
 	 *
 	 * @apiParam {String} voteId The ID of the vote.
 	 */
-	app.get('/ballot/:voteId', isAuthenticated, routes.api.ballot.get);
+  app.get('/ballot/:voteId', isAuthenticated, routes.api.ballot.get);
 
 	/**
 	 * @api {post} /ballot/:voteId Send a ballot
@@ -281,22 +282,22 @@ exports = module.exports = function(app) {
 	 * @apiParam (POST) {String} transaction The blockchain transaction of the ballot.
 	 *
 	 */
-	app.post('/ballot/:voteId', isAuthenticated, routes.api.ballot.vote);
+  app.post('/ballot/:voteId', isAuthenticated, routes.api.ballot.vote);
 	// app.post('/ballot/cancel/:voteId', isAuthenticated, routes.api.ballot.cancel);
 
-	app.get('/source/:voteId', routes.api.source.list);
+  app.get('/source/:voteId', routes.api.source.list);
 	// app.post('/source/like/add/:id/:value', isAuthenticated, routes.api.source.addLike);
 	// app.post('/source/like/remove/:id', isAuthenticated, routes.api.source.removeLike);
 
-	app.get('/page/list', routes.api.page.list);
-	app.get('/page/navbar', routes.api.page.navbar);
-	app.get('/page/:id', routes.api.page.get);
-	app.get('/page/getBySlug/:slug', routes.api.page.getBySlug);
+  app.get('/page/list', routes.api.page.list);
+  app.get('/page/navbar', routes.api.page.navbar);
+  app.get('/page/:id', routes.api.page.get);
+  app.get('/page/getBySlug/:slug', routes.api.page.getBySlug);
 
-	app.get('/user/me', isAuthenticated, routes.api.user.me);
+  app.get('/user/me', isAuthenticated, routes.api.user.me);
 
-	app.get('/service/status', routes.api.service.getStatus);
+  app.get('/service/status', routes.api.service.getStatus);
 
-	app.get('/redirect', routes.api.redirect.redirect);
-	app.get('/redirect/proxy', routes.api.redirect.proxy);
+  app.get('/redirect', routes.api.redirect.redirect);
+  app.get('/redirect/proxy', routes.api.redirect.proxy);
 };

@@ -1,29 +1,28 @@
 var config = require('../../config.json');
 
 var keystone = require('keystone');
-var bcrypt = require('bcrypt');
 var EthereumTx = require('ethereumjs-tx');
 var EthereumUtil = require('ethereumjs-util');
 var async = require('async');
 
 var Vote = keystone.list('Vote'),
-    Ballot = keystone.list('Ballot');
+  Ballot = keystone.list('Ballot');
 
 exports.get = function(req, res) {
-	Ballot.getByVoteIdAndUser(
+  Ballot.getByVoteIdAndUser(
 		req.params.voteId,
 		req.user.sub,
 		(err, ballot) => {
-			if (err)
-				return res.apiError('database error', err);
+  if (err)
+    return res.apiError('database error', err);
 
-			if (!ballot)
-				return res.status(404).apiResponse({
-					error: 'ballot does not exist'
-				});
+  if (!ballot)
+    return res.status(404).apiResponse({
+      error: 'ballot does not exist',
+    });
 
-			return res.apiResponse({ ballot: ballot });
-		}
+  return res.apiResponse({ ballot: ballot });
+}
 	);
 
 	// if (!req.user || !req.user.sub)
@@ -46,118 +45,116 @@ exports.get = function(req, res) {
 }
 
 function pushBallotMessageOnQueue(data, callback) {
-    try {
-        require('amqplib/callback_api').connect(
-            'amqp://localhost',
-            (err, conn) => {
-                if (err != null)
-                    return callback(err, null);
+  try {
+    return require('amqplib/callback_api').connect(
+      'amqp://localhost',
+      (err, conn) => {
+        if (err != null)
+          return callback(err, null);
 
-                conn.createChannel((err, ch) => {
-                    if (err != null)
-                        return callback(err, null);
+        return conn.createChannel((channelErr, ch) => {
+          if (channelErr != null)
+            return callback(channelErr, null);
 
-                    var ballotObj = { ballot : data };
+          var ballotObj = { ballot : data };
 
-                    ch.assertQueue('ballots');
-                    ch.sendToQueue(
-                        'ballots',
-                        new Buffer(JSON.stringify(ballotObj)),
-                        { persistent : true }
-                    );
+          ch.assertQueue('ballots');
+          ch.sendToQueue(
+              'ballots',
+              new Buffer(JSON.stringify(ballotObj)),
+              { persistent : true }
+          );
 
-                    callback(null, ballotObj);
-                });
-            }
-        );
-    }
-    catch (e) {
-        callback(e, null);
-    }
+          return callback(null, ballotObj);
+        });
+      }
+    );
+  } catch (e) {
+    return callback(e, null);
+  }
 }
 
 function ballotTransactionError(res, ballot, msg) {
-    ballot.status = 'error';
-    ballot.error = JSON.stringify(msg);
-    ballot.save(function(err)
-    {
-        if (err)
-            return res.apiError('database error', err);
+  ballot.status = 'error';
+  ballot.error = JSON.stringify(msg);
+  ballot.save((err) => {
+    if (err)
+      return res.apiError('database error', err);
 
-        return res.status(400).send({error:msg});
-    });
+    return res.status(400).send({error:msg});
+  });
 }
 
 exports.vote = function(req, res) {
-    if (!config.capabilities.vote.enabled)
-        return res.status(403).send();
+  if (!config.capabilities.vote.enabled)
+    return res.status(403).send();
 
-    var signedTx = new EthereumTx(req.body.transaction);
-    var voteContractAddress = EthereumUtil.bufferToHex(signedTx.to);
+  var signedTx = new EthereumTx(req.body.transaction);
+  var voteContractAddress = EthereumUtil.bufferToHex(signedTx.to);
 
-    async.waterfall(
-        [
-            (callback) => Vote.model.findById(req.params.voteId)
-                .populate('app')
-                .exec(callback),
-            (vote, callback) => {
-                if (!vote)
-        			return callback({code: 404, error: 'vote not found'});
-                // FIXME: log the unauthorized attempt
-                if (!vote.userIsAuthorizedToVote(req.user))
-                    return callback({code: 403, error: 'unauthorized user'});
-                if (vote.voteContractAddress != voteContractAddress)
-                    return callback({code: 300, error: 'contract address mismatch'});
+  return async.waterfall(
+    [
+      (callback) => Vote.model.findById(req.params.voteId)
+        .populate('app')
+        .exec(callback),
+      (vote, callback) => {
+        if (!vote)
+          return callback({code: 404, error: 'vote not found'});
+        // FIXME: log the unauthorized attempt
+        if (!vote.userIsAuthorizedToVote(req.user))
+          return callback({code: 403, error: 'unauthorized user'});
+        if (vote.voteContractAddress !== voteContractAddress)
+          return callback({code: 300, error: 'contract address mismatch'});
 
-                Ballot.getByVoteIdAndUser(
-                    vote.id,
-                    req.user.sub,
-                    (err, ballot) => callback(err, vote, ballot)
-                );
-            },
-            (vote, ballot, callback) => {
-                if (!!ballot)
-                    return callback({code: 403, error: 'user already voted'});
+        return Ballot.getByVoteIdAndUser(
+          vote.id,
+          req.user.sub,
+          (err, ballot) => callback(err, vote, ballot)
+        );
+      },
+      (vote, ballot, callback) => {
+        if (!!ballot)
+          return callback({code: 403, error: 'user already voted'});
 
-                var ballot = Ballot.model({
-                    voter: Ballot.getHash(vote.id, user),
-                    status: 'queued'
-                });
+        var ballot = Ballot.model({
+          voter: Ballot.getHash(vote.id, user),
+          status: 'queued',
+        });
 
-                ballot.save((err, ballot) => callback(err, vote, ballot));
-            },
-            (vote, ballot, callback) => pushBallotMessageOnQueue(
-                {
-                    id: ballot.id,
-                    app: vote.app,
-                    transaction: req.body.transaction,
-                    voteContractAddress: vote.voteContractAddress,
-                    voteContractABI: JSON.parse(vote.voteContractABI)
-                },
-                (err, msg) => callback(err, ballot)
-            )
-        ],
-        (err, ballot) => {
-            if (err) {
-                if (ballot) {
-                    return ballotTransactionError(res, ballot, err);
-                }
-                if (err.code) {
-                    res.status(err.code);
-                }
-                if (err.error) {
-                    return res.apiError(err.error);
-                }
-                return res.apiError(err);
-            }
-            return res.apiResponse({ballot: ballot});
+        return ballot.save((err, ballot) => callback(err, vote, ballot));
+      },
+      (vote, ballot, callback) => pushBallotMessageOnQueue(
+        {
+          id: ballot.id,
+          app: vote.app,
+          transaction: req.body.transaction,
+          voteContractAddress: vote.voteContractAddress,
+          voteContractABI: JSON.parse(vote.voteContractABI),
+        },
+        (err, msg) => callback(err, ballot)
+      ),
+    ],
+    (err, ballot) => {
+      if (err) {
+        if (ballot) {
+          return ballotTransactionError(res, ballot, err);
         }
-    );
+        if (err.code) {
+          res.status(err.code);
+        }
+        if (err.error) {
+          return res.apiError(err.error);
+        }
+        return res.apiError(err);
+      }
+      return res.apiResponse({ballot: ballot});
+    }
+  );
 }
 
-exports.cancel = function(req, res) {
-    if (!config.capabilities.vote.vote)
-        return res.status(403).send();
+// exports.cancel = function(req, res) {
+//   if (!config.capabilities.vote.vote)
+//     return res.status(403).send();
 
 	// Vote.model.findById(req.params.id).exec(function(err, vote)
 	// {
@@ -200,4 +197,4 @@ exports.cancel = function(req, res) {
 	// 			});
 	// 		});
 	// });
-}
+// }
