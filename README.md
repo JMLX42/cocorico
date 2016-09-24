@@ -12,6 +12,13 @@ Cocorico is an open online voting platform powered by the blockchain.
 * [REST API](https://cocorico.cc/documentation/index.html)
 * [External users](./doc/External_Users.md)
 
+## Contribute
+
+* You must contribute via pull requests.
+* Pull requests that do not pass the unit tests will be denied.
+* Pull requests that do not pass the coding style tests will be denied.
+* Pull requests that add new API endpoints without comprehensive unit tests will be denied.
+
 ## Licence
 
 Copyright (c) 2016 Cocorico
