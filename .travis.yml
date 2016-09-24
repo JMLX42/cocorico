@@ -11,4 +11,4 @@ env:
   - TEST_DIR=app
 
 script:
-  - cd $TEST_DIR && npm install && npm test
+  - cd $TEST_DIR && npm install && npm run build && npm test
