@@ -1,0 +1,9 @@
+language: node_js
+
+node_js:
+ - stable
+
+env:
+  - TEST_DIR=api
+
+script: cd $TEST_DIR && npm install && npm test
