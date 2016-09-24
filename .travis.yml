@@ -5,11 +5,12 @@ install:
   - pip install ansible
 
 env:
-  - PLAYBOOK="provisioning/provision.yml"
-  - INVENTORY="provisioning/inventory"
-  - LIMIT="local"
-  - SKIP_TAGS=""
-  - VERBOSE="vvv"
+  global:
+    - PLAYBOOK="provisioning/provision.yml"
+    - INVENTORY="provisioning/inventory"
+    - LIMIT="local"
+    - SKIP_TAGS=""
+    - VERBOSE="vvv"
 
 script:
   - cd /vagrant && source "deployment/ansible.sh"
