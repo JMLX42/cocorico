@@ -61,9 +61,9 @@ function savePage(page, next) {
 function savePages(pages, done) {
   var ops = [];
   for (var page of pages) {
-    (function(page) {
+    (function(p) {
       ops.push(function(next) {
-        savePage(page, next);
+        savePage(p, next);
       });
     })(page);
   }

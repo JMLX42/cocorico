@@ -34,9 +34,9 @@ module.exports = function(done) {
       var mediaData = JSON.parse(fs.readFileSync(mediaFile));
 
       Media.model.findOne({slug: mediaData.slug})
-        .exec((err, media) => {
-          if (err)
-            return callback(err);
+        .exec((findErr, media) => {
+          if (findErr)
+            return callback(findErr);
 
           if (media) {
             var time1 = new Date(media.updatedAt).getTime();
@@ -63,9 +63,9 @@ module.exports = function(done) {
           var pageData = JSON.parse(fs.readFileSync(pageFile));
 
           Page.model.findOne({slug: pageData.slug})
-            .exec((err, page) => {
-              if (err)
-                return callback(err);
+            .exec((findErr, page) => {
+              if (findErr)
+                return callback(findErr);
 
               if (page) {
                 var time1 = new Date(page.updatedAt).getTime();
@@ -84,9 +84,9 @@ module.exports = function(done) {
                 {slug: pageData.slug},
                 pageData,
                 {upsert: true},
-                (err) => {
+                (updateErr) => {
                   console.log('Updated page "' + pageData.slug + '"');
-                  return callback(err);
+                  return callback(updateErr);
                 }
               );
             });
