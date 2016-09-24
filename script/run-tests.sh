@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ev
 
 pushd api
 npm install && npm run build && npm test
