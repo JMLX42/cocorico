@@ -11,135 +11,130 @@ var ServiceStatusAction = require('../action/ServiceStatusAction');
 var ServiceStatusStore = require('../store/ServiceStatusStore');
 
 var Grid = ReactBootstrap.Grid,
-    Row = ReactBootstrap.Row,
-    Col = ReactBootstrap.Col,
-    Table = ReactBootstrap.Table;
+  Row = ReactBootstrap.Row,
+  Col = ReactBootstrap.Col,
+  Table = ReactBootstrap.Table;
 
 module.exports = React.createClass({
 
-    mixins: [
-        ReactIntl.IntlMixin,
-        Reflux.connect(ServiceStatusStore, 'serviceStatus')
-    ],
+  mixins: [
+    ReactIntl.IntlMixin,
+    Reflux.connect(ServiceStatusStore, 'serviceStatus'),
+  ],
 
-    componentWillMount: function()
-    {
-        ServiceStatusAction.showStatus();
-    },
+  componentWillMount: function() {
+    ServiceStatusAction.showStatus();
+  },
 
-    componentDidMount: function()
-    {
-        this.interval = setInterval(
-            () => ServiceStatusAction.updateStatus(),
-            10000
-        );
-    },
+  componentDidMount: function() {
+    this.interval = setInterval(
+      () => ServiceStatusAction.updateStatus(),
+      10000
+    );
+  },
 
-    componentWillUnmount: function()
-    {
-        clearInterval(this.interval);
-    },
+  componentWillUnmount: function() {
+    clearInterval(this.interval);
+  },
 
-    getStatusClassNames: function(status)
-    {
-        return status ? 'positive' : 'negative';
-    },
+  getStatusClassNames: function(status) {
+    return status ? 'positive' : 'negative';
+  },
 
-    render: function()
-    {
-        if (!this.state.serviceStatus)
-            return (
-                <div className="page">
-                    <Grid>
-                        <Row>
-                            <Col md={12}>
-                                <LoadingIndicator/>
-                            </Col>
-                        </Row>
-                    </Grid>
-                </div>
-            );
+  render: function() {
+    if (!this.state.serviceStatus)
+      return (
+    <div className="page">
+      <Grid>
+      <Row>
+        <Col md={12}>
+        <LoadingIndicator/>
+        </Col>
+      </Row>
+      </Grid>
+    </div>
+    );
 
-        var system = this.state.serviceStatus.getSystemStatus();
-        var capabilities = this.state.serviceStatus.getSystemCapabilities();
+    var system = this.state.serviceStatus.getSystemStatus();
+    var capabilities = this.state.serviceStatus.getSystemCapabilities();
 
-		return (
-            <ReactDocumentTitle title={'Service Status - ' + this.getIntlMessage('site.TITLE')}>
-                <div className="page">
-                    <Grid>
-                        <Row>
-                            <Col md={12}>
-                                <Table style={{width:'100%'}} striped hover responsive>
-                                    <thead>
-                                        <tr>
-                                            <th>Service</th>
-                                            <th style={{width:'25%'}}>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Blockchain Node</td>
-                                            <td className={this.getStatusClassNames(system.blockchainNode)}>
-                                                {system.blockchainNode ? 'OK' : 'KO'}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Blockchain Miner</td>
-                                            <td className={this.getStatusClassNames(system.blockchainMiner)}>
-                                                {system.blockchainMiner ? 'OK' : 'KO'}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Queue</td>
-                                            <td className={this.getStatusClassNames(system.queue)}>
-                                                {system.queue ? 'OK' : 'KO'}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Database</td>
-                                            <td className={this.getStatusClassNames(system.database)}>
-                                                {system.database ? 'OK' : 'KO'}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </Table>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col md={12}>
-                                <Table style={{width:'100%'}} striped hover responsive>
-                                    <thead>
-                                        <tr>
-                                            <th>Capability</th>
-                                            <th style={{width:'25%'}}>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Vote</td>
-                                            <td className={this.getStatusClassNames(capabilities.vote)}>
-                                                {capabilities.vote ? 'OK' : 'KO'}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Read Vote</td>
-                                            <td className={this.getStatusClassNames(capabilities.readVote)}>
-                                                {capabilities.readVote ? 'OK' : 'KO'}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Create Vote</td>
-                                            <td className={this.getStatusClassNames(capabilities.createVote)}>
-                                                {capabilities.createVote ? 'OK' : 'KO'}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </Table>
-                            </Col>
-                        </Row>
-                    </Grid>
-                </div>
-            </ReactDocumentTitle>
+    return (
+      <ReactDocumentTitle title={'Service Status - ' + this.getIntlMessage('site.TITLE')}>
+        <div className="page">
+          <Grid>
+            <Row>
+              <Col md={12}>
+                <Table style={{width:'100%'}} striped={true} hover={true} responsive={true}>
+                  <thead>
+                    <tr>
+                      <th>Service</th>
+                      <th style={{width:'25%'}}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Blockchain Node</td>
+                      <td className={this.getStatusClassNames(system.blockchainNode)}>
+                        {system.blockchainNode ? 'OK' : 'KO'}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Blockchain Miner</td>
+                      <td className={this.getStatusClassNames(system.blockchainMiner)}>
+                        {system.blockchainMiner ? 'OK' : 'KO'}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Queue</td>
+                      <td className={this.getStatusClassNames(system.queue)}>
+                        {system.queue ? 'OK' : 'KO'}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Database</td>
+                      <td className={this.getStatusClassNames(system.database)}>
+                        {system.database ? 'OK' : 'KO'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={12}>
+                <Table style={{width:'100%'}} striped={true} hover={true} responsive={true}>
+                  <thead>
+                    <tr>
+                      <th>Capability</th>
+                      <th style={{width:'25%'}}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Vote</td>
+                      <td className={this.getStatusClassNames(capabilities.vote)}>
+                        {capabilities.vote ? 'OK' : 'KO'}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Read Vote</td>
+                      <td className={this.getStatusClassNames(capabilities.readVote)}>
+                        {capabilities.readVote ? 'OK' : 'KO'}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Create Vote</td>
+                      <td className={this.getStatusClassNames(capabilities.createVote)}>
+                        {capabilities.createVote ? 'OK' : 'KO'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </Grid>
+        </div>
+      </ReactDocumentTitle>
 		);
-	}
+  },
 });

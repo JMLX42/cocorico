@@ -8,5 +8,7 @@ node_js:
 
 env:
   - TEST_DIR=api
+  - TEST_DIR=app
 
-script: cd $TEST_DIR && npm install && npm test
+script:
+  - cd $TEST_DIR && npm install && npm test
