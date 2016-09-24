@@ -1,9 +1,6 @@
 sudo: required
 dist: trusty
 
-install:
-  - pip install ansible
-
 env:
   global:
     - PLAYBOOK="provisioning/provision.yml"
@@ -13,4 +10,4 @@ env:
     - VERBOSE="vvv"
 
 script:
-  - cd /vagrant && source "deployment/ansible.sh"
+  - source "deployment/ansible.sh"
