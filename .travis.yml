@@ -8,6 +8,7 @@ env:
     - LIMIT="local"
     - SKIP_TAGS=""
     - VERBOSE="vvv"
+    - PROVIDER="travis"
 
 script:
   - source "deployment/ansible.sh"
