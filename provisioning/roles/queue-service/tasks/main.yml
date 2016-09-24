@@ -22,7 +22,7 @@
   when: ansible_os_family == 'Debian'
 
 - name: start queue service
-  service: name=rabbitmq-server state=started
+  service: name=rabbitmq-server state=restarted
 
 - name: install queue admin
   command: rabbitmq-plugins enable rabbitmq_management
