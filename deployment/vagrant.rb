@@ -16,8 +16,6 @@ module Vagrant
 
       Vagrant.define_singleton_method(:autoconfigure) do |inventory|
         Vagrant.configure('2') do |config|
-          AutoConfigure::write(inventory, "provisioning/generated/hosts.json")
-
           AutoConfigure::install_plugins([
             "vagrant-cachier",
             "vagrant-managed-servers",
