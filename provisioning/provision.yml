@@ -4,6 +4,7 @@
     - image
     - staging
     - prod
+    - travis
   gather_facts: yes
   roles:
     - { role: "common" }
