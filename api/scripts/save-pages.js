@@ -47,10 +47,10 @@ function savePage(page, next) {
     delete page.html;
 
     fs.writeFileSync(
-          './db/pages/' + page.slug + '.json',
-          stringify(page, { space : '\t' }),
-          'utf8'
-      );
+      './db/pages/' + page.slug + '.json',
+      stringify(page, { space : '\t' }),
+      'utf8'
+    );
 
     process.stdout.write('done\n');
 
