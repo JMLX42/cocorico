@@ -27,14 +27,18 @@ script
         -o {{ log_dir }}/{{ role_name }}.log \
         -e {{ log_dir }}/{{ role_name }}.error.log \
         --pidFile /var/run/{{ project_name }}-{{ role_name }}.pid \
-        --watchDirectory {{ cocorico_api_dir }} \
-        --sourceDir {{ cocorico_api_dir }} \
-        --workingDir {{ cocorico_api_dir }} \
-        keystone.js
+        --sourceDir {{ cocorico_api_dir }}/dist \
+        --workingDir {{ cocorico_api_dir }}/dist \
+        index.js
+end script
+
+pre-start script
+    npm install
+    npm run build
 end script
 
 pre-stop script
     rm /var/run/{{ project_name }}-{{ role_name }}.pid
 
-    exec forever stop {{ cocorico_api_dir }}/keystone.js
+    exec forever stop {{ cocorico_api_dir }}/dist/index.js
 end script
