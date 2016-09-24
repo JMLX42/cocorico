@@ -1,6 +1,8 @@
 # Cocorico
 
-Cocorico is a democracy engine powered by the blockchain.
+![build status](https://travis-ci.org/promethe42/cocorico.svg)
+
+Cocorico is an open online voting platform powered by the blockchain.
 
 ## Documentation
 
