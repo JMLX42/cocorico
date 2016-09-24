@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cat hosts.json
+cat /vagrant/hosts.json
