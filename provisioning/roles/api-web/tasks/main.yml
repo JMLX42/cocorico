@@ -40,7 +40,7 @@
 - name: create admin
   when: is_development_environment
   shell: headstone {{ cocorico_api_dir }}/scripts/add-admin.js
-    --cwd={{ cocorico_api_dir }}
+    --cwd={{ cocorico_api_dir }}/src
     --userEmail={{ home_web_admin_email }}
     --userPassword={{ home_web_admin_password }}
     --userName={{ home_web_admin_name }} --userIsAdmin=true
