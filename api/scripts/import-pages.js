@@ -76,9 +76,9 @@ module.exports = function(done) {
               }
 
               if (pageData.contentType === 'HTML')
-                pageData.html = fs.readFileSync('./db/pages/' + pageData.slug + '.html', 'utf8');
+                pageData.html = fs.readFileSync('../db/pages/' + pageData.slug + '.html', 'utf8');
               else
-                pageData.markdown = { md : fs.readFileSync('./db/pages/' + pageData.slug + '.md', 'utf8')};
+                pageData.markdown = { md : fs.readFileSync('../db/pages/' + pageData.slug + '.md', 'utf8')};
 
               return Page.model.update(
                 {slug: pageData.slug},
