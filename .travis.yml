@@ -5,10 +5,10 @@ env:
   global:
     - PLAYBOOK="provisioning/provision.yml"
     - INVENTORY="provisioning/inventory"
-    - LIMIT="image"
+    - LIMIT="travis"
     - SKIP_TAGS=""
     - VERBOSE="vvv"
-    - PROVIDER="docker"
+    - PROVIDER="travis"
 
 script:
   - sudo ln -s $TRAVIS_BUILD_DIR /vagrant

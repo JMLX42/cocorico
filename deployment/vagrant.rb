@@ -25,11 +25,13 @@ module Vagrant
           ])
 
           inventory.each do |key, value|
-            value[:provider] = "virtualbox" if not value.key?(:provider)
-            value[:box] = "ubuntu/trusty64" if not value.key?(:box)
-            value[:memory] = 4096 if not value.key?(:memory)
-            value[:skip_tags] = [] if not value.key?(:skip_tags)
-            AutoConfigure::send("define_#{value[:provider]}", config, key.to_s, value)
+            if value.key?(:provider)
+              value[:provider] = "virtualbox" if not value.key?(:provider)
+              value[:box] = "ubuntu/trusty64" if not value.key?(:box)
+              value[:memory] = 4096 if not value.key?(:memory)
+              value[:skip_tags] = [] if not value.key?(:skip_tags)
+              AutoConfigure::send("define_#{value[:provider]}", config, key.to_s, value)
+            end
           end
         end
       end
