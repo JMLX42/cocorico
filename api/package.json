@@ -49,7 +49,7 @@
   "scripts": {
     "build": "rm -rf dist ; babel src --out-dir dist --source-maps inline --presets es2015",
     "start": "service cocorico-api-web stop ; nodemon dist/index.js -w src -d 5 --exec 'npm run build && nodejs'",
-    "doc": "apidoc -i ./routes/ -o ../app/public/documentation -c .",
+    "doc": "apidoc -i ./src/routes/ -o ../app/public/documentation -c .",
     "test": "eslint routes"
   },
   "devDependencies": {
