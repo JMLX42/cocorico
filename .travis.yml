@@ -11,4 +11,5 @@ env:
     - PROVIDER="travis"
 
 script:
-  - source "deployment/ansible.sh"
+  - ln -s $TRAVIS_BUILD_DIR /vagrant
+  - cd /vagrant && source "deployment/ansible.sh"
