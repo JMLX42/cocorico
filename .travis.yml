@@ -7,7 +7,7 @@ env:
   global:
     - PLAYBOOK="provisioning/provision.yml"
     - INVENTORY="provisioning/inventory"
-    - LIMIT="travis"
+    - LIMIT="local"
     - SKIP_TAGS=""
     - VERBOSE="vvv"
     - PROVIDER="travis"
