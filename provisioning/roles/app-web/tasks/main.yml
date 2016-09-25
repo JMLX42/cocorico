@@ -28,7 +28,7 @@
   template: src=messages.js.j2 dest={{ project_dir }}/{{ role_name }}/messages.js
 
 - name: build debug app
-  shell: npm run build
+  shell: npm run build-debug
   args:
     chdir: "{{ cocorico_app_dir }}"
   register: result
@@ -36,7 +36,7 @@
   when: is_development_environment
 
 - name: build release app
-  shell: npm run build-release
+  shell: npm run build
   args:
     chdir: "{{ cocorico_app_dir }}"
   register: result
