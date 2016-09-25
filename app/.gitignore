@@ -3,4 +3,5 @@
 public/*.js*
 public/img/screenshot/*.jpg
 public/documentation
+public/build
 node_modules

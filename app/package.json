@@ -5,50 +5,43 @@
   "dependencies": {
     "async": "1.5.2",
     "babel-core": "^6.14.0",
+    "babel-loader": "^6.2.5",
     "babel-plugin-object-assign": "^1.2.1",
     "babel-polyfill": "^6.13.0",
-    "babelify": "^7.3.0",
-    "browserify": "^13.1.0",
     "classnames": "2.2.3",
+    "css-loader": "^0.25.0",
     "d3": "^3.5.3",
-    "eth-lightwallet": "2.5.1",
+    "eth-lightwallet": "2.5.2",
+    "file-loader": "^0.9.0",
     "getusermedia": "1.3.7",
     "jquery": "2.1.4",
     "js-base64": "2.1.9",
+    "json-loader": "^0.5.4",
     "json-stable-stringify": "1.0.0",
-    "minifyify": "7.3.3",
-    "node-lessify": "0.1.1",
+    "less-loader": "^2.2.3",
     "pace": "HubSpot/pace",
     "platform": "^1.3.1",
     "print-html-element": "0.3.4",
     "qr-image": "latest",
     "qrcode-npm": "0.0.3",
-    "qrcode-reader": "0.1.1",
+    "qrcode-reader": "0.2.2",
     "react": "^0.14.6",
     "react-bootstrap": "^0.30.3",
     "react-cookie": "0.4.3",
     "react-d3-components": "0.6.0",
     "react-document-title": "2.0.1",
     "react-dom": "^0.14.6",
-    "react-intl": "1.2.2",
+    "react-intl": "^1.2.2",
     "react-remarkable": "1.1.1",
-    "react-router": "2.8.0",
-    "reflux": "0.3.0"
-  },
-  "engines": {
-    "node": ">=0.10.22",
-    "npm": ">=1.3.14"
-  },
-  "babel": {
-    "presets": [
-      "es2015",
-      "react"
-    ]
+    "react-router": "2.8.1",
+    "reflux": "0.3.0",
+    "style-loader": "^0.13.1",
+    "webpack": "^2.1.0-beta.25"
   },
   "scripts": {
-    "build-debug": "NODE_ENV=development browserify -v -t babelify -t node-lessify -d --extension=.jsx src/script/index.js -o public/app.js",
-    "build": "NODE_ENV=production browserify -v -t babelify -t node-lessify -d --extension=.jsx src/script/index.js -o public/app.js",
-    "start": "NODE_ENV=development watchify -v --debug -t babelify -t node-lessify -d --extension=.jsx src/script/index.js --poll=5000 -o public/app.js",
+    "start": "NODE_ENV=development webpack --watch --watch-poll=5000 --progress",
+    "build": "NODE_ENV=production webpack --config webpack.production.config.js",
+    "build-debug": "NODE_ENV=development webpack --config webpack.config.js",
     "test": "eslint src/script --ext .jsx"
   },
   "devDependencies": {

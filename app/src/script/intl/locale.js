@@ -10,8 +10,8 @@ module.exports = {
     var locale = navigator.language.split('-');
 
     return locale[1]
-            ? `${locale[0]}-${locale[1].toUpperCase()}`
-            : navigator.language;
+      ? `${locale[0]}-${locale[1].toUpperCase()}`
+      : navigator.language;
   },
 
   getLocaleMessages: function(locale) {
