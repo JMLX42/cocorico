@@ -63,7 +63,7 @@ var Footer = React.createClass({
                   ? <li>
                     <a href="/" target={target}>
                       <FormattedMessage
-                        message={this.getIntlMessage('title.POWERED_BY')}
+                        message={this.getIntlMessage('site.POWERED_BY')}
                         productName="Cocorico"/>
                     </a>
                   </li>
