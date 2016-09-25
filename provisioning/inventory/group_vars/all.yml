@@ -8,8 +8,6 @@ home_db_private_port: 27017
 cocorico_api_dir: /vagrant/api
 cocorico_app_dir: /vagrant/app
 
-jq_archive_url: https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-
 data_dir: "/var/data"
 backup_dir: "/var/backup"
 www_dir: "/var/www"
@@ -40,3 +38,6 @@ supported_locales:
   fr-FR: Français
   en-US: English
   es-ES: Español
+
+nodejs_nodesource_repository: https://deb.nodesource.com/node_4.x
+nodejs_version: 4.*

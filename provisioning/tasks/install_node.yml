@@ -4,15 +4,15 @@
   apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
 
 - name: install nodesource repository
-  apt_repository: repo='deb https://deb.nodesource.com/node_4.x trusty main' state=present
+  apt_repository: repo='deb {{ nodejs_nodesource_repository }} trusty main' state=present
 
 - name: install node
-  apt: name={{ item }} state=present
+  apt: name={{ item.name }}={{ item.version }} state=present force=yes
+  when: ansible_os_family == 'Debian'
   with_items:
-    - nodejs
-    - jq
-    - build-essential
-    - libkrb5-dev
+    - { name: nodejs, version: "{{ nodejs_version }}" }
+    - { name: build-essential, version: "11.6*" }
+    - { name: libkrb5-dev, version: "1.12*" }
 
 - name: fix node binary name
   command: update-alternatives --install /usr/bin/node node /usr/bin/nodejs 10
@@ -30,8 +30,6 @@
     - { name: forever, version: 0.14.2 }
     - { name: nodemon, version: 1.3.7 }
     - { name: json, version: 9.0.3 }
-    - { name: watchify, version: 3.7.0 }
-    - { name: browserify, version: 11.2.0 }
     - { name: apidoc, version: 0.16.1 }
   register: result
   failed_when: no
