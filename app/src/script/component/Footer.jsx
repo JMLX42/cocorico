@@ -22,7 +22,7 @@ var Footer = React.createClass({
   },
 
   render: function() {
-    var isEmbed = this.context.location.pathname.indexOf('embed') === 0;
+    var isEmbed = this.context.location.pathname.indexOf('/embed') === 0;
     var target = isEmbed ? '_blank' : '_self';
 
     return (
