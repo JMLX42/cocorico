@@ -10,7 +10,15 @@
     "memory": 3072
   },
   "travis": {
-    "provider": "virtualbox",
+    "hosts": [
+      "localhost"
+    ],
+    "vars": {
+      "hostname": "local.cocorico.cc"
+    }
+  },
+  "image": {
+    "provider": "docker",
     "hosts": [
       "127.0.0.1"
     ],

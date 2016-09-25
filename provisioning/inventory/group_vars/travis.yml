@@ -1,4 +1,4 @@
-environment_name: travis
+environment_name: local
 front_hostname: local.cocorico.cc
 front_web_public_host: "{{ front_hostname }}"
 hostname: "{{ front_hostname }}-{{ environment_name }}"
