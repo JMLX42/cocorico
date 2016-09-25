@@ -1,6 +1,6 @@
 # Cocorico
 
-![build status](https://travis-ci.org/promethe42/cocorico.svg)
+[![build status](https://travis-ci.org/promethe42/cocorico.svg)](https://travis-ci.org/promethe42/cocorico)
 
 Cocorico is an open online voting platform powered by the blockchain.
 
