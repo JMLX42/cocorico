@@ -1,111 +1,111 @@
 {
-	"messages": {
-		"site": {
-			"TITLE": "Cocorico",
-			"LOADING": "Chargement",
-			"POWERED_BY": "Propulsé par {productName}"
-		},
+  "messages": {
+    "site": {
+      "TITLE": "Cocorico",
+      "LOADING": "Chargement",
+      "POWERED_BY": "Propulsé par {productName}"
+    },
 
-		"route": {
-			"SIGN_IN": "/connexion",
-			"VOTE": "/vote",
-			"SERVICE_STATUS": "/systeme/etat",
-			"BALLOT_BOX": "/vote/urne"
-		},
+    "route": {
+      "SIGN_IN": "/connexion",
+      "VOTE": "/vote",
+      "SERVICE_STATUS": "/systeme/etat",
+      "BALLOT_BOX": "/vote/urne"
+    },
 
-		"slug": {
-			"HOME": "accueil",
-			"ABOUT": "a-propos",
-			"PRIVACY_POLICY": "politique-de-confidentialite",
-		},
+    "slug": {
+      "HOME": "accueil",
+      "ABOUT": "a-propos",
+      "PRIVACY_POLICY": "politique-de-confidentialite"
+    },
 
-		"title": {
-			"ABOUT": "À Propos",
-			"PRIVACY_POLICY": "Politique de Confidentialité",
-			"SOURCE_CODE": "Code Source",
-			"SERVICE_STATUS": "Etat du Système",
-		},
+    "title": {
+      "ABOUT": "À Propos",
+      "PRIVACY_POLICY": "Politique de Confidentialité",
+      "SOURCE_CODE": "Code Source",
+      "SERVICE_STATUS": "Etat du Système"
+    },
 
-		"login": {
-			"USERNAME": "Utilisateur",
-			"PASSWORD": "Mot de passe",
-			"FORGOTTEN_PASSWORD": "Mot de passe oublié",
-			"SIGN_IN": "S'identifier",
-			"SIGN_IN_WITH": "S'identifier avec :",
-			"SIGN_OUT": "Se Déconnecter",
-			"SIGN_UP": "Créer un compte",
-			"REQUIRE_LOGIN": "Vous devez être connecté pour accéder à cette page."
-		},
+    "login": {
+      "USERNAME": "Utilisateur",
+      "PASSWORD": "Mot de passe",
+      "FORGOTTEN_PASSWORD": "Mot de passe oublié",
+      "SIGN_IN": "S'identifier",
+      "SIGN_IN_WITH": "S'identifier avec :",
+      "SIGN_OUT": "Se Déconnecter",
+      "SIGN_UP": "Créer un compte",
+      "REQUIRE_LOGIN": "Vous devez être connecté pour accéder à cette page."
+    },
 
-		"sort": {
-			"SORTED_BY_POPULARITY": "tri{gender, select, male {é} female {ée}}s par popularité",
-			"SORTED_BY_TIME": "tri{gender, select, male {é} female {ée}}s par date",
-			"SORTED_RANDOMLY": "tri{gender, select, male {é} female {ée}}s au hasard"
-		},
+    "sort": {
+      "SORTED_BY_POPULARITY": "tri{gender, select, male {é} female {ée}}s par popularité",
+      "SORTED_BY_TIME": "tri{gender, select, male {é} female {ée}}s par date",
+      "SORTED_RANDOMLY": "tri{gender, select, male {é} female {ée}}s au hasard"
+    },
 
-		"vote": {
-			"VOTE": "Voter",
-			"VOTE_UNAVAILABLE": "Impossible de voter pour l'instant. Merci de bien vouloir réessayer plus tard.",
-			"ALREADY_VOTED": "Vous avez voté le { date }.",
-			"TOO_LATE_TO_VOTE": "Vous ne pouvez plus voter pour ce texte.",
-			"BEFORE_UNLOAD_MESSAGE": "Si vous quittez ou actualisez cette page, vous ne pourrez jamais récupérer votre carte de vote.",
-			"EXIT": "Terminer",
-			"CANCEL_MY_VOTE": "Annuler mon vote",
-			"IGNORE": "Ignorer",
-			"NOT_RECOMMENDED": "non recommandé",
-			"WARNING_FETCH_VOTE_CARD": "<h3>Attention : lisez attentivement !</h3><p>Si vous ne récupérez pas votre nouvelle carte de vote maintenant, il sera complètement impossible de la récupérer par la suite. <strong>Impossible. Pour quiconque. Pour toujours.</strong>",
-			"STEP_TITLE": "Étape { step }/{ total } : { title }",
+    "vote": {
+      "VOTE": "Voter",
+      "VOTE_UNAVAILABLE": "Impossible de voter pour l'instant. Merci de bien vouloir réessayer plus tard.",
+      "ALREADY_VOTED": "Vous avez voté le { date }.",
+      "TOO_LATE_TO_VOTE": "Vous ne pouvez plus voter pour ce texte.",
+      "BEFORE_UNLOAD_MESSAGE": "Si vous quittez ou actualisez cette page, vous ne pourrez jamais récupérer votre carte de vote.",
+      "EXIT": "Terminer",
+      "CANCEL_MY_VOTE": "Annuler mon vote",
+      "IGNORE": "Ignorer",
+      "NOT_RECOMMENDED": "non recommandé",
+      "WARNING_FETCH_VOTE_CARD": "<h3>Attention : lisez attentivement !</h3><p>Si vous ne récupérez pas votre nouvelle carte de vote maintenant, il sera complètement impossible de la récupérer par la suite. <strong>Impossible. Pour quiconque. Pour toujours.</strong>",
+      "STEP_TITLE": "Étape { step }/{ total } : { title }",
 
-			"STEP_0_NAME": "Carte d'Identité",
-			"STEP_0_DESCRIPTION": "<p>Votre identité numérique permet de garantir que vous ne votez qu'une seule fois : elle est utilisée pour créer la signature numérique qui sera écrite dans le bordereau d'émargement numérique. Votre carte d'identité numérique permet de retrouver vos signatures numériques, mais pas l'inverse : <strong>votre vote est donc 100% anonyme</strong>.</p>",
-			"STEP_0_WARNING": "<h3>Attention : l'usurpation d'identité est un déli !</h3><p>Selon l'<a href=\"https://www.legifrance.gouv.fr/affichCodeArticle.do?idArticle=LEGIARTI000023709201&cidTexte=LEGITEXT000006070719\">article 226-4-1 du code pénal</a>, le fait d'<strong>usurper l'identité d'un tiers est puni d'un an d'emprisonnement et de 15 000 € d'amende</strong>. Cette infraction est punie des mêmes peines lorsqu'elle est commise sur un réseau de communication au public en ligne.</p>",
-			"ANNOUNCE_VOTER_ID": "Vous êtes sur le point de voter en tant que { name } né le { birthdate }",
-			"CONFIRM_VOTER_ID": "Oui, je suis bien {name}",
-			"DENY_VOTER_ID": "Non, ça n'est pas moi",
+      "STEP_0_NAME": "Carte d'Identité",
+      "STEP_0_DESCRIPTION": "<p>Votre identité numérique permet de garantir que vous ne votez qu'une seule fois : elle est utilisée pour créer la signature numérique qui sera écrite dans le bordereau d'émargement numérique. Votre carte d'identité numérique permet de retrouver vos signatures numériques, mais pas l'inverse : <strong>votre vote est donc 100% anonyme</strong>.</p>",
+      "STEP_0_WARNING": "<h3>Attention : l'usurpation d'identité est un déli !</h3><p>Selon l'<a href=\"https://www.legifrance.gouv.fr/affichCodeArticle.do?idArticle=LEGIARTI000023709201&cidTexte=LEGITEXT000006070719\">article 226-4-1 du code pénal</a>, le fait d'<strong>usurper l'identité d'un tiers est puni d'un an d'emprisonnement et de 15 000 € d'amende</strong>. Cette infraction est punie des mêmes peines lorsqu'elle est commise sur un réseau de communication au public en ligne.</p>",
+      "ANNOUNCE_VOTER_ID": "Vous êtes sur le point de voter en tant que { name } né le { birthdate }",
+      "CONFIRM_VOTER_ID": "Oui, je suis bien {name}",
+      "DENY_VOTER_ID": "Non, ça n'est pas moi",
 
-			"STEP_1_NAME": "Bulletin de Vote",
-			"I_VOTE": "je vote \"{ value }\"",
-			"VOTE_YES": "pour",
-			"VOTE_BLANK": "blanc",
-			"VOTE_NO": "contre",
-			"VALIDATE_BALLOT": "Valider mon bulletin",
+      "STEP_1_NAME": "Bulletin de Vote",
+      "I_VOTE": "je vote \"{ value }\"",
+      "VOTE_YES": "pour",
+      "VOTE_BLANK": "blanc",
+      "VOTE_NO": "contre",
+      "VALIDATE_BALLOT": "Valider mon bulletin",
 
-			"STEP_2_NAME": "Carte de Vote",
-			"STEP_2_DESCRIPTION": "<p>Pour garantir l'anonymat de vos votes, ces derniers sont rattachés à <strong>une carte de vote numérique anonyme dont vous êtes l'unique garant/détenteur</strong>. Vous pouvez utiliser la même carte de vote pour tous/plusieurs de vos votes ou <strong>créer une nouvelle carte de vote pour chaque vote (recommandé)</strong>. La carte de vote ainsi choisie vous permettra de pouvoir vérifier que ce dernier est bien présent dans l'urne numérique.</p>",
-			"STEP_2_HINT": "<h3>Pour votre sécurité et votre anonymat...</h3><p>A chaque fois que vous ré-utilisez la même carte de vote numérique, votre vote numérique y est rattaché. Vos votes seront toujours anonymes, mais il sera alors possible à quiconque de consulter la liste de tous les votes effectués avec cette même carte de vote numérique. Ainsi, il est recommandé de créer une nouvelle carte de vote numérique pour chaque vote.</p>",
-			"STEP_2_NEW_CARD": "<p><strong>Une nouvelle carte de vote numérique vient d'être créée pour vous.</strong> Le vote que vous allez faire sera rattaché à cette nouvelle carte de vote. Vous pouvez avoir autant de cartes de vote numériques que vous le souhaitez : cette nouvelle carte n'affecte pas celles que vous avez éventuellement créées précédemment. Vous devez maintenant récupérer cette nouvelle carte de vote :</p>",
-			"CREATE_NEW_VOTE_CARD": "Créer une nouvelle carte de vote pour ce vote (recommandé)",
-			"DOWNLOAD_VOTER_CARD": "Télécharger ma carte de vote",
-			"PRINT_VOTER_CARD": "Imprimer ma carte de vote",
-			"CREATING_NEW_VOTE_CARD": "Création d'une nouvelle carte de vote en cours...",
-			"USE_EXISTING_VOTE_CARD": "Utiliser une carte de vote existante",
+      "STEP_2_NAME": "Carte de Vote",
+      "STEP_2_DESCRIPTION": "<p>Pour garantir l'anonymat de vos votes, ces derniers sont rattachés à <strong>une carte de vote numérique anonyme dont vous êtes l'unique garant/détenteur</strong>. Vous pouvez utiliser la même carte de vote pour tous/plusieurs de vos votes ou <strong>créer une nouvelle carte de vote pour chaque vote (recommandé)</strong>. La carte de vote ainsi choisie vous permettra de pouvoir vérifier que ce dernier est bien présent dans l'urne numérique.</p>",
+      "STEP_2_HINT": "<h3>Pour votre sécurité et votre anonymat...</h3><p>A chaque fois que vous ré-utilisez la même carte de vote numérique, votre vote numérique y est rattaché. Vos votes seront toujours anonymes, mais il sera alors possible à quiconque de consulter la liste de tous les votes effectués avec cette même carte de vote numérique. Ainsi, il est recommandé de créer une nouvelle carte de vote numérique pour chaque vote.</p>",
+      "STEP_2_NEW_CARD": "<p><strong>Une nouvelle carte de vote numérique vient d'être créée pour vous.</strong> Le vote que vous allez faire sera rattaché à cette nouvelle carte de vote. Vous pouvez avoir autant de cartes de vote numériques que vous le souhaitez : cette nouvelle carte n'affecte pas celles que vous avez éventuellement créées précédemment. Vous devez maintenant récupérer cette nouvelle carte de vote :</p>",
+      "CREATE_NEW_VOTE_CARD": "Créer une nouvelle carte de vote pour ce vote (recommandé)",
+      "DOWNLOAD_VOTER_CARD": "Télécharger ma carte de vote",
+      "PRINT_VOTER_CARD": "Imprimer ma carte de vote",
+      "CREATING_NEW_VOTE_CARD": "Création d'une nouvelle carte de vote en cours...",
+      "USE_EXISTING_VOTE_CARD": "Utiliser une carte de vote existante",
 
-			"STEP_3_NAME": "Confirmation",
-			"STEP_3_WARNING": "<h3>Attention : impossible de revenir en arrière !</h3><p>Après avoir confirmé votre vote, ce dernier sera envoyé pour être enregistré et sera impossible à modifier/annuler. <strong>Impossible. Pour quiconque. Pour toujours.</strong></p>",
-			"I_CONFIRM_MY_VOTE": "je confirme : ",
-			"CONFIRM_VOTE_MESSAGE": "Vous êtes sur le point de voter \"{ value }\" au sujet de { vote }. Confirmez-vous votre choix ?",
-			"PENDING_BALLOT_TRANSACTION": "Envoi de votre bulletin de vote en cours...",
+      "STEP_3_NAME": "Confirmation",
+      "STEP_3_WARNING": "<h3>Attention : impossible de revenir en arrière !</h3><p>Après avoir confirmé votre vote, ce dernier sera envoyé pour être enregistré et sera impossible à modifier/annuler. <strong>Impossible. Pour quiconque. Pour toujours.</strong></p>",
+      "I_CONFIRM_MY_VOTE": "je confirme : ",
+      "CONFIRM_VOTE_MESSAGE": "Vous êtes sur le point de voter \"{ value }\" au sujet de { vote }. Confirmez-vous votre choix ?",
+      "PENDING_BALLOT_TRANSACTION": "Envoi de votre bulletin de vote en cours...",
 
-			"STEP_4_NAME": "A voté !",
-			"STEP_4_HINT": "<h3>Enregistrement Du Vote</h3><p>Chaque vote est enregistré de façon indélébile et anonyme dans une base de données hébergée par chaque citoyen. Ils peuvent ainsi être recomptés en toute transparence sans jamais divulguer qui vote quoi.</p><p>Ce processus d'écriture indélébile est le garant de la sécurité du vote, mais il n'est pas immédiat et peut prendre jusqu'à quelques minutes.</p>",
-			"YOUR_VOTE_IS_COMPLETE": "Votre vote \"{ value }\" au sujet de { vote } a bien été envoyé !",
-		},
+      "STEP_4_NAME": "A voté !",
+      "STEP_4_HINT": "<h3>Enregistrement Du Vote</h3><p>Chaque vote est enregistré de façon indélébile et anonyme dans une base de données hébergée par chaque citoyen. Ils peuvent ainsi être recomptés en toute transparence sans jamais divulguer qui vote quoi.</p><p>Ce processus d'écriture indélébile est le garant de la sécurité du vote, mais il n'est pas immédiat et peut prendre jusqu'à quelques minutes.</p>",
+      "YOUR_VOTE_IS_COMPLETE": "Votre vote \"{ value }\" au sujet de { vote } a bien été envoyé !"
+    },
 
-		"voterCard": {
-			"PROVIDE_VOTER_CARD": "Pour continuer, merci de fournir votre carte de vote",
-			"SCAN_PRINTED_FILE": "Utiliser ma webcam pour scanner ma carte de vote imprimée",
-			"SEND_DOWNLOADED_FILE": "Envoyer le fichier de ma carte de vote téléchargée",
-			"BACK": "Retour",
-			"CANCEL": "Annuler"
-		},
+    "voterCard": {
+      "PROVIDE_VOTER_CARD": "Pour continuer, merci de fournir votre carte de vote",
+      "SCAN_PRINTED_FILE": "Utiliser ma webcam pour scanner ma carte de vote imprimée",
+      "SEND_DOWNLOADED_FILE": "Envoyer le fichier de ma carte de vote téléchargée",
+      "BACK": "Retour",
+      "CANCEL": "Annuler"
+    },
 
-		"hint": {
-			"HIDE_HINT_BUTTON": "J'ai compris, ne plus afficher ce message.",
-			"LEARN_MORE_BUTTON": "En savoir plus..."
-		},
+    "hint": {
+      "HIDE_HINT_BUTTON": "J'ai compris, ne plus afficher ce message.",
+      "LEARN_MORE_BUTTON": "En savoir plus..."
+    },
 
-		"error": {
-			"ERROR_404": "Oops... nous n'avons pas pu trouver la page que vous cherchez !"
-		}
-	}
+    "error": {
+      "ERROR_404": "Oops... nous n'avons pas pu trouver la page que vous cherchez !"
+    }
+  }
 }

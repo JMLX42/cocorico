@@ -1,111 +1,111 @@
 {
-	"messages": {
-		"site": {
-			"TITLE": "Cocorico",
-			"LOADING": "Cargando",
-			"POWERED_BY": "Con tecnología de {productName}"
-		},
+  "messages": {
+    "site": {
+      "TITLE": "Cocorico",
+      "LOADING": "Cargando",
+      "POWERED_BY": "Con tecnología de {productName}"
+    },
 
-		"route": {
-			"SIGN_IN": "/iniciar-sesion",
-			"VOTE": "/voto",
-			"SERVICE_STATUS": "/systema/estado",
-			"BALLOT_BOX": "/voto/urna"
-		},
+    "route": {
+      "SIGN_IN": "/iniciar-sesion",
+      "VOTE": "/voto",
+      "SERVICE_STATUS": "/systema/estado",
+      "BALLOT_BOX": "/voto/urna"
+    },
 
-		"slug": {
-			"HOME": "portada",
-			"ABOUT": "acerca-de-esto",
-			"PRIVACY_POLICY": "politica-de-privacidad"
-		},
+    "slug": {
+      "HOME": "portada",
+      "ABOUT": "acerca-de-esto",
+      "PRIVACY_POLICY": "politica-de-privacidad"
+    },
 
-		"title": {
-			"ABOUT": "Acerca de esto",
-			"PRIVACY_POLICY": "Política de privacidad",
-			"SOURCE_CODE": "Codigo fuente",
-			"SERVICE_STATUS": "Estado del sistema"
-		},
+    "title": {
+      "ABOUT": "Acerca de esto",
+      "PRIVACY_POLICY": "Política de privacidad",
+      "SOURCE_CODE": "Codigo fuente",
+      "SERVICE_STATUS": "Estado del sistema"
+    },
 
-		"login": {
-			"USERNAME": "Usuario",
-			"PASSWORD": "Contraseña",
-			"FORGOTTEN_PASSWORD": "Olvidaste tu Contraseña",
-			"SIGN_IN": "Iniciar sesion",
-			"SIGN_IN_WITH": "Ingresar con :",
-			"SIGN_OUT": "Salir",
-			"SIGN_UP": "Crear cuenta",
-			"REQUIRE_LOGIN": "Usted necesita estar connectado par ver esta página."
-		},
+    "login": {
+      "USERNAME": "Usuario",
+      "PASSWORD": "Contraseña",
+      "FORGOTTEN_PASSWORD": "Olvidaste tu Contraseña",
+      "SIGN_IN": "Iniciar sesion",
+      "SIGN_IN_WITH": "Ingresar con :",
+      "SIGN_OUT": "Salir",
+      "SIGN_UP": "Crear cuenta",
+      "REQUIRE_LOGIN": "Usted necesita estar connectado par ver esta página."
+    },
 
-		"sort": {
-			"SORTED_BY_POPULARITY": "Ordenado por popularidad",
-			"SORTED_BY_TIME": "Ordenado por fecha",
-			"SORTED_RANDOMLY": "Ordenado al azar"
-		},
+    "sort": {
+      "SORTED_BY_POPULARITY": "Ordenado por popularidad",
+      "SORTED_BY_TIME": "Ordenado por fecha",
+      "SORTED_RANDOMLY": "Ordenado al azar"
+    },
 
-		"vote": {
-			"VOTE": "Voto",
-			"VOTE_UNAVAILABLE": "Es imposible votar en este momento, volve a intentar más tarde.",
-			"ALREADY_VOTED": "Usted ha votado { date }.",
-			"TOO_LATE_TO_VOTE": "Usted ya no puede votar sobre este texto",
-			"BEFORE_UNLOAD_MESSAGE": "Si usted se va de esta página o si la actualisa, no podrá nunca recuperar su voto.",
-			"EXIT": "Terminar",
-			"CANCEL_MY_VOTE": "Cancelar mi voto",
-			"IGNORE": "Ignorar",
-			"NOT_RECOMMENDED": "no recomendado",
-			"WARNING_FETCH_VOTE_CARD": "<h3>Cuidado : lea con atención !</h3><p> Si usted no recupera su tarjeta de voto ahora, no la podrá recuperar más tarde. <strong>Imposible. Para cualquiera. Para siempre.</strong>",
-			"STEP_TITLE": "Etapa { step }/{ total } : { title }",
+    "vote": {
+      "VOTE": "Voto",
+      "VOTE_UNAVAILABLE": "Es imposible votar en este momento, volve a intentar más tarde.",
+      "ALREADY_VOTED": "Usted ha votado { date }.",
+      "TOO_LATE_TO_VOTE": "Usted ya no puede votar sobre este texto",
+      "BEFORE_UNLOAD_MESSAGE": "Si usted se va de esta página o si la actualisa, no podrá nunca recuperar su voto.",
+      "EXIT": "Terminar",
+      "CANCEL_MY_VOTE": "Cancelar mi voto",
+      "IGNORE": "Ignorar",
+      "NOT_RECOMMENDED": "no recomendado",
+      "WARNING_FETCH_VOTE_CARD": "<h3>Cuidado : lea con atención !</h3><p> Si usted no recupera su tarjeta de voto ahora, no la podrá recuperar más tarde. <strong>Imposible. Para cualquiera. Para siempre.</strong>",
+      "STEP_TITLE": "Etapa { step }/{ total } : { title }",
 
-			"STEP_0_NAME": "Identitad",
-			"STEP_0_DESCRIPTION": "<p>Su identidad digital le permite votar una sola vez: está usada para crear firmas digitales en la hoja de firma digital. Su identidad digital está usdada también para encontrar su firma pero lo contrario es imposible: de esta forma <strong>su voto es 100% anónimo</strong>.</p>",
-			"STEP_0_WARNING": "<h3>Atención: robar la identidad de otra es un crimen!</h3><p> Es un crimen en todos lo países. Robar la identidad de alguien es condenable por ley, que sea en linéa o en la vida real.</p>",
-			"ANNOUNCE_VOTER_ID": "Usted está al punto de votar en nombre de { name } nacido/a el { birthdate }",
-			"CONFIRM_VOTER_ID": "Si, Yo soy {name}",
-			"DENY_VOTER_ID": "No, No soy yo",
+      "STEP_0_NAME": "Identitad",
+      "STEP_0_DESCRIPTION": "<p>Su identidad digital le permite votar una sola vez: está usada para crear firmas digitales en la hoja de firma digital. Su identidad digital está usdada también para encontrar su firma pero lo contrario es imposible: de esta forma <strong>su voto es 100% anónimo</strong>.</p>",
+      "STEP_0_WARNING": "<h3>Atención: robar la identidad de otra es un crimen!</h3><p> Es un crimen en todos lo países. Robar la identidad de alguien es condenable por ley, que sea en linéa o en la vida real.</p>",
+      "ANNOUNCE_VOTER_ID": "Usted está al punto de votar en nombre de { name } nacido/a el { birthdate }",
+      "CONFIRM_VOTER_ID": "Si, Yo soy {name}",
+      "DENY_VOTER_ID": "No, No soy yo",
 
-			"STEP_1_NAME": "Votación",
-			"I_VOTE": "Voto\"{ value }\"",
-			"VOTE_YES": "a favor",
-			"VOTE_BLANK": "en blanco",
-			"VOTE_NO": "en contra",
-			"VALIDATE_BALLOT": "Validar mi votación",
+      "STEP_1_NAME": "Votación",
+      "I_VOTE": "Voto\"{ value }\"",
+      "VOTE_YES": "a favor",
+      "VOTE_BLANK": "en blanco",
+      "VOTE_NO": "en contra",
+      "VALIDATE_BALLOT": "Validar mi votación",
 
-			"STEP_2_NAME": "Tarjeta de voto",
-			"STEP_2_DESCRIPTION": "<p>Para garantizar que sus votos sean anónimos, están conectados a una <string> tarjeta de voto digital a la cual <strong>solamente usted tiene acceso</strong>. Usted puede usar la misma tarjeta de voto para algunos o todos los votos, también puede crear una <strong>nueva tarjeta de voto para cada voto(recomendado)</strong>. Usted podrá usar la carta elegida en un voto para verificar que su voto has está realmente en la urna digital.</p>",
-			"STEP_2_HINT": "<h3>Para garantizar su privacidad...</h3><p>Cada vez que usted usa la misma tarjeta de voto, su voto está vinculado a ella. Sus votos siempre serán anónimos. Pero es posible trackear todos los votos de una misma tarjeta de voto. Entonces, está recomendado de crear una nueva tarjeta de voto para cada voto</p>",
-			"STEP_2_NEW_CARD": "<p><strong>Una nueva tarjeta digital ha sido creada.</strong> El proximo voto estará vinculada a esta tarjeta de voto. Usted puede tener tantos tarjetas de voto como usted quiera : esta nuvea tarjeta de voto no impactará las tarjetas que usted habrá podido crear en el pasado. Ahora usted tiene que recuperar esta tarjeta de voto:",
-			"CREATE_NEW_VOTE_CARD": "Crear una nueva tarjeta de voto para este voto (recomendado)",
-			"DOWNLOAD_VOTER_CARD": "Descargar mi tarjeta de voto",
-			"PRINT_VOTER_CARD": "Imprimir mi  tarjeta de voto",
-			"CREATING_NEW_VOTE_CARD": "Creación de la tarjeta de voto en curso...",
-			"USE_EXISTING_VOTE_CARD": "Usar una tarjeta de voto existente",
+      "STEP_2_NAME": "Tarjeta de voto",
+      "STEP_2_DESCRIPTION": "<p>Para garantizar que sus votos sean anónimos, están conectados a una <string> tarjeta de voto digital a la cual <strong>solamente usted tiene acceso</strong>. Usted puede usar la misma tarjeta de voto para algunos o todos los votos, también puede crear una <strong>nueva tarjeta de voto para cada voto(recomendado)</strong>. Usted podrá usar la carta elegida en un voto para verificar que su voto has está realmente en la urna digital.</p>",
+      "STEP_2_HINT": "<h3>Para garantizar su privacidad...</h3><p>Cada vez que usted usa la misma tarjeta de voto, su voto está vinculado a ella. Sus votos siempre serán anónimos. Pero es posible trackear todos los votos de una misma tarjeta de voto. Entonces, está recomendado de crear una nueva tarjeta de voto para cada voto</p>",
+      "STEP_2_NEW_CARD": "<p><strong>Una nueva tarjeta digital ha sido creada.</strong> El proximo voto estará vinculada a esta tarjeta de voto. Usted puede tener tantos tarjetas de voto como usted quiera : esta nuvea tarjeta de voto no impactará las tarjetas que usted habrá podido crear en el pasado. Ahora usted tiene que recuperar esta tarjeta de voto:",
+      "CREATE_NEW_VOTE_CARD": "Crear una nueva tarjeta de voto para este voto (recomendado)",
+      "DOWNLOAD_VOTER_CARD": "Descargar mi tarjeta de voto",
+      "PRINT_VOTER_CARD": "Imprimir mi  tarjeta de voto",
+      "CREATING_NEW_VOTE_CARD": "Creación de la tarjeta de voto en curso...",
+      "USE_EXISTING_VOTE_CARD": "Usar una tarjeta de voto existente",
 
-			"STEP_3_NAME": "Confirmación",
-			"STEP_3_WARNING": "<h3>Atención: no se podrá volver atrás depués de este punto!</h3><p>Después de confirmar su voto, será mandado al registro y no se podrá más cancelar/modificar. <strong>Imposible. Para cualquira. Para siempre.</strong></p>",
-			"I_CONFIRM_MY_VOTE": "Confirmo: ",
-			"CONFIRM_VOTE_MESSAGE": "Usted está a punto de votar \"{ value }\" sobre { vote }. Usted confirma su elección ?",
-			"PENDING_BALLOT_TRANSACTION": "Estamos mandado su voto al registro...",
+      "STEP_3_NAME": "Confirmación",
+      "STEP_3_WARNING": "<h3>Atención: no se podrá volver atrás depués de este punto!</h3><p>Después de confirmar su voto, será mandado al registro y no se podrá más cancelar/modificar. <strong>Imposible. Para cualquira. Para siempre.</strong></p>",
+      "I_CONFIRM_MY_VOTE": "Confirmo: ",
+      "CONFIRM_VOTE_MESSAGE": "Usted está a punto de votar \"{ value }\" sobre { vote }. Usted confirma su elección ?",
+      "PENDING_BALLOT_TRANSACTION": "Estamos mandado su voto al registro...",
 
-			"STEP_4_NAME": "Usted ha votado!",
-			"STEP_4_HINT": "<h3>Estamos registrando su voto</h3><p>Cada voto está registrado permanentemente de forma anónima en una base de datos hosteada por ciudadanos como usted. De esta forma, todos los votos pueden recontados sin saber de quién son los votos.</p><p>Este proceso garantiza resultados fiables, pero no es inmediato y puedo tomar un par de minutos.</p>",
-			"YOUR_VOTE_IS_COMPLETE": "Su voto \"{ value }\" sobre { vote } ha sido registrado !",
-		},
+      "STEP_4_NAME": "Usted ha votado!",
+      "STEP_4_HINT": "<h3>Estamos registrando su voto</h3><p>Cada voto está registrado permanentemente de forma anónima en una base de datos hosteada por ciudadanos como usted. De esta forma, todos los votos pueden recontados sin saber de quién son los votos.</p><p>Este proceso garantiza resultados fiables, pero no es inmediato y puedo tomar un par de minutos.</p>",
+      "YOUR_VOTE_IS_COMPLETE": "Su voto \"{ value }\" sobre { vote } ha sido registrado !"
+    },
 
-		"voterCard" : {
-			"PROVIDE_VOTER_CARD": "Para continuar, provee su tarjeta de voto",
-			"SCAN_PRINTED_FILE": "Usar mi webcam para escanear mi tarjeta de voto impresa",
-			"SEND_DOWNLOADED_FILE": "Mandar el archivo de mi tarjeta de voto descargada",
-			"BACK": "Volver",
-			"CANCEL": "Cancelar"
-		},
+    "voterCard" : {
+      "PROVIDE_VOTER_CARD": "Para continuar, provee su tarjeta de voto",
+      "SCAN_PRINTED_FILE": "Usar mi webcam para escanear mi tarjeta de voto impresa",
+      "SEND_DOWNLOADED_FILE": "Mandar el archivo de mi tarjeta de voto descargada",
+      "BACK": "Volver",
+      "CANCEL": "Cancelar"
+    },
 
-		"hint": {
-			"HIDE_HINT_BUTTON": "Entendí, no vuelan a mostrarme este mensaje.",
-			"LEARN_MORE_BUTTON": "Saber más..."
-		},
+    "hint": {
+      "HIDE_HINT_BUTTON": "Entendí, no vuelan a mostrarme este mensaje.",
+      "LEARN_MORE_BUTTON": "Saber más..."
+    },
 
-		"error" : {
-			"ERROR_404": "Huy... no hemos encontrado la página que estaba buscando !",
-		}
-	}
+    "error" : {
+      "ERROR_404": "Huy... no hemos encontrado la página que estaba buscando !"
+    }
+  }
 }

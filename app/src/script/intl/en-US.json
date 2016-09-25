@@ -1,107 +1,107 @@
 {
-	"messages": {
-		"site": {
-			"TITLE": "Cocorico",
-			"LOADING": "Loading",
-			"POWERED_BY": "Powered by {productName}"
-		},
+  "messages": {
+    "site": {
+      "TITLE": "Cocorico",
+      "LOADING": "Loading",
+      "POWERED_BY": "Powered by {productName}"
+    },
 
-		"route": {
-			"SIGN_IN": "/sign-in",
-			"VOTE": "/vote",
-			"SERVICE_STATUS": "/system/status",
-			"BALLOT_BOX": "/vote/ballot-box"
-		},
+    "route": {
+      "SIGN_IN": "/sign-in",
+      "VOTE": "/vote",
+      "SERVICE_STATUS": "/system/status",
+      "BALLOT_BOX": "/vote/ballot-box"
+    },
 
-		"slug": {
-			"HOME": "home",
-			"ABOUT": "about",
-			"PRIVACY_POLICY": "privacy-policy",
-		},
+    "slug": {
+      "HOME": "home",
+      "ABOUT": "about",
+      "PRIVACY_POLICY": "privacy-policy"
+    },
 
-		"title": {
-			"ABOUT": "About",
-			"PRIVACY_POLICY": "Privacy Policy",
-			"SOURCE_CODE": "Source Code",
-			"SERVICE_STATUS": "System Status"
-		},
+    "title": {
+      "ABOUT": "About",
+      "PRIVACY_POLICY": "Privacy Policy",
+      "SOURCE_CODE": "Source Code",
+      "SERVICE_STATUS": "System Status"
+    },
 
-		"login": {
-			"SIGN_IN": "Sign In",
-			"SIGN_IN_WITH": "Sign in with :",
-			"SIGN_OUT": "Sign Out",
-			"REQUIRE_LOGIN": "You must be signed in to access this page."
-		},
+    "login": {
+      "SIGN_IN": "Sign In",
+      "SIGN_IN_WITH": "Sign in with :",
+      "SIGN_OUT": "Sign Out",
+      "REQUIRE_LOGIN": "You must be signed in to access this page."
+    },
 
-		"sort": {
-			"SORTED_BY_POPULARITY": "sorted by popularity",
-			"SORTED_BY_TIME": "sorted by date",
-			"SORTED_RANDOMLY": "sorted randomly"
-		},
+    "sort": {
+      "SORTED_BY_POPULARITY": "sorted by popularity",
+      "SORTED_BY_TIME": "sorted by date",
+      "SORTED_RANDOMLY": "sorted randomly"
+    },
 
-		"vote": {
-			"VOTE": "Vote",
-			"VOTE_UNAVAILABLE": "Unable to vote at the moment. Please try again later.",
-			"ALREADY_VOTED": "You have voted the { date }.",
-			"TOO_LATE_TO_VOTE": "You cannot vote for this texte any more.",
-			"BEFORE_UNLOAD_MESSAGE": "If you leave or refresh this page, you will lose your vote card forever.",
-			"EXIT": "Finish",
-			"CANCEL_MY_VOTE": "Cancel my vote",
-			"IGNORE": "Ignore",
-			"NOT_RECOMMENDED": "not recommended",
-			"WARNING_FETCH_VOTE_CARD": "<h3>Attention : read carefully !</h3><p>If you do not fetch your new vote card now, it will be completely impossible to get it back later. <strong>Impossible. For anyone. Forever.</strong>",
-			"STEP_TITLE": "Step { step }/{ total } : { title }",
+    "vote": {
+      "VOTE": "Vote",
+      "VOTE_UNAVAILABLE": "Unable to vote at the moment. Please try again later.",
+      "ALREADY_VOTED": "You have voted the { date }.",
+      "TOO_LATE_TO_VOTE": "You cannot vote for this texte any more.",
+      "BEFORE_UNLOAD_MESSAGE": "If you leave or refresh this page, you will lose your vote card forever.",
+      "EXIT": "Finish",
+      "CANCEL_MY_VOTE": "Cancel my vote",
+      "IGNORE": "Ignore",
+      "NOT_RECOMMENDED": "not recommended",
+      "WARNING_FETCH_VOTE_CARD": "<h3>Attention : read carefully !</h3><p>If you do not fetch your new vote card now, it will be completely impossible to get it back later. <strong>Impossible. For anyone. Forever.</strong>",
+      "STEP_TITLE": "Step { step }/{ total } : { title }",
 
-			"STEP_0_NAME": "ID",
-			"STEP_0_DESCRIPTION": "<p>Your digital ID guarantees you only vote once: its used to create the digital signature on the digital signing sheet. Your digital ID is used to find your signatures, but the opposite is impossible : thus <strong>your vote is 100% anonymous</strong>.</p>",
-			"STEP_0_WARNING": "<h3>Attention: identity theft is a crime!</h3><p>Identity theft is a crime in all countries. Stealing someone's identity is punishable by law, even when it's done online.</p>",
-			"ANNOUNCE_VOTER_ID": "You are about to vote as { name } born the { birthdate }",
-			"CONFIRM_VOTER_ID": "Yes, I am {name}",
-			"DENY_VOTER_ID": "No, it's not me",
+      "STEP_0_NAME": "ID",
+      "STEP_0_DESCRIPTION": "<p>Your digital ID guarantees you only vote once: its used to create the digital signature on the digital signing sheet. Your digital ID is used to find your signatures, but the opposite is impossible : thus <strong>your vote is 100% anonymous</strong>.</p>",
+      "STEP_0_WARNING": "<h3>Attention: identity theft is a crime!</h3><p>Identity theft is a crime in all countries. Stealing someone's identity is punishable by law, even when it's done online.</p>",
+      "ANNOUNCE_VOTER_ID": "You are about to vote as { name } born the { birthdate }",
+      "CONFIRM_VOTER_ID": "Yes, I am {name}",
+      "DENY_VOTER_ID": "No, it's not me",
 
-			"STEP_1_NAME": "Ballot",
-			"I_VOTE": "I vote \"{ value }\"",
-			"VOTE_YES": "for",
-			"VOTE_BLANK": "blank",
-			"VOTE_NO": "against",
-			"VALIDATE_BALLOT": "Validate your ballot",
+      "STEP_1_NAME": "Ballot",
+      "I_VOTE": "I vote \"{ value }\"",
+      "VOTE_YES": "for",
+      "VOTE_BLANK": "blank",
+      "VOTE_NO": "against",
+      "VALIDATE_BALLOT": "Validate your ballot",
 
-			"STEP_2_NAME": "Vote Card",
-			"STEP_2_DESCRIPTION": "<p>To guarantee your votes are anonymous, they are linked to a <string>digital vote card which is held solely by you</strong>. You can use the same vote card for all or some of your votes or <strong>create a new vote card for each vote (recommended)</strong>. You'll be able to use the selected vote card to check that your digital ballot is actually in the digital ballot box.</p>",
-			"STEP_2_HINT": "<h3>To guarantee your privacy...</h3><p>Each time you use the same vote card, your vote is linked to it. Your votes will always be anonymous. But it is possible to trace all the votes back to the vote card that was used. Thus, it is recommended to create a new vote card for every vote</p>",
-			"STEP_2_NEW_CARD": "<p><strong>A new digital vote card has been created for your.</strong> Your upcoming vote will be linked to this vote card. You can have as many digital vote card as you wish: this new vote card will not affect the one you eventually created previously. You must now fetch this new vote card:",
-			"CREATE_NEW_VOTE_CARD": "Create a new vote card (recommended)",
-			"DOWNLOAD_VOTER_CARD": "Download my vote card",
-			"PRINT_VOTER_CARD": "Print my vote card",
-			"CREATING_NEW_VOTE_CARD": "Creating a new vote card...",
-			"USE_EXISTING_VOTE_CARD": "Providing an existing vote card",
+      "STEP_2_NAME": "Vote Card",
+      "STEP_2_DESCRIPTION": "<p>To guarantee your votes are anonymous, they are linked to a <string>digital vote card which is held solely by you</strong>. You can use the same vote card for all or some of your votes or <strong>create a new vote card for each vote (recommended)</strong>. You'll be able to use the selected vote card to check that your digital ballot is actually in the digital ballot box.</p>",
+      "STEP_2_HINT": "<h3>To guarantee your privacy...</h3><p>Each time you use the same vote card, your vote is linked to it. Your votes will always be anonymous. But it is possible to trace all the votes back to the vote card that was used. Thus, it is recommended to create a new vote card for every vote</p>",
+      "STEP_2_NEW_CARD": "<p><strong>A new digital vote card has been created for your.</strong> Your upcoming vote will be linked to this vote card. You can have as many digital vote card as you wish: this new vote card will not affect the one you eventually created previously. You must now fetch this new vote card:",
+      "CREATE_NEW_VOTE_CARD": "Create a new vote card (recommended)",
+      "DOWNLOAD_VOTER_CARD": "Download my vote card",
+      "PRINT_VOTER_CARD": "Print my vote card",
+      "CREATING_NEW_VOTE_CARD": "Creating a new vote card...",
+      "USE_EXISTING_VOTE_CARD": "Providing an existing vote card",
 
-			"STEP_3_NAME": "Confirmation",
-			"STEP_3_WARNING": "<h3>Attention: no come back beyond this point!</h3><p>After confirming your vote, it will be sent away to be recorded and it will be impossible to cancel/modify it. <strong>Impossible. For anyone. Forever.</strong></p>",
-			"I_CONFIRM_MY_VOTE": "I confirm : ",
-			"CONFIRM_VOTE_MESSAGE": "You are about to vote \"{ value }\" about { vote }. Do you confirm your vote?",
-			"PENDING_BALLOT_TRANSACTION": "Sending your vote...",
+      "STEP_3_NAME": "Confirmation",
+      "STEP_3_WARNING": "<h3>Attention: no come back beyond this point!</h3><p>After confirming your vote, it will be sent away to be recorded and it will be impossible to cancel/modify it. <strong>Impossible. For anyone. Forever.</strong></p>",
+      "I_CONFIRM_MY_VOTE": "I confirm : ",
+      "CONFIRM_VOTE_MESSAGE": "You are about to vote \"{ value }\" about { vote }. Do you confirm your vote?",
+      "PENDING_BALLOT_TRANSACTION": "Sending your vote...",
 
-			"STEP_4_NAME": "Voted!",
-			"STEP_4_HINT": "<h3>Recording your vote</h3><p>Each vote is permanently and anonymously written in a database stored by citizens like you. This way, each of them can recounted without knowing who votes what.</p><p>This process guarantees the vote results are reliable, but it's not immediate and can take a few minutes.</p>",
-			"YOUR_VOTE_IS_COMPLETE": "Your vote \"{ value }\" about { vote } has been sent!",
-		},
+      "STEP_4_NAME": "Voted!",
+      "STEP_4_HINT": "<h3>Recording your vote</h3><p>Each vote is permanently and anonymously written in a database stored by citizens like you. This way, each of them can recounted without knowing who votes what.</p><p>This process guarantees the vote results are reliable, but it's not immediate and can take a few minutes.</p>",
+      "YOUR_VOTE_IS_COMPLETE": "Your vote \"{ value }\" about { vote } has been sent!"
+    },
 
-		"voterCard": {
-			"PROVIDE_VOTER_CARD": "To continue, please provide your vote card",
-			"SCAN_PRINTED_FILE": "Use my webcam to scan my printed vote card",
-			"SEND_DOWNLOADED_FILE": "Select my downloaded vote card file",
-			"BACK": "Back",
-			"CANCEL": "Cancel"
-		},
+    "voterCard": {
+      "PROVIDE_VOTER_CARD": "To continue, please provide your vote card",
+      "SCAN_PRINTED_FILE": "Use my webcam to scan my printed vote card",
+      "SEND_DOWNLOADED_FILE": "Select my downloaded vote card file",
+      "BACK": "Back",
+      "CANCEL": "Cancel"
+    },
 
-		"hint": {
-			"HIDE_HINT_BUTTON": "I understand, don't show this message again.",
-			"LEARN_MORE_BUTTON": "Learn more..."
-		},
+    "hint": {
+      "HIDE_HINT_BUTTON": "I understand, don't show this message again.",
+      "LEARN_MORE_BUTTON": "Learn more..."
+    },
 
-		"error": {
-			"ERROR_404": "Oops... we couldn't find the page you are looking for!"
-		}
-	}
+    "error": {
+      "ERROR_404": "Oops... we couldn't find the page you are looking for!"
+    }
+  }
 }
