@@ -9,14 +9,6 @@
     },
     "memory": 3072
   },
-  "travis": {
-    "hosts": [
-      "localhost"
-    ],
-    "vars": {
-      "hostname": "local.cocorico.cc"
-    }
-  },
   "image": {
     "provider": "docker",
     "hosts": [
