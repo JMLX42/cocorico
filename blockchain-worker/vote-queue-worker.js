@@ -10,7 +10,7 @@ var log = bunyan.createLogger({name: "vote-queue-worker"});
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
-keystone.import('../api/models');
+keystone.import('../api/dist/models');
 
 var Vote = keystone.list('Vote');
 
@@ -20,19 +20,19 @@ function getCompiledVoteContract(web3, callback)
     var source = fs.readFileSync(path, {encoding: 'utf-8'});
 
     log.info(
-        { path: path },
-        'compiling smart contract'
+      { path: path },
+      'compiling smart contract'
     );
 
     web3.eth.compile.solidity(source, (error, compiled) => {
-        if (!error) {
-            log.info(
-                { md5Hash: md5(source) },
-                'compiled smart contract'
-            );
-        }
+      if (!error) {
+        log.info(
+          { md5Hash: md5(source) },
+          'compiled smart contract'
+        );
+      }
 
-        callback(error, compiled);
+      callback(error, compiled);
     });
 }
 

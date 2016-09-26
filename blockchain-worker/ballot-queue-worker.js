@@ -10,7 +10,7 @@ var log = bunyan.createLogger({name: "ballot-queue-worker"});
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
-keystone.import('../api/models');
+keystone.import('../api/dist/models');
 
 var Ballot = keystone.list('Ballot');
 
