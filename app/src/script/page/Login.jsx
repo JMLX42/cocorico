@@ -31,7 +31,7 @@ var Login = React.createClass({
       redirect: this.context.location
         ? !!this.context.location.query.redirect
           ? this.context.location.query.redirect
-          : '/' + this.context.location.pathname
+          : this.context.location.pathname
         : this.props.redirect,
     };
   },
