@@ -1,5 +1,5 @@
-var config = require('../api/config.json');
-var keystone = require('../api/node_modules/keystone');
+var config = require('/opt/cocorico/api-web/config.json');
+var keystone = require('/opt/cocorico/api-web/node_modules/keystone');
 var async = require('async');
 var EthereumTx = require('ethereumjs-tx');
 var EthereumUtil = require('ethereumjs-util');
@@ -10,7 +10,7 @@ var log = bunyan.createLogger({name: 'ballot-queue-worker'});
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
-keystone.import('../api/models');
+keystone.import('../../api/dist/models');
 
 var Ballot = keystone.list('Ballot');
 
@@ -338,10 +338,15 @@ require('amqplib/callback_api').connect(
       if (err != null) {
         log.error({error: err}, 'error');
       } else {
+
+        log.info('connecting');
+
         conn.createChannel(function(channelErr, ch) {
           if (channelErr != null) {
             log.error({error: channelErr}, 'error');
           } else {
+            log.info('connected');
+
             ch.assertQueue('ballots');
             ch.consume(
               'ballots',

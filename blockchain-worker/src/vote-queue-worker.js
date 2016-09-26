@@ -1,5 +1,5 @@
-var config = require('../api/config.json');
-var keystone = require('../api/node_modules/keystone');
+var config = require('/opt/cocorico/api-web/config.json');
+var keystone = require('/opt/cocorico/api-web/node_modules/keystone');
 var async = require('async');
 var Web3 = require('web3');
 var fs = require('fs');
@@ -10,7 +10,7 @@ var log = bunyan.createLogger({name: 'vote-queue-worker'});
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
-keystone.import('../api/models');
+keystone.import('../../api/dist/models');
 
 var Vote = keystone.list('Vote');
 
