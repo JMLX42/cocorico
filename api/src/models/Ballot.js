@@ -2,7 +2,6 @@ var config = require('/opt/cocorico/api-web/config.json');
 
 var keystone = require('keystone');
 var transform = require('model-transform');
-var bcrypt = require('bcrypt');
 
 var Types = keystone.Field.Types;
 
