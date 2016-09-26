@@ -12,7 +12,7 @@ var Media = new keystone.List('Media', {
 var storage = new keystone.Storage({
   adapter: keystone.Storage.Adapters.FS,
   fs: {
-    path: keystone.expandPath('../app/public/'+ config.uploadDir),
+    path: keystone.expandPath('../../app/public/'+ config.uploadDir),
     publicPath: '/' + config.uploadDir,
   },
 });
