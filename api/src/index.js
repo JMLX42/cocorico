@@ -2,6 +2,11 @@ var config = require('/opt/cocorico/api-web/config.json');
 var keystone = require('keystone');
 var srs = require('secure-random-string');
 
+try {
+  require('source-map-support').install();
+} catch (e) {
+}
+
 keystone.init({
 
   'name': 'cocorico',
