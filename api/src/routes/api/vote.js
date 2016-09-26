@@ -82,7 +82,7 @@ exports.create = function(req, res) {
           url: url,
           restricted: req.body.restricted === 'true',
           labels: labels,
-        }).save((err, vote) => callback(err, vote)),
+        }).save((err, savedVote) => callback(err, savedVote)),
     ],
         (err, vote) => {
           if (err) {

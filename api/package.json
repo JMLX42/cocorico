@@ -20,7 +20,7 @@
     "markdown": "0.5.0",
     "md5": "2.1.0",
     "metafetch": "1.2.11",
-    "model-transform": "^1.1.0",
+    "model-transform": "^2.0.0",
     "node-fetch": "1.5.3",
     "oauth": "~0.9.12",
     "oauth2-server": "^2.4.1",

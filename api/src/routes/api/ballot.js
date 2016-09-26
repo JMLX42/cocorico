@@ -5,43 +5,35 @@ var EthereumTx = require('ethereumjs-tx');
 var EthereumUtil = require('ethereumjs-util');
 var async = require('async');
 
-var Vote = keystone.list('Vote'),
-  Ballot = keystone.list('Ballot');
+var Vote = keystone.list('Vote');
 
 exports.get = function(req, res) {
-  Ballot.getByVoteIdAndUser(
-    req.params.voteId,
-    req.user.sub,
-    (err, ballot) => {
-      if (err)
-        return res.apiError('database error', err);
-
-      if (!ballot)
-        return res.status(404).apiResponse({
-          error: 'ballot does not exist',
-        });
-
-      return res.apiResponse({ ballot: ballot });
+  Vote.model.findById(req.params.voteId).exec((voteErr, vote) => {
+    if (voteErr) {
+      return res.apiError('database error', voteErr)
     }
-);
 
-  // if (!req.user || !req.user.sub)
-  //   return res.status(401).apiResponse({error: 'NOT_LOGGED_IN'});
-  //
-  // Ballot.model.findOne({bill:req.params.id})
-  //   .$where(UserProfileHelper.getWhereUserFunction(req.user))
-  //   .exec(function(err, ballot)
-  //   {
-  //     if (err)
-  //       return res.apiError('database error', err);
-  //
-  //     if (!ballot)
-  //       return res.status(404).apiResponse({
-  //         error: 'ballot does not exist'
-  //       });
-  //
-  //     return res.apiResponse({ ballot: ballot });
-  //   });
+    if (!vote) {
+      return res.status(404).apiResponse({error: 'vote does not exist'});
+    }
+
+    return vote.getBallotByUserUID(
+      req.user.sub,
+      (err, ballot) => {
+        if (err) {
+          return res.apiError('database error', err);
+        }
+
+        if (!ballot) {
+          return res.status(404).apiResponse({
+            error: 'ballot does not exist',
+          });
+        }
+
+        return res.apiResponse({ ballot: ballot });
+      }
+    );
+  });
 }
 
 function pushBallotMessageOnQueue(data, callback) {
@@ -60,9 +52,9 @@ function pushBallotMessageOnQueue(data, callback) {
 
           ch.assertQueue('ballots');
           ch.sendToQueue(
-              'ballots',
-              new Buffer(JSON.stringify(ballotObj)),
-              { persistent : true }
+            'ballots',
+            new Buffer(JSON.stringify(ballotObj)),
+            { persistent : true }
           );
 
           return callback(null, ballotObj);
@@ -106,8 +98,7 @@ exports.vote = function(req, res) {
         if (vote.voteContractAddress !== voteContractAddress)
           return callback({code: 300, error: 'contract address mismatch'});
 
-        return Ballot.getByVoteIdAndUser(
-          vote.id,
+        return vote.getBallotByUserUID(
           req.user.sub,
           (err, ballot) => callback(err, vote, ballot)
         );
@@ -116,12 +107,8 @@ exports.vote = function(req, res) {
         if (!!ballot)
           return callback({code: 403, error: 'user already voted'});
 
-        var ballot = Ballot.model({
-          voter: Ballot.getHash(vote.id, user),
-          status: 'queued',
-        });
-
-        return ballot.save((err, ballot) => callback(err, vote, ballot));
+        return vote.createBallot(req.user.sub)
+          .save((err, newBallot) => callback(err, vote, newBallot));
       },
       (vote, ballot, callback) => pushBallotMessageOnQueue(
         {

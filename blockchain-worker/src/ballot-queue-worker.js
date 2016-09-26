@@ -15,7 +15,9 @@ keystone.import('../../api/dist/models');
 var Ballot = keystone.list('Ballot');
 
 function noRetryError(err) {
-  err.noRetry = true;
+  if (!!err) {
+    err.noRetry = true;
+  }
 
   return err;
 }
@@ -93,7 +95,7 @@ function registerVoter(web3, rootAccount, address, voteInstance, callback) {
     if (e.args.voter === address) {
       voterRegisteredEvent.stopWatching();
       voteErrorEvent.stopWatching();
-      callback(noRetryError(e), null);
+      callback(noRetryError(err), e);
     }
   });
 
@@ -101,7 +103,7 @@ function registerVoter(web3, rootAccount, address, voteInstance, callback) {
     if (e.args.voter === address) {
       voteErrorEvent.stopWatching();
       voterRegisteredEvent.stopWatching();
-      callback(noRetryError(e), null);
+      callback(noRetryError(err), e);
     }
   });
 
@@ -189,8 +191,18 @@ function sendVoteTransaction(web3, voteInstance, transaction, callback) {
 // }
 
 function handleBallot(ballot, next) {
-  if (!ballot.id || !ballot.voteContractAddress || !ballot.transaction) {
-    next(noRetryError({error:'invalid ballot'}), null);
+  if (!ballot.id) {
+    next(noRetryError({error:'missing ballot id'}), null);
+    return;
+  }
+
+  if (!ballot.voteContractAddress) {
+    next(noRetryError({error:'missing ballot vote contract address'}), null);
+    return;
+  }
+
+  if (!ballot.transaction) {
+    next(noRetryError({error:'missing ballot transaction'}), null);
     return;
   }
 
@@ -357,7 +369,7 @@ require('amqplib/callback_api').connect(
                   return ch.nack(msg);
                 }
 
-                if (!!msgObj.ballot) {
+                if (!msgObj.ballot) {
                   log.info('invalid ballot message received');
                   return ch.ack(msg);
                 }
@@ -377,13 +389,14 @@ require('amqplib/callback_api').connect(
                   if (ballotErr) {
                     log.error({error: ballotErr}, 'error');
 
-                    if (ballotErr.noRetry) {
-                      return ch.ack(msg);
-                    }
-
                     msgObj.lastTriedAt = Date.now() / 1000;
 
                     return ballotError(msgObj.ballot, ballotErr, () => {
+                      if (ballotErr.noRetry) {
+                        ch.ack(msg);
+                        return;
+                      }
+
                       ch.sendToQueue(
                         'ballots',
                         new Buffer(JSON.stringify(msgObj)),

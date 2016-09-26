@@ -5,6 +5,9 @@ var transform = require('model-transform');
 var metafetch = require('metafetch');
 var async = require('async');
 var Web3 = require('web3');
+var bcrypt = require('bcrypt');
+
+var Ballot = keystone.list('Ballot');
 
 var Types = keystone.Field.Types;
 
@@ -32,6 +35,7 @@ Vote.add({
   voteContractABI: { type: Types.Text, noedit: true },
   restricted: { type: Types.Boolean, default: false },
   labels: { type: Types.TextArray },
+  salt: { type: Types.Text, noedit: true, default: () => bcrypt.genSaltSync(10) },
 });
 
 Vote.relationship({ path: 'sources', ref: 'Source', refPath: 'vote' });
@@ -46,6 +50,16 @@ Vote.schema.methods.userIsAuthorizedToVote = function(user) {
     && (!user.authorizedVotes
       || !user.authorizedVotes.length
       || user.authorizedVotes.indexOf(this.id) >= 0);
+}
+
+Vote.schema.methods.createBallot = function(uid) {
+  return Ballot.model({
+    hash: bcrypt.hashSync(uid, this.salt),
+  });
+}
+
+Vote.schema.methods.getBallotByUserUID = function(uid, callback) {
+  Ballot.model.findOne({hash: bcrypt.hashSync(uid, this.salt)}).exec(callback);
 }
 
 function completeVote(vote, next) {
@@ -147,7 +161,9 @@ Vote.schema.pre('validate', function(next) {
   );
 });
 
-transform.toJSON(Vote);
+transform.toJSON(Vote, (vote) => {
+  delete vote.salt;
+});
 
 Vote.defaultColumns = 'title, url, status, voteContractAddress';
 Vote.register();

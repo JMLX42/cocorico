@@ -26,7 +26,9 @@ App.schema.methods.isValidURL = function(url) {
   return false;
 }
 
-transform.toJSON(App);
+transform.toJSON(App, (app) => {
+  delete app.secret;
+});
 
 App.defaultColumns = 'title, key, secret';
 App.register();
