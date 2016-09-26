@@ -25,9 +25,6 @@ exports.list = function(req, res) {
           if (err)
             return res.apiError('database error', err);
 
-          for (var source of sources)
-            source.likes = LikeHelper.filterUserLikes(source.likes, req.user);
-
           return res.apiResponse({ sources : sources });
         });
     });

@@ -10,38 +10,38 @@ var Vote = keystone.list('Vote'),
 
 exports.get = function(req, res) {
   Ballot.getByVoteIdAndUser(
-		req.params.voteId,
-		req.user.sub,
-		(err, ballot) => {
-  if (err)
-    return res.apiError('database error', err);
+    req.params.voteId,
+    req.user.sub,
+    (err, ballot) => {
+      if (err)
+        return res.apiError('database error', err);
 
-  if (!ballot)
-    return res.status(404).apiResponse({
-      error: 'ballot does not exist',
-    });
+      if (!ballot)
+        return res.status(404).apiResponse({
+          error: 'ballot does not exist',
+        });
 
-  return res.apiResponse({ ballot: ballot });
-}
-	);
+      return res.apiResponse({ ballot: ballot });
+    }
+);
 
-	// if (!req.user || !req.user.sub)
-	// 	return res.status(401).apiResponse({error: 'NOT_LOGGED_IN'});
-	//
-	// Ballot.model.findOne({bill:req.params.id})
-	// 	.$where(UserProfileHelper.getWhereUserFunction(req.user))
-	// 	.exec(function(err, ballot)
-	// 	{
-	// 		if (err)
-	// 			return res.apiError('database error', err);
-	//
-	// 		if (!ballot)
-	// 			return res.status(404).apiResponse({
-	// 				error: 'ballot does not exist'
-	// 			});
-	//
-	// 		return res.apiResponse({ ballot: ballot });
-	// 	});
+  // if (!req.user || !req.user.sub)
+  //   return res.status(401).apiResponse({error: 'NOT_LOGGED_IN'});
+  //
+  // Ballot.model.findOne({bill:req.params.id})
+  //   .$where(UserProfileHelper.getWhereUserFunction(req.user))
+  //   .exec(function(err, ballot)
+  //   {
+  //     if (err)
+  //       return res.apiError('database error', err);
+  //
+  //     if (!ballot)
+  //       return res.status(404).apiResponse({
+  //         error: 'ballot does not exist'
+  //       });
+  //
+  //     return res.apiResponse({ ballot: ballot });
+  //   });
 }
 
 function pushBallotMessageOnQueue(data, callback) {
@@ -156,45 +156,45 @@ exports.vote = function(req, res) {
 //   if (!config.capabilities.vote.vote)
 //     return res.status(403).send();
 
-	// Vote.model.findById(req.params.id).exec(function(err, vote)
-	// {
-	// 	if (err)
-	// 		return res.apiError('database error', err);
-	// 	if (!vote)
-	// 		return res.apiError('not found');
+  // Vote.model.findById(req.params.id).exec(function(err, vote)
+  // {
+  //   if (err)
+  //     return res.apiError('database error', err);
+  //   if (!vote)
+  //     return res.apiError('not found');
     //
-	// 	BallotHelper.getByVoteIdAndVoter(
-	// 		req.params.id,
-	// 		req.user.sub,
-	// 		function(err, ballot)
-	// 		{
-	// 			if (err)
-	// 				return res.apiError('database error', err);
+  //   BallotHelper.getByVoteIdAndVoter(
+  //     req.params.id,
+  //     req.user.sub,
+  //     function(err, ballot)
+  //     {
+  //       if (err)
+  //         return res.apiError('database error', err);
     //
-	// 			if (!ballot)
-	// 				return res.status(404).apiResponse({
-	// 					error: 'ballot does not exist'
-	// 				});
+  //       if (!ballot)
+  //         return res.status(404).apiResponse({
+  //           error: 'ballot does not exist'
+  //         });
     //
-	// 			Ballot.model.findById(ballot.id).remove(function(err)
-	// 			{
-	// 				var client = redis.createClient();
-	// 				var key = 'ballot/' + req.params.id + '/' + req.user.sub;
+  //       Ballot.model.findById(ballot.id).remove(function(err)
+  //       {
+  //         var client = redis.createClient();
+  //         var key = 'ballot/' + req.params.id + '/' + req.user.sub;
     //
-	// 				if (err)
-	// 					return res.apiError('database error', err);
+  //         if (err)
+  //           return res.apiError('database error', err);
     //
-	// 				client.on('connect', function()
-	// 				{
-	// 					client.del(key, function(err, reply)
-	// 					{
-	// 						if (err)
-	// 							console.log(err);
+  //         client.on('connect', function()
+  //         {
+  //           client.del(key, function(err, reply)
+  //           {
+  //             if (err)
+  //               console.log(err);
     //
-	// 						return res.apiResponse({ ballot: 'removed' });
-	// 					});
-	// 				});
-	// 			});
-	// 		});
-	// });
+  //             return res.apiResponse({ ballot: 'removed' });
+  //           });
+  //         });
+  //       });
+  //     });
+  // });
 // }

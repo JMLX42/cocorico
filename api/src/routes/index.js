@@ -286,8 +286,6 @@ exports = module.exports = function(app) {
 	// app.post('/ballot/cancel/:voteId', isAuthenticated, routes.api.ballot.cancel);
 
   app.get('/source/:voteId', routes.api.source.list);
-	// app.post('/source/like/add/:id/:value', isAuthenticated, routes.api.source.addLike);
-	// app.post('/source/like/remove/:id', isAuthenticated, routes.api.source.removeLike);
 
   app.get('/page/list', routes.api.page.list);
   app.get('/page/navbar', routes.api.page.navbar);
