@@ -86,9 +86,9 @@ var BallotBox = React.createClass({
                   <span className={classNames({
                     'label': true,
                     'label-primary': hasLabels,
-                    'positive-background': !hasLabels && tx.args.proposal === 0,
-                    'neutral-background': !hasLabels && tx.args.proposal === 1,
-                    'negative-background': !hasLabels && tx.args.proposal === 2,
+                    'positive-background': !hasLabels && tx.args.proposal === '0',
+                    'neutral-background': !hasLabels && tx.args.proposal === '1',
+                    'negative-background': !hasLabels && tx.args.proposal === '2',
                   })}>
                     <Title text={this.getVoteValueDisplayMessage(tx.args.proposal)}/>
                   </span>
