@@ -309,40 +309,100 @@ function handleBallot(ballot, next) {
 }
 
 function updateBallotStatus(ballot, status, callback) {
-  Ballot.model.findById(ballot.id)
-    .exec(function(err, dbBallot) {
-      if (err)
-        return callback(err, null);
+  Ballot.model.findById(ballot.id).exec(function(err, dbBallot) {
+    if (err) {
+      return callback(err, null);
+    }
+    if (!dbBallot) {
+      return callback('unknown ballot with id ' + ballot.id, null);
+    }
 
-      if (!dbBallot) {
-        return callback('unknown ballot with id ' + ballot.id, null);
+    dbBallot.status = status;
+
+    return dbBallot.save((err2, _) => {
+      if (err2) {
+        return callback(err2, dbBallot);
       }
-
-      dbBallot.status = status;
-
-      return dbBallot.save(callback);
+      if (status !== 'complete') {
+        return callback(null, dbBallot);
+      }
+      return triggerWebhookOnSuccess(ballot, (err3, webhookMsg) => {
+        if (err3) {
+          return callback(err3, webhookMsg);
+        }
+        return callback(null, dbBallot);
+      });
     });
+  });
 }
 
 function ballotError(ballot, msg, callback) {
   log.error(msg.toString());
 
-  Ballot.model.findById(ballot.id)
-    .exec(function(err, dbBallot) {
-      if (err)
-        return callback(err, null);
+  Ballot.model.findById(ballot.id).exec(function(err, dbBallot) {
+    if (err) {
+      return callback(err, null);
+    }
+    if (!dbBallot) {
+      return callback('unknown ballot with id ' + ballot.id, null);
+    }
 
-      if (dbBallot) {
-        dbBallot.status = 'error';
-        dbBallot.error = JSON.stringify(msg);
+    dbBallot.status = 'error';
+    dbBallot.error = JSON.stringify(msg);
 
-        return dbBallot.save(function(saveErr) {
-          return callback(saveErr, dbBallot);
-        });
+    return dbBallot.save((err2, _) => {
+      if (err2) {
+        return callback(err2, dbBallot);
       }
-
-      return callback(null, null);
+      return triggerWebhookOnError(ballot, (err3, webhookMsg) => {
+        if (err3) {
+          return callback(err3, webhookMsg);
+        }
+        return callback(null, null);
+      });
     });
+  });
+}
+
+
+function triggerWebhookOnSuccess(ballot, callback) {
+  return triggerWebhook(ballot, 'success', callback)
+}
+
+function triggerWebhookOnError(ballot, callback) {
+  return triggerWebhook(ballot, 'error', callback)
+}
+
+function triggerWebhook(ballot, status, callback) {
+  require('amqplib/callback_api').connect('amqp://localhost', (err, conn) => {
+    if (err) {
+      log.error('Unable to connect to AMQP service.');
+      return callback(err, null);
+    }
+    return conn.createChannel((err2, ch) => {
+      if (err2) {
+        log.error('Unable to create new AMQP channel.');
+        return callback(err2, null);
+      }
+      msg = {
+        url: ballot.app.webhookURL,
+        event: {
+          app: ballot.app,
+          vote: {id: ballot.vote.id},
+          user: {sub: ballot.user.sub},
+          status: status,
+        },
+        createdAt: Date.now(),
+      };
+      ch.assertQueue('webhooks');
+      ch.sendToQueue('webhooks',
+        new Buffer(JSON.stringify(msg)),
+        { persistent : true }
+      );
+      log.info('Message appended to webhooks queue: ' + JSON.stringify(msg));
+      return callback(null, msg);
+    });
+  });
 }
 
 module.exports.run = function() {
