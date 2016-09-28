@@ -33,6 +33,7 @@
     "react-dom": "^0.14.6",
     "react-intl": "^1.2.2",
     "react-remarkable": "1.1.1",
+    "react-responsive": "^1.1.5",
     "react-router": "2.8.1",
     "reflux": "0.3.0",
     "style-loader": "^0.13.1",
