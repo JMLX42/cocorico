@@ -118,10 +118,10 @@ exports.vote = function(req, res) {
           voteContractAddress: vote.voteContractAddress,
           voteContractABI: JSON.parse(vote.voteContractABI),
         },
-        (err, msg) => callback(err, ballot)
+        (err, msg) => callback(err, vote, ballot)
       ),
     ],
-    (err, ballot) => {
+    (err, vote, ballot) => {
       if (err) {
         if (ballot) {
           return ballotTransactionError(res, ballot, err);
@@ -134,7 +134,11 @@ exports.vote = function(req, res) {
         }
         return res.apiError(err);
       }
-      return res.apiResponse({ballot: ballot});
+
+      return res.apiResponse({
+        ballot: ballot,
+        proof: vote.getProofOfVote(signedTx),
+      });
     }
   );
 }
