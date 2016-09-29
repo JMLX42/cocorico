@@ -20,7 +20,12 @@ var Grid = ReactBootstrap.Grid,
   Col = ReactBootstrap.Col,
   Modal = ReactBootstrap.Modal,
   Button = ReactBootstrap.Button,
-  ButtonToolbar = ReactBootstrap.ButtonToolbar;
+  ButtonToolbar = ReactBootstrap.ButtonToolbar,
+  FormGroup = ReactBootstrap.FormGroup,
+  MenuItem = ReactBootstrap.MenuItem,
+  InputGroup = ReactBootstrap.InputGroup,
+  FormControl = ReactBootstrap.FormControl,
+  DropdownButton = ReactBootstrap.DropdownButton;
 
 var BallotBox = React.createClass({
 
@@ -33,6 +38,7 @@ var BallotBox = React.createClass({
   getInitialState: function() {
     return {
       qrCodeReader: false,
+      searchMode: 'Transaction',
     };
   },
 
@@ -71,12 +77,32 @@ var BallotBox = React.createClass({
   },
 
   render: function() {
+    var vote = this.state.votes.getById(this.props.params.voteId);
+
+    if (!vote) {
+      return (
+        <Grid>
+          <Row>
+            <Col xs={12}>
+              <LoadingIndicator/>
+            </Col>
+          </Row>
+        </Grid>
+      );
+    }
+
     return (
       <div className="page">
         {this.renderQRCodeReaderModal()}
         <Grid>
           <Row>
             <Col xs={12}>
+              <h1>{vote.title} <small>Ballot Box</small></h1>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={12}>
+              <h2>Verify your ballot</h2>
               <ButtonToolbar>
                 <Button
                   bsStyle="primary"
@@ -87,6 +113,16 @@ var BallotBox = React.createClass({
                   Select my downloaded proof of vote
                 </FileSelectButton>
               </ButtonToolbar>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={12}>
+              <h2>Explore the ballot box</h2>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={12} md={8}>
+              {this.renderSearchForm()}
             </Col>
           </Row>
           <Row>
@@ -116,11 +152,41 @@ var BallotBox = React.createClass({
     );
   },
 
+  renderSearchForm: function() {
+    var searchModes = [
+      'Transaction',
+      'Voter',
+      'Proposal',
+    ];
+
+    return (
+      <form>
+        <FormGroup>
+          <InputGroup>
+            <FormControl type="text" placeholder="Type here to search..."/>
+            <DropdownButton
+              componentClass={InputGroup.Button}
+              id="input-dropdown-addon"
+              title={this.state.searchMode}
+              onSelect={(k, e)=>this.setState({searchMode:k})}
+              pullRight={true}>
+              {searchModes.map((mode, index) => {
+                return (
+                  <MenuItem key={index} eventKey={mode}>{mode}</MenuItem>
+                );
+              })}
+            </DropdownButton>
+          </InputGroup>
+        </FormGroup>
+      </form>
+    );
+  },
+
   renderContent: function() {
     var transactions = this.state.transactions.getByVoteId(this.props.params.voteId);
     var vote = this.state.votes.getById(this.props.params.voteId);
 
-    if (!transactions || !vote) {
+    if (!transactions) {
       return <LoadingIndicator/>;
     }
 
@@ -130,7 +196,7 @@ var BallotBox = React.createClass({
       <table className="table table-hover table-ellipsis">
         <thead>
           <tr>
-            <th>Transaction Hash</th>
+            <th>Transaction</th>
             <th>Voter</th>
             <th>Proposal</th>
           </tr>
