@@ -22,7 +22,6 @@ module.exports = {
         exclude: /node_modules/,
         query: {
           presets : ['es2015', 'react'],
-          plugins: ['add-module-exports'],
         },
       },
       {
