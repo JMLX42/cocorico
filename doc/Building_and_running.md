@@ -20,4 +20,4 @@ The Web app is built during the install. Use the following command to re-build t
 
 or the following command to build the Web app whenever a file changes (recommended for development):
 
-`cd /vagrant/app && npm run watch`
+`cd /vagrant/app && npm start`
