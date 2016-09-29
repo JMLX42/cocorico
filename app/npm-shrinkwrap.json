@@ -1780,11 +1780,6 @@
         }
       }
     },
-    "qrcode-npm": {
-      "version": "0.0.3",
-      "from": "https://registry.npmjs.org/qrcode-npm/-/qrcode-npm-0.0.3.tgz",
-      "resolved": "https://registry.npmjs.org/qrcode-npm/-/qrcode-npm-0.0.3.tgz"
-    },
     "qrcode-reader": {
       "version": "0.2.2",
       "from": "https://registry.npmjs.org/qrcode-reader/-/qrcode-reader-0.2.2.tgz",
