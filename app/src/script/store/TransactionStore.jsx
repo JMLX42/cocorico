@@ -8,6 +8,7 @@ module.exports = Reflux.createStore({
     jquery.ajaxSetup({ cache: false });
 
     this.listenTo(VoteAction.getTransactions, this._fetchByVoteId);
+    this.listenTo(VoteAction.searchTransactions, this._fetchByVoteId);
 
     this._transactions = {};
   },
@@ -22,20 +23,25 @@ module.exports = Reflux.createStore({
       : this._transactions[voteId];
   },
 
-  _fetchByVoteId: function(voteId) {
+  _fetchByVoteId: function(voteId, search) {
     if (voteId in this._transactions && this._transactions[voteId] === true) {
       return;
     }
 
-    if (voteId in this._transactions) {
+    if (!search && voteId in this._transactions) {
       this.trigger(this);
       return;
     }
 
     this._transactions[voteId] = true;
 
-    jquery.get(
+    jquery.post(
       '/api/vote/transactions/' + voteId,
+      {
+        transactionHash: search ? search.transactionHash : null,
+        voter: search ? search.voter : null,
+        proposal: search ? search.proposal : null,
+      },
       (data) => {
         this._transactions[voteId] = data.transactions;
 

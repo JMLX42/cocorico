@@ -4,6 +4,7 @@ var keystone = require('keystone');
 var EthereumTx = require('ethereumjs-tx');
 var EthereumUtil = require('ethereumjs-util');
 var async = require('async');
+var jwt = require('jsonwebtoken');
 
 var Vote = keystone.list('Vote');
 
@@ -143,49 +144,43 @@ exports.vote = function(req, res) {
   );
 }
 
-// exports.cancel = function(req, res) {
-//   if (!config.capabilities.vote.vote)
-//     return res.status(403).send();
+exports.verify = function(req, res) {
+  if (!req.body.proofOfVote) {
+    res.status(400).send();
+    return;
+  }
 
-  // Vote.model.findById(req.params.id).exec(function(err, vote)
-  // {
-  //   if (err)
-  //     return res.apiError('database error', err);
-  //   if (!vote)
-  //     return res.apiError('not found');
-    //
-  //   BallotHelper.getByVoteIdAndVoter(
-  //     req.params.id,
-  //     req.user.sub,
-  //     function(err, ballot)
-  //     {
-  //       if (err)
-  //         return res.apiError('database error', err);
-    //
-  //       if (!ballot)
-  //         return res.status(404).apiResponse({
-  //           error: 'ballot does not exist'
-  //         });
-    //
-  //       Ballot.model.findById(ballot.id).remove(function(err)
-  //       {
-  //         var client = redis.createClient();
-  //         var key = 'ballot/' + req.params.id + '/' + req.user.sub;
-    //
-  //         if (err)
-  //           return res.apiError('database error', err);
-    //
-  //         client.on('connect', function()
-  //         {
-  //           client.del(key, function(err, reply)
-  //           {
-  //             if (err)
-  //               console.log(err);
-    //
-  //             return res.apiResponse({ ballot: 'removed' });
-  //           });
-  //         });
-  //       });
-  //     });
-  // });
-// }
+  // First, we decode the JWT without checking the signature because we need
+  // to get the vote smart contract address from the payload.
+  var decoded = jwt.decode(req.body.proofOfVote);
+
+  if (!decoded) {
+    res.status(400).send();
+    return;
+  }
+
+  // We fetch the vote that match the smart contract address.
+  Vote.findOne({voteContractAddress: decoded.c})
+    .exec((findErr, vote) => {
+      if (err) {
+        return res.apiError('database error', err);
+      }
+
+      if (!vote) {
+        return res.status(404).apiResponse({error: 'vote does not exist'});
+      }
+
+      return jwt.verify(
+        req.body.proofOfVote,
+        vote.key,
+        (err, verified) => {
+          if (err) {
+            return res.status(400).apiResponse({error: err.message});
+          }
+
+
+
+          return res.status(200).send();
+        });
+    });
+}

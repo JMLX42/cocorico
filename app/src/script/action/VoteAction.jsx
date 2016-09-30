@@ -6,4 +6,5 @@ module.exports = Reflux.createActions({
   'showResults': {sync: false},
   'getPermissions': {sync: false},
   'getTransactions': {sync: false},
+  'searchTransactions': {sync: false},
 });

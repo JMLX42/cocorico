@@ -310,7 +310,6 @@ exports.permissions = function(req, res) {
 }
 
 exports.getTransactions = function(req, res) {
-
   var voteId = req.params.voteId;
 
   return Vote.model.findById(voteId)
@@ -323,28 +322,50 @@ exports.getTransactions = function(req, res) {
         return res.status(404).send();
       }
 
-      // FIXME: Add 403 if vote.status != complete
+      if (vote.status !== 'complete') {
+        return res.status(403).send();
+      }
+
+      var filter = null;
+
+      if (!!req.body.transactionHash) {
+        if (req.body.transactionHash.indexOf('0x') !== 0) {
+          req.body.transactionHash = '0x' + req.body.transactionHash;
+        }
+        filter = (tx) => tx.transactionHash.indexOf(req.body.transactionHash) === 0;
+      } else if (!!req.body.voter) {
+        if (req.body.voter.indexOf('0x') !== 0) {
+          req.body.voter = '0x' + req.body.voter;
+        }
+        filter = (tx) => tx.args.voter.indexOf(req.body.voter) === 0;
+      } else if (!!req.body.proposal) {
+        filter = (tx) => Math.round(tx.args.proposal.toNumber()) === parseInt(req.body.proposal);
+      }
 
       var web3 = new Web3();
       web3.setProvider(new web3.providers.HttpProvider('http://127.0.0.1:8545'));
 
       return web3.eth.contract(JSON.parse(vote.voteContractABI))
         .at(
-            vote.voteContractAddress,
-            (atErr, instance) => {
-              if (atErr) {
-                return res.apiError('blockchain error', atErr);
+          vote.voteContractAddress,
+          (atErr, instance) => {
+            if (atErr) {
+              return res.apiError('blockchain error', atErr);
+            }
+
+            var ballotEvent = instance.Ballot(null, {fromBlock:0, toBlock: 'latest'});
+            return ballotEvent.get((ballotEventErr, result) => {
+              if (ballotEventErr) {
+                return res.apiError('blockchain error', ballotEventErr);
               }
 
-              var ballotEvent = instance.Ballot(null, {fromBlock:0, toBlock: 'latest'});
-              return ballotEvent.get((ballotEventErr, result) => {
-                if (ballotEventErr) {
-                  return res.apiError('blockchain error', ballotEventErr);
-                }
+              if (!!filter) {
+                result = result.filter(filter);
+              }
 
-                return res.apiResponse({transactions:result});
-              });
-            }
+              return res.apiResponse({transactions:result});
+            });
+          }
         );
 
     });

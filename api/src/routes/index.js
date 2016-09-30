@@ -185,7 +185,7 @@ exports = module.exports = function(app) {
 	 * @apiExample {curl} cURL example:
 	 * 		curl -X GET "https://cocorico.cc/api/vote/transactions/57cc487608875ef57ac75ff1"
 	 */
-  app.get('/vote/transactions/:voteId', routes.api.vote.getTransactions);
+  app.post('/vote/transactions/:voteId', routes.api.vote.getTransactions);
 
 	/**
 	 * @api {get} /vote/result/:voteId Get a vote result
@@ -283,7 +283,7 @@ exports = module.exports = function(app) {
 	 *
 	 */
   app.post('/ballot/:voteId', isAuthenticated, routes.api.ballot.vote);
-	// app.post('/ballot/cancel/:voteId', isAuthenticated, routes.api.ballot.cancel);
+  app.post('/ballot/verify', routes.api.ballot.verify);
 
   app.get('/source/:voteId', routes.api.source.list);
 
