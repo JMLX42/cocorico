@@ -5,10 +5,10 @@ if [ "$TRAVIS" == "" ] || [ "$TRAVIS_BRANCH" == "feature/master-deploy" ]; then
   openssl aes-256-cbc \
     -K "$encrypted_1f753eb353f1_key" \
     -iv "$encrypted_1f753eb353f1_iv" \
-    -in "../key/cocorico.cc.enc" \
-    -out "../key/cocorico.cc" -d
+    -in "${TRAVIS_BUILD_DIR}/key/cocorico.cc.enc" \
+    -out "${TRAVIS_BUILD_DIR}/key/cocorico.cc" -d
 
-  ssh -i ../key/cocorico.cc -o "StrictHostKeyChecking=no" root@cocorico.cc << EOF
+  ssh -i "${TRAVIS_BUILD_DIR}/key/cocorico.cc" -o "StrictHostKeyChecking=no" root@cocorico.cc << EOF
     rm -rf /vagrant
     git clone https://github.com/promethe42/cocorico /vagrant
     export PLAYBOOK="provisioning/provision.yml"
