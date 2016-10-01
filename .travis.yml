@@ -26,9 +26,3 @@ notifications:
     on_success: change
     on_failure: always
     on_start: never
-
-before_install:
-  - openssl aes-256-cbc -K $encrypted_1f753eb353f1_key
-    -iv $encrypted_1f753eb353f1_iv
-    -in provisioning/inventory/group_vars/prod.yml.enc
-    -out provisioning/inventory/group_vars/prod.yml -d
