@@ -15,6 +15,7 @@ Cocorico is an open online voting platform powered by the blockchain.
 ## Contribute
 
 * You must contribute via pull requests.
+* Pull requests targeting the "master" branch will be denied. Pull requests should target the "dev" branch or a specific fix/feature branch.
 * Pull requests that do not pass the unit tests will be denied.
 * Pull requests that do not pass the coding style tests will be denied.
 * Pull requests that add new API endpoints without comprehensive unit tests will be denied.
