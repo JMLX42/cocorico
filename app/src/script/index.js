@@ -1,6 +1,10 @@
 require('../style/index.less');
 require('babel-polyfill');
 
+console.log('commit hash:', __COMMIT_HASH__);
+console.log('build number:', __BUILD_NUMBER__);
+console.log('env:', __ENV__);
+
 var React = require('react');
 var ReactRouter = require('react-router');
 var ReactDOM = require('react-dom');
