@@ -210,6 +210,7 @@ Vote.schema.methods.getProofOfVote = function(tx) {
 
 transform.toJSON(Vote, (vote) => {
   delete vote.salt;
+  delete vote.key;
 });
 
 Vote.defaultColumns = 'title, url, status, voteContractAddress';
