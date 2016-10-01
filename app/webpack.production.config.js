@@ -1,5 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
+var childProcess = require('child_process');
 
 module.exports = {
   entry: path.resolve('./src/script/index.js'),
@@ -40,6 +41,11 @@ module.exports = {
     ],
   },
   plugins: [
+    new webpack.DefinePlugin({
+      '__COMMIT_HASH__': JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString()),
+      '__ENV__': JSON.stringify('production'),
+      '__BUILD_NUMBER__': JSON.stringify(process.env.TRAVIS_BUILD_NUMBER || 'NA'),
+    }),
     new webpack.DefinePlugin({
       'process.env': {
         'NODE_ENV': JSON.stringify('production'),

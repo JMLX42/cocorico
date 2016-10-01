@@ -1,6 +1,5 @@
 sudo: required
 dist: trusty
-
 language: generic
 
 env:
@@ -17,10 +16,16 @@ script:
   - cd /vagrant && sudo bash ./deployment/ansible.sh
   - sudo ./script/run-tests.sh
 
+deploy:
+  provider: script
+  script: script/deploy-prod.sh
+  on:
+    branch: master
+
 notifications:
   webhooks:
     urls:
-      - https://webhooks.gitter.im/e/37692dce0ad99c8a2c7d
+    - https://webhooks.gitter.im/e/37692dce0ad99c8a2c7d
     on_success: change
     on_failure: always
     on_start: never
