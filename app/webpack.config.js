@@ -45,6 +45,7 @@ module.exports = {
       '__COMMIT_HASH__': JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString()),
       '__ENV__': JSON.stringify('development'),
       '__BUILD_NUMBER__': JSON.stringify(process.env.TRAVIS_BUILD_NUMBER || 'NA'),
+      '__BUILD_DATE__': JSON.stringify(new Date().toString()),
     }),
   ],
   output: {
