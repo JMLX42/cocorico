@@ -1,12 +1,14 @@
 #!/bin/bash
 
 if [ "$TRAVIS" == "" ] || [ "$TRAVIS_BRANCH" == "feature/master-deploy" ]; then
-  $(npm bin)/set-up-ssh
-    --key "$encrypted_1f753eb353f1_key" \
-    --iv "$encrypted_1f753eb353f1_iv" \
-    --path-encrypted-key "./key/cocorico.cc.enc"
 
-  ssh root@cocorico.cc << EOF
+  openssl aes-256-cbc \
+    -K "$encrypted_1f753eb353f1_key" \
+    -iv "$encrypted_1f753eb353f1_iv" \
+    -in "./key/cocorico.cc.enc" \
+    -out "./key/cocorico.cc" -d
+
+  ssh root@cocorico.cc -i ./key/cocorico.cc << EOF
     rm -rf /vagrant
     git clone https://github.com/promethe42/cocorico /vagrant
     export PLAYBOOK="provisioning/provision.yml"
