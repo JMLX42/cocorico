@@ -8,7 +8,7 @@ if [ "$TRAVIS" == "" ] || [ "$TRAVIS_BRANCH" == "feature/master-deploy" ]; then
     -in "./key/cocorico.cc.enc" \
     -out "./key/cocorico.cc" -d
 
-  ssh root@cocorico.cc -i ./key/cocorico.cc << EOF
+  ssh -i ./key/cocorico.cc -o "StrictHostKeyChecking=no" root@cocorico.cc << EOF
     rm -rf /vagrant
     git clone https://github.com/promethe42/cocorico /vagrant
     export PLAYBOOK="provisioning/provision.yml"
