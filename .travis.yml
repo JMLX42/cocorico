@@ -11,16 +11,16 @@ env:
     - VERBOSE="vvv"
     - PROVIDER="travis"
 
-# script:
-#   - sudo ln -s $TRAVIS_BUILD_DIR /vagrant
-#   - cd /vagrant && sudo bash ./deployment/ansible.sh
-#   - sudo ./script/run-tests.sh
+script:
+  - sudo ln -s $TRAVIS_BUILD_DIR /vagrant
+  - cd /vagrant && sudo bash ./deployment/ansible.sh
+  - sudo ./script/run-tests.sh
 
 deploy:
   provider: script
   script: script/deploy-prod.sh
   on:
-    branch: feature/master-deploy
+    branch: master
 
 notifications:
   webhooks:
