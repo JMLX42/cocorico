@@ -10,10 +10,10 @@ if [ "$TRAVIS" == "" ] || [ "$TRAVIS_BRANCH" == "feature/master-deploy" ]; then
 
   chmod 600 "${TRAVIS_BUILD_DIR}/key/cocorico.cc"
 
-  openssl aes-256-cbc
-    -K "$encrypted_1f753eb353f1_key"
-    -iv "$encrypted_1f753eb353f1_iv"
-    -in "${TRAVIS_BUILD_DIR}/provisioning/inventory/group_vars/prod.yml.enc"
+  openssl aes-256-cbc \
+    -K "$encrypted_1f753eb353f1_key" \
+    -iv "$encrypted_1f753eb353f1_iv" \
+    -in "${TRAVIS_BUILD_DIR}/provisioning/inventory/group_vars/prod.yml.enc" \
     -out "${TRAVIS_BUILD_DIR}/provisioning/inventory/group_vars/prod.yml" -d
 
   scp \
