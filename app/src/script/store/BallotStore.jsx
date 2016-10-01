@@ -2,7 +2,7 @@ var Reflux = require('reflux');
 var jquery = require('jquery');
 var lightwallet = require('eth-lightwallet');
 var async = require('async');
-// var bcrypt = require('bcryptjs');
+var qr = require('qr-image');
 
 var BallotAction = require('../action/BallotAction');
 
@@ -11,12 +11,13 @@ module.exports = Reflux.createStore({
     jquery.ajaxSetup({ cache: false });
 
     this.listenTo(BallotAction.send, this._vote);
-    this.listenTo(BallotAction.cancel, this._unvote);
+    // this.listenTo(BallotAction.cancel, this._unvote);
     this.listenTo(BallotAction.startPolling, this._startPollingBallot);
     this.listenTo(BallotAction.stopPolling, this._stopPollingBallot);
     this.listenTo(BallotAction.showCurrentUserBallot, this._fetchByVoteId);
 
     this._ballots = {};
+    this._proofOfVote = {};
     this._loadingBallot = {};
     this._ballotPolling = {};
   },
@@ -27,6 +28,13 @@ module.exports = Reflux.createStore({
 
   getByVoteId: function(voteId) {
     return this._ballots[voteId];
+  },
+
+  getProofOfVoteSVGByVoteId: function(voteId) {
+    var data = this._proofOfVote[voteId];
+    var svg = qr.imageSync(data, { type: 'svg', ec_level: 'M' });
+
+    return svg.replace('</svg>', '<desc>' + data + '</desc></svg>');
   },
 
   _fetchByVoteId: function(voteId, forceUpdate) {
@@ -112,36 +120,37 @@ module.exports = Reflux.createStore({
       (data) => {
         console.log('ballot transaction sent');
         this._ballots[vote.id] = data.ballot;
+        this._proofOfVote[vote.id] = data.proof;
         this.trigger(this);
       }
     );
   },
 
-  _removeVote: function(keystore, voteId, callback) {
-    jquery.post(
-      '/api/ballot/cancel/' + voteId,
-      {
-        // voterCardHash: keystore
-        //     ? bcrypt.hashSync(keystore.serialize(), 10)
-        //     : null,
-        transaction: null, // FIXME: generate the actual blockchain transaction
-      },
-      (data) => {
-        // No ballot object => ballot is loading. To make sure the
-        // removed ballot does not make the app hang waiting for a
-        // ballot object, we create a dummy ballot object with an error
-        // state.
-        this._ballots[voteId] = {status:'cancelled'};
+  // _removeVote: function(keystore, voteId, callback) {
+  //   jquery.post(
+  //     '/api/ballot/cancel/' + voteId,
+  //     {
+  //       // voterCardHash: keystore
+  //       //     ? bcrypt.hashSync(keystore.serialize(), 10)
+  //       //     : null,
+  //       transaction: null, // FIXME: generate the actual blockchain transaction
+  //     },
+  //     (data) => {
+  //       // No ballot object => ballot is loading. To make sure the
+  //       // removed ballot does not make the app hang waiting for a
+  //       // ballot object, we create a dummy ballot object with an error
+  //       // state.
+  //       this._ballots[voteId] = {status:'cancelled'};
+  //
+  //       if (callback)
+  //         callback(data);
+  //     }
+  //   );
+  // },
 
-        if (callback)
-          callback(data);
-      }
-    );
-  },
-
-  _unvote: function(keystore, voteId) {
-    this._removeVote(keystore, voteId, (data) => this.trigger(this));
-  },
+  // _unvote: function(keystore, voteId) {
+  //   this._removeVote(keystore, voteId, (data) => this.trigger(this));
+  // },
 
   _startPollingBallot: function(voteId) {
     if (this._isPollingBallot(voteId))

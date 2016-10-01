@@ -6,6 +6,9 @@ var metafetch = require('metafetch');
 var async = require('async');
 var Web3 = require('web3');
 var bcrypt = require('bcrypt');
+var srs = require('secure-random-string');
+var SolidityCoder = require('web3/lib/solidity/coder');
+var jwt = require('jsonwebtoken');
 
 var Ballot = keystone.list('Ballot');
 
@@ -36,9 +39,14 @@ Vote.add({
   restricted: { type: Types.Boolean, default: false },
   labels: { type: Types.TextArray },
   salt: { type: Types.Text, noedit: true, default: () => bcrypt.genSaltSync(10) },
+  key: { type: Types.Key, noedit: true, default: () => srs(32).toLowerCase() },
+  numBallots: { type: Types.Number, default: 0 },
+  numValidBallots: { type: Types.Number, default: 0 },
+  numInvalidBallots: { type: Types.Number, default: 0 },
 });
 
 Vote.relationship({ path: 'sources', ref: 'Source', refPath: 'vote' });
+Vote.relationship({ path: 'verified ballots', ref: 'VerifiedBallot', refPath: 'vote' });
 
 Vote.schema.methods.userIsAuthorizedToVote = function(user) {
   return config.capabilities.vote.enabled
@@ -161,8 +169,48 @@ Vote.schema.pre('validate', function(next) {
   );
 });
 
+function getTypesFromAbi(abi, functionName) {
+
+  function matchesFunctionName(json) {
+    return (json.name === functionName && json.type === 'function');
+  }
+
+  function getTypes(json) {
+    return json.type;
+  }
+
+  var funcJson = abi.filter(matchesFunctionName)[0];
+
+  return (funcJson.inputs).map(getTypes);
+}
+
+Vote.schema.methods.getProofOfVote = function(tx) {
+  var params = SolidityCoder.decodeParams(
+    getTypesFromAbi(JSON.parse(this.voteContractABI), 'vote'),
+    // the parameter value is in the last byte of the tx data
+    tx.data.slice(tx.data.length - 1).toString('hex')
+  );
+
+  // We intend to embed this in a QR code. The lighter the JSON, the lighter the
+  // QR code. And the lighter the QR code, the easier it is to read.
+  return jwt.sign(
+    {
+      v: 1.0, // version
+      a: tx.from.toString('hex'), // address
+      c: tx.to.toString('hex'), // contract
+      p: ~~params[0].toNumber(), // proposal
+      t: Date.now(), // date
+    },
+    this.key,
+    {
+      noTimestamp: true,
+    }
+  );
+}
+
 transform.toJSON(Vote, (vote) => {
   delete vote.salt;
+  delete vote.key;
 });
 
 Vote.defaultColumns = 'title, url, status, voteContractAddress';

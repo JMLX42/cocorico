@@ -1,16 +1,14 @@
 var React = require('react');
 var ReactIntl = require('react-intl');
 var ReactBootstrap = require('react-bootstrap');
-var Reflux = require('reflux');
 
-var BlockchainAccountStore = require('../store/BlockchainAccountStore');
+var Icon = require('./Icon');
 
 var Button = ReactBootstrap.Button;
 
-var VoterCardDownloadButton = React.createClass({
+var SVGDownloadButton = React.createClass({
 
   mixins: [
-    Reflux.connect(BlockchainAccountStore, 'blockchainAccounts'),
     ReactIntl.IntlMixin,
   ],
 
@@ -22,43 +20,35 @@ var VoterCardDownloadButton = React.createClass({
   },
 
   onClick: function(e) {
-    var voterCard = this.state.blockchainAccounts.getVoterCardByVoteId(
-      this.props.voteId
-    );
-
     // IE workaround for not supporting the download anchor attribute
     // FIXME: IE8 workaround https://jsfiddle.net/gokpfr00/41/
     if (window.navigator.msSaveBlob)
-      window.navigator.msSaveBlob(new Blob([voterCard]), this.props.filename);
+      window.navigator.msSaveBlob(new Blob([this.props.data]), this.props.filename);
 
     this.props.onClick(e);
   },
 
   render: function() {
-    var voterCard = this.state.blockchainAccounts.getVoterCardByVoteId(
-      this.props.voteId
-    );
-
-    if (!voterCard) {
+    if (!this.props.data) {
       return null;
     }
 
     return (
       !!window.navigator.msSaveBlob
         ? <Button className={this.props.className} onClick={this.onClick}>
-          <span className="icon-download"/>
-          {this.getIntlMessage('vote.DOWNLOAD_VOTER_CARD')}
+          <Icon name="download"/>
+          {this.props.children}
         </Button>
         : <a className={this.props.className}
-            href={'data:image/svg+xml;utf8,' + voterCard}
+            href={'data:image/svg+xml;utf8,' + this.props.data}
             download={this.props.filename}
             onClick={this.onClick}>
-            <span className="icon-download"/>
-            {this.getIntlMessage('vote.DOWNLOAD_VOTER_CARD')}
+            <Icon name="download"/>
+            {this.props.children}
         </a>
     );
   },
 
 });
 
-module.exports = VoterCardDownloadButton;
+module.exports = SVGDownloadButton;

@@ -6,4 +6,6 @@ module.exports = Reflux.createActions({
   'showCurrentUserBallot': {sync: false},
   'startPolling': {sync: false},
   'stopPolling': {sync: false},
+  'getTransactions': {sync: false},
+  'searchTransactions': {sync: false},
 });

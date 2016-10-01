@@ -1,5 +1,5 @@
 var React = require('react');
-var QRCodeDecoder = require('qrcode-reader');
+var QRCodeDecoder = require('qrcode-reader').default;
 
 var CameraVideo = require('./CameraVideo');
 

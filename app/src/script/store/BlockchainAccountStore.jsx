@@ -1,6 +1,5 @@
 var Reflux = require('reflux');
 var lightwallet = require('eth-lightwallet');
-var qr = require('qr-image');
 
 var BlockchainAccountAction = require('../action/BlockchainAccountAction');
 
@@ -8,8 +7,6 @@ module.exports = Reflux.createStore({
 
   init: function() {
     this._deleteAllKeystores();
-
-    this._voterCard = {};
 
     this.listenTo(BlockchainAccountAction.create, this._createAccount);
     this.listenTo(BlockchainAccountAction.import, this._importSerializedAccount);
@@ -33,14 +30,6 @@ module.exports = Reflux.createStore({
     }
 
     return this._pwDerivedKey[voteId];
-  },
-
-  getVoterCardByVoteId: function(voteId) {
-    if (!(voteId in this._voterCard)) {
-      return null;
-    }
-
-    return this._voterCard[voteId];
   },
 
   getAddressByVoteId: function(voteId) {
@@ -89,16 +78,6 @@ module.exports = Reflux.createStore({
         });
       }
     );
-  },
-
-  _generateVoterCard: function(ks) {
-    var voterCardData = ks.serialize();
-    var svg = qr.imageSync(
-      voterCardData,
-      { type: 'svg', ec_level: 'M' }
-    );
-
-    return svg.replace('</svg>', '<desc>' + voterCardData + '</desc></svg>');
   },
 
   _createAccount: function(voteId) {

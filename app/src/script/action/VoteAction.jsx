@@ -5,5 +5,4 @@ module.exports = Reflux.createActions({
   'showPage': {sync: false},
   'showResults': {sync: false},
   'getPermissions': {sync: false},
-  'getTransactions': {sync: false},
 });
