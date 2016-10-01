@@ -567,7 +567,7 @@ var BallotBox = React.createClass({
           onSelect={this.selectPageHandler} />
         {!!transactions && !this.state.searching
           ? <div className="pagination-item-count hidden-xs">
-            {this.state.page * 10} - {this.state.page * 10 + transactions.length} / {numItems}
+            {this.state.page * 10 + 1} - {this.state.page * 10 + transactions.length} / {numItems}
           </div>
           : null}
       </div>
