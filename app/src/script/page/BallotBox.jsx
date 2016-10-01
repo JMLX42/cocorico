@@ -3,18 +3,38 @@ var ReactBootstrap = require('react-bootstrap');
 var ReactIntl = require('react-intl');
 var Reflux = require('reflux');
 var classNames = require('classnames');
+var Base64 = require('js-base64').Base64;
+var jwtDecode = require('jwt-decode');
+var DoughnutChart = require('react-chartjs-2').Doughnut;
+
+var StringHelper = require('../helper/StringHelper');
 
 var TransactionStore = require('../store/TransactionStore'),
-  VoteStore = require('../store/VoteStore');
+  VoteStore = require('../store/VoteStore'),
+  ProofOfVoteStore = require('../store/ProofOfVoteStore');
 
-var VoteAction = require('../action/VoteAction');
+var BallotAction = require('../action/BallotAction'),
+  VoteAction = require('../action/VoteAction'),
+  ProofOfVoteAction = require('../action/ProofOfVoteAction');
 
 var LoadingIndicator = require('../component/LoadingIndicator'),
-  Title = require('../component/Title');
+  Title = require('../component/Title'),
+  Icon = require('../component/Icon'),
+  QRCodeReader = require('../component/QRCodeReader'),
+  FileSelectButton = require('../component/FileSelectButton');
 
 var Grid = ReactBootstrap.Grid,
   Row = ReactBootstrap.Row,
-  Col = ReactBootstrap.Col;
+  Col = ReactBootstrap.Col,
+  Modal = ReactBootstrap.Modal,
+  Button = ReactBootstrap.Button,
+  ButtonToolbar = ReactBootstrap.ButtonToolbar,
+  FormGroup = ReactBootstrap.FormGroup,
+  MenuItem = ReactBootstrap.MenuItem,
+  InputGroup = ReactBootstrap.InputGroup,
+  FormControl = ReactBootstrap.FormControl,
+  DropdownButton = ReactBootstrap.DropdownButton,
+  Pagination = ReactBootstrap.Pagination;
 
 var BallotBox = React.createClass({
 
@@ -22,16 +42,30 @@ var BallotBox = React.createClass({
     ReactIntl.IntlMixin,
     Reflux.connect(TransactionStore, 'transactions'),
     Reflux.connect(VoteStore, 'votes'),
+    Reflux.connect(ProofOfVoteStore, 'proofsOfVote'),
+    Reflux.listenTo(TransactionStore, 'transactionStoreChangedHandler'),
+    Reflux.listenTo(ProofOfVoteStore, 'proofOfVoteStoreChangedHandler'),
   ],
 
+  getInitialState: function() {
+    return {
+      page: 0,
+      proofOfVote: '',
+      qrCodeReader: false,
+      searchQuery: '',
+      searchMode: 'voter',
+      searching: false,
+    };
+  },
+
   componentWillMount: function() {
-    VoteAction.getTransactions(this.props.params.voteId);
+    BallotAction.getTransactions(this.props.params.voteId, this.state.page);
     VoteAction.show(this.props.params.voteId);
+    VoteAction.showResults(this.props.params.voteId);
   },
 
   getVoteValueDisplayMessage: function(id) {
     var vote = this.state.votes.getById(this.props.params.voteId);
-
     var labels = (!!vote.labels && vote.labels.length !== 0)
       ? vote.labels
       : [
@@ -43,12 +77,333 @@ var BallotBox = React.createClass({
     return labels[id];
   },
 
-  render: function() {
+  readFromQRCodeHandler: function(data) {
+    this.verifyProofOfVote(data);
+  },
+
+  readFromFileHandler: function(data) {
+    var svg = Base64.decode(data.substr(26));
+    var pof = svg.match(/<desc>(.*)<\/desc>/);
+
+    var data = pof[1];
+
+    this.verifyProofOfVote(data);
+  },
+
+  verifyProofOfVote(proofOfVote) {
+    if (!!proofOfVote) {
+      var decoded = jwtDecode(proofOfVote);
+
+      ProofOfVoteAction.verify(proofOfVote);
+
+      this.setState(
+        {
+          page: 0,
+          proofOfVote: proofOfVote,
+          searchMode: 'voter',
+          searchQuery: '0x' + decoded.a,
+        },
+        this.search
+      );
+    }
+  },
+
+  proposalLabelToID: function(label) {
+    var vote = this.state.votes.getById(this.props.params.voteId);
+    var labels = (!!vote.labels && vote.labels.length !== 0)
+      ? vote.labels.map((l)=>l.toLowerCase())
+      : [
+        this.getIntlMessage('vote.VOTE_YES').toLowerCase(),
+        this.getIntlMessage('vote.VOTE_BLANK').toLowerCase(),
+        this.getIntlMessage('vote.VOTE_NO').toLowerCase(),
+      ];
+
+    return labels.indexOf(label.toLowerCase());
+  },
+
+  transactionStoreChangedHandler: function() {
+    this.setState({searching:false});
+  },
+
+  proofOfVoteStoreChangedHandler: function() {
+    VoteAction.show(this.props.params.voteId, true);
+  },
+
+  search: function() {
+    if (!!this._searchTimeout) {
+      clearTimeout(this._searchTimeout);
+    }
+
+    var query = this.state.searchQuery;
+
+    // If we're looking for transactions for a specific proposal, the user
+    // will type a string but the server expects the proposal ID.
+    if (this.state.searchMode === 'proposal') {
+      query = this.proposalLabelToID(query);
+      if (query < 0) {
+        query = '';
+      }
+    }
+
+    this._searchTimeout = setTimeout(
+      () => BallotAction.searchTransactions(
+        this.props.params.voteId,
+        this.state.page,
+        {[this.state.searchMode] : query}
+      ),
+      1000
+    );
+
+    this.setState({searching: true});
+  },
+
+  componentWillUnmount: function() {
+    if (!!this._searchTimeout) {
+      clearTimeout(this._searchTimeout);
+    }
+  },
+
+  resetProofOfVote: function() {
+    this.setState(
+      {
+        proofOfVote: '',
+        searchQuery: '',
+      },
+      this.search
+    );
+  },
+
+  renderVoteVerifySuccessChart: function(vote) {
+    var labels = ['Valid', 'Invalid'];
+    var backgroundColor = ['#2ecc71', '#e74c3c'];
+    var hoverBackgroundColor = ['#27ae60', '#c0392b'];
+    var data = [vote.numValidBallots, vote.numInvalidBallots];
+    var hasData = vote.numValidBallots !== 0 || vote.numInvalidBallots !== 0;
+
+    if (!hasData) {
+      labels = ['Not enough data yet.'];
+      data = [1];
+      backgroundColor = ['#bdc3c7'];
+      hoverBackgroundColor = ['#95a5a6'];
+    }
+
     return (
-      <div className="page">
+      <DoughnutChart data={{
+        labels: labels,
+        datasets: [
+          {
+            data: data,
+            backgroundColor: backgroundColor,
+            hoverBackgroundColor: hoverBackgroundColor,
+          }],
+      }}
+      options={{
+        cutoutPercentage: 80,
+        responsive: true,
+        legend: {
+          display: false,
+        },
+        tooltips: {
+          enabled: hasData,
+        },
+      }}
+      width={90}
+      height={90}/>
+    );
+  },
+
+  renderVoteResultChart: function(vote) {
+    var data = this.state.votes.getVoteResultByVoteId(this.props.params.voteId);
+
+    if (!data) {
+      return null;
+    }
+
+    var labels = !!vote.labels.length
+      ? vote.labels
+      : [
+        this.getIntlMessage('vote.VOTE_YES').toLowerCase(),
+        this.getIntlMessage('vote.VOTE_BLANK').toLowerCase(),
+        this.getIntlMessage('vote.VOTE_NO').toLowerCase(),
+      ];
+    var colors = !!vote.labels.length
+      ? [
+        '#001F3F',
+        '#0074D9',
+        '#7FDBFF',
+        '#39CCCC',
+        '#3D9970',
+        '#2ECC40',
+        '#01FF70',
+        '#FFDC00',
+        '#FF851B',
+        '#FF4136',
+        '#F012BE',
+        '#B10DC9',
+        '#85144B',
+        '#FFFFFF',
+        '#AAAAAA',
+        '#DDDDDD',
+        '#111111',
+      ]
+      : [
+        '#2ecc71',
+        '#e74c3c',
+        '#bdc3c7',
+      ];
+
+    var hoverColors = !!vote.labels.length
+      ? colors
+      : [
+        '#27ae60',
+        '#c0392b',
+        '#95a5a6',
+      ];
+
+    return (
+      <DoughnutChart data={{
+        labels: labels.map((label)=>StringHelper.toTitleCase(label)),
+        datasets: [
+          {
+            data: data,
+            backgroundColor: colors,
+            hoverBackgroundColor: hoverColors,
+          }],
+      }}
+      options={{
+        cutoutPercentage: 80,
+        responsive: true,
+      }}
+      width={90}
+      height={90}/>
+    );
+  },
+
+  renderVoteVerifyChart: function(vote) {
+    if (vote.numVerifiedBallots === 0) {
+      return null;
+    }
+
+    return (
+      <DoughnutChart data={{
+        labels: [
+          'Valid',
+          'Invalid',
+          'Unverified',
+        ],
+        datasets: [
+          {
+            data: [
+              vote.numValidBallots,
+              vote.numInvalidBallots,
+              vote.numBallots - (vote.numValidBallots + vote.numInvalidBallots),
+            ],
+            backgroundColor: [
+              '#2ecc71',
+              '#e74c3c',
+              '#bdc3c7',
+            ],
+            hoverBackgroundColor: [
+              '#27ae60',
+              '#c0392b',
+              '#95a5a6',
+            ],
+          }],
+      }}
+      options={{
+        cutoutPercentage: 80,
+        responsive: true,
+        legend: {
+          display: false,
+        },
+      }}
+      width={90}
+      height={90}/>
+    );
+  },
+
+  render: function() {
+    var vote = this.state.votes.getById(this.props.params.voteId);
+
+    if (!vote) {
+      return (
+        <div className="page page-ballot-box">
+          <Grid>
+            <Row>
+              <Col xs={12}>
+                <LoadingIndicator/>
+              </Col>
+            </Row>
+          </Grid>
+        </div>
+      );
+    }
+
+    var status = this.state.proofsOfVote.getStatus(this.state.proofOfVote);
+    var numVerifiedBallots = vote.numValidBallots + vote.numInvalidBallots;
+
+    return (
+      <div className="page page-ballot-box">
+        {this.renderQRCodeReaderModal()}
         <Grid>
           <Row>
-            <Col md={12}>
+            <Col xs={12}>
+              <h1>{vote.title} <small>Ballot Box</small></h1>
+            </Col>
+          </Row>
+          <Row className="ballot-box-recount">
+            <Col md={4} sm={6} xs={12} className="text-center">
+              {this.renderVoteResultChart(vote)}
+            </Col>
+            <Col md={2} sm={3} smPush={0} xs={6} className="text-center">
+              {this.renderVoteVerifySuccessChart(vote)}
+              {numVerifiedBallots !== 0
+                ? <span>
+                  {Math.floor(vote.numValidBallots / numVerifiedBallots * 100.0)}%
+                  valid verified ballots
+                </span>
+                : <span>Not enough data yet.</span>}
+            </Col>
+            <Col md={2} sm={3} smPush={0} xs={6} className="text-center">
+              {this.renderVoteVerifyChart(vote)}
+              <span>
+                {Math.floor(numVerifiedBallots / vote.numBallots * 100.0)}%
+                verified ballots
+              </span>
+            </Col>
+          </Row>
+          <Row>
+            <Col lg={6} md={12}>
+              <h2>Verify your ballot</h2>
+              {!this.state.proofOfVote
+                ? <ButtonToolbar>
+                  <Button
+                    bsStyle="primary"
+                    onClick={(e)=>this.setState({qrCodeReader:true})}>
+                    <Icon name="qrcode"/>Scan my printed proof of vote
+                  </Button>
+                  <FileSelectButton onSuccess={this.readFromFileHandler}>
+                    <Icon name="cloud_upload"/>Select my downloaded proof of vote
+                  </FileSelectButton>
+                </ButtonToolbar>
+                : status === 'pending'
+                  ? <LoadingIndicator/>
+                : <div>
+                  <p>{status}</p>
+                  <ButtonToolbar>
+                    <Button onClick={this.resetProofOfVote}>
+                      Verify another proof of vote
+                    </Button>
+                  </ButtonToolbar>
+                </div>}
+            </Col>
+            <Col lg={6} md={12}>
+              <h2>Explore the ballot box</h2>
+              {this.renderSearchForm()}
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={12}>
               {this.renderContent()}
             </Col>
           </Row>
@@ -57,47 +412,165 @@ var BallotBox = React.createClass({
     );
   },
 
+  renderQRCodeReaderModal: function() {
+    return (
+      <Modal show={this.state.qrCodeReader}>
+        <Modal.Body>
+          <QRCodeReader onSuccess={this.readFromQRCodeHandler}/>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            bsStyle="link"
+            onClick={(e)=>this.setState({qrCodeReader:false})}>
+            Annuler
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  },
+
+  searchQueryChangeHandler: function(e) {
+    this.setState({searchQuery: e.target.value}, this.search);
+  },
+
+  searchModeChangeHandler: function(k, e) {
+    this.setState({searchMode: k}, this.search);
+  },
+
+  renderSearchForm: function() {
+    var searchModes = {
+      'transactionHash': 'Transaction Hash',
+      'voter' : 'Voter',
+      'proposal' : 'Proposal',
+    };
+
+    return (
+      <form>
+        <FormGroup>
+          <InputGroup>
+            <FormControl
+              type="text"
+              placeholder="Type here to search..."
+              value={this.state.searchQuery}
+              onChange={this.searchQueryChangeHandler}/>
+            <DropdownButton
+              componentClass={InputGroup.Button}
+              id="input-dropdown-addon"
+              title={searchModes[this.state.searchMode]}
+              onSelect={this.searchModeChangeHandler}
+              pullRight={true}>
+              {Object.keys(searchModes).map((mode, index) => {
+                return (
+                  <MenuItem key={index} eventKey={mode}>{searchModes[mode]}</MenuItem>
+                );
+              })}
+            </DropdownButton>
+          </InputGroup>
+        </FormGroup>
+      </form>
+    );
+  },
+
   renderContent: function() {
-    var transactions = this.state.transactions.getByVoteId(this.props.params.voteId);
+    var transactions = this.state.transactions.getByVoteId(
+      this.props.params.voteId,
+      this.state.page
+    );
     var vote = this.state.votes.getById(this.props.params.voteId);
-
-    if (!transactions || !vote) {
-      return <LoadingIndicator/>;
-    }
-
     var hasLabels = vote.labels.length !== 0;
 
     return (
-      <table className="table table-hover table-ellipsis">
-        <thead>
-          <tr>
-            <th>Transaction Hash</th>
-            <th>Voter</th>
-            <th>Proposal</th>
-          </tr>
-        </thead>
-        <tbody>
-          {transactions.map((tx) => {
-            return (
-              <tr>
-                <td className="truncate">{tx.transactionHash}</td>
-                <td className="truncate">{tx.args.voter}</td>
-                <td className="truncate">
-                  <span className={classNames({
-                    'label': true,
-                    'label-primary': hasLabels,
-                    'positive-background': !hasLabels && tx.args.proposal === '0',
-                    'neutral-background': !hasLabels && tx.args.proposal === '1',
-                    'negative-background': !hasLabels && tx.args.proposal === '2',
-                  })}>
-                    <Title text={this.getVoteValueDisplayMessage(tx.args.proposal)}/>
-                  </span>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div className="ballot-box-content">
+        {this.renderPagination()}
+        <table className="table table-hover">
+          <thead>
+            <tr>
+              <th style={{width:45}}/>
+              <th>Transaction Hash</th>
+              <th>Voter</th>
+              <th>Proposal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {!!transactions && !transactions.error && transactions.length !== 0 && !this.state.searching
+              ? transactions.map((tx) => {
+                return (
+                  <tr key={tx.transactionHash}>
+                    <td style={{width:45}} className="text-center">
+                      {tx.verified
+                        ? <span className="positive">
+                          <Icon name="checkmark"/>
+                        </span>
+                        : null}
+                    </td>
+                    <td className="truncate">{tx.transactionHash}</td>
+                    <td className="truncate">{tx.args.voter}</td>
+                    <td className="truncate">
+                      <span className={classNames({
+                        'label': true,
+                        'label-primary': hasLabels,
+                        'positive-background': !hasLabels && tx.args.proposal === '0',
+                        'neutral-background': !hasLabels && tx.args.proposal === '1',
+                        'negative-background': !hasLabels && tx.args.proposal === '2',
+                      })}>
+                        <Title text={this.getVoteValueDisplayMessage(tx.args.proposal)}/>
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+              : null}
+          </tbody>
+        </table>
+        {!transactions || !!this.state.searching
+          ? <LoadingIndicator/>
+          : transactions.length === 0
+            ? <p>No ballots.</p>
+            : null}
+        {this.renderPagination()}
+      </div>
+    );
+  },
+
+  selectPageHandler: function(eventKey) {
+    this.setState({page: parseInt(eventKey) - 1}, this.search);
+  },
+
+  renderPagination: function() {
+    var numPages = this.state.transactions.getNumPagesByVoteId(
+      this.props.params.voteId
+    );
+    var numItems = this.state.transactions.getNumItemsByVoteId(
+      this.props.params.voteId
+    );
+    var transactions = this.state.transactions.getByVoteId(
+      this.props.params.voteId,
+      this.state.page
+    );
+
+    if (!!this.state.proofOfVote) {
+      return null;
+    }
+
+    return (
+      <div>
+        <Pagination
+          prev={true}
+          next={true}
+          first={true}
+          last={true}
+          ellipsis={true}
+          boundaryLinks={true}
+          items={this.state.searching && !!this.state.searchQuery ? 0 : numPages}
+          maxButtons={5}
+          activePage={this.state.page + 1}
+          onSelect={this.selectPageHandler} />
+        {!!transactions && !this.state.searching
+          ? <div className="pagination-item-count hidden-xs">
+            {this.state.page * 10 + 1} - {this.state.page * 10 + transactions.length} / {numItems}
+          </div>
+          : null}
+      </div>
     );
   },
 });

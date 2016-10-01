@@ -23,12 +23,12 @@ var LoadingIndicator = require('./LoadingIndicator'),
   Countdown = require('./Countdown'),
   Title = require('./Title'),
   Icon = require('./Icon'),
-  VoterCardDownloadButton = require('./VoterCardDownloadButton'),
-  VoterCardPrintButton = require('./VoterCardPrintButton'),
-  VoterCardReader = require('./VoterCardReader'),
+  SVGDownloadButton = require('./SVGDownloadButton'),
   VoteButtonBar = require('./VoteButtonBar'),
   VoteRadioButtons = require('./VoteRadioButtons'),
-  LoginPage = require('../page/Login');
+  LoginPage = require('../page/Login'),
+  SVGImage = require('./SVGImage'),
+  PrintButton = require('./PrintButton');
 
 var ConfigStore = require('../store/ConfigStore'),
   BallotStore = require('../store/BallotStore'),
@@ -57,10 +57,9 @@ var VoteWidget = React.createClass({
   statics: {
     STEP_VOTER_ID:      0,
     STEP_VOTE:          1,
-    STEP_VOTE_CARD:     2,
-    STEP_CONFIRM:       3,
-    STEP_COMPLETE:      4,
-    STEP_ERROR:         5,
+    STEP_CONFIRM:       2,
+    STEP_COMPLETE:      3,
+    STEP_ERROR:         4,
 
     ERROR_NONE:         0,
     ERROR_UNAUTHORIZED: 1,
@@ -193,20 +192,6 @@ var VoteWidget = React.createClass({
     this.props.onError(vote);
   },
 
-  voterCardDownloaded: function() {
-    this.setState({fetchedVoterCard: true});
-    if (this.state.step === VoteWidget.STEP_VOTE_CARD) {
-      this.goToNextStep();
-    }
-  },
-
-  voterCardPrinted: function() {
-    this.setState({fetchedVoterCard: true});
-    if (this.state.step === VoteWidget.STEP_VOTE_CARD) {
-      this.goToNextStep();
-    }
-  },
-
   voteHandler: function(e, proposal) {
     this.setState({
       ballotValue: proposal,
@@ -241,11 +226,18 @@ var VoteWidget = React.createClass({
     if (step !== this.state.step) {
       this.setState({step: step});
 
-      if (step < 0) {
-        this.setState(this.getInitialState());
-      }
-      if (step === VoteWidget.STEP_COMPLETE) {
-        this.props.onSuccess(this.getSafeContext());
+      switch (step) {
+        case 0:
+        case VoteWidget.STEP_VOTER_ID:
+          this.setState(this.getInitialState());
+          break;
+        case VoteWidget.STEP_CONFIRM:
+          this.createNewVoterCard();
+          break;
+        case VoteWidget.STEP_COMPLETE:
+          this.props.onSuccess(this.getSafeContext());
+          break;
+        default:
       }
     }
   },
@@ -259,46 +251,35 @@ var VoteWidget = React.createClass({
   },
 
   renderProgressBar: function() {
-    var voterCard = this.state.blockchainAccounts.getVoterCardByVoteId(
-      this.props.voteId
-    );
-
     return (
       <div className="vote-step-indicator">
         <Grid>
           <Row>
-            <div className="col-xs-2-4" className="vote-step-progress">
+            <div className="col-md-3" className="vote-step-progress">
               <ProgressBar
                 now={this.state.step >= VoteWidget.STEP_VOTER_ID ? 100 : 0}
                 style={{borderRight:'1px solid white',borderRadius:0}}/>
             </div>
-            <div className="col-xs-2-4" className="vote-step-progress">
+            <div className="col-md-3" className="vote-step-progress">
               <ProgressBar
                 now={this.state.step >= VoteWidget.STEP_VOTE ? 100 : 0}
                 style={{borderRight:'1px solid white',borderRadius:0}}/>
             </div>
-            <div className="col-xs-2-4" className="vote-step-progress">
-              <ProgressBar
-                now={this.state.step >= VoteWidget.STEP_VOTE_CARD ? 100 : 0}
-                style={{borderRight:'1px solid white',borderRadius:0}}
-                active={this.state.step === VoteWidget.STEP_VOTE_CARD && this.state.blockchainAccountCreated && !voterCard}
-                stripped={this.state.step === VoteWidget.STEP_VOTE_CARD && this.state.blockchainAccountCreated && !voterCard}/>
-            </div>
-            <div className="col-xs-2-4" className="vote-step-progress">
+            <div className="col-md-3" className="vote-step-progress">
               <ProgressBar
                 now={this.state.step >= VoteWidget.STEP_CONFIRM ? 100 : 0}
                 style={{borderRight:'1px solid white',borderRadius:0}}
                 active={this.state.step === VoteWidget.STEP_CONFIRM && this.state.confirmedVote}
                 stripped={this.state.step === VoteWidget.STEP_CONFIRM && this.state.confirmedVote}/>
             </div>
-            <div className="col-xs-2-4" className="vote-step-progress">
+            <div className="col-md-3" className="vote-step-progress">
               <ProgressBar
                 now={this.state.step >= VoteWidget.STEP_COMPLETE ? 100 : 0}
                 style={{borderRadius:0}}/>
             </div>
           </Row>
           <Row>
-            <div className="col-xs-12 col-sm-2-4">
+            <div className="col-xs-12 col-sm-3">
               <div className={classNames({
                 'vote-step-counter': true,
                 'vote-step-counter-active': this.state.step === VoteWidget.STEP_VOTER_ID,
@@ -313,7 +294,7 @@ var VoteWidget = React.createClass({
                 </span>
               </div>
             </div>
-            <div className="col-xs-12 col-sm-2-4">
+            <div className="col-xs-12 col-sm-3">
               <div className={classNames({
                 'vote-step-counter': true,
                 'vote-step-counter-active': this.state.step === VoteWidget.STEP_VOTE,
@@ -328,22 +309,7 @@ var VoteWidget = React.createClass({
                 </span>
               </div>
             </div>
-            <div className="col-xs-12 col-sm-2-4">
-              <div className={classNames({
-                'vote-step-counter': true,
-                'vote-step-counter-active': this.state.step === VoteWidget.STEP_VOTE_CARD,
-                'vote-step-counter-done': this.state.step > VoteWidget.STEP_VOTE_CARD,
-                'hidden-xs': this.state.step !== VoteWidget.STEP_VOTE_CARD,
-              })}>
-                <div className="vote-step-number">
-                  {VoteWidget.STEP_VOTE_CARD + 1}
-                </div>
-                <span className="vote-step-name">
-                  {this.getIntlMessage('vote.STEP_2_NAME')}
-                </span>
-              </div>
-            </div>
-            <div className="col-xs-12 col-sm-2-4">
+            <div className="col-xs-12 col-sm-3">
               <div className={classNames({
                 'vote-step-counter': true,
                 'vote-step-counter-active': this.state.step === VoteWidget.STEP_CONFIRM,
@@ -358,7 +324,7 @@ var VoteWidget = React.createClass({
                 </span>
               </div>
             </div>
-            <div className="col-xs-12 col-sm-2-4">
+            <div className="col-xs-12 col-sm-3">
               <div className={classNames({
                 'vote-step-counter': true,
                 'vote-step-counter-active': this.state.step === VoteWidget.STEP_COMPLETE,
@@ -417,23 +383,8 @@ var VoteWidget = React.createClass({
     };
   },
 
-  renderVoterCardPrintButton: function(className) {
-    if (!this.state.config.capabilities.vote_card.print) {
-      return null;
-    }
-
-    return (
-      <VoterCardPrintButton
-          className={className ? className : 'btn btn-primary'}
-          voteId={this.props.voteId}
-          onClick={this.voterCardPrinted}/>
-    );
-  },
-
-  renderVoterCardDownloadButton: function(className) {
-    if (!this.state.config.capabilities.vote_card.download)
-      return null;
-
+  renderSVGDownloadButton: function(className) {
+    var data = this.state.ballots.getProofOfVoteSVGByVoteId(this.props.voteId);
     var vote = this.state.vote;
 
     // var ballot = this.state.ballots.getByVoteId(this.props.voteId);
@@ -450,11 +401,14 @@ var VoteWidget = React.createClass({
       .replace(/[:\/]/g, '');
 
     return (
-      <VoterCardDownloadButton
+      <SVGDownloadButton
+          data={data}
           filename={filename}
           className={className ? className : 'btn btn-primary'}
           voteId={this.props.voteId}
-          onClick={this.voterCardDownloaded}/>
+          onClick={this.voterCardDownloaded}>
+        Download my proof of vote
+      </SVGDownloadButton>
     );
   },
 
@@ -534,111 +488,6 @@ var VoteWidget = React.createClass({
     );
   },
 
-  renderVoterCardDialog: function() {
-    var voterCard = this.state.blockchainAccounts.getVoterCardByVoteId(
-      this.props.voteId
-    );
-
-    if (this.state.blockchainAccountCreated && !!voterCard) {
-      return this.renderDownloadOrPrintVoterCardDialog();
-    }
-
-    return (
-      <Grid>
-        <Row>
-          <Col xs={12}>
-            <div className="vote-step-description">
-              {this.state.showVoterCardReader
-                ? <div>
-                  <VoterCardReader voteId={this.props.voteId}
-                    onSuccess={(e)=>this.goToNextStep()}/>
-                </div>
-                : <FormattedHTMLMessage
-                  message={this.getIntlMessage('vote.STEP_2_DESCRIPTION')}/>}
-            </div>
-          </Col>
-        </Row>
-        {this.state.showVoterCardReader
-          ? null
-          : <Row>
-            <Col xs={12}>
-              {!this.state.blockchainAccountCreated
-                ? <ButtonToolbar className="vote-step-actions">
-                  <Button bsStyle="primary"
-                    onClick={this.createNewVoterCard}>
-                    <FormattedMessage
-                      message={this.getIntlMessage('vote.CREATE_NEW_VOTE_CARD')}/>
-                  </Button>
-                  <Button bsStyle="default"
-                    onClick={(e)=>this.setState({showVoterCardReader:true})}>
-                    <FormattedMessage
-                      message={this.getIntlMessage('vote.USE_EXISTING_VOTE_CARD')}/>
-                  </Button>
-                </ButtonToolbar>
-                : <ButtonToolbar className="vote-step-actions">
-                  <LoadingIndicator text={this.getIntlMessage('vote.CREATING_NEW_VOTE_CARD')}/>
-                </ButtonToolbar>}
-            </Col>
-          </Row>}
-        {!this.state.showVoterCardReader
-          ? <Row>
-            <Col xs={12}>
-              <Hint>
-                <FormattedHTMLMessage
-                  message={this.getIntlMessage('vote.STEP_2_HINT')}/>
-              </Hint>
-            </Col>
-          </Row>
-          : null}
-      </Grid>
-    );
-  },
-
-  renderDownloadOrPrintVoterCardDialog: function() {
-    window.onbeforeunload = () => this.getIntlMessage('vote.BEFORE_UNLOAD_MESSAGE');
-
-    return (
-      <Grid>
-        <Row>
-          <Col xs={12}>
-            <div className="vote-step-description">
-              <FormattedHTMLMessage
-                message={this.getIntlMessage('vote.STEP_2_NEW_CARD')}/>
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={12}>
-            <ButtonToolbar className="vote-step-actions">
-              {this.renderVoterCardPrintButton()}
-              {this.renderVoterCardDownloadButton()}
-              <Button bsStyle="link"
-                disabled={!this.state.skipVoterCardButtonEnabled}
-                onClick={(e)=>this.goToNextStep()}>
-                <Countdown count={VoteWidget.COUNTDOWN}
-                  format={(c) => c
-                    ? this.getIntlMessage('vote.IGNORE') + ' ('
-                      + c + ')'
-                    : this.getIntlMessage('vote.IGNORE') + ' ('
-                      + this.getIntlMessage('vote.NOT_RECOMMENDED')
-                      + ')'}
-                  onComplete={()=>this.setState({skipVoterCardButtonEnabled:true})}/>
-              </Button>
-            </ButtonToolbar>
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={12}>
-            <Hint style="warning">
-              <FormattedHTMLMessage
-                message={this.getIntlMessage('vote.WARNING_FETCH_VOTE_CARD')}/>
-            </Hint>
-          </Col>
-        </Row>
-      </Grid>
-    );
-  },
-
   renderConfirmVoteButton: function() {
     return (
       <Button className={classNames(this.getVoteValueButtonClassNames())}
@@ -662,6 +511,9 @@ var VoteWidget = React.createClass({
 
   renderConfirmDialog: function() {
     var vote = this.state.vote;
+    var address = this.state.blockchainAccounts.getAddressByVoteId(
+      this.props.voteId
+    );
 
     return (
         <Grid>
@@ -688,12 +540,14 @@ var VoteWidget = React.createClass({
         <Row>
           <Col xs={12}>
             <ButtonToolbar className="vote-step-actions">
-              {this.state.confirmedVote
-                ? <LoadingIndicator
-                    text={this.getIntlMessage('vote.PENDING_BALLOT_TRANSACTION')}/>
-                : <div>
-                  {this.renderConfirmVoteButton()}
-                </div>}
+              {!address
+                ? <LoadingIndicator/>
+                : this.state.confirmedVote
+                  ? <LoadingIndicator
+                      text={this.getIntlMessage('vote.PENDING_BALLOT_TRANSACTION')}/>
+                  : <div>
+                    {this.renderConfirmVoteButton()}
+                  </div>}
             </ButtonToolbar>
           </Col>
         </Row>
@@ -703,16 +557,6 @@ var VoteWidget = React.createClass({
               <FormattedHTMLMessage
                 message={this.getIntlMessage('vote.STEP_3_WARNING')}/>
             </Hint>
-            {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
-              ? <Hint style="warning">
-                <FormattedHTMLMessage
-                  message={this.getIntlMessage('vote.WARNING_FETCH_VOTE_CARD')}/>
-                <ButtonToolbar>
-                  {this.renderVoterCardPrintButton('btn btn-warning')}
-                  {this.renderVoterCardDownloadButton('btn btn-warning')}
-                </ButtonToolbar>
-              </Hint>
-              : null}
           </Col>
         </Row>
       </Grid>
@@ -749,20 +593,20 @@ var VoteWidget = React.createClass({
         </Row>
         <Row>
           <Col xs={12}>
+            <ButtonToolbar className="vote-step-actions">
+              <PrintButton text="Print my proof of vote">
+                <SVGImage data={this.state.ballots.getProofOfVoteSVGByVoteId(this.props.voteId)}/>
+              </PrintButton>
+              {this.renderSVGDownloadButton()}
+            </ButtonToolbar>
+          </Col>
+        </Row>
+        <Row>
+          <Col xs={12}>
             <Hint>
               <FormattedHTMLMessage
                 message={this.getIntlMessage('vote.STEP_4_HINT')}/>
             </Hint>
-            {this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard
-              ? <Hint style="warning">
-                <FormattedHTMLMessage
-                  message={this.getIntlMessage('vote.WARNING_FETCH_VOTE_CARD')}/>
-                <ButtonToolbar>
-                  {this.renderVoterCardPrintButton('btn btn-warning')}
-                  {this.renderVoterCardDownloadButton('btn btn-warning')}
-                </ButtonToolbar>
-              </Hint>
-              : null}
           </Col>
         </Row>
       </Grid>

@@ -42,7 +42,7 @@ keystone.set('routes', require('./routes'));
 keystone.set('nav', {
   'apps': 'apps',
   'pages': ['Page', 'Media'],
-  'votes': ['Vote', 'Ballot', 'Source'],
+  'votes': ['Vote', 'Ballot', 'Source', 'VerifiedBallot'],
 });
 
 keystone.start();
