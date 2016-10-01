@@ -3,6 +3,7 @@ require('babel-polyfill');
 
 console.log('commit hash:', __COMMIT_HASH__);
 console.log('build number:', __BUILD_NUMBER__);
+console.log('build date:', __BUILD_DATE__);
 console.log('env:', __ENV__);
 
 var React = require('react');

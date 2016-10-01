@@ -21,7 +21,7 @@ scp \
   root@cocorico.cc:/tmp/prod.yml
 
 ssh -i "${TRAVIS_BUILD_DIR}/key/cocorico.cc" -o "StrictHostKeyChecking=no" root@cocorico.cc << EOF
-  export TRAVIS_BUILD_NUMBER='"'$TRAVIS_BUILD_NUMBER'"'
+  export TRAVIS_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
   rm -rf /vagrant
   git clone https://github.com/promethe42/cocorico /vagrant
   export PLAYBOOK="provisioning/provision.yml"
