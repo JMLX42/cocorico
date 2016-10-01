@@ -3,8 +3,8 @@
 if [ "$TRAVIS" == "" ] || [ "$TRAVIS_BRANCH" == "feature/master-deploy" ]; then
 
   openssl aes-256-cbc \
-    -K "$encrypted_1f753eb353f1_key" \
-    -iv "$encrypted_1f753eb353f1_iv" \
+    -K "$encrypted_d9774cb211e3_key" \
+    -iv "$encrypted_d9774cb211e3_iv" \
     -in "${TRAVIS_BUILD_DIR}/key/cocorico.cc.enc" \
     -out "${TRAVIS_BUILD_DIR}/key/cocorico.cc" -d
 
