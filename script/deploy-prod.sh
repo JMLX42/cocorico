@@ -8,6 +8,8 @@ if [ "$TRAVIS" == "" ] || [ "$TRAVIS_BRANCH" == "feature/master-deploy" ]; then
     -in "${TRAVIS_BUILD_DIR}/key/cocorico.cc.enc" \
     -out "${TRAVIS_BUILD_DIR}/key/cocorico.cc" -d
 
+  chmod 600 "${TRAVIS_BUILD_DIR}/key/cocorico.cc"
+
   ssh -i "${TRAVIS_BUILD_DIR}/key/cocorico.cc" -o "StrictHostKeyChecking=no" root@cocorico.cc << EOF
     rm -rf /vagrant
     git clone https://github.com/promethe42/cocorico /vagrant
