@@ -16,8 +16,11 @@ env:
 #   - cd /vagrant && sudo bash ./deployment/ansible.sh
 #   - sudo ./script/run-tests.sh
 
-after_success:
-  - ./script/deploy-prod.sh
+deploy:
+  provider: script
+  script: script/deploy-prod.sh
+  on:
+    branch: feature/master-deploy
 
 notifications:
   webhooks:
