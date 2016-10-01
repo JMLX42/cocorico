@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -v
+
 if [ "$TRAVIS" == "" ] || [ "$TRAVIS_BRANCH" == "feature/master-deploy" ]; then
 
   openssl aes-256-cbc \
@@ -17,8 +19,9 @@ if [ "$TRAVIS" == "" ] || [ "$TRAVIS_BRANCH" == "feature/master-deploy" ]; then
     -out "${TRAVIS_BUILD_DIR}/provisioning/inventory/group_vars/prod.yml" -d
 
   scp \
-    -i "${TRAVIS_BUILD_DIR}/provisioning/inventory/group_vars/prod.yml" \
+    -i "${TRAVIS_BUILD_DIR}/key/cocorico.cc" \
     -o "StrictHostKeyChecking=no" \
+    "${TRAVIS_BUILD_DIR}/provisioning/inventory/group_vars/prod.yml" \
     root@cocorico.cc:/tmp/prod.yml
 
   ssh -i "${TRAVIS_BUILD_DIR}/key/cocorico.cc" -o "StrictHostKeyChecking=no" root@cocorico.cc << EOF
