@@ -419,6 +419,11 @@
         }
       }
     },
+    "chart.js": {
+      "version": "1.1.1",
+      "from": "chart.js@>=1.1.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/chart.js/-/chart.js-1.1.1.tgz"
+    },
     "classnames": {
       "version": "2.2.3",
       "from": "https://registry.npmjs.org/classnames/-/classnames-2.2.3.tgz",
@@ -2131,6 +2136,49 @@
                   "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-1.0.3.tgz"
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "react-chartjs-2": {
+      "version": "1.2.8",
+      "from": "react-chartjs-2@latest",
+      "resolved": "https://registry.npmjs.org/react-chartjs-2/-/react-chartjs-2-1.2.8.tgz",
+      "dependencies": {
+        "chart.js": {
+          "version": "2.3.0",
+          "from": "chart.js@>=2.2.0-rc.1 <3.0.0",
+          "resolved": "https://registry.npmjs.org/chart.js/-/chart.js-2.3.0.tgz",
+          "dependencies": {
+            "chartjs-color": {
+              "version": "2.0.0",
+              "from": "chartjs-color@>=2.0.0 <3.0.0",
+              "resolved": "https://registry.npmjs.org/chartjs-color/-/chartjs-color-2.0.0.tgz",
+              "dependencies": {
+                "color-convert": {
+                  "version": "0.5.3",
+                  "from": "color-convert@>=0.5.3 <0.6.0",
+                  "resolved": "https://registry.npmjs.org/color-convert/-/color-convert-0.5.3.tgz"
+                },
+                "chartjs-color-string": {
+                  "version": "0.4.0",
+                  "from": "chartjs-color-string@>=0.4.0 <0.5.0",
+                  "resolved": "https://registry.npmjs.org/chartjs-color-string/-/chartjs-color-string-0.4.0.tgz",
+                  "dependencies": {
+                    "color-name": {
+                      "version": "1.1.1",
+                      "from": "color-name@>=1.0.0 <2.0.0",
+                      "resolved": "https://registry.npmjs.org/color-name/-/color-name-1.1.1.tgz"
+                    }
+                  }
+                }
+              }
+            },
+            "moment": {
+              "version": "2.15.1",
+              "from": "moment@>=2.10.6 <3.0.0",
+              "resolved": "https://registry.npmjs.org/moment/-/moment-2.15.1.tgz"
             }
           }
         }

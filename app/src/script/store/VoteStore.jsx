@@ -97,8 +97,8 @@ module.exports = Reflux.createStore({
     });
   },
 
-  _fetch: function(voteId) {
-    if (voteId in this._loading) {
+  _fetch: function(voteId, forceUpdate) {
+    if (!forceUpdate & voteId in this._loading) {
       return;
     }
 

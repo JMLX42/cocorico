@@ -1,30 +1,40 @@
 var Reflux = require('reflux');
 var jquery = require('jquery');
 
-var VoteAction = require('../action/VoteAction');
+var BallotAction = require('../action/BallotAction');
 
 module.exports = Reflux.createStore({
   init: function() {
     jquery.ajaxSetup({ cache: false });
 
-    this.listenTo(VoteAction.getTransactions, this._fetchByVoteId);
-    this.listenTo(VoteAction.searchTransactions, this._fetchByVoteId);
+    this.listenTo(BallotAction.getTransactions, this._fetchByVoteId);
+    this.listenTo(BallotAction.searchTransactions, this._fetchByVoteId);
 
     this._transactions = {};
+    this._numPages = {};
+    this._numItems = {};
   },
 
   getInitialState: function() {
     return this;
   },
 
-  getByVoteId: function(voteId) {
-    return this._transactions[voteId] === true
-      ? null
-      : this._transactions[voteId];
+  getNumPagesByVoteId: function(voteId) {
+    return voteId in this._numPages ? this._numPages[voteId] : 0;
   },
 
-  _fetchByVoteId: function(voteId, search) {
-    if (voteId in this._transactions && this._transactions[voteId] === true) {
+  getNumItemsByVoteId: function(voteId) {
+    return voteId in this._numItems ? this._numItems[voteId] : 0;
+  },
+
+  getByVoteId: function(voteId, page) {
+    return !(voteId in this._transactions) || this._transactions[voteId][page] === true
+      ? null
+      : this._transactions[voteId][page];
+  },
+
+  _fetchByVoteId: function(voteId, page, search) {
+    if (voteId in this._transactions && this._transactions[voteId][page] === true) {
       return;
     }
 
@@ -33,17 +43,21 @@ module.exports = Reflux.createStore({
       return;
     }
 
-    this._transactions[voteId] = true;
+    this._transactions[voteId] = [];
+    this._transactions[voteId][page] = true;
 
     jquery.post(
-      '/api/vote/transactions/' + voteId,
+      '/api/ballot/transactions/' + voteId,
       {
+        page: page,
         transactionHash: search ? search.transactionHash : null,
         voter: search ? search.voter : null,
         proposal: search ? search.proposal : null,
       },
       (data) => {
-        this._transactions[voteId] = data.transactions;
+        this._transactions[voteId][data.page] = data.transactions;
+        this._numPages[voteId] = data.numPages;
+        this._numItems[voteId] = data.numItems;
 
         this.trigger(this);
       }

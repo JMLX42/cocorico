@@ -40,9 +40,13 @@ Vote.add({
   labels: { type: Types.TextArray },
   salt: { type: Types.Text, noedit: true, default: () => bcrypt.genSaltSync(10) },
   key: { type: Types.Key, noedit: true, default: () => srs(32).toLowerCase() },
+  numBallots: { type: Types.Number, default: 0 },
+  numValidBallots: { type: Types.Number, default: 0 },
+  numInvalidBallots: { type: Types.Number, default: 0 },
 });
 
 Vote.relationship({ path: 'sources', ref: 'Source', refPath: 'vote' });
+Vote.relationship({ path: 'verified ballots', ref: 'VerifiedBallot', refPath: 'vote' });
 
 Vote.schema.methods.userIsAuthorizedToVote = function(user) {
   return config.capabilities.vote.enabled
