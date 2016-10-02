@@ -22,7 +22,8 @@ var LoadingIndicator = require('../component/LoadingIndicator'),
   Title = require('../component/Title'),
   Icon = require('../component/Icon'),
   QRCodeReader = require('../component/QRCodeReader'),
-  FileSelectButton = require('../component/FileSelectButton');
+  FileSelectButton = require('../component/FileSelectButton'),
+  Hint = require('../component/Hint');
 
 var Grid = ReactBootstrap.Grid,
   Row = ReactBootstrap.Row,
@@ -324,19 +325,54 @@ var BallotBox = React.createClass({
   },
 
   render: function() {
+    return (
+      <div className="page page-ballot-box">
+        {this.renderContent()}
+      </div>
+    );
+  },
+
+  renderTitle: function(vote) {
+    return (
+      <Row>
+        <Col xs={12}>
+          <h1>{vote.title} <small>Ballot Box</small></h1>
+        </Col>
+      </Row>
+    );
+  },
+
+  renderContent: function() {
     var vote = this.state.votes.getById(this.props.params.voteId);
 
     if (!vote) {
       return (
-        <div className="page page-ballot-box">
-          <Grid>
-            <Row>
-              <Col xs={12}>
-                <LoadingIndicator/>
-              </Col>
-            </Row>
-          </Grid>
-        </div>
+        <Grid>
+          <Row>
+            <Col xs={12}>
+              <LoadingIndicator/>
+            </Col>
+          </Row>
+        </Grid>
+      );
+    }
+
+    if (vote.status !== 'complete') {
+      return (
+        <Grid>
+          {this.renderTitle(vote)}
+          <Row>
+            <Col xs={12}>
+              <Hint style="danger">
+                <h3>This vote is not complete yet...</h3>
+                <p>
+                  You must wait for a vote to be complete in order to inspect
+                  its ballot box.
+                </p>
+              </Hint>
+            </Col>
+          </Row>
+        </Grid>
       );
     }
 
@@ -345,14 +381,10 @@ var BallotBox = React.createClass({
       || !this.state.proofsOfVote.getVerifiedBallot(this.state.proofOfVote));
 
     return (
-      <div className="page page-ballot-box">
+      <div>
         {this.renderQRCodeReaderModal()}
         <Grid>
-          <Row>
-            <Col xs={12}>
-              <h1>{vote.title} <small>Ballot Box</small></h1>
-            </Col>
-          </Row>
+          {this.renderTitle()}
           <Row className="ballot-box-recount">
             <Col md={4} sm={6} xs={12} className="text-center">
               {this.renderVoteResultChart(vote)}
@@ -403,7 +435,7 @@ var BallotBox = React.createClass({
           </Row>
           <Row>
             <Col xs={12}>
-              {this.renderContent()}
+              {this.renderTransactionTable()}
             </Col>
           </Row>
         </Grid>
@@ -470,7 +502,7 @@ var BallotBox = React.createClass({
     );
   },
 
-  renderContent: function() {
+  renderTransactionTable: function() {
     var transactions = this.state.transactions.getByVoteId(
       this.props.params.voteId,
       this.state.page
