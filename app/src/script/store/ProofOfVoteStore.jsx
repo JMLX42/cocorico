@@ -7,41 +7,41 @@ module.exports = Reflux.createStore({
   init: function() {
     this.listenTo(ProofOfVoteAction.verify, this._verify);
 
-    this._status = {};
+    this._verified = {};
   },
 
   getInitialState: function() {
     return this;
   },
 
-  getStatus(proofOfVote) {
-    return proofOfVote in this._status
-      ? this._status[proofOfVote]
+  getVerifiedBallot(proofOfVote) {
+    return proofOfVote in this._verified && this._verified[proofOfVote] !== true
+      ? this._verified[proofOfVote]
       : false;
   },
 
   _verify: function(proofOfVote) {
-    if (proofOfVote in this._status
-        && this._status[proofOfVote] === 'pending') {
+    if (proofOfVote in this._verified
+        && this._verified[proofOfVote] === true) {
       return;
     }
 
-    if (proofOfVote in this._status) {
+    if (proofOfVote in this._verified) {
       this.trigger(this);
       return;
     }
 
-    this._status[proofOfVote] = 'pending';
+    this._verified[proofOfVote] = true;
 
     jquery.post(
       '/api/ballot/verify',
       { proofOfVote: proofOfVote },
       (data) => {
-        this._status[proofOfVote] = data.status;
+        this._verified[proofOfVote] = data.verified;
         this.trigger(this);
       }
     ).error((xhr, voteStatus, err) => {
-      this._status[proofOfVote] = { error : xhr.status };
+      this._verified[proofOfVote] = { error : xhr.status };
     });
   },
 });

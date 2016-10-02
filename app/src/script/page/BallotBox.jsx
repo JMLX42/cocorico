@@ -6,6 +6,7 @@ var classNames = require('classnames');
 var Base64 = require('js-base64').Base64;
 var jwtDecode = require('jwt-decode');
 var DoughnutChart = require('react-chartjs-2').Doughnut;
+var dateFormat = require('dateformat');
 
 var StringHelper = require('../helper/StringHelper');
 
@@ -339,8 +340,9 @@ var BallotBox = React.createClass({
       );
     }
 
-    var status = this.state.proofsOfVote.getStatus(this.state.proofOfVote);
     var numVerifiedBallots = vote.numValidBallots + vote.numInvalidBallots;
+    var verifying = !!this.state.proofOfVote && (this.state.searching
+      || !this.state.proofsOfVote.getVerifiedBallot(this.state.proofOfVote));
 
     return (
       <div className="page page-ballot-box">
@@ -386,16 +388,13 @@ var BallotBox = React.createClass({
                     <Icon name="cloud_upload"/>Select my downloaded proof of vote
                   </FileSelectButton>
                 </ButtonToolbar>
-                : status === 'pending'
-                  ? <LoadingIndicator/>
-                : <div>
-                  <p>{status}</p>
-                  <ButtonToolbar>
+                : verifying
+                  ? <LoadingIndicator text="Verifying..."/>
+                  : <ButtonToolbar>
                     <Button onClick={this.resetProofOfVote}>
                       Verify another proof of vote
                     </Button>
-                  </ButtonToolbar>
-                </div>}
+                  </ButtonToolbar>}
             </Col>
             <Col lg={6} md={12}>
               <h2>Explore the ballot box</h2>
@@ -497,9 +496,9 @@ var BallotBox = React.createClass({
                 return (
                   <tr key={tx.transactionHash}>
                     <td style={{width:45}} className="text-center">
-                      {tx.verified
-                        ? <span className="positive">
-                          <Icon name="checkmark"/>
+                      {'verified' in tx
+                        ? <span className={tx.verified ? 'positive' : 'negative'}>
+                          <Icon name={tx.verified ? 'checkmark' : 'cross'}/>
                         </span>
                         : null}
                     </td>
@@ -528,6 +527,44 @@ var BallotBox = React.createClass({
             ? <p>No ballots.</p>
             : null}
         {this.renderPagination()}
+        {this.renderProofOfVoteStatus()}
+      </div>
+    );
+  },
+
+  renderProofOfVoteStatus: function() {
+    if (this.state.searching || !this.state.proofOfVote) {
+      return null;
+    }
+
+    var verified = this.state.proofsOfVote.getVerifiedBallot(
+      this.state.proofOfVote
+    );
+
+    if (!verified) {
+      return null;
+    }
+
+    return (
+      <div className={classNames({
+        'ballot-verify-status': true,
+        'positive-background': verified.valid,
+        'negative-background': !verified.valid,
+        'animated': true,
+        'flipInX': true,
+      })}>
+        {verified.valid
+          ? <span>
+            <Icon name="checkmark"/>
+            Verified
+          </span>
+          : <span>
+            <Icon name="cross"/>
+            Invalid
+          </span>}
+        <span className="ballot-verify-date">
+          {dateFormat(verified.createdAt, 'UTC:dd-mm-yyyy HH:MM:ss Z')}
+        </span>
       </div>
     );
   },

@@ -173,7 +173,7 @@ exports.verify = function(req, res) {
       }
 
       if (!!ballot) {
-        res.apiResponse({success: ballot.success});
+        res.apiResponse({verified: ballot});
         return;
       }
 
@@ -244,7 +244,7 @@ exports.verify = function(req, res) {
               .apiResponse({error: err.msg ? err.msg : err});
           } else {
             return res.apiResponse({
-              valid: verifiedBallot.valid,
+              verified: verifiedBallot,
             });
           }
         }
@@ -319,7 +319,7 @@ exports.getTransactions = function(req, res) {
                 for (var ballot of ballots) {
                   for (var tx of result) {
                     if (tx.transactionHash === ballot.transactionHash) {
-                      tx.verified = true;
+                      tx.verified = ballot.valid;
                     }
                   }
                 }
