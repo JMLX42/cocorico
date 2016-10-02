@@ -10,4 +10,10 @@
 - file: src={{ project_dir }}/{{ role_name }}/node_modules dest=/vagrant/{{ role_name }}/node_modules state=link
 
 - name: install npm modules
-  npm: path=/vagrant/webhook
+  npm: path=/vagrant/{{ role_name }}
+
+- name: install upstart script
+  template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
+
+- name: start service
+  service: name=cocorico-webhook state=started
