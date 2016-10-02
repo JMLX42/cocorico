@@ -103,7 +103,7 @@
           "prevSize": 24,
           "code": 59672,
           "name": "switch_video",
-          "tempChar": ""
+          "tempChar": ""
         },
         {
           "order": 1,
@@ -111,7 +111,7 @@
           "prevSize": 24,
           "code": 59668,
           "name": "lock_open",
-          "tempChar": ""
+          "tempChar": ""
         },
         {
           "order": 2,
@@ -119,14 +119,14 @@
           "prevSize": 24,
           "code": 59669,
           "name": "security",
-          "tempChar": ""
+          "tempChar": ""
         },
         {
           "order": 1,
           "id": 8,
           "prevSize": 32,
           "code": 59648,
-          "tempChar": "",
+          "tempChar": "",
           "name": "info_outline"
         },
         {
@@ -134,7 +134,7 @@
           "id": 9,
           "prevSize": 32,
           "code": 59649,
-          "tempChar": "",
+          "tempChar": "",
           "name": "info"
         },
         {
@@ -142,7 +142,7 @@
           "id": 10,
           "prevSize": 32,
           "code": 59650,
-          "tempChar": "",
+          "tempChar": "",
           "name": "remove_circle_outline"
         },
         {
@@ -150,7 +150,7 @@
           "id": 11,
           "prevSize": 32,
           "code": 59651,
-          "tempChar": "",
+          "tempChar": "",
           "name": "add_circle_outline"
         },
         {
@@ -158,7 +158,7 @@
           "id": 12,
           "prevSize": 32,
           "code": 59652,
-          "tempChar": "",
+          "tempChar": "",
           "name": "search"
         },
         {
@@ -166,7 +166,7 @@
           "id": 13,
           "prevSize": 32,
           "code": 59653,
-          "tempChar": "",
+          "tempChar": "",
           "name": "share"
         },
         {
@@ -174,7 +174,7 @@
           "id": 14,
           "prevSize": 32,
           "code": 59654,
-          "tempChar": "",
+          "tempChar": "",
           "name": "flag"
         },
         {
@@ -182,7 +182,7 @@
           "id": 15,
           "prevSize": 32,
           "code": 59655,
-          "tempChar": "",
+          "tempChar": "",
           "name": "thumb_up"
         },
         {
@@ -190,7 +190,7 @@
           "id": 16,
           "prevSize": 32,
           "code": 59656,
-          "tempChar": "",
+          "tempChar": "",
           "name": "thumb_down"
         },
         {
@@ -9333,7 +9333,7 @@
           "prevSize": 24,
           "code": 59679,
           "name": "cloud_upload",
-          "tempChar": ""
+          "tempChar": ""
         },
         {
           "order": 0,
@@ -11570,11 +11570,13 @@
           "id": 271
         },
         {
-          "order": 0,
-          "prevSize": 16,
+          "order": 30,
+          "prevSize": 32,
           "ligatures": "cross, cancel",
           "name": "cross",
-          "id": 272
+          "id": 272,
+          "code": 59681,
+          "tempChar": ""
         },
         {
           "order": 29,
@@ -11583,7 +11585,7 @@
           "name": "checkmark",
           "id": 273,
           "code": 59680,
-          "tempChar": ""
+          "tempChar": ""
         },
         {
           "order": 0,
