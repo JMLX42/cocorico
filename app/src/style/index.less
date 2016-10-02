@@ -31,6 +31,7 @@
 // @import "./Source Sans Pro.less";
 @import "./icons.less";
 @import "./embed.less";
+@import "./animate.css";
 
 // @font-family-sans-serif: "Source Sans Pro", "Arial Narrow", sans-serif;
 // @font-family-serif: Georgia, "Times New Roman", Times, serif;
@@ -880,6 +881,24 @@ ul.source-list {
     margin: 50px 0;
   }
 
+  .ballot-verify-status {
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 25px;
+    margin-top: 10px;
+    border-radius: 5px;
+
+    .ballot-verify-date {
+      font-size: 12px;
+      display: block;
+    }
+
+    i:before {
+      margin-right: 10px;
+    }
+  }
+
   div.ballot-box-content {
     margin-bottom: 12px;
 
@@ -889,7 +908,7 @@ ul.source-list {
     }
 
     table {
-      margin-bottom: 0;
+      margin-bottom: 5px;
 
       & > tbody > tr > td {
         height: 50px;
