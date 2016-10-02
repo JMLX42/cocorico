@@ -210,9 +210,9 @@ exports = module.exports = function(app) {
   app.get('/vote/permissions/:voteId', routes.api.vote.permissions);
 
   /**
-   * @api {get} /ballot/transactions/:voteId Get transactions from voteId
+   * @api {get} /ballot/transactions/:voteId Get ballot transactions
    * @apiName GetTransactions
-   * @apiGroup Vote
+   * @apiGroup Ballot
    * @apiVersion 0.0.1
    *
    * @apiParam {String} voteId The ID of the vote.
@@ -222,7 +222,20 @@ exports = module.exports = function(app) {
    */
   app.post('/ballot/transactions/:voteId', routes.api.ballot.getTransactions);
 
-
+  /**
+   * @api {post} /ballot/verify/:voteId Verify a ballot
+   * @apiName VerifyBallot
+   * @apiGroup Ballot
+   * @apiVersion 0.0.1
+   *
+   * @apiParam (POST) {String} proofOfVote The JWT of the proof of vote to
+   * verify returned by a previous call to [the POST `/ballot/:voteId` API endpoint](#api-Ballot-SendBallot).
+   *
+   * @apiExample {curl} cURL example:
+   *    curl -X POST
+   *      -F "proofOfVote=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2IjoxLCJhIjoiNzI3OTk5NzJhYTQ3YjY4YTBhOTliNGUyNTZjN2ZjZmY2MmE5MGUwNSIsImMiOiJkZjVkODcxYjhhMTNiMmU4YzNiMjgwOTZiYWQ4YWEzN2IzZDM1YjdhIiwicCI6MSwidCI6MTQ3NTA1MDE5MzIyOX0.AncBGzKm2Sa-iCXGnnBsFn7WqqYC1Z0Yi9wWJ5H_ghk"
+   *      "https://cocorico.cc/api/ballot/verify"
+   */
   app.post('/ballot/verify', routes.api.ballot.verify);
 
   /**
@@ -251,7 +264,7 @@ exports = module.exports = function(app) {
    *
    * @apiExample {javascript} JavaScript example:
    *
-   *     var jquery = require('jquery');
+   *    var jquery = require('jquery');
    *    var lightwallet = require('eth-lightwallet');
    *
    *     var tx = lightwallet.txutils.functionTx(
@@ -282,7 +295,18 @@ exports = module.exports = function(app) {
    *
    * @apiParam {String} voteId The ID of the vote.
    *
-   * @apiParam (POST) {String} transaction The blockchain transaction of the ballot.
+   * @apiParam (POST) {String} transaction The blockchain transaction of the
+   * ballot.
+   *
+   * @apiSuccess {Object} ballot The created ballot object.
+   * @apiSuccess {String} ballot.id The ID of the ballot.
+   * @apiSuccess {String} ballot.status The status of the ballot.
+   * @apiSuccess {String} ballot.hash The signature of the user who sent the
+   * ballot.
+   * @apiSuccess {String} ballot.error The message of the error that happened
+   * when processing the ballot, if any.
+   * @apiSuccess {Object} proofOfVote A JWT signed by the server to verify the
+   * ballot using [the `/ballot/verify` API endpoint](#api-Ballot-VerifyBallot).
    *
    */
   app.post('/ballot/:voteId', isAuthenticated, routes.api.ballot.vote);
