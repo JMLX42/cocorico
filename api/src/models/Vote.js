@@ -131,11 +131,22 @@ Vote.schema.pre('validate', function(next) {
   var self = this;
 
   if (!self.url) {
-    return next();
+    return next(null);
   }
 
   if (self.isModified('status') && self.status === 'complete') {
     return completeVote(self, next);
+  }
+
+  var updateTitle = (self.isModified('url') || !self.isModified('title'))
+    && !self.title;
+  var updateDescription = (self.isModified('url') || !self.isModified('description'))
+    && !self.description;
+  var updateImage = (self.isModified('url') || !self.isModified('image'))
+    && !self.image;
+
+  if (!updateTitle && !updateDescription && !updateImage) {
+    next(null);
   }
 
   return async.waterfall(
@@ -147,9 +158,15 @@ Vote.schema.pre('validate', function(next) {
           http: { timeout: 30000 },
         },
         (err, meta) => {
-          self.title = meta.title;
-          self.description = meta.description;
-          self.image = meta.image;
+          if (updateTitle) {
+            self.title = meta.title;
+          }
+          if (updateDescription) {
+            self.description = meta.description;
+          }
+          if (updateImage) {
+            self.image = meta.image;
+          }
 
           callback(null);
         }
