@@ -102,6 +102,13 @@ exports = module.exports = function(app) {
    * @apiParam (POST) {Boolean} restricted (Optionnal) Restrict the vote to
    * the users provided by the app. Default value is `false`.
    * @apiParam (POST) {String[]} labels (Optionnal) The vote proposal labels.
+   * @apiParam (POST) {String} title (Optionnal) The title of the vote. If missing,
+   * the value is read from the vote's URL `og:title` OpenGraph tag.
+   * @apiParam (POST) {String} image (Optionnal) The URL of the image of the vote. If missing,
+   * the value is read from the vote's URL `og:image` OpenGraph tag.
+   * @apiParam (POST) {String} description (Optionnal) The description of the
+   * vote. If missing, the value is read from the vote's URL `og:description` OpenGraph
+   * tag.
    *
    * @apiExample {curl} cURL example:
    *     curl -X POST
@@ -199,6 +206,13 @@ exports = module.exports = function(app) {
    * @apiPermission app
    *
    * @apiParam {String} voteId The ID of the vote.
+   * @apiParam (POST) {String} title (Optionnal) The title of the vote. If missing,
+   * the value is read from the vote's URL `og:title` OpenGraph tag.
+   * @apiParam (POST) {String} image (Optionnal) The URL of the image of the vote. If missing,
+   * the value is read from the vote's URL `og:image` OpenGraph tag.
+   * @apiParam (POST) {String} description (Optionnal) The description of the
+   * vote. If missing, the value is read from the vote's URL `og:description` OpenGraph
+   * tag.
    */
   app.put('/vote/:voteId', routes.api.oauth.checkAccessToken, routes.api.vote.update);
 

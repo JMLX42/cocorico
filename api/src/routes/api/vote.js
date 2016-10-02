@@ -36,15 +36,15 @@ exports.get = function(req, res) {
 
 exports.getBySlug = function(req, res) {
   Vote.model.findOne({slug: req.params.voteSlug})
-        .exec((err, vote) => {
-          if (err)
-            return res.apiError('database error', err);
+    .exec((err, vote) => {
+      if (err)
+        return res.apiError('database error', err);
 
-          if (!vote)
-            return res.status(404).send();
+      if (!vote)
+        return res.status(404).send();
 
-          return res.apiResponse({vote: vote});
-        });
+      return res.apiResponse({vote: vote});
+    });
 }
 
 exports.create = function(req, res) {
@@ -82,21 +82,24 @@ exports.create = function(req, res) {
           url: url,
           restricted: req.body.restricted === 'true',
           labels: labels,
+          title: req.body.title,
+          description: req.body.description,
+          image: req.body.image,
         }).save((err, savedVote) => callback(err, savedVote)),
     ],
-        (err, vote) => {
-          if (err) {
-            if (err.code) {
-              res.status(err.code);
-            }
-            if (err.error) {
-              return res.apiError(err.error);
-            }
-            return res.apiError(err);
-          }
-          return res.apiResponse({vote: vote});
+    (err, vote) => {
+      if (err) {
+        if (err.code) {
+          res.status(err.code);
         }
-    );
+        if (err.error) {
+          return res.apiError(err.error);
+        }
+        return res.apiError(err);
+      }
+      return res.apiResponse({vote: vote});
+    }
+  );
 }
 
 exports.update = function(req, res) {
@@ -110,11 +113,11 @@ exports.update = function(req, res) {
       if (!vote)
         return res.status(404).send();
 
-      if (vote.app !== req.user.id) {
+      if (vote.app.toString() !== req.user.id) {
         return res.status(403).send();
       }
 
-      for (propertyName in vote) {
+      for (var propertyName in vote) {
         if (propertyName in req.body) {
           vote[propertyName] = req.body[propertyName];
         }

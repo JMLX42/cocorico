@@ -41,9 +41,9 @@ var Hint = React.createClass({
     if (this.state.hidden) {
       return (
         <a onClick={this.buttonClickHandler}
-            className="btn-hint-show">
-            <span className="icon-info"/>
-            <PageTitle slug={this.props.pageSlug} className="hint-title"/>
+          className="btn-hint-show">
+          <span className="icon-info"/>
+          <PageTitle slug={this.props.pageSlug} className="hint-title"/>
         </a>
       );
     }
