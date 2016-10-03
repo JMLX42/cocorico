@@ -7,7 +7,7 @@ describe('/vote/:voteId', () => {
       .get('https://local.cocorico.cc/api/vote/424242424242424242424242')
       .then(
         (res) => null,
-        (err) => expect(err.status).toBe(400)
+        (err) => expect(err.status).toBe(404)
       );
   });
 
