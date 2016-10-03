@@ -14,7 +14,11 @@ env:
 script:
   - sudo ln -s $TRAVIS_BUILD_DIR /vagrant
   - cd /vagrant && sudo bash ./deployment/ansible.sh
-  - sudo ./script/run-tests.sh
+  # - sudo ./script/run-tests.sh
+  - curl -X GET https://local.cocorico.cc/api/user/me --insecure -v
+  - curl -X GET https://127.0.0.1/api/user/me --insecure -v
+  - curl -X GET https://0.0.0.0/api/user/me --insecure -v
+  - curl -X GET https://localhost/api/user/me --insecure -v
 
 deploy:
   provider: script
