@@ -57,7 +57,8 @@
   "devDependencies": {
     "babel-eslint": "^6.1.2",
     "eslint": "^3.6.0",
-    "jest": "^16.0.0"
+    "jest": "^16.0.0",
+    "superagent": "^2.3.0"
   },
   "jest": {
     "setupTestFrameworkScriptFile": "test/index.js"
