@@ -15,13 +15,16 @@ script:
   - sudo ln -s $TRAVIS_BUILD_DIR /vagrant
   - cd /vagrant && sudo bash ./deployment/ansible.sh
   # - sudo ./script/run-tests.sh
-  - cat /var/log/upstart/cocorico-*
+  - sudo cat /var/log/upstart/cocorico-*
   - cat /opt/cocorico/log/*.log
   - forever list
   - curl -X GET https://local.cocorico.cc/api/user/me --insecure -v
   - curl -X GET https://127.0.0.1/api/user/me --insecure -v
   - curl -X GET https://0.0.0.0/api/user/me --insecure -v
   - curl -X GET https://localhost/api/user/me --insecure -v
+  - sudo service cocorico-api-web restart
+  - sudo cat /var/log/upstart/cocorico-api-web.log
+  - cat /opt/cocorico/log/api-web*
   - curl -X GET http://localhost:3000/user/me --insecure -v
   - curl -X GET http://0.0.0.0:3000/user/me --insecure -v
   - curl -X GET http://127.0.0.1:3000/user/me --insecure -v
