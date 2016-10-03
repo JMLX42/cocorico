@@ -22,7 +22,9 @@ script:
   - curl -X GET https://127.0.0.1/api/user/me --insecure -v
   - curl -X GET https://0.0.0.0/api/user/me --insecure -v
   - curl -X GET https://localhost/api/user/me --insecure -v
+  - forever list
   - sudo service cocorico-api-web restart
+  - forever list
   - sudo cat /var/log/upstart/cocorico-api-web.log
   - cat /opt/cocorico/log/api-web*
   - curl -X GET http://localhost:3000/user/me --insecure -v
