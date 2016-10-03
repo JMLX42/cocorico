@@ -58,9 +58,12 @@
     "babel-eslint": "^6.1.2",
     "eslint": "^3.6.0",
     "jest": "^16.0.0",
-    "superagent": "^2.3.0"
+    "promise": "^7.1.1",
+    "superagent": "^2.3.0",
+    "superagent-promise": "^1.1.0"
   },
   "jest": {
-    "setupTestFrameworkScriptFile": "test/index.js"
+    "setupTestFrameworkScriptFile": "test/index.js",
+    "verbose": true
   }
 }

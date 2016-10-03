@@ -1,7 +1,13 @@
-var request = require('superagent');
+var Promise = this.Promise || require('promise');
+var request = require('superagent-promise')(require('superagent'), Promise);
 
-it('/user/me should return 403 when not signed in', () => {
-  request.get('https://127.0.0.1/api/user/me').end((err, res) => {
-    expect(err.status).toBe(401);
+describe('/user/me', () => {
+  it('returns 401 when not signed in', () => {
+    return request
+      .get('https://127.0.0.1/api/user/me')
+      .then(
+        (res) => null,
+        (err) => expect(err.status).toBe(401)
+      );
   });
 });
