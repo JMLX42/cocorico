@@ -27,6 +27,7 @@
     "print-html-element": "0.3.4",
     "qr-image": "latest",
     "qrcode-reader": "0.2.2",
+    "raven-js": "^3.7.0",
     "react": "^0.14.6",
     "react-bootstrap": "^0.30.3",
     "react-chartjs-2": "^1.2.8",
