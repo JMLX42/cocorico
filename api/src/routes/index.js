@@ -30,10 +30,10 @@ exports = module.exports = function(app) {
       return next(err);
     }
     if (!user) {
-      // if the JWT authentification failed
+      // if the JWT authentication failed
       if (info) {
         return res.status(401).apiResponse({
-          error: 'authentification failed',
+          error: 'authentication failed',
           message: info.message,
         });
       }
