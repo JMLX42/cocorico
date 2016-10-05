@@ -29,6 +29,11 @@
 - name: link .env file
   file: src={{ project_dir }}/{{ role_name }}/.env dest={{ cocorico_api_dir }}/.env state=link
 
+- name: generate configuration
+  template: src=config.json.j2 dest={{ project_dir }}/{{ role_name }}/config.json
+  notify:
+    - restart cocorico-api-web service
+
 - name: create admin
   when: is_development_environment
   shell: headstone {{ cocorico_api_dir }}/scripts/add-admin.js
@@ -58,6 +63,12 @@
   changed_when: "'created' in result.stdout"
   failed_when: result.stderr
 
+- name: update configuration
+  template: src=config.json.j2 dest={{ project_dir }}/{{ role_name }}/config.json
+  when: create_api_test_app
+  notify:
+    - restart cocorico-api-web service
+
 - name: import pages
   shell: headstone {{ cocorico_api_dir }}/scripts/import-pages.js
     --cwd={{ cocorico_api_dir }}/src
@@ -67,11 +78,6 @@
   register: result
   failed_when: result.stderr
   changed_when: "'Updated page' in result.stdout"
-
-- name: generate app configuration
-  template: src=config.json.j2 dest={{ project_dir }}/{{ role_name }}/config.json
-  notify:
-    - restart cocorico-api-web service
 
 - name: link app configuration
   file: src={{ project_dir }}/{{ role_name }}/config.json dest={{ cocorico_api_dir }}/config.json state=link
