@@ -72,3 +72,8 @@ ethereum_rpc_public_url: "{{ http_protocol_prefix }}://{{ front_web_public_host 
 ethereum_datadir: "{{ project_dir }}/blockchain/data"
 ethereum_testrpc: no
 ethereum_mine_on_boot: yes
+
+test_app:
+  title: Test
+  url: https://www.meetup.com
+  secret: r6rxtuuwhdnb3qixltd7hbiu5wxtdfda

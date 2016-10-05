@@ -29,25 +29,32 @@
 - name: link .env file
   file: src={{ project_dir }}/{{ role_name }}/.env dest={{ cocorico_api_dir }}/.env state=link
 
-- name: generate app configuration
-  template: src=config.json.j2 dest={{ project_dir }}/{{ role_name }}/config.json
-  notify:
-    - restart cocorico-api-web service
-
-- name: link app configuration
-  file: src={{ project_dir }}/{{ role_name }}/config.json dest={{ cocorico_api_dir }}/config.json state=link
-
 - name: create admin
   when: is_development_environment
   shell: headstone {{ cocorico_api_dir }}/scripts/add-admin.js
     --cwd={{ cocorico_api_dir }}/src
     --userEmail={{ home_web_admin_email }}
     --userPassword={{ home_web_admin_password }}
-    --userName={{ home_web_admin_name }} --userIsAdmin=true
+    --userName={{ home_web_admin_name }}
+    --userIsAdmin=true
     --mongoUri=mongodb://{{ home_db_private_host }}/{{ mongodb_database_name }}
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: result
+  changed_when: "'created' in result.stdout"
+  failed_when: result.stderr
+
+- name: create test app
+  when: is_development_environment
+  shell: headstone {{ cocorico_api_dir }}/scripts/add-app.js
+    --cwd={{ cocorico_api_dir }}/src
+    --title={{ test_app.title }}
+    --secret={{ test_app.secret }}
+    --url={{ test_app.url }}
+    --mongoUri=mongodb://{{ home_db_private_host }}/{{ mongodb_database_name }}
+  args:
+    chdir: "{{ cocorico_api_dir }}"
+  register: create_api_test_app
   changed_when: "'created' in result.stdout"
   failed_when: result.stderr
 
@@ -60,6 +67,14 @@
   register: result
   failed_when: result.stderr
   changed_when: "'Updated page' in result.stdout"
+
+- name: generate app configuration
+  template: src=config.json.j2 dest={{ project_dir }}/{{ role_name }}/config.json
+  notify:
+    - restart cocorico-api-web service
+
+- name: link app configuration
+  file: src={{ project_dir }}/{{ role_name }}/config.json dest={{ cocorico_api_dir }}/config.json state=link
 
 - name: install upstart script
   template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
