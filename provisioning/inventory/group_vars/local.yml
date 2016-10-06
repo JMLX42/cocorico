@@ -75,5 +75,5 @@ ethereum_mine_on_boot: yes
 
 test_app:
   title: Test
-  url: https://www.meetup.com
+  url: https://localhost
   secret: r6rxtuuwhdnb3qixltd7hbiu5wxtdfda

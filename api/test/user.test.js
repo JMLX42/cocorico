@@ -1,70 +1,70 @@
 var config = require('/opt/cocorico/api-web/config.json');
 
-var Promise = this.Promise || require('promise');
 var request = require('superagent-promise')(require('superagent'), Promise);
 var jwt = require('jsonwebtoken');
 
-describe('/user/me', () => {
-  it('returns 401 when not signed in', () => {
-    return request
-      .get('https://127.0.0.1/api/user/me')
-      .then(
-        (res) => null,
-        (err) => expect(err.status).toBe(401)
-      );
+describe('/user/me', async () => {
+  it('returns 401 when not signed in', async () => {
+    try {
+      const res = await request.get('https://127.0.0.1/api/user/me');
+
+      expect(res).toBeFalsy();
+    } catch (err) {
+      expect(err.status).toBe(401);
+    }
   });
 
-  it('returns a 401 and an error message when the JWT secret/signature is not valid', () => {
+  it('returns a 401 and an error message when the JWT secret/signature is not valid', async () => {
     var token = jwt.sign({ foo: 'bar' }, 'foo');
 
-    return request
-      .get('https://127.0.0.1/api/user/me')
-      .set('Authorization', 'JWT ' + token)
-      .set('Cocorico-App-Id', config.testApp.id)
-      .then(
-        (res) => null,
-        (err) => {
-          expect(err.response.body.error).toBe('authentication failed');
-          expect(err.response.body.message).toBe('invalid signature');
-          expect(err.status).toBe(401);
-        }
-      );
+    try {
+      const res = await request
+        .get('https://127.0.0.1/api/user/me')
+        .set('Authorization', 'JWT ' + token)
+        .set('Cocorico-App-Id', config.testApp.id);
+
+      expect(res).toBeFalsy();
+    } catch (err) {
+      expect(err.response.body.error).toBe('authentication failed');
+      expect(err.response.body.message).toBe('invalid signature');
+      expect(err.status).toBe(401);
+    }
   });
 
-  it('returns a 401 and an error message when the app ID is missing', () => {
+  it('returns a 401 and an error message when the app ID is missing', async () => {
     var token = jwt.sign({ foo: 'bar' }, config.testApp.secret);
 
-    return request
-      .get('https://127.0.0.1/api/user/me')
-      .set('Authorization', 'JWT ' + token)
-      .then(
-        (res) => null,
-        (err) => {
-          expect(err.response.body.error).toBe('authentication failed');
-          expect(err.response.body.message).toBe('Missing Cocorico-App-Id header');
-          expect(err.status).toBe(401);
-        }
-      );
+    try {
+      const res = await request
+        .get('https://127.0.0.1/api/user/me')
+        .set('Authorization', 'JWT ' + token);
+
+      expect(res).toBeFalsy();
+    } catch (err) {
+      expect(err.response.body.error).toBe('authentication failed');
+      expect(err.response.body.message).toBe('Missing Cocorico-App-Id header');
+      expect(err.status).toBe(401);
+    }
   });
 
-  it('returns a 401 and an error message when the JWT issuer is not valid', () => {
+  it('returns a 401 and an error message when the JWT issuer is not valid', async () => {
     var token = jwt.sign({ foo: 'bar' }, config.testApp.secret);
 
-    return request
-      .get('https://127.0.0.1/api/user/me')
-      .set('Authorization', 'JWT ' + token)
-      .set('Cocorico-App-Id', config.testApp.id)
-      .then(
-        (res) => null,
-        (err) => {
-          expect(err.response.body.error).toBe('authentication failed');
-          expect(err.response.body.message).toBe('jwt issuer invalid. expected: ' + config.testApp.id);
-          expect(err.status).toBe(401);
-        }
-      );
+    try {
+      const res = await request
+        .get('https://127.0.0.1/api/user/me')
+        .set('Authorization', 'JWT ' + token)
+        .set('Cocorico-App-Id', config.testApp.id);
+
+      expect(res).toBeFalsy();
+    } catch (err) {
+      expect(err.response.body.error).toBe('authentication failed');
+      expect(err.response.body.message).toBe('jwt issuer invalid. expected: ' + config.testApp.id);
+      expect(err.status).toBe(401);
+    }
   });
 
-  it('returns a 401 and an error message when the JWT has no "sub" field', () => {
+  it('returns a 401 and an error message when the JWT has no "sub" field', async () => {
     var token = jwt.sign(
       {
         iss: config.testApp.id,
@@ -73,20 +73,20 @@ describe('/user/me', () => {
       config.testApp.secret
     );
 
-    return request
-      .get('https://127.0.0.1/api/user/me')
-      .set('Authorization', 'JWT ' + token)
-      .set('Cocorico-App-Id', config.testApp.id)
-      .then(
-        (res) => null,
-        (err) => {
-          expect(err.response.body.error).toBe('not authenticated');
-          expect(err.status).toBe(401);
-        }
-      );
+    try {
+      const res = await request
+        .get('https://127.0.0.1/api/user/me')
+        .set('Authorization', 'JWT ' + token)
+        .set('Cocorico-App-Id', config.testApp.id);
+
+      expect(res).toBeFalsy();
+    } catch (err) {
+      expect(err.response.body.error).toBe('not authenticated');
+      expect(err.status).toBe(401);
+    }
   });
 
-  it('returns 200 and the user object when the JWT is valid', () => {
+  it('returns 200 and the user object when the JWT is valid', async () => {
     var sub = '1234567890';
     var token = jwt.sign(
       {
@@ -97,20 +97,16 @@ describe('/user/me', () => {
       config.testApp.secret
     );
 
-    return request
+    const res = await request
       .get('https://127.0.0.1/api/user/me')
       .set('Authorization', 'JWT ' + token)
-      .set('Cocorico-App-Id', config.testApp.id)
-      .then(
-        (res) => {
-          expect(res.body.user.foo).toBe('bar');
-          expect(res.body.user.sub).toBe(config.testApp.id + ':' + sub);
-        },
-        (err) => null
-      );
+      .set('Cocorico-App-Id', config.testApp.id);
+
+    expect(res.body.user.foo).toBe('bar');
+    expect(res.body.user.sub).toBe(config.testApp.id + ':' + sub);
   });
 
-  it('returns 200 and the user object when the JWT has a valid expiration date', () => {
+  it('returns 200 and the user object when the JWT has a valid expiration date', async () => {
     var sub = '1234567890';
     var token = jwt.sign(
       {
@@ -122,20 +118,16 @@ describe('/user/me', () => {
       config.testApp.secret
     );
 
-    return request
+    const res = await request
       .get('https://127.0.0.1/api/user/me')
       .set('Authorization', 'JWT ' + token)
-      .set('Cocorico-App-Id', config.testApp.id)
-      .then(
-        (res) => {
-          expect(res.body.user.foo).toBe('bar');
-          expect(res.body.user.sub).toBe(config.testApp.id + ':' + sub);
-        },
-        (err) => null
-      );
+      .set('Cocorico-App-Id', config.testApp.id);
+
+    expect(res.body.user.foo).toBe('bar');
+    expect(res.body.user.sub).toBe(config.testApp.id + ':' + sub);
   });
 
-  it('returns 401 and an error message when the JWT has expired', () => {
+  it('returns 401 and an error message when the JWT has expired', async () => {
     var sub = '1234567890';
     var token = jwt.sign(
       {
@@ -147,17 +139,17 @@ describe('/user/me', () => {
       config.testApp.secret
     );
 
-    return request
-      .get('https://127.0.0.1/api/user/me')
-      .set('Authorization', 'JWT ' + token)
-      .set('Cocorico-App-Id', config.testApp.id)
-      .then(
-        (res) => null,
-        (err) => {
-          expect(err.response.body.error).toBe('authentication failed');
-          expect(err.response.body.message).toBe('jwt expired');
-          expect(err.status).toBe(401);
-        }
-      );
+    try {
+      const res = await request
+        .get('https://127.0.0.1/api/user/me')
+        .set('Authorization', 'JWT ' + token)
+        .set('Cocorico-App-Id', config.testApp.id);
+
+      expect(res).toBeFalsy();
+    } catch (err) {
+      expect(err.response.body.error).toBe('authentication failed');
+      expect(err.response.body.message).toBe('jwt expired');
+      expect(err.status).toBe(401);
+    }
   });
 });
