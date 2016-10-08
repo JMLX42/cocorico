@@ -51,6 +51,8 @@ exports = module.exports = function(app) {
    * @apiDefine app A registered 3rd party app providing a valid OAuth token fetched using `/oauth/token`.
    */
 
+  app.get('/ping', (req, res) => res.apiResponse('pong'));
+
   /**
    * @api {post} /oauth/token Get an OAuth access token
    * @apiName GetOAuthToken
