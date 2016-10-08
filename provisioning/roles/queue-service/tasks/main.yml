@@ -18,11 +18,11 @@
   template: src=rabbitmq.upstart.conf.j2 dest=/etc/init/rabbitmq-server.conf
 
 - name: disable old init rabbitmq scripts
-  shell: update-rc.d rabbitmq-server disable
+  shell: update-rc.d -f rabbitmq-server remove
   when: ansible_os_family == 'Debian'
 
 - name: start queue service
-  service: name=rabbitmq-server state=started
+  service: name=rabbitmq-server state=restarted
 
 - name: install queue admin
   command: rabbitmq-plugins enable rabbitmq_management

@@ -33,3 +33,5 @@ node_modules
 config.json
 .node*
 *.tmp
+
+dist

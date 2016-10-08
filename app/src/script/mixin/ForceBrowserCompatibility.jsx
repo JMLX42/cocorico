@@ -11,83 +11,83 @@ var RedirectLink = require('../component/RedirectLink');
 var ForceBrowserCompatibility = {
 
     // https://gist.github.com/alexey-bass/1115557
-    _compareVersion: function(left, right) {
-        if (typeof left + typeof right != 'stringstring')
-            return false;
+  _compareVersion: function(left, right) {
+    if (typeof left + typeof right !== 'stringstring')
+      return false;
 
-        var a = left.split('.')
-        ,   b = right.split('.')
-        ,   i = 0, len = Math.max(a.length, b.length);
+    var a = left.split('.')
+      , b = right.split('.')
+      , i = 0, len = Math.max(a.length, b.length);
 
-        for (; i < len; i++) {
-            if ((a[i] && !b[i] && parseInt(a[i]) > 0) || (parseInt(a[i]) > parseInt(b[i]))) {
-                return 1;
-            } else if ((b[i] && !a[i] && parseInt(b[i]) > 0) || (parseInt(a[i]) < parseInt(b[i]))) {
-                return -1;
-            }
-        }
+    for (; i < len; i++) {
+      if ((a[i] && !b[i] && parseInt(a[i]) > 0) || (parseInt(a[i]) > parseInt(b[i]))) {
+        return 1;
+      } else if ((b[i] && !a[i] && parseInt(b[i]) > 0) || (parseInt(a[i]) < parseInt(b[i]))) {
+        return -1;
+      }
+    }
 
-        return 0;
-    },
+    return 0;
+  },
 
-    renderUnsupportedWebBrowserDialog: function() {
-        var supported = ConfigStore.getConfig().supportedWebBrowsers;
-        var name = platform.name.toLowerCase();
+  renderUnsupportedWebBrowserDialog: function() {
+    var supported = ConfigStore.getConfig().supportedWebBrowsers;
+    var name = platform.name.toLowerCase();
 
-        return (
-            <ReactBootstrap.Grid>
-                <Hint style="danger">
-                    <h3>Ohoo... votre navigateur n'est pas compatible :(</h3>
-                    <p>
-                        Voter, c'est du sérieux ! <strong>Votre navigateur Web
-                        ({platform.name} {platform.version}) est trop
-                        ancien ou mal sécurisé et pourrait permettre à
-                        des gens mal intentionnés d'usurper
-                        votre identité ou de traffiquer vos bulletins de
-                        vote.</strong>
-                    </p>
-                    {name in supported && supported[name].updateLink
-                        ? <p>
-                            Vous pouvez&nbsp;
-                            <RedirectLink href={supported[name].updateLink}>
-                                mettre à jour votre navigateur Web
-                            </RedirectLink>
-                            &nbsp;ou installer et utiliser l'un des
-                            navigateurs Web suivants :
-                        </p>
-                        : <p>
-                            Vous pouvez installer et utiliser l'un des
-                            navigateurs Web suivants :
-                        </p>}
-                    <ul>
-                        {Object.keys(supported).map((key) => {
-                            if (!supported[key].installLink || key == name) {
-                                return;
-                            }
+    return (
+      <ReactBootstrap.Grid>
+        <Hint style="danger">
+          <h3>Ohoo... votre navigateur n'est pas compatible :(</h3>
+          <p>
+            Voter, c'est du sérieux ! <strong>Votre navigateur Web
+            ({platform.name} {platform.version}) est trop
+            ancien ou mal sécurisé et pourrait permettre à
+            des gens mal intentionnés d'usurper
+            votre identité ou de traffiquer vos bulletins de
+            vote.</strong>
+          </p>
+          {name in supported && supported[name].updateLink
+            ? <p>
+              Vous pouvez&nbsp;
+              <RedirectLink href={supported[name].updateLink}>
+                mettre à jour votre navigateur Web
+              </RedirectLink>
+              &nbsp;ou installer et utiliser l'un des
+              navigateurs Web suivants :
+            </p>
+            : <p>
+              Vous pouvez installer et utiliser l'un des
+              navigateurs Web suivants :
+            </p>}
+          <ul>
+            {Object.keys(supported).map((key) => {
+              if (!supported[key].installLink || key === name) {
+                return null;
+              }
 
-                            return (
-                                <li key={key}>
-                                    <RedirectLink href={supported[key].installLink}>
-                                        {supported[key].name}
-                                    </RedirectLink>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </Hint>
-            </ReactBootstrap.Grid>
-        );
-    },
+              return (
+                <li key={key}>
+                  <RedirectLink href={supported[key].installLink}>
+                    {supported[key].name}
+                  </RedirectLink>
+                </li>
+              );
+            })}
+          </ul>
+        </Hint>
+      </ReactBootstrap.Grid>
+    );
+  },
 
-    componentWillMount: function() {
-        var supported = ConfigStore.getConfig().supportedWebBrowsers;
-        var name = platform.name.toLowerCase();
+  componentWillMount: function() {
+    var supported = ConfigStore.getConfig().supportedWebBrowsers;
+    var name = platform.name.toLowerCase();
 
-        if (!(name in supported)
+    if (!(name in supported)
             || this._compareVersion(platform.version, supported[name].version) < 0) {
-            this.render = this.renderUnsupportedWebBrowserDialog;
-        }
-    },
+      this.render = this.renderUnsupportedWebBrowserDialog;
+    }
+  },
 
 };
 

@@ -16,8 +16,6 @@ module Vagrant
 
       Vagrant.define_singleton_method(:autoconfigure) do |inventory|
         Vagrant.configure('2') do |config|
-          AutoConfigure::write(inventory, "provisioning/generated/hosts.json")
-
           AutoConfigure::install_plugins([
             "vagrant-cachier",
             "vagrant-managed-servers",
@@ -25,11 +23,13 @@ module Vagrant
           ])
 
           inventory.each do |key, value|
-            value[:provider] = "virtualbox" if not value.key?(:provider)
-            value[:box] = "ubuntu/trusty64" if not value.key?(:box)
-            value[:memory] = 4096 if not value.key?(:memory)
-            value[:skip_tags] = [] if not value.key?(:skip_tags)
-            AutoConfigure::send("define_#{value[:provider]}", config, key.to_s, value)
+            if value.key?(:provider)
+              value[:provider] = "virtualbox" if not value.key?(:provider)
+              value[:box] = "ubuntu/trusty64" if not value.key?(:box)
+              value[:memory] = 4096 if not value.key?(:memory)
+              value[:skip_tags] = [] if not value.key?(:skip_tags)
+              AutoConfigure::send("define_#{value[:provider]}", config, key.to_s, value)
+            end
           end
         end
       end
@@ -241,6 +241,14 @@ module Vagrant
       File.open(filename, "w") do |f|
         f.write(JSON.pretty_generate(inventory))
       end
+    end
+
+    def self.symbolize_keys_deep!(h)
+        h.keys.each do |k|
+            ks    = k.to_sym
+            h[ks] = h.delete k
+            symbolize_keys_deep! h[ks] if h[ks].kind_of? Hash
+        end
     end
 
   end

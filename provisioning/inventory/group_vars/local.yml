@@ -7,7 +7,7 @@ http_protocol_prefix: https
 
 capabilities:
   user:
-    sign_in: yes
+    sign_in: no
   step:
     draft: yes
     review: yes

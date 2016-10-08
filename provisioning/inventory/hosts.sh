@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cat provisioning/generated/hosts.json
+cat /vagrant/hosts.json

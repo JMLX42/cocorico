@@ -6,4 +6,7 @@ provisioning/inventory/group_vars/prod.yml
 npm-debug*
 .node*
 provision.retry
-key
+key/*
+!key/cocorico.cc.enc
+.DS_Store
+node_modules

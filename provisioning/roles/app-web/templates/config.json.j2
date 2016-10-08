@@ -5,5 +5,9 @@
     "env": "production",
 {% endif %}
     "capabilities" : {{ capabilities | to_json }},
-    "supportedWebBrowsers": {{ supported_web_browsers | to_json }}
+    "supportedWebBrowsers": {{ supported_web_browsers | to_json }},
+    "supportedLocales": {{ supported_locales | to_json }}
+{% if sentry %}
+    , "sentry" : {{ sentry | to_json }}
+{% endif %}
 }

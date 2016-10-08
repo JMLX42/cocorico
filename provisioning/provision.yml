@@ -4,6 +4,7 @@
     - image
     - staging
     - prod
+    - travis
   gather_facts: yes
   roles:
     - { role: "common" }
@@ -12,5 +13,5 @@
     - { role: "api-db", tags: ["website", "database"] }
     - { role: "api-web", tags: ["website", "api"] }
     - { role: "queue-service", tags: ["blockchain", "database", "queue"] }
-    - { role: "blockchain", tags: ["blockchain", "database"] }
     - { role: "blockchain-worker", tags: ["blockchain", "worker"] }
+    - { role: "blockchain", tags: ["blockchain", "database"] }

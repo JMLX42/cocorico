@@ -3,9 +3,6 @@ var Reflux = require('reflux');
 var ReactIntl = require('react-intl');
 var ReactBootstrap = require('react-bootstrap');
 var ReactDocumentTitle = require('react-document-title');
-var jquery = require('jquery');
-
-var PropTypes = React.PropTypes;
 
 var StringHelper = require('../helper/StringHelper');
 
@@ -14,47 +11,47 @@ var VoteStore = require('../store/VoteStore');
 var VoteAction = require('../action/VoteAction');
 
 var Icon = require('../component/Icon'),
-    RedirectLink = require('../component/RedirectLink'),
-    SourceTab = require('../component/SourceTab'),
-    Icon = require('../component/Icon'),
-    VoteWidget = require('../component/VoteWidget');
+  RedirectLink = require('../component/RedirectLink'),
+  SourceTab = require('../component/SourceTab'),
+  Icon = require('../component/Icon'),
+  VoteWidget = require('../component/VoteWidget');
 
 var ProxyMixin = require('../mixin/ProxyMixin');
 
 var Grid = ReactBootstrap.Grid,
-    Row = ReactBootstrap.Row,
-    Col = ReactBootstrap.Col,
-    Button = ReactBootstrap.Button;
+  Row = ReactBootstrap.Row,
+  Col = ReactBootstrap.Col,
+  Button = ReactBootstrap.Button;
 
 var VotePage = React.createClass({
 
-    mixins: [
-        ReactIntl.IntlMixin,
-        ProxyMixin,
-        Reflux.connect(VoteStore, 'votes')
-    ],
+  mixins: [
+    ReactIntl.IntlMixin,
+    ProxyMixin,
+    Reflux.connect(VoteStore, 'votes'),
+  ],
 
-    componentWillUnmount: function() {
-    },
+  componentWillUnmount: function() {
+  },
 
-    componentWillMount: function() {
-        VoteAction.showPage(this.props.params.slug);
-    },
+  componentWillMount: function() {
+    VoteAction.showPage(this.props.params.slug);
+  },
 
-    getInitialState: function() {
-        return {
-            showVoteWidget: false
-        };
-    },
+  getInitialState: function() {
+    return {
+      showVoteWidget: false,
+    };
+  },
 
-    render: function() {
-        var vote = this.state.votes.getBySlug(this.props.params.slug);
+  render: function() {
+    var vote = this.state.votes.getBySlug(this.props.params.slug);
 
-        if (!vote) {
-            return null;
-        }
+    if (!vote) {
+      return null;
+    }
 
-        return (
+    return (
             <ReactDocumentTitle title={StringHelper.toTitleCase(vote.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
                 <div>
                     {this.state.showVoteWidget
@@ -78,7 +75,7 @@ var VotePage = React.createClass({
                                 </small>
                                 <p>
                                     {vote.description}
-                                    {vote.description[-1] != '.' ? '...' : null}
+                                    {vote.description[-1] !== '.' ? '...' : null}
                                     &nbsp;
                                     <RedirectLink href={vote.url}>
                                         Lire la suite
@@ -127,7 +124,7 @@ var VotePage = React.createClass({
                 </div>
             </ReactDocumentTitle>
         );
-    }
+  },
 
 });
 
