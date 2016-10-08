@@ -1,13 +1,17 @@
+var config = require('/opt/cocorico/api-web/config.json');
+
 var keystone = require('keystone');
 var passport = require('passport');
 
-var config = require('/opt/cocorico/api-web/config.json');
+var log = require('bunyan').createLogger({name: 'api-web'});
 
 var importRoutes = keystone.importer(__dirname);
 
 var routes = {
   api: importRoutes('./api'),
 };
+
+log.info('imported routes');
 
 function isAuthenticated(req, res, next) {
   if (!req.isAuthenticated() || !req.user.sub)
@@ -18,25 +22,31 @@ function isAuthenticated(req, res, next) {
 // Setup Route Bindings
 exports = module.exports = function(app) {
 
+  log.info('initialize passport');
   app.use(passport.initialize());
   app.use(passport.session());
+  log.info('initialized passport');
 
   var excludes = config.env !== 'development'
     ? ['req', 'res', 'res-headers', 'req-headers']
     : [];
   app.use(require('express-bunyan-logger')({
+    name: 'api-web',
     format: ':remote-address :incoming :method :url HTTP/:http-version :status-code :referer :user-agent[family] :user-agent[major].:user-agent[minor] :user-agent[os] :response-time ms',
     excludes: excludes,
   }));
   app.use(require('express-bunyan-logger').errorLogger({
+    name: 'api-web',
     format: ':remote-address :incoming :method :url HTTP/:http-version :status-code :referer :user-agent[family] :user-agent[major].:user-agent[minor] :user-agent[os] :response-time ms',
     excludes: excludes,
   }));
 
+  log.info('setup keystone middleware');
   app.use(keystone.middleware.api);
 
   // JWT authentication does not use sessions, so we have to check for a user
   // without throwing an error if there is none.
+  log.info('setup JWT authentication middleware');
   app.use((req, res, next) => passport.authenticate('jwt', (err, user, info) => {
     if (err) {
       return next(err);
@@ -54,6 +64,8 @@ exports = module.exports = function(app) {
 
     return req.logIn(user, { session: false }, next);
   })(req, res, next));
+
+  log.info('setup routes');
 
   /**
    * @apiDefine user A user that has been properly logged in using any of the `/auth` endpoints.

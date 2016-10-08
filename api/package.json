@@ -8,6 +8,7 @@
     "babel-cli": "^6.14.0",
     "babel-preset-es2015": "^6.14.0",
     "bcrypt": "0.8.5",
+    "bunyan": "^1.8.1",
     "client-sessions": "0.7.0",
     "ethereumjs-tx": "^1.1.1",
     "ethereumjs-util": "^4.0.1",
