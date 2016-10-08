@@ -70,7 +70,7 @@ ethereum_rpc_private_host: 127.0.0.1
 ethereum_rpc_private_port: 8545
 ethereum_rpc_public_url: "{{ http_protocol_prefix }}://{{ front_web_public_host }}/blockchain/"
 ethereum_datadir: "{{ project_dir }}/blockchain/data"
-ethereum_testrpc: "{{ provider == travis }}"
+ethereum_testrpc: "{{ provider == 'travis' }}"
 ethereum_mine_on_boot: yes
 ethereum_testrpc_account: 0xfb14a6a918e93910c3fed95c81af5aa631f905f9a1605e65888a0e2ad7b312f7
 
