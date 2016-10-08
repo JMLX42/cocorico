@@ -1,8 +1,12 @@
+var config = require('/opt/cocorico/api-web/config.json');
+
 var request = require('superagent-promise')(require('superagent'), Promise);
 var delay = require('timeout-as-promise');
 
 var getAccessToken = require('./getAccessToken');
 var getAPIURL = require('./getAPIURL');
+
+const url = 'https://www.meetup.com';
 
 describe('/vote/:voteId', () => {
   it('returns 404 and an empty response when :voteId is invalid', async () => {
@@ -49,7 +53,7 @@ describe('POST /vote', () => {
       const res = await request
         .post(getAPIURL('/vote'))
         .set('Authorization', 'Bearer ' + accesToken)
-        .send({'url': 'https://127.0.0.1/about'});
+        .send({'url': 'http://localhost'});
 
       expect(res).toBeFalsy();
     } catch (err) {
@@ -62,9 +66,18 @@ describe('POST /vote', () => {
     const res = await request
       .post(getAPIURL('/vote'))
       .set('Authorization', 'Bearer ' + accesToken)
-      .send({'url': 'https://localhost/about'});
+      .send({'url': url});
 
     expect(res.status).toBe(200);
+    expect(res.body.vote).not.toBeFalsy();
+    expect(res.body.vote.createdAt).not.toBeFalsy();
+    expect(res.body.vote.updatedAt).not.toBeFalsy();
+    expect(res.body.vote.numBallots).toBe(0);
+    expect(res.body.vote.numValidBallots).toBe(0);
+    expect(res.body.vote.numInvalidBallots).toBe(0);
+    expect(res.body.vote.app).toBe(config.testApp.id);
+    expect(res.body.vote.url).toBe(url);
+    expect(res.body.vote.status).toBe('initializing');
   });
 
   it('has a valid smart contract address and ABI', async () => {
@@ -86,7 +99,7 @@ describe('POST /vote', () => {
       const res = await request
         .post(getAPIURL('/vote'))
         .set('Authorization', 'Bearer ' + accesToken)
-        .send({'url': 'https://localhost/about'});
+        .send({'url': url});
 
       expect(res).toBeFalsy();
     } catch (err) {
