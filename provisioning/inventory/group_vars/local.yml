@@ -72,6 +72,7 @@ ethereum_rpc_public_url: "{{ http_protocol_prefix }}://{{ front_web_public_host 
 ethereum_datadir: "{{ project_dir }}/blockchain/data"
 ethereum_testrpc: no
 ethereum_mine_on_boot: yes
+ethereum_testrpc_account: 0xfb14a6a918e93910c3fed95c81af5aa631f905f9a1605e65888a0e2ad7b312f7
 
 test_app:
   title: Test
