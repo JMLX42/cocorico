@@ -159,7 +159,7 @@ Vote.schema.pre('validate', function(next) {
         },
         (err, meta) => {
           if (err) {
-            callback(err);
+            callback(new Error(err));
             return;
           }
 
