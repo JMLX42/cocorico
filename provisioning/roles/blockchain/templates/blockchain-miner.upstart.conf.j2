@@ -18,10 +18,11 @@ end script
 
 script
 {% if is_development_environment and ethereum_testrpc %}
+    PRIVATE_KEY=0x$(cat $(find /opt/cocorico/blockchain/data/keystore/ -type f) | jq ".crypto.mac" -r)
     BALANCE=$(cat /opt/cocorico/blockchain/genesis_block.json | jq -r '.alloc[.alloc | keys[0]].balance')
 
     exec testrpc \
-        --account="{{ ethereum_testrpc_account }},${BALANCE}" \
+        --account="${PRIVATE_KEY},${BALANCE}" \
         --unlock 0 \
         --port {{ ethereum_rpc_private_port }} \
         --blocktime 1 \
