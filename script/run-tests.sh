@@ -25,12 +25,9 @@ pushd api
 npm install && npm run build && npm test
 API_RC=$?
 if [[ $API_RC != 0 ]] && [[ $VERBOSE != 0 ]]; then
-    cat /opt/cocorico/log/api-web.log | json -gi
-    cat /opt/cocorico/log/api-web.error.log | json -gi
-    cat /opt/cocorico/log/blockchain-worker-vote.log | json -gi
-    cat /opt/cocorico/log/blockchain-worker-vote.error.log | json -gi
-    cat /opt/cocorico/log/blockchain-worker-ballot.log | json -gi
-    cat /opt/cocorico/log/blockchain-worker-ballot.error.log | json -gi
+    cat /opt/cocorico/log/api-web.forever.log
+    cat /opt/cocorico/log/blockchain-worker-vote.forever.log
+    cat /opt/cocorico/log/blockchain-worker-ballot.forever.log
     cat /opt/cocorico/log/blockchain.log
 fi
 popd
