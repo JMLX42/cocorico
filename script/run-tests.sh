@@ -7,10 +7,10 @@ pushd api
 npm install && npm run build && npm test
 $API_RC=$?
 if [[ $API_RC != 0 ]]; then
-    cat /opt/cocorico/log/api-web.forever.log
+    cat /opt/cocorico/log/api-web.forever.log | json -gi
     cat /opt/cocorico/log/blockchain.log
-    cat /opt/cocorico/log/blockchain-worker-vote.forever.log
-    cat /opt/cocorico/log/blockchain-worker-ballot.forever.log
+    cat /opt/cocorico/log/blockchain-worker-vote.forever.log | json -gi
+    cat /opt/cocorico/log/blockchain-worker-ballot.forever.log | json -gi
 fi
 popd
 
