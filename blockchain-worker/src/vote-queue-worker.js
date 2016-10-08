@@ -50,8 +50,8 @@ function mineVoteContract(next) {
         (err, accounts) => callback(err, accounts, compiled)
       ),
       (accounts, compiled, callback) => {
-        var code = compiled.Vote.code;
-        var abi = compiled.Vote.info.abiDefinition;
+        var code = compiled.code;
+        var abi = compiled.info.abiDefinition;
 
         log.info(
           { address: accounts[0] },
@@ -91,8 +91,8 @@ function mineVoteContract(next) {
         );
       },
     ],
-        next
-    );
+    next
+  );
 }
 
 function handleVote(voteMsg, callback) {
@@ -106,6 +106,13 @@ function handleVote(voteMsg, callback) {
       .exec((findErr, vote) => {
         if (findErr) {
           callback(findErr, null);
+          return;
+        }
+
+        // FIXME: should not fail silently
+        if (!vote) {
+          log.error('unable to find/update Vote object');
+          callback(null, null);
           return;
         }
 

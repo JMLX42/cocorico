@@ -1,4 +1,5 @@
 var request = require('superagent-promise')(require('superagent'), Promise);
+var delay = require('timeout-as-promise');
 
 var getAccessToken = require('./getAccessToken');
 
@@ -66,13 +67,24 @@ describe('POST /vote', () => {
 
   it('returns 200 and a vote object when the URL is valid', async () => {
     const accesToken = await getAccessToken();
-
     const res = await request
       .post('https://localhost/api/vote')
       .set('Authorization', 'Bearer ' + accesToken)
       .send({'url': 'https://localhost/about'});
 
     expect(res.status).toBe(200);
+  });
+
+  it('has a valid smart contract address and ABI', async () => {
+    await delay(5000);
+
+    const voteId = await request
+      .get('https://localhost/api/vote')
+      .then((res) => res.body.votes[res.body.votes.length - 1].id);
+    const res = await request.get('https://local.cocorico.cc/api/vote/' + voteId);
+
+    expect(res.body.vote.voteContractABI).not.toBeFalsy();
+    expect(res.body.vote.voteContractAddress).not.toBeFalsy();
   });
 
   it('returns 400 when a vote with the same URL exists', async () => {
@@ -86,8 +98,51 @@ describe('POST /vote', () => {
 
       expect(res).toBeFalsy();
     } catch (err) {
-      // console.log(err);
       expect(err.status).toBe(400);
     }
+  });
+});
+
+describe('PUT /vote/:voteId', () => {
+  it('returns 200 and a modified vote object when we edit the title', async () => {
+    const accesToken = await getAccessToken();
+    const voteId = await request
+      .get('https://localhost/api/vote')
+      .then((res) => res.body.votes[res.body.votes.length - 1].id);
+    const res = await request
+      .put('https://localhost/api/vote/' + voteId)
+      .set('Authorization', 'Bearer ' + accesToken)
+      .send({'title': 'edited title'});
+
+    expect(res.status).toBe(200);
+    expect(res.body.vote.title).toBe('edited title');
+  });
+
+  it('returns 200 and a modified vote object when we edit the description', async () => {
+    const accesToken = await getAccessToken();
+    const voteId = await request
+      .get('https://localhost/api/vote')
+      .then((res) => res.body.votes[res.body.votes.length - 1].id);
+    const res = await request
+      .put('https://localhost/api/vote/' + voteId)
+      .set('Authorization', 'Bearer ' + accesToken)
+      .send({'description': 'edited description'});
+
+    expect(res.status).toBe(200);
+    expect(res.body.vote.description).toBe('edited description');
+  });
+
+  it('returns 200 and a modified vote object when we edit the image', async () => {
+    const accesToken = await getAccessToken();
+    const voteId = await request
+      .get('https://localhost/api/vote')
+      .then((res) => res.body.votes[res.body.votes.length - 1].id);
+    const res = await request
+      .put('https://localhost/api/vote/' + voteId)
+      .set('Authorization', 'Bearer ' + accesToken)
+      .send({'image': 'https://localhost/img.jpg'});
+
+    expect(res.status).toBe(200);
+    expect(res.body.vote.image).toBe('https://localhost/img.jpg');
   });
 });

@@ -2,6 +2,8 @@ var config = require('/opt/cocorico/api-web/config.json');
 
 var childProcess = require('child_process');
 
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000; // 10 second timeout
+
 if (config.env === 'development') {
   // Allow self-signed SSL certificates.
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';

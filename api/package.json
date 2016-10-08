@@ -49,8 +49,12 @@
     "npm": ">=1.3.14"
   },
   "babel": {
-    "presets": ["es2015"],
-    "plugins": ["transform-async-to-generator"]
+    "presets": [
+      "es2015"
+    ],
+    "plugins": [
+      "transform-async-to-generator"
+    ]
   },
   "scripts": {
     "build": "rm -rf dist ; babel src --out-dir dist --source-maps inline",
@@ -67,7 +71,8 @@
     "jest": "^16.0.0",
     "promise": "^7.1.1",
     "superagent": "^2.3.0",
-    "superagent-promise": "^1.1.0"
+    "superagent-promise": "^1.1.0",
+    "timeout-as-promise": "^1.0.0"
   },
   "jest": {
     "setupTestFrameworkScriptFile": "test/index.js",
