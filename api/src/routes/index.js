@@ -21,6 +21,18 @@ exports = module.exports = function(app) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  var excludes = config.env !== 'development'
+    ? ['req', 'res', 'res-headers', 'req-headers']
+    : [];
+  app.use(require('express-bunyan-logger')({
+    format: ':remote-address :incoming :method :url HTTP/:http-version :status-code :referer :user-agent[family] :user-agent[major].:user-agent[minor] :user-agent[os] :response-time ms',
+    excludes: excludes,
+  }));
+  app.use(require('express-bunyan-logger').errorLogger({
+    format: ':remote-address :incoming :method :url HTTP/:http-version :status-code :referer :user-agent[family] :user-agent[major].:user-agent[minor] :user-agent[os] :response-time ms',
+    excludes: excludes,
+  }));
+
   app.use(keystone.middleware.api);
 
   // JWT authentication does not use sessions, so we have to check for a user
