@@ -91,7 +91,7 @@ exports.create = function(req, res) {
         if (err.code) {
           res.status(err.code);
         }
-        return res.apiResponse(err);
+        return res.apiResponse({error : err});
       }
       return res.apiResponse({vote: vote});
     }
