@@ -3,10 +3,12 @@ var config = require('/opt/cocorico/api-web/config.json');
 var request = require('superagent-promise')(require('superagent'), Promise);
 var jwt = require('jsonwebtoken');
 
+var getAPIURL = require('./getAPIURL');
+
 describe('/user/me', async () => {
   it('returns 401 when not signed in', async () => {
     try {
-      const res = await request.get('https://127.0.0.1/api/user/me');
+      const res = await request.get(getAPIURL('/user/me'));
 
       expect(res).toBeFalsy();
     } catch (err) {
@@ -19,7 +21,7 @@ describe('/user/me', async () => {
 
     try {
       const res = await request
-        .get('https://127.0.0.1/api/user/me')
+        .get(getAPIURL('/user/me'))
         .set('Authorization', 'JWT ' + token)
         .set('Cocorico-App-Id', config.testApp.id);
 
@@ -36,7 +38,7 @@ describe('/user/me', async () => {
 
     try {
       const res = await request
-        .get('https://127.0.0.1/api/user/me')
+        .get(getAPIURL('/user/me'))
         .set('Authorization', 'JWT ' + token);
 
       expect(res).toBeFalsy();
@@ -52,7 +54,7 @@ describe('/user/me', async () => {
 
     try {
       const res = await request
-        .get('https://127.0.0.1/api/user/me')
+        .get(getAPIURL('/user/me'))
         .set('Authorization', 'JWT ' + token)
         .set('Cocorico-App-Id', config.testApp.id);
 
@@ -75,7 +77,7 @@ describe('/user/me', async () => {
 
     try {
       const res = await request
-        .get('https://127.0.0.1/api/user/me')
+        .get(getAPIURL('/user/me'))
         .set('Authorization', 'JWT ' + token)
         .set('Cocorico-App-Id', config.testApp.id);
 
@@ -98,7 +100,7 @@ describe('/user/me', async () => {
     );
 
     const res = await request
-      .get('https://127.0.0.1/api/user/me')
+      .get(getAPIURL('/user/me'))
       .set('Authorization', 'JWT ' + token)
       .set('Cocorico-App-Id', config.testApp.id);
 
@@ -119,7 +121,7 @@ describe('/user/me', async () => {
     );
 
     const res = await request
-      .get('https://127.0.0.1/api/user/me')
+      .get(getAPIURL('/user/me'))
       .set('Authorization', 'JWT ' + token)
       .set('Cocorico-App-Id', config.testApp.id);
 
@@ -141,7 +143,7 @@ describe('/user/me', async () => {
 
     try {
       const res = await request
-        .get('https://127.0.0.1/api/user/me')
+        .get(getAPIURL('/user/me'))
         .set('Authorization', 'JWT ' + token)
         .set('Cocorico-App-Id', config.testApp.id);
 

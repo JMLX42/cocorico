@@ -2,12 +2,14 @@ var config = require('/opt/cocorico/api-web/config.json');
 
 var request = require('superagent-promise')(require('superagent'), Promise);
 
+var getAPIURL = require('./getAPIURL');
+
 describe('/oauth/token', async () => {
   it('returns 401 when appId or secret is invalid', async () => {
 
     try {
       const res = await request
-        .post('https://127.0.0.1/api/oauth/token')
+        .post(getAPIURL('/oauth/token'))
         .send({'grant_type': 'client_credentials'})
         .set('Authorization', 'Basic ' + new Buffer('424242424242424242424242:foo').toString('base64'));
 
@@ -20,7 +22,7 @@ describe('/oauth/token', async () => {
   it('returns 500 when appId is not a valid MongoDB ObjectID', async () => {
     try {
       const res = await request
-        .post('https://127.0.0.1/api/oauth/token')
+        .post(getAPIURL('/oauth/token'))
         .send({'grant_type': 'client_credentials'})
         .set('Authorization', 'Basic ' + new Buffer('foo:bar').toString('base64'));
 
@@ -35,7 +37,7 @@ describe('/oauth/token', async () => {
     var appSecret = config.testApp.secret;
 
     const res = await request
-      .post('https://127.0.0.1/api/oauth/token')
+      .post(getAPIURL('/oauth/token'))
       .send({'grant_type': 'client_credentials'})
       .set('Authorization', 'Basic ' + new Buffer(appId + ':' + appSecret).toString('base64'));
 
@@ -47,7 +49,7 @@ describe('/oauth/token', async () => {
     var appSecret = config.testApp.secret;
 
     const res = await request
-      .post('https://127.0.0.1/api/oauth/token')
+      .post(getAPIURL('/oauth/token'))
       .send({'grant_type': 'client_credentials'})
       .set('Authorization', 'Basic ' + new Buffer(appId + ':' + appSecret).toString('base64'));
 
