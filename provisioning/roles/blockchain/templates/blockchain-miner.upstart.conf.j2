@@ -26,6 +26,7 @@ script
         --unlock 0 \
         --port {{ ethereum_rpc_private_port }} \
         --blocktime 1 \
+        --gasLimit {{ ethereum_genesis_gas_limit }} \
         >>{{ log_dir }}/blockchain.log 2>&1
 {% else %}
     exec geth \
