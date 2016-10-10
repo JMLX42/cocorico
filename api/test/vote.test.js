@@ -81,7 +81,7 @@ describe('POST /vote', () => {
   });
 
   it('has a valid smart contract address and ABI', async () => {
-    await delay(8000);
+    await delay(10000);
 
     const voteId = await request
       .get(getAPIURL('/vote'))

@@ -25,6 +25,48 @@ describe('POST /ballot/:voteId', () => {
     expect(res.body.ballot.status).toBe('queued');
     expect(res.body.proof).not.toBeFalsy();
   });
+
+  it('returns 403 and an error message when the user already voted', async () => {
+    const vote = await getVote(true);
+    const tx = await getBallotTransaction(vote, 0)
+
+    try {
+      const res = await request
+        .post(getAPIURL('/ballot/' + vote.id))
+        .set('Authorization', 'JWT ' + getUserJWT())
+        .set('Cocorico-App-Id', config.testApp.id)
+        .send({'transaction': tx});
+
+      expect(res).toBeFalsy();
+    } catch (err) {
+      expect(err.status).toBe(403);
+      expect(err.response.body.error).toBe('user already voted');
+    }
+  });
+
+  // it('returns 200 and a complete ballot', async () => {
+  //   try {
+  //     const vote = await getVote(true);
+  //     const tx = await getBallotTransaction(vote, 0)
+  //     const user = getUserJWT();
+  //
+  //     await request
+  //       .post(getAPIURL('/ballot/' + vote.id))
+  //       .set('Authorization', 'JWT ' + user)
+  //       .set('Cocorico-App-Id', config.testApp.id)
+  //       .send({'transaction': tx});
+  //     await delay(10000);
+  //
+  //     const res = await request
+  //       .get(getAPIURL('/ballot/' + vote.id))
+  //       .set('Authorization', 'JWT ' + user)
+  //       .set('Cocorico-App-Id', config.testApp.id);
+  //
+  //   } catch (e) {
+  //
+  //     console.log(e.response.body);
+  //   }
+  // });
 });
 
 describe('GET /ballot/:voteId', () => {
