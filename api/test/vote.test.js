@@ -85,8 +85,8 @@ describe('POST /vote', () => {
 
     const voteId = await request
       .get(getAPIURL('/vote'))
-      .then((res) => res.body.votes[res.body.votes.length - 1].id);
-    const res = await request.get(getAPIURL('/vote/') + voteId);
+      .then((res) => res.body.votes.slice(-1)[0].id);
+    const res = await request.get(getAPIURL('/vote/'+ voteId));
 
     expect(res.body.vote.voteContractABI).not.toBeFalsy();
     expect(res.body.vote.voteContractAddress).not.toBeFalsy();

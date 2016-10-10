@@ -2,12 +2,22 @@ var config = require('/opt/cocorico/api-web/config.json');
 
 var childProcess = require('child_process');
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000; // 10 second timeout
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000; // 20 second timeout
 
 if (config.env === 'development') {
   // Allow self-signed SSL certificates.
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
+
+// Naive window.crypto polyfill. Required by eth-lightwallet.
+window.crypto = {
+  getRandomValues: function(array) {
+    var v = require('crypto').randomBytes(array.length);
+    for (var i = 0; i < array.length; i++) {
+      array[i] = v[i];
+    }
+  },
+};
 
 function dumpDatabase() {
   childProcess.execSync(

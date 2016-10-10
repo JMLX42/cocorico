@@ -70,6 +70,7 @@
     "babel-plugin-transform-async-to-generator": "^6.16.0",
     "babel-polyfill": "^6.16.0",
     "eslint": "^3.6.0",
+    "eth-lightwallet": "^2.5.2",
     "jest": "^16.0.0",
     "promise": "^7.1.1",
     "superagent": "^2.3.0",
