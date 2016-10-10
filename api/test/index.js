@@ -33,17 +33,32 @@ function restoreDatabase() {
   );
 }
 
+function restartBlockchainMiner() {
+  childProcess.execSync(
+    'rabbitmqctl stop_app ; rabbitmqctl reset ; rabbitmqctl start_app',
+    {stdio:'ignore'}
+  );
+  childProcess.execSync(
+    'service cocorico-blockchain-miner restart',
+    {stdio:'ignore'}
+  );
+}
+
 function exitHandler(err) {
   if (err) {
     console.log(err.stack);
   }
 
   restoreDatabase();
+  restartBlockchainMiner();
   process.exit();
 }
 
 beforeAll(dumpDatabase);
-afterAll(restoreDatabase);
+afterAll(() => {
+  restoreDatabase();
+  restartBlockchainMiner();
+});
 
 //catches ctrl+c event
 process.on('SIGINT', exitHandler);
