@@ -37,6 +37,39 @@
   copy: src=.htpasswd dest=/etc/apache2/.htpasswd
   when: environment_name == 'staging'
 
+- name: create the certbot install dir
+  file: path={{ certbot_dir }} state=directory
+  when: certbot_enabled
+
+- name: install certbot
+  get_url:
+    url: https://dl.eff.org/certbot-auto
+    dest: "{{ certbot_dir }}"
+    mode: a+x
+  when:
+    - certbot_enabled
+    - http_protocol_prefix == 'https'
+
+- stat: path=/etc/letsencrypt/live/{{ front_web_public_host }}/cert.pem
+  register: letsencrypt_ssl_certificate
+  when: certbot_enabled
+
+- name: install letsencrypt SSL certificates
+  shell: "{{ certbot_dir }}/certbot-auto certonly --standalone --noninteractive --text --agree-tos --email {{ certbot_email }} --domains {{ front_web_public_host }}"
+  when:
+    - certbot_enabled
+    - not letsencrypt_ssl_certificate.stat.exists
+
+- name: create cron job to renew letsencrypt certificates
+  cron:
+    name: "renew letsencrypt certificates"
+    state: "{{ certbot_renew | ternary('present', 'absent') }}"
+    special_time: daily
+    job: "{{ certbot_dir }}/certbot-auto renew --quiet --no-self-upgrade"
+  when:
+    - certbot_enabled
+    - http_protocol_prefix == 'https'
+
 - name: install site configuration
   template: src={{ project_name }}-{{ role_name }}.conf.j2 dest=/etc/apache2/sites-available/{{ project_name }}-{{ role_name }}.conf
   notify:
@@ -61,22 +94,6 @@
 - name: create include directory
   file: path=/etc/apache2/sites-available/{{ project_name}}-{{ role_name }}-include state=directory
 
-# - name: copy ca certificate
-#   copy: src={{ item }} dest=/etc/apache2/ssl/{{ item }}
-#   with_items:
-#     - GandiStandardSSLCA2.pem
-#   notify:
-#     - restart apache2 service
-
-# - name: copy ssl certificate
-#   copy: src={{ item }} dest=/etc/apache2/ssl/{{ item }}
-#   when: not is_development_environment
-#   with_items:
-#     - "{{ front_hostname }}.crt"
-#     - "{{ front_hostname }}.key"
-#   notify:
-#     - restart apache2 service
-
 - name: create self-signed certificate
   shell: openssl req -new -nodes -x509 -subj "/C=FR/ST=IdF/L=Paris/O=IT/CN={{ front_web_public_host }}" -days 3650 -keyout /etc/apache2/ssl/{{ front_hostname }}.key -out /etc/apache2/ssl/{{ front_hostname }}.crt -extensions v3_ca
   args:
@@ -86,26 +103,6 @@
     - http_protocol_prefix == 'https'
   notify:
     - restart apache2 service
-
-- name: install certbot
-  get_url:
-    url: https://dl.eff.org/certbot-auto
-    dest: /opt/certbot
-  when:
-    - http_protocol_prefix == 'https'
-    - environment_name == 'prod'
-
-- name: make certbot executable
-  file: path=/opt/certbot/certbot-auto mode=a+x
-  when:
-    - http_protocol_prefix == 'https'
-    - environment_name == 'prod'
-
-- name: create cron job to renew letsencrypt certificates
-  cron: name="renew letsencrypt certificates" state=present special_time=daily job="/opt/certbot/certbot-auto renew --quiet --no-self-upgrade"
-  when:
-    - http_protocol_prefix == 'https'
-    - environment_name == 'prod'
 
 - name: remove unused sites
   file: path=/etc/apache2/sites-available/{{ item }} state=absent
