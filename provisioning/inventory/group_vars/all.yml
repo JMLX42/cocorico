@@ -45,3 +45,8 @@ nodejs_version: 4.*
 sentry:
   public_key: b4f860a54da0436eab32838de28d6514
   project_id: 103204
+
+certbot_enabled: yes
+certbot_dir: /opt/cerbot
+certbot_email: contact@cocorico.cc
+certbot_renew: yes

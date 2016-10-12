@@ -18,14 +18,6 @@
 
 {% if http_protocol_prefix == 'https' %}
 <VirtualHost *:443>
-{% if environment_name == 'local' %}
-   SSLEngine               On
-   SSLCertificateFile      /etc/apache2/ssl/{{ front_web_public_host }}.crt
-   SSLCertificateKeyFile   /etc/apache2/ssl/{{ front_web_public_host }}.key
-   SSLVerifyClient         None
-   SSLHonorCipherOrder     On
-   SSLCipherSuite          ALL:!ADH:!EXP:!LOW:!RC2:!3DES:!SEED:!RC4:+HIGH:+MEDIUM
-{% endif %}
 {% if environment_name == 'staging' %}
     <Proxy *>
         Options +FollowSymLinks +Multiviews +Indexes
@@ -38,7 +30,15 @@
         Require ip {{ ip_white_list | join(' ') }}
     </Proxy>
 {% endif %}
-{% if environment_name == 'prod' %}
+{% if environment_name == 'local' %}
+    SSLEngine               On
+    SSLCertificateFile      /etc/apache2/ssl/{{ front_web_public_host }}.crt
+    SSLCertificateKeyFile   /etc/apache2/ssl/{{ front_web_public_host }}.key
+    SSLVerifyClient         None
+    SSLHonorCipherOrder     On
+    SSLCipherSuite          ALL:!ADH:!EXP:!LOW:!RC2:!3DES:!SEED:!RC4:+HIGH:+MEDIUM
+{% endif %}
+{% if certbot_enabled %}
     SSLCertificateFile /etc/letsencrypt/live/{{ front_web_public_host }}/cert.pem
     SSLCertificateKeyFile /etc/letsencrypt/live/{{ front_web_public_host }}/privkey.pem
     Include /etc/letsencrypt/options-ssl-apache.conf
