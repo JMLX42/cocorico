@@ -18,11 +18,17 @@ end script
 
 script
     exec geth \
-        --maxpeers 0 \
+{% if ethereum_max_peers is defined and ethereum_max_peers %}
+        --maxpeers {{ ethereum_max_peers }} \
+{% endif %}
+{% if ethereum_no_discover is defined and ethereum_no_discover %}
         --nodiscover \
+{% endif %}
         --rpc \
         --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" \
+{% if ethereum_network_id is defined and ethereum_network_id %}
         --networkid "{{ ethereum_network_id }}" \
+{% endif %}
         --unlock 0 \
         --password {{ project_dir }}/{{ role_name }}/password \
         --datadir {{ ethereum_datadir }} \

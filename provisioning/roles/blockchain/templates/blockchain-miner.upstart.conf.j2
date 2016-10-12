@@ -24,14 +24,26 @@ script
     exec testrpc --account="${PRIVATE_KEY},${BALANCE}" --port {{ ethereum_rpc_private_port }}
 {% else %}
     exec geth \
-        --maxpeers 0 \
+{% if ethereum_max_peers is defined and ethereum_max_peers %}
+        --maxpeers {{ ethereum_max_peers }} \
+{% endif %}
+{% if ethereum_no_discover is defined and ethereum_no_discover %}
         --nodiscover \
+{% endif %}
         --rpc \
         --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" \
         --mine \
-        --minerthreads 1 \
+{% if ethereum_miner_threads is defined and ethereum_miner_threads %}
+        --minerthreads {{ ethereum_miner_threads }} \
+{% else %}
+        --minerthreads 1
+{% endif %}
+{% if ethereum_etherbase_address is defined and ethereum_etherbase_address %}
         --etherbase {{ ethereum_etherbase_address }} \
+{% endif %}
+{% if ethereum_network_id is defined and ethereum_network_id %}
         --networkid "{{ ethereum_network_id }}" \
+{% endif %}
         --unlock 0 \
         --password {{ project_dir }}/{{ role_name }}/password \
         --datadir {{ ethereum_datadir }} \
