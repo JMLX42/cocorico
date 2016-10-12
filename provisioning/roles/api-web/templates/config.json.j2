@@ -13,7 +13,7 @@
     "blockchain" : {
         "httpProvider" : "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}"
     }
-{% if franceconnect_client_id and franceconnect_client_secret %}
+{% if franceconnect_client_id is defined and franceconnect_client_secret is defined %}
     , "franceConnect" : {
         "URL": "{{ franceconnect_url }}/",
         "openIDConnectStrategyParameters": {
@@ -34,14 +34,14 @@
         }
     }
 {% endif %}
-{% if facebook_client_id and facebook_client_secret %}
+{% if facebook_client_id is defined and facebook_client_id %}
     , "facebook" : {
         "clientID" : "{{ facebook_client_id }}",
         "clientSecret" : "{{ facebook_client_secret }}",
         "callbackURL" : "http://{{ front_web_public_host }}/api/auth/facebook/callback"
     }
 {% endif %}
-{% if google_client_id and google_client_secret %}
+{% if google_client_id is defined and google_client_id %}
     , "google" : {
         "clientID" : "{{ google_client_id }}",
         "clientSecret" : "{{ google_client_secret }}",
