@@ -28,6 +28,19 @@ var Router = ReactRouter.Router,
 var messages = require('./intl/locale.js').getCurrentLocaleMessages();
 
 function main() {
+  // window.Intl polyfill
+  // https://github.com/andyearnshaw/Intl.js/issues/118#issuecomment-120123392
+  if (!window.Intl) {
+    require.ensure(['intl'], (require) => {
+      window.Intl = require('intl');
+      run();
+    }, 'IntlPolyfillBundle');
+  } else {
+    run();
+  }
+}
+
+function run() {
   browserHistory.listen((location, action) => {
     RouteAction.change(browserHistory, location, action);
   });
