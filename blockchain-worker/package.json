@@ -16,8 +16,8 @@
     "npm": ">=1.3.14"
   },
   "scripts": {
-      "vote": "service cocorico-blockchain-worker-vote stop ; nodemon -w src -d 5 ./src/vote-queue-worker.js",
-      "ballot": "service cocorico-blockchain-worker-ballot stop ; nodemon -w src -d 5 ./src/ballot-queue-worker.js",
+      "vote": "service cocorico-blockchain-worker-vote stop ; nodemon -w src -d 5 ./src/vote.js",
+      "ballot": "service cocorico-blockchain-worker-ballot stop ; nodemon -w src -d 5 ./src/ballot.js",
       "test": "eslint ."
   },
   "devDependencies": {

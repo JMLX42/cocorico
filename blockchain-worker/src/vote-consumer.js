@@ -5,8 +5,9 @@ var Web3 = require('web3');
 var fs = require('fs');
 var md5 = require('md5');
 var bunyan = require('bunyan');
+var cluster = require('cluster');
 
-var log = bunyan.createLogger({name: 'vote-queue-worker'});
+var log = bunyan.createLogger({name: 'vote-consumer-' + cluster.worker.id});
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
@@ -31,7 +32,7 @@ function getCompiledVoteContract(web3, callback) {
       );
     }
 
-    callback(error, compiled);
+    callback(error, !!compiled.Vote ? compiled.Vote : compiled);
   });
 }
 

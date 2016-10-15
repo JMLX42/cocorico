@@ -118,6 +118,7 @@ module Vagrant
 
         config.vm.provider :virtualbox do |vbox, override|
           vbox.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root", "1"]
+          vbox.customize ["setextradata", :id, "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled", "0"]
           vbox.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 10000]
           vbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
           vbox.customize ["modifyvm", :id, "--natdnsproxy1", "on"]

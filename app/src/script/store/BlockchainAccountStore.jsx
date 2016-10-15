@@ -105,8 +105,6 @@ module.exports = Reflux.createStore({
         + ' with private key ' + ks.exportPrivateKey(address, pwDerivedKey)
       );
 
-      this._voterCard[voteId] = this._generateVoterCard(ks);
-
       this.trigger(this);
     });
   },

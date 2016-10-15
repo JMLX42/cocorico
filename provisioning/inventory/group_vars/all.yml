@@ -41,3 +41,10 @@ supported_locales:
 
 nodejs_nodesource_repository: https://deb.nodesource.com/node_4.x
 nodejs_version: 4.*
+
+sentry:
+  public_key: b4f860a54da0436eab32838de28d6514
+  project_id: 103204
+
+ballot_consumer_count: 8
+vote_consumer_count: 8
