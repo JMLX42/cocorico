@@ -5,8 +5,9 @@ var EthereumTx = require('ethereumjs-tx');
 var EthereumUtil = require('ethereumjs-util');
 var Web3 = require('web3');
 var bunyan = require('bunyan');
+var cluster = require('cluster');
 
-var log = bunyan.createLogger({name: 'ballot-queue-worker'});
+var log = bunyan.createLogger({name: 'ballot-consumer-' + cluster.worker.id});
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
@@ -344,74 +345,79 @@ function ballotError(ballot, msg, callback) {
     });
 }
 
-require('amqplib/callback_api').connect(
+module.exports.run = function() {
+  log.info('connecting');
+
+  require('amqplib/callback_api').connect(
     'amqp://localhost',
-    function(err, conn) {
+    (err, conn) => {
       if (err != null) {
         log.error({error: err}, 'error');
-      } else {
+        process.exit(1);
+      }
 
-        log.info('connecting');
+      log.info('connected');
 
-        conn.createChannel(function(channelErr, ch) {
-          if (channelErr != null) {
-            log.error({error: channelErr}, 'error');
-          } else {
-            log.info('connected');
+      conn.createChannel((channelErr, ch) => {
+        if (channelErr != null) {
+          log.error({error: channelErr}, 'error');
+          process.exit(1);
+        }
 
-            ch.assertQueue('ballots');
-            ch.consume(
-              'ballots',
-              function(msg) {
-                var msgObj = JSON.parse(msg.content.toString());
+        ch.assertQueue('ballots');
+        ch.consume(
+          'ballots',
+          (msg) => {
+            var msgObj = JSON.parse(msg.content.toString());
 
-                if (!!msgObj.lastTriedAt && Date.now() / 1000 - msgObj.lastTriedAt < 1) {
-                  return ch.nack(msg);
-                }
+            if (!!msgObj.lastTriedAt && Date.now() / 1000 - msgObj.lastTriedAt < 1) {
+              ch.nack(msg);
+              return;
+            }
 
-                if (!msgObj.ballot) {
-                  log.info('invalid ballot message received');
-                  return ch.ack(msg);
-                }
+            if (!msgObj.ballot) {
+              log.info('invalid ballot message received');
+              ch.ack(msg);
+              return
+            }
 
-                log.info(
-                  {
-                    ballot : {
-                      transaction: msgObj.ballot.transaction,
-                      voteContractAddress: msgObj.ballot.voteContractAddress,
-                      voteContractABI: msgObj.ballot.voteContractABI,
-                    },
-                  },
-                  'ballot received'
-                );
+            log.info(
+              {
+                ballot : {
+                  transaction: msgObj.ballot.transaction,
+                  voteContractAddress: msgObj.ballot.voteContractAddress,
+                  voteContractABI: msgObj.ballot.voteContractABI,
+                },
+              },
+              'ballot received'
+            );
 
-                return handleBallot(msgObj.ballot, (ballotErr, ballot) => {
-                  if (ballotErr) {
-                    log.error({error: ballotErr}, 'error');
+            handleBallot(msgObj.ballot, (ballotErr, ballot) => {
+              if (ballotErr) {
+                log.error({error: ballotErr}, 'error');
 
-                    msgObj.lastTriedAt = Date.now() / 1000;
+                msgObj.lastTriedAt = Date.now() / 1000;
 
-                    return ballotError(msgObj.ballot, ballotErr, () => {
-                      if (ballotErr.noRetry) {
-                        ch.ack(msg);
-                        return;
-                      }
-
-                      ch.sendToQueue(
-                        'ballots',
-                        new Buffer(JSON.stringify(msgObj)),
-                        { persistent : true }
-                      );
-                      ch.ack(msg);
-                    });
+                ballotError(msgObj.ballot, ballotErr, () => {
+                  if (ballotErr.noRetry) {
+                    ch.ack(msg);
+                    return;
                   }
 
-                  return ch.ack(msg);
+                  ch.sendToQueue(
+                    'ballots',
+                    new Buffer(JSON.stringify(msgObj)),
+                    { persistent : true }
+                  );
+                  ch.ack(msg);
                 });
               }
-            );
+
+              ch.ack(msg);
+            });
           }
-        });
-      }
+        );
+      });
     }
-);
+  );
+}
