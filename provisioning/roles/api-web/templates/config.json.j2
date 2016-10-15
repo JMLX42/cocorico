@@ -8,6 +8,8 @@
     "mongo" : {
       "uri" : "mongodb://{{ home_db_private_host }}/{{ mongodb_database_name }}"
     },
+    "ballotConsumerCount": {{ ballot_consumer_count }},
+    "voteConsumerCount": {{ vote_consumer_count }},
     "uploadDir" : "{{ home_web_upload_dir }}",
     "capabilities" : {{ capabilities | to_json }},
     "blockchain" : {
