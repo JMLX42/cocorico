@@ -315,7 +315,10 @@ function updateBallotStatus(ballot, status, callback) {
         return callback(err, null);
 
       if (!dbBallot) {
-        return callback('unknown ballot with id ' + ballot.id, null);
+        return callback(
+          noRetryError({error:'unknown ballot with id ' + ballot.id}),
+          null
+        );
       }
 
       dbBallot.status = status;

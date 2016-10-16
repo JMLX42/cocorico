@@ -7,6 +7,8 @@ var config = require('/opt/cocorico/api-web/config.json');
 var keystone = require('keystone');
 var srs = require('secure-random-string');
 
+var log = require('bunyan').createLogger({name: 'api-web'});
+
 keystone.init({
 
   'name': 'cocorico',
@@ -27,6 +29,8 @@ keystone.init({
   'auth': true,
   'user model': 'Admin',
   'cookie secret': srs(64),
+
+  'logger': false,
 });
 
 keystone.import('models');
@@ -46,3 +50,4 @@ keystone.set('nav', {
 });
 
 keystone.start();
+log.info('started');

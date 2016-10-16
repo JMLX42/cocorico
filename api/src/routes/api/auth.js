@@ -186,6 +186,7 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
 // secretOrKey is not really important since we will set it dynamically according
 // to the "Cocorico-App-Id" HTTP header. But it still has to be != false.
 opts.secretOrKey = 'secret';
+opts.ignoreExpiration = false;
 
 // JwtStrategy reads the JWT secret from the option object above. But
 // we need the secret to be the one set for the corresponding App.

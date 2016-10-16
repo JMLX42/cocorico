@@ -35,3 +35,4 @@ config.json
 *.tmp
 
 dist
+jest

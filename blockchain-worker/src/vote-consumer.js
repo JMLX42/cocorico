@@ -92,8 +92,8 @@ function mineVoteContract(next) {
         );
       },
     ],
-        next
-    );
+    next
+  );
 }
 
 function handleVote(voteMsg, callback) {
@@ -110,6 +110,13 @@ function handleVote(voteMsg, callback) {
           return;
         }
 
+        // FIXME: should not fail silently
+        if (!vote) {
+          log.error('unable to find/update Vote object');
+          callback(null, null);
+          return;
+        }
+
         vote.status = 'open';
         vote.voteContractABI = JSON.stringify(abi);
         vote.voteContractAddress = contract.address;
@@ -119,45 +126,47 @@ function handleVote(voteMsg, callback) {
   });
 }
 
-require('amqplib/callback_api').connect(
-    'amqp://localhost',
-    function(err, conn) {
-      if (err != null) {
-        log.error({error: err}, 'error');
-        return;
-      }
-
-      log.info('connecting');
-
-      conn.createChannel(function(channelErr, ch) {
-        if (channelErr != null) {
-          log.error({error: channelErr}, 'error');
+module.exports.run = function() {
+  require('amqplib/callback_api').connect(
+      'amqp://localhost',
+      (err, conn) => {
+        if (err != null) {
+          log.error({error: err}, 'error');
           return;
         }
 
-        log.info('connected');
+        log.info('connecting');
 
-        ch.assertQueue('votes');
-        ch.consume(
-          'votes',
-          (msg) =>{
-            if (msg !== null) {
-              var obj = JSON.parse(msg.content.toString());
+        conn.createChannel((channelErr, ch) => {
+          if (channelErr != null) {
+            log.error({error: channelErr}, 'error');
+            return;
+          }
 
-              log.info({ vote: obj }, 'vote received');
+          log.info('connected');
 
-              if (obj.vote) {
-                handleVote(obj.vote, (voteErr, vote) => {
-                  if (!!voteErr) {
-                    log.error({error: voteErr}, 'error');
-                    return ch.nack(msg);
-                  }
+          ch.assertQueue('votes');
+          ch.consume(
+            'votes',
+            (msg) =>{
+              if (msg !== null) {
+                var obj = JSON.parse(msg.content.toString());
 
-                  return ch.ack(msg);
-                });
+                log.info({ vote: obj }, 'vote received');
+
+                if (obj.vote) {
+                  handleVote(obj.vote, (voteErr, vote) => {
+                    if (!!voteErr) {
+                      log.error({error: voteErr}, 'error');
+                      return ch.nack(msg);
+                    }
+
+                    return ch.ack(msg);
+                  });
+                }
               }
-            }
-          });
-      });
-    }
-);
+            });
+        });
+      }
+  );
+}

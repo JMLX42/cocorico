@@ -1,4 +1,5 @@
 #!/usr/bin/env headstone
+
 var async = require('async');
 var keystone = require('keystone');
 var fs = require('fs');
