@@ -48,3 +48,8 @@ sentry:
 
 ballot_consumer_count: 8
 vote_consumer_count: 8
+
+certbot_enabled: yes
+certbot_dir: /opt/cerbot
+certbot_email: contact@cocorico.cc
+certbot_renew: yes
