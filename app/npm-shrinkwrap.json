@@ -1932,6 +1932,11 @@
         }
       }
     },
+    "intl": {
+      "version": "1.2.5",
+      "from": "intl@latest",
+      "resolved": "https://registry.npmjs.org/intl/-/intl-1.2.5.tgz"
+    },
     "jquery": {
       "version": "2.1.4",
       "from": "https://registry.npmjs.org/jquery/-/jquery-2.1.4.tgz",
@@ -2095,12 +2100,12 @@
     },
     "raven-js": {
       "version": "3.7.0",
-      "from": "raven-js@latest",
+      "from": "https://registry.npmjs.org/raven-js/-/raven-js-3.7.0.tgz",
       "resolved": "https://registry.npmjs.org/raven-js/-/raven-js-3.7.0.tgz",
       "dependencies": {
         "json-stringify-safe": {
           "version": "5.0.1",
-          "from": "json-stringify-safe@>=5.0.1 <6.0.0",
+          "from": "https://registry.npmjs.org/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz",
           "resolved": "https://registry.npmjs.org/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz"
         }
       }
@@ -2829,35 +2834,6 @@
               "resolved": "https://registry.npmjs.org/autolinker/-/autolinker-0.15.3.tgz"
             }
           }
-        }
-      }
-    },
-    "react-responsive": {
-      "version": "1.1.5",
-      "from": "https://registry.npmjs.org/react-responsive/-/react-responsive-1.1.5.tgz",
-      "resolved": "https://registry.npmjs.org/react-responsive/-/react-responsive-1.1.5.tgz",
-      "dependencies": {
-        "hyphenate-style-name": {
-          "version": "1.0.1",
-          "from": "https://registry.npmjs.org/hyphenate-style-name/-/hyphenate-style-name-1.0.1.tgz",
-          "resolved": "https://registry.npmjs.org/hyphenate-style-name/-/hyphenate-style-name-1.0.1.tgz"
-        },
-        "matchmedia": {
-          "version": "0.1.2",
-          "from": "https://registry.npmjs.org/matchmedia/-/matchmedia-0.1.2.tgz",
-          "resolved": "https://registry.npmjs.org/matchmedia/-/matchmedia-0.1.2.tgz",
-          "dependencies": {
-            "css-mediaquery": {
-              "version": "0.1.2",
-              "from": "https://registry.npmjs.org/css-mediaquery/-/css-mediaquery-0.1.2.tgz",
-              "resolved": "https://registry.npmjs.org/css-mediaquery/-/css-mediaquery-0.1.2.tgz"
-            }
-          }
-        },
-        "object-assign": {
-          "version": "4.1.0",
-          "from": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.0.tgz",
-          "resolved": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.0.tgz"
         }
       }
     },
