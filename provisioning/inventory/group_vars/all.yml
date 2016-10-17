@@ -47,7 +47,7 @@ sentry:
   project_id: 103204
 
 ballot_consumer_count: 8
-vote_consumer_count: 8
+vote_consumer_count: 2
 
 certbot_enabled: yes
 certbot_dir: /opt/cerbot
