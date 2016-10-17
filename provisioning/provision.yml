@@ -15,3 +15,4 @@
     - { role: "queue-service", tags: ["blockchain", "database", "queue"] }
     - { role: "blockchain-worker", tags: ["blockchain", "worker"] }
     - { role: "blockchain", tags: ["blockchain", "database"] }
+    - { role: "webhook" }

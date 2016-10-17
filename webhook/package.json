@@ -1,0 +1,22 @@
+{
+  "name": "cocorico-webhook",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "amqplib": "^0.4.2",
+    "bunyan": "1.8.0",
+    "superagent": "^2.2.0",
+    "superagent-no-cache": "^0.1.0"
+  },
+  "scripts": {
+      "start": "service cocorico-webhook stop ; nodemon -w src -d 5 ./index.js",
+      "test": "eslint ."
+  },
+  "devDependencies": {
+    "babel-eslint": "^6.1.2",
+    "eslint": "^3.6.0"
+  }
+}

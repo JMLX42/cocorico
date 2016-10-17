@@ -13,3 +13,7 @@ popd
 pushd blockchain-worker
 npm install && npm test
 popd
+
+pushd webhook
+npm install && npm test
+popd
