@@ -48,9 +48,6 @@
     # FIXME: only for legit embed pages
     Header set x-frame-options ALLOWALL
 
-    # Including all additional rewrite rule configurations set by roles.
-    IncludeOptional /etc/apache2/sites-available/cocorico-front-web-include/*.conf
-
     # Compression
     AddOutputFilterByType DEFLATE text/plain
     AddOutputFilterByType DEFLATE text/html
@@ -69,6 +66,9 @@
         Header unset ETag
         FileETag none
     </FilesMatch>
+
+    # Including all additional rewrite rule configurations set by roles.
+    IncludeOptional /etc/apache2/sites-available/cocorico-front-web-include/*.conf
 
 </VirtualHost>
 {% endif %}
