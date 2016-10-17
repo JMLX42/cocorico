@@ -8,7 +8,6 @@ if python -mplatform | grep Ubuntu; then
 	/etc/init.d/php5-fpm start
 	/etc/init.d/postfix start
 	/etc/init.d/rabbitmq-server start
-	/etc/init.d/redis-server start
 	/etc/init.d/cocorico-api-web start
 {% if capabilities.bill.vote == "blockchain" %}
     /etc/init.d/cocorico-blockchain start
