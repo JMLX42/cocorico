@@ -48,9 +48,6 @@
     # FIXME: only for legit embed pages
     Header set x-frame-options ALLOWALL
 
-    # Including all additional rewrite rule configurations set by roles.
-    IncludeOptional /etc/apache2/sites-available/cocorico-front-web-include/*.conf
-
     # Compression
     AddOutputFilterByType DEFLATE text/plain
     AddOutputFilterByType DEFLATE text/html
@@ -63,10 +60,15 @@
     AddOutputFilterByType DEFLATE application/x-javascript
 
     # Cache control
-    <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|css|html)$">
+    <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|js|css|swf|data|mem|scene|html)$">
         Header unset Cache-Control
         Header set Cache-Control "max-age=290304000, public"
+        Header unset ETag
+        FileETag none
     </FilesMatch>
+
+    # Including all additional rewrite rule configurations set by roles.
+    IncludeOptional /etc/apache2/sites-available/cocorico-front-web-include/*.conf
 
 </VirtualHost>
 {% endif %}

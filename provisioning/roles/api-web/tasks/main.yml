@@ -66,9 +66,6 @@
   notify:
     - restart cocorico-api-web service
 
-- name: install redis server
-  apt: name=redis-server state=present
-
 - name: install site configuration
   template: src={{ role_name }}.apache.conf.j2 dest=/etc/apache2/sites-available/cocorico-front-web-include/{{ project_name }}-{{ role_name }}.conf
   notify:

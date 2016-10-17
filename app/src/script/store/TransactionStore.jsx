@@ -5,8 +5,6 @@ var BallotAction = require('../action/BallotAction');
 
 module.exports = Reflux.createStore({
   init: function() {
-    jquery.ajaxSetup({ cache: false });
-
     this.listenTo(BallotAction.getTransactions, this._fetchByVoteId);
     this.listenTo(BallotAction.searchTransactions, this._fetchByVoteId);
 

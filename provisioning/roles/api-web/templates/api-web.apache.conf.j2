@@ -6,6 +6,11 @@ ProxyPreserveHost   On
 <LocationMatch "/api/">
     ProxyPass           http://127.0.0.1:3000/ retry=0
     ProxyPassReverse    http://127.0.0.1:3000/
+
+    # Remove cache on our API calls
+    Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
 </LocationMatch>
 
 <LocationMatch "/admin">

@@ -1,0 +1,53 @@
+#!/usr/bin/env sh
+
+FILEPATH=/etc/iptables.rules
+
+if [ "$1" = "save" ]; then
+    /sbin/iptables-save > $FILEPATH
+    echo "Firewall rules saved to $FILEPATH..."
+    iptables -L
+    exit
+fi
+
+if [ "$1" = "restore" ]; then
+    /sbin/iptables-restore &lt; $FILEPATH
+    echo "Firewall rules restored from $FILEPATH..."
+    iptables -L
+    exit
+fi
+
+if [ "$1" = "status" ]; then
+    iptables -L
+    exit
+fi
+
+# Flush all existing rules
+iptables -P INPUT ACCEPT
+iptables -F
+
+if [ "$1" = "stop" ]; then
+    echo "Firewall disabled."
+    iptables -L
+    exit
+fi
+
+# Set default policy to DROP
+iptables -P INPUT DROP
+
+# Accept all connections from loopback interface
+iptables -A INPUT -i lo -j ACCEPT
+
+# Accept all traffic from existing connections
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# ICMP (ping)
+iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+
+# SSH
+iptables -A INPUT -p tcp --dport ssh -j ACCEPT
+
+# HTTP
+iptables -A INPUT -p tcp --dport {{ http_protocol_prefix }} -j ACCEPT
+
+# Show current rules
+iptables -L
