@@ -64,7 +64,7 @@
     name: "remove old ethash DAG files"
     state: present
     special_time: daily
-    job: "ls -1t /root/.ethash/* | sed -e '1,2d' | xargs -d '\n' rm"
+    job: "ls -1t /root/.ethash/* | sed -e '1,2d' | xargs rm"
 
 - name: start the ethereum blockchain service
   service: name=cocorico-blockchain state=started
