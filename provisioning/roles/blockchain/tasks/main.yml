@@ -59,6 +59,13 @@
 - name: install miner upstart script
   template: src=blockchain-miner.upstart.conf.j2 dest=/etc/init/cocorico-blockchain-miner.conf
 
+- name: setup cron job to remove old ethash DAG files
+  cron:
+    name: "remove old ethash DAG files"
+    state: present
+    special_time: daily
+    job: "ls -1t /root/.ethash/* | sed -e '1,2d' | xargs -d '\n' rm"
+
 - name: start the ethereum blockchain service
   service: name=cocorico-blockchain state=started
   when: not ethereum_mine_on_boot
