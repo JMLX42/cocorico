@@ -8,8 +8,6 @@ var BallotAction = require('../action/BallotAction');
 
 module.exports = Reflux.createStore({
   init: function() {
-    jquery.ajaxSetup({ cache: false });
-
     this.listenTo(BallotAction.send, this._vote);
     // this.listenTo(BallotAction.cancel, this._unvote);
     this.listenTo(BallotAction.startPolling, this._startPollingBallot);

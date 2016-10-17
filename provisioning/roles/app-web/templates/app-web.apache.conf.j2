@@ -1,6 +1,9 @@
 <Directory "{{ www_dir }}">
     Options FollowSymLinks
 
+    Header set Cache-Control "public, must-revalidate"
+    Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+
     RewriteEngine On
     RewriteBase /
 

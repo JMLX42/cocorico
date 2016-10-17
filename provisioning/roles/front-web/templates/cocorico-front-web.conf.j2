@@ -63,9 +63,11 @@
     AddOutputFilterByType DEFLATE application/x-javascript
 
     # Cache control
-    <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|css|html)$">
+    <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|js|css|swf|data|mem|scene|html)$">
         Header unset Cache-Control
         Header set Cache-Control "max-age=290304000, public"
+        Header unset ETag
+        FileETag none
     </FilesMatch>
 
 </VirtualHost>
