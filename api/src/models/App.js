@@ -12,6 +12,7 @@ App.add({
   title: { type: String, required: true, initial: true },
   secret: { type: Types.Key, required: true, default: () => srs(32).toLowerCase() },
   validURLs: { type: Types.TextArray },
+  webhookURL: { type: Types.Text },
 });
 
 App.relationship({ path: 'votes', ref: 'Vote', refPath: 'app' });

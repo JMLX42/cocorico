@@ -117,6 +117,8 @@ exports.vote = function(req, res) {
         {
           id: ballot.id,
           app: vote.app,
+          vote: {id: vote.id},
+          user: {sub: req.user.sub},
           transaction: req.body.transaction,
           voteContractAddress: vote.voteContractAddress,
           voteContractABI: JSON.parse(vote.voteContractABI),
