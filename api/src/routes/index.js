@@ -99,6 +99,7 @@ exports = module.exports = function(app) {
    *
    * @apiHeader {String} Authorization The OAuth access token fetched with `/oauth/token`.
    *
+   * @apiParam (POST) {Boolean} url The URL of the original vote content page.
    * @apiParam (POST) {Boolean} restricted (Optionnal) Restrict the vote to
    * the users provided by the app. Default value is `false`.
    * @apiParam (POST) {String[]} labels (Optionnal) The vote proposal labels.

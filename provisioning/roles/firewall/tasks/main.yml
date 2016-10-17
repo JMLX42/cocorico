@@ -1,0 +1,14 @@
+---
+- set_fact: role_name=firewall
+
+- name: Create /etc/init.d/local/ directory
+  file: path=/etc/init.d/local/ state=directory
+
+- name: Generate and install firewall script
+  template: src=firewall.j2 dest=/etc/init.d/local/firewall mode=744
+
+- name: Generate and install Upstart script
+  template: src=firewall.upstart.conf.j2 dest=/etc/init/firewall.conf
+
+- name: Start firewall
+  service: name=firewall state=restarted

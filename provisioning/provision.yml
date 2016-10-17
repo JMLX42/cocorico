@@ -15,3 +15,8 @@
     - { role: "queue-service", tags: ["blockchain", "database", "queue"] }
     - { role: "blockchain-worker", tags: ["blockchain", "worker"] }
     - { role: "blockchain", tags: ["blockchain", "database"] }
+
+    # Firewall must be set-up last so as to not interfere with any other
+    # provisionings. For example, provisionning of RabbitMQ may needsto access
+    # its admin web interface.
+    - { role: "firewall" }

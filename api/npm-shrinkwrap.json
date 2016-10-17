@@ -10823,23 +10823,6 @@
         }
       }
     },
-    "redis": {
-      "version": "2.4.2",
-      "from": "redis@2.4.2",
-      "resolved": "https://registry.npmjs.org/redis/-/redis-2.4.2.tgz",
-      "dependencies": {
-        "double-ended-queue": {
-          "version": "2.1.0-0",
-          "from": "double-ended-queue@>=2.1.0-0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz"
-        },
-        "redis-commands": {
-          "version": "1.2.0",
-          "from": "redis-commands@>=1.0.1 <2.0.0",
-          "resolved": "https://registry.npmjs.org/redis-commands/-/redis-commands-1.2.0.tgz"
-        }
-      }
-    },
     "request": {
       "version": "2.75.0",
       "from": "request@>=2.60.0 <3.0.0",
