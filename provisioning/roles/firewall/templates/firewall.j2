@@ -46,8 +46,9 @@ iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 # SSH
 iptables -A INPUT -p tcp --dport ssh -j ACCEPT
 
-# HTTP
-iptables -A INPUT -p tcp --dport {{ http_protocol_prefix }} -j ACCEPT
+# HTTP(S)
+iptables -A INPUT -p tcp --dport http -j ACCEPT
+iptables -A INPUT -p tcp --dport https -j ACCEPT
 
 # Show current rules
 iptables -L
