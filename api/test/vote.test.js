@@ -6,7 +6,7 @@ var delay = require('timeout-as-promise');
 var getAccessToken = require('./getAccessToken');
 var getAPIURL = require('./getAPIURL');
 
-const url = 'https://www.meetup.com';
+const url = 'https://localhost/';
 
 describe('/vote/:voteId', () => {
   it('returns 404 and an empty response when :voteId is invalid', async () => {
@@ -78,6 +78,7 @@ describe('POST /vote', () => {
     expect(res.body.vote.app).toBe(config.testApp.id);
     expect(res.body.vote.url).toBe(url);
     expect(res.body.vote.status).toBe('initializing');
+    expect(res.body.vote.secret).toBeFalsy();
   });
 
   it('has a valid smart contract address and ABI', async () => {

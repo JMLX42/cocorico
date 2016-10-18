@@ -17,7 +17,7 @@ async function createVote(url) {
   const accesToken = await getAccessToken();
 
   if (!url) {
-    url = 'https://www.meetup.com';
+    url = 'https://localhost/';
   }
 
   return request
@@ -32,7 +32,8 @@ export default async function(waitForSmartContract, url) {
     const v = await createVote();
     await delay(10000);
 
-    return request.get(getAPIURL('/vote/' + v.id))
+    return request
+      .get(getAPIURL('/vote/' + v.id))
       .then((res) => res.body.vote);
   } else {
     return createVote(url);
