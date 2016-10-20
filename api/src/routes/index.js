@@ -110,6 +110,9 @@ exports = module.exports = function(app) {
    * @apiParam (POST) {String} description (Optionnal) The description of the
    * vote. If missing, the value is read from the vote's URL `og:description` OpenGraph
    * tag.
+   * @apiParam (POST) {String[]} labels (Optionnal) The ballot value labels.
+   * @apiParam (POST) {String} question (Optionnal) The question that will be asked
+   * to the voter.
    *
    * @apiExample {curl} cURL example:
    *     curl -X POST

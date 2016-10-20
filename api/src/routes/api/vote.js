@@ -82,6 +82,7 @@ exports.create = function(req, res) {
           url: url,
           restricted: req.body.restricted === 'true',
           labels: labels,
+          question: req.body.question,
           title: req.body.title,
           description: req.body.description,
           image: req.body.image,

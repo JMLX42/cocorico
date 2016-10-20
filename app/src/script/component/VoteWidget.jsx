@@ -428,6 +428,9 @@ var VoteWidget = React.createClass({
         <Row>
           <Col xs={12}>
             <div className="vote-step-description">
+              {!!vote.question
+                ? <p>{vote.question}</p>
+                : null}
               <div className="vote-step-actions">
               {!!vote.labels && vote.labels.length !== 0
                 ? <VoteRadioButtons vote={vote} onVote={this.voteHandler}/>

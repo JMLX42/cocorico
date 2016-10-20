@@ -37,6 +37,7 @@ Vote.add({
   voteContractABI: { type: Types.Text, noedit: true },
   restricted: { type: Types.Boolean, default: false },
   labels: { type: Types.TextArray },
+  question: { type: Types.Text },
   salt: { type: Types.Text, noedit: true, default: () => bcrypt.genSaltSync(10) },
   key: { type: Types.Key, noedit: true, default: () => srs(32).toLowerCase() },
   numBallots: { type: Types.Number, default: 0 },
@@ -113,7 +114,7 @@ function pushVoteOnQueue(vote, callback) {
 
         var voteMsg = { vote : {
           id: vote.id,
-          numProposals: !vote.labels ? 3 : vote.labels.length,
+          numProposals: vote.labels.length === 0 ? 3 : vote.labels.length,
         } };
 
         ch.assertQueue('votes');
