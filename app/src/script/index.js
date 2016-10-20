@@ -4,28 +4,6 @@ require('babel-polyfill');
 var config = require('/opt/cocorico/app-web/config.json');
 
 var Raven = require('raven-js');
-var React = require('react');
-var ReactRouter = require('react-router');
-var ReactDOM = require('react-dom');
-
-var Router = ReactRouter.Router,
-  Route = ReactRouter.Route,
-  IndexRoute = ReactRouter.IndexRoute,
-  browserHistory = ReactRouter.browserHistory,
-
-  App = require('./App'),
-  Embed = require('./Embed'),
-  Page = require('./page/Page'),
-  Home = require('./page/Home'),
-  Login = require('./page/Login'),
-  ServiceStatus = require('./page/ServiceStatus'),
-  VotePage = require('./page/VotePage'),
-  EmbedVoteWidgetPage = require('./page/embed/VoteWidgetPage'),
-  BallotBox = require('./page/BallotBox'),
-
-  RouteAction = require('./action/RouteAction');
-
-var messages = require('./intl/locale.js').getCurrentLocaleMessages();
 
 function main() {
   // window.Intl polyfill
@@ -41,6 +19,29 @@ function main() {
 }
 
 function run() {
+  var React = require('react');
+  var ReactRouter = require('react-router');
+  var ReactDOM = require('react-dom');
+
+  var Router = ReactRouter.Router,
+    Route = ReactRouter.Route,
+    IndexRoute = ReactRouter.IndexRoute,
+    browserHistory = ReactRouter.browserHistory,
+
+    App = require('./App'),
+    Embed = require('./Embed'),
+    Page = require('./page/Page'),
+    Home = require('./page/Home'),
+    Login = require('./page/Login'),
+    ServiceStatus = require('./page/ServiceStatus'),
+    VotePage = require('./page/VotePage'),
+    EmbedVoteWidgetPage = require('./page/embed/VoteWidgetPage'),
+    BallotBox = require('./page/BallotBox'),
+
+    RouteAction = require('./action/RouteAction');
+
+  var messages = require('./intl/locale.js').getCurrentLocaleMessages();
+
   browserHistory.listen((location, action) => {
     RouteAction.change(browserHistory, location, action);
   });
