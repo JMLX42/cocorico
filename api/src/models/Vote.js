@@ -18,7 +18,6 @@ var Vote = new keystone.List('Vote', {
   autokey: { path: 'slug', from: 'title', unique: true },
   // map: { name: 'title' },
   track: { createdAt: true, updatedAt: true },
-  sortable: true,
   noedit: config.env !== 'development',
   nocreate: config.env !== 'development',
   nodelete: config.env !== 'development',
@@ -54,7 +53,7 @@ Vote.schema.methods.userIsAuthorizedToVote = function(user) {
     && !!this.voteContractAddress
     && !!this.voteContractABI
     && !!user
-    && (!this.restricted || (!!user.iss && user.iss === this.app))
+    && (!this.restricted || (!!user.iss && this.app.equals(user.iss)))
     && (!user.authorizedVotes
       || !user.authorizedVotes.length
       || user.authorizedVotes.indexOf(this.id) >= 0);
