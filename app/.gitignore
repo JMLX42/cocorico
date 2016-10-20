@@ -5,3 +5,5 @@ public/img/screenshot/*.jpg
 public/documentation
 public/build
 node_modules
+test/dist
+test/*.png

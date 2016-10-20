@@ -36,19 +36,20 @@ var VoteRadioButtons = React.createClass({
               <li>
                 <label className="vote-label">
                   <input type="radio" name="ballot" value={index}
-                      onChange={(e) => this.setState({ballotValue: index})}/>
+                    onChange={(e) => this.setState({ballotValue: index})}/>
                   <i>
-                      <Title text={label}/>
+                    <Title text={label}/>
                   </i>
                 </label>
               </li>
             )
           })}
         </ul>
-          <Button disabled={!this.state.ballotValue}
-              className="btn-vote btn-primary"
-              onClick={(e) => this.props.onVote(e, this.state.ballotValue)}>
-              {this.getIntlMessage('vote.VALIDATE_BALLOT')}
+          <Button disabled={this.state.ballotValue === null}
+            id="btn-vote-submit-ballot-value"
+            className="btn-vote btn-primary"
+            onClick={(e) => this.props.onVote(e, this.state.ballotValue)}>
+            {this.getIntlMessage('vote.VALIDATE_BALLOT')}
           </Button>
       </form>
     );

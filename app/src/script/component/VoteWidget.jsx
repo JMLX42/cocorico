@@ -415,7 +415,7 @@ var VoteWidget = React.createClass({
   renderLoginDialog: function() {
     return (
       <div className="vote-step-description">
-          <LoginPage />
+        <LoginPage />
       </div>
     );
   },
@@ -467,7 +467,8 @@ var VoteWidget = React.createClass({
                   birthdate={birthdate.toLocaleDateString()}/> :
               </p>
               <ButtonToolbar className="vote-step-actions">
-                <Button bsStyle="primary" onClick={(e)=>this.goToNextStep()}>
+                <Button bsStyle="primary" onClick={(e)=>this.goToNextStep()}
+                  id="btn-vote-confirm-id">
                   <FormattedMessage
                     message={this.getIntlMessage('vote.CONFIRM_VOTER_ID')}
                     name={user.firstName + ' ' + user.lastName}/>
@@ -491,6 +492,7 @@ var VoteWidget = React.createClass({
   renderConfirmVoteButton: function() {
     return (
       <Button className={classNames(this.getVoteValueButtonClassNames())}
+        id="btn-vote-confirm-ballot"
         disabled={!this.state.confirmVoteButtonEnabled}
         onClick={(e)=>this.confirmVoteValue()}>
           <Countdown count={VoteWidget.COUNTDOWN}
