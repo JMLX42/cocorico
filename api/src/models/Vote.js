@@ -111,7 +111,10 @@ function pushVoteOnQueue(vote, callback) {
         if (channelErr != null)
           return callback(channelErr, null);
 
-        var voteMsg = { vote : { id : vote.id } };
+        var voteMsg = { vote : {
+          id: vote.id,
+          numProposals: !vote.labels ? 3 : vote.labels.length,
+        } };
 
         ch.assertQueue('votes');
         ch.sendToQueue(

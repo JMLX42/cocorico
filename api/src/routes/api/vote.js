@@ -117,6 +117,10 @@ exports.update = function(req, res) {
         return res.status(403).send();
       }
 
+      if (!!req.body.labels && req.body.labels.length !== vote.labels.length) {
+        return res.status(400).send({error: 'invalid labels'});
+      }
+
       for (var propertyName in vote) {
         if (propertyName in req.body) {
           vote[propertyName] = req.body[propertyName];
