@@ -56,7 +56,7 @@ contract Vote {
 
         if (voter.voted || voter.registered) {
             VoteError(voterAddress, 'already registered');
-            throw;
+            return;
         }
 
         voter.registered = true;
@@ -68,8 +68,10 @@ contract Vote {
     function vote(uint8 proposal) onlyRegisteredVoter {
         Voter voter = voters[msg.sender];
 
-        if (proposal >= results.length)
-            return; // FIXME: emit a BallotError event
+        if (proposal >= results.length) {
+          VoteError(msg.sender, 'invalid proposal');
+          return;
+        }
 
         voter.voted = true;
         voter.vote = proposal;
