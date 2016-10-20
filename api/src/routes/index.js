@@ -132,6 +132,9 @@ exports = module.exports = function(app) {
    * @apiSuccess {String} vote.status The status of the vote.
    * @apiSuccess {Object[]} vote.voteContractABI The ABI of the vote blockchain smart contract.
    * @apiSuccess {String} vote.voteContractAddress The blockchain block address of the vote smart contract.
+   * @apiSuccess {String} vote.labels The ballot value labels.
+   * @apiSuccess {String} vote.question The question that will be asked
+   * to the voter.
    */
   app.post('/vote', routes.api.oauth.checkAccessToken, routes.api.vote.create);
 
@@ -156,6 +159,9 @@ exports = module.exports = function(app) {
    * @apiSuccess {String} votes.status The status of the vote.
    * @apiSuccess {Object[]} votes.voteContractABI The ABI of the vote blockchain smart contract.
    * @apiSuccess {String} votes.voteContractAddress The blockchain block address of the vote smart contract.
+   * @apiSuccess {String} vote.labels The ballot value labels.
+   * @apiSuccess {String} vote.question The question that will be asked
+   * to the voter.
    */
   app.get('/vote', routes.api.vote.list);
 
@@ -182,6 +188,9 @@ exports = module.exports = function(app) {
    * @apiSuccess {String} vote.status The status of the vote.
    * @apiSuccess {Object[]} vote.voteContractABI The ABI of the vote blockchain smart contract.
    * @apiSuccess {String} vote.voteContractAddress The blockchain block address of the vote smart contract.
+   * @apiSuccess {String} vote.labels The ballot value labels.
+   * @apiSuccess {String} vote.question The question that will be asked
+   * to the voter.
    */
   app.get('/vote/:voteId', routes.api.vote.get);
 
