@@ -11,10 +11,10 @@ var Home = React.createClass({
 
   render: function() {
     return (
-            <div className="page page-home">
-                <Page slug={this.getIntlMessage('slug.HOME')} setDocumentTitle={true}/>
-            </div>
-		);
+      <div className="page page-home">
+          <Page slug={this.getIntlMessage('slug.HOME')} setDocumentTitle={true}/>
+      </div>
+    );
   },
 });
 
