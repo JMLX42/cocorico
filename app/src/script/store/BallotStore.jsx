@@ -30,6 +30,11 @@ module.exports = Reflux.createStore({
 
   getProofOfVoteSVGByVoteId: function(voteId) {
     var data = this._proofOfVote[voteId];
+
+    if (!data) {
+      return null;
+    }
+
     var svg = qr.imageSync(data, { type: 'svg', ec_level: 'M' });
 
     return svg.replace('</svg>', '<desc>' + data + '</desc></svg>');

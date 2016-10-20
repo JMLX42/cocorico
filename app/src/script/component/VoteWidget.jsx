@@ -567,10 +567,9 @@ var VoteWidget = React.createClass({
   },
 
   renderVoteCompleteDialog: function() {
-    if (this.state.skipVoterCardButtonEnabled && !this.state.fetchedVoterCard)
-      window.onbeforeunload = () => this.getIntlMessage('vote.BEFORE_UNLOAD_MESSAGE');
-    else
-      window.onbeforeunload = null;
+    var proofOfVoteSVG = this.state.ballots.getProofOfVoteSVGByVoteId(
+      this.props.voteId
+    );
 
     return (
       <Grid>
@@ -594,16 +593,18 @@ var VoteWidget = React.createClass({
             </p>
           </Col>
         </Row>
-        <Row>
-          <Col xs={12}>
-            <ButtonToolbar className="vote-step-actions">
-              <PrintButton text="Print my proof of vote">
-                <SVGImage data={this.state.ballots.getProofOfVoteSVGByVoteId(this.props.voteId)}/>
-              </PrintButton>
-              {this.renderSVGDownloadButton()}
-            </ButtonToolbar>
-          </Col>
-        </Row>
+        {!!proofOfVoteSVG
+          ? <Row>
+            <Col xs={12}>
+              <ButtonToolbar className="vote-step-actions">
+                <PrintButton text="Print my proof of vote">
+                  <SVGImage data={proofOfVoteSVG}/>
+                </PrintButton>
+                {this.renderSVGDownloadButton()}
+              </ButtonToolbar>
+            </Col>
+          </Row>
+          : null}
         <Row>
           <Col xs={12}>
             <Hint>
