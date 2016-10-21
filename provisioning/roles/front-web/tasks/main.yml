@@ -54,6 +54,12 @@
   register: letsencrypt_ssl_certificate
   when: certbot_enabled
 
+- name: stop apache2
+  service: name=apache2 state=stopped
+  when:
+    - certbot_enabled
+    - not letsencrypt_ssl_certificate.stat.exists
+
 - name: install letsencrypt SSL certificates
   shell: "{{ certbot_dir }}/certbot-auto certonly --standalone --noninteractive --text --agree-tos --email {{ certbot_email }} --domains {{ front_web_public_host }}"
   when:
