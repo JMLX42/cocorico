@@ -15,5 +15,5 @@
 - name: install upstart script
   template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
 
-- name: start service
-  service: name=cocorico-webhook state=started
+- name: restart service
+  service: name=cocorico-webhook state=restarted
