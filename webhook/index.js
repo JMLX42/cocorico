@@ -10,6 +10,8 @@ function isWebhookEvent(content) {
   return !!content.event && !!content.url && !!content.createdAt;
 }
 
+log.info('connecting');
+
 require('amqplib/callback_api').connect('amqp://localhost', (err, conn) => {
   if (err) {
     log.error({error: err}, 'Failed to connect to message broker');
@@ -21,6 +23,8 @@ require('amqplib/callback_api').connect('amqp://localhost', (err, conn) => {
       log.error({error: err}, 'Failed to create message channel');
       process.exit(1);
     }
+
+    log.info('connected');
 
     ch.assertQueue('webhooks');
     ch.consume('webhooks', (msg) => {
