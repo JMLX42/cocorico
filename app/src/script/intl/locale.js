@@ -7,11 +7,21 @@ module.exports = {
   },
 
   getCurrentLocale: function() {
-    var locale = navigator.language.split('-');
+    var locale = location.search
+      .split(/[\?&]/)
+      .filter((e) => !!e)
+      .map((e) => e.split('='))
+      .map(e => e[0] === 'lang' ? e[1] : false)
+      .filter(e => !!e)[0];
 
-    return locale[1]
-      ? `${locale[0]}-${locale[1].toUpperCase()}`
-      : navigator.language;
+    if (!locale) {
+      locale = navigator.language.split('-');
+      if (!!locale[1]) {
+        locale = `${locale[0]}-${locale[1].toUpperCase()}`
+      }
+    }
+
+    return locale || navigator.language;
   },
 
   getLocaleMessages: function(locale) {
