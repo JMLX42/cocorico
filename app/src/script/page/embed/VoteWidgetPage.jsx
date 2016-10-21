@@ -19,8 +19,9 @@ var VoteWidgetPage = React.createClass({
 
   postMessage: function(msg, vote) {
     console.log('postMessage: ' + msg, vote);
-    if (!!window.parent && !!vote && !!vote.url) {
-      window.parent.postMessage(msg, vote.url);
+    if (!!window.parent) {
+      // FIXME: we should not use a wildcard
+      window.parent.postMessage(msg, '*');
     }
   },
 
