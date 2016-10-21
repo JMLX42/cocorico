@@ -45,7 +45,7 @@ var VoteRadioButtons = React.createClass({
             )
           })}
         </ul>
-          <Button disabled={!this.state.ballotValue}
+          <Button disabled={this.state.ballotValue === null}
               className="btn-vote btn-primary"
               onClick={(e) => this.props.onVote(e, this.state.ballotValue)}>
               {this.getIntlMessage('vote.VALIDATE_BALLOT')}
