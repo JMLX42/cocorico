@@ -21,5 +21,5 @@
     - ballot
     - vote
 
-- name: start the worker services
-  service: name=cocorico-blockchain-worker state=started
+- name: restart the worker services
+  service: name=cocorico-blockchain-worker state=restarted
