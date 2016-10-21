@@ -123,6 +123,8 @@ function handleVote(voteMsg, callback) {
 }
 
 module.exports.run = function() {
+  log.info('connecting');
+
   require('amqplib/callback_api').connect(
       'amqp://localhost',
       (err, conn) => {
@@ -130,8 +132,6 @@ module.exports.run = function() {
           log.error({error: err}, 'error');
           return;
         }
-
-        log.info('connecting');
 
         conn.createChannel((channelErr, ch) => {
           if (channelErr != null) {
