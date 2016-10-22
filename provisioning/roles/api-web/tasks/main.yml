@@ -41,10 +41,10 @@
   when: is_development_environment
   shell: headstone {{ cocorico_api_dir }}/scripts/add-admin.js
     --cwd={{ cocorico_api_dir }}/src
-    --userEmail={{ home_web_admin_email }}
-    --userPassword={{ home_web_admin_password }}
-    --userName={{ home_web_admin_name }} --userIsAdmin=true
-    --mongoUri=mongodb://{{ home_db_private_host }}/{{ mongodb_database_name }}
+    --userEmail={{ api_web_admin_email }}
+    --userPassword={{ api_web_admin_password }}
+    --userName={{ api_web_admin_name }} --userIsAdmin=true
+    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: result
@@ -54,7 +54,7 @@
 - name: import pages
   shell: headstone {{ cocorico_api_dir }}/scripts/import-pages.js
     --cwd={{ cocorico_api_dir }}/src
-    --mongoUri=mongodb://{{ home_db_private_host }}/{{ mongodb_database_name }}
+    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: result

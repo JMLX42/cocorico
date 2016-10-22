@@ -19,12 +19,12 @@ facebook_client_secret: 8f0812597bdc510a32f27e79b77f4b21
 google_client_id: 1048827102701-6gbl2i586oqoj9a9p1u620u0pom399gu.apps.googleusercontent.com
 google_client_secret:  U5YibRB5qJn1tvJ-C_3M_I8b
 
-home_web_admin_email: "admin@{{ front_hostname }}"
-home_web_admin_password: admin
-home_web_admin_name: Admin
-home_web_upload_dir: upload
+api_web_admin_email: "admin@{{ front_hostname }}"
+api_web_admin_password: admin
+api_web_admin_name: Admin
+api_web_upload_dir: upload
 
-home_db_saved_pages:
+api_db_saved_pages:
     - accueil
     - aide
     - politique-de-confidentialite

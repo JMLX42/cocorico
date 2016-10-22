@@ -1,9 +1,9 @@
 project_name: cocorico
 
-home_web_private_host: 127.0.0.1
-home_web_private_port: 3000
-home_db_private_host: 127.0.0.1
-home_db_private_port: 27017
+api_web_private_host: 127.0.0.1
+api_web_private_port: 3000
+api_db_private_host: 127.0.0.1
+api_db_private_port: 27017
 
 cocorico_api_dir: /vagrant/api
 cocorico_app_dir: /vagrant/app
