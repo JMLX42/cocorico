@@ -7,12 +7,19 @@ var Raven = require('raven-js');
 
 function main() {
   // window.Intl polyfill
-  // https://github.com/andyearnshaw/Intl.js/issues/118#issuecomment-120123392
+  // https://github.com/andyearnshaw/Intl.js#intljs-and-browserifywebpack
   if (!window.Intl) {
-    require.ensure(['intl'], (require) => {
-      window.Intl = require('intl');
-      run();
-    }, 'IntlPolyfillBundle');
+    require.ensure([
+      'intl',
+      'intl/locale-data/jsonp/en.js',
+    ],
+      (require) => {
+        require('intl');
+        require('intl/locale-data/jsonp/en.js');
+        run();
+      },
+      'IntlPolyfillBundle'
+    );
   } else {
     run();
   }
