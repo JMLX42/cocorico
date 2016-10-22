@@ -1,0 +1,6 @@
+{% for item in backups %}
+Host {{ item.remote_host }}
+  Hostname {{ item.remote_host }}
+  User {{ item.remote_user }}
+  IdentityFile ~{{ item.local_user }}/.ssh/{{ item.remote_key | basename }}
+{% endfor %}

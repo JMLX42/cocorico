@@ -8,6 +8,11 @@ module Vagrant
         :dest => "/vagrant",
         :mount_options => [],
         :limit => false
+      },
+      ENV["COCORICO_HOME"] => {
+        :dest => "/srv/cocorico",
+        :mount_options => [],
+        :limit => false
       }
     }
 
@@ -231,7 +236,7 @@ module Vagrant
     end
 
     def self.is_main_project()
-      return true
+      return (not ENV["COCORICO_HOME"] or File.expand_path(ENV["COCORICO_HOME"]) == Dir.pwd)
     end
 
     def self.write(inventory, filename)

@@ -18,7 +18,6 @@ var Vote = new keystone.List('Vote', {
   autokey: { path: 'slug', from: 'title', unique: true },
   // map: { name: 'title' },
   track: { createdAt: true, updatedAt: true },
-  sortable: true,
   noedit: config.env !== 'development',
   nocreate: config.env !== 'development',
   nodelete: config.env !== 'development',
@@ -38,6 +37,7 @@ Vote.add({
   voteContractABI: { type: Types.Text, noedit: true },
   restricted: { type: Types.Boolean, default: false },
   labels: { type: Types.TextArray },
+  question: { type: Types.Text },
   salt: { type: Types.Text, noedit: true, default: () => bcrypt.genSaltSync(10) },
   key: { type: Types.Key, noedit: true, default: () => srs(32).toLowerCase() },
   numBallots: { type: Types.Number, default: 0 },
@@ -54,7 +54,7 @@ Vote.schema.methods.userIsAuthorizedToVote = function(user) {
     && !!this.voteContractAddress
     && !!this.voteContractABI
     && !!user
-    && (!this.restricted || (!!user.iss && user.iss === this.app))
+    && (!this.restricted || (!!user.iss && this.app.equals(user.iss)))
     && (!user.authorizedVotes
       || !user.authorizedVotes.length
       || user.authorizedVotes.indexOf(this.id) >= 0);
@@ -112,7 +112,10 @@ function pushVoteOnQueue(vote, callback) {
         if (channelErr != null)
           return callback(channelErr, null);
 
-        var voteMsg = { vote : { id : vote.id } };
+        var voteMsg = { vote : {
+          id: vote.id,
+          numProposals: vote.labels.length === 0 ? 3 : vote.labels.length,
+        } };
 
         ch.assertQueue('votes');
         ch.sendToQueue(

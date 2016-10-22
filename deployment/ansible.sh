@@ -62,6 +62,25 @@ fi
 ansible --version 2> /dev/null | head -n1
 python --version 2>&1
 
+# Link default provisioning rules.
+for FILES in                                                     \
+    '/srv/cocorico/provisioning/roles/*'                         \
+    '/srv/cocorico/provisioning/tasks/*'                         \
+    '/srv/cocorico/provisioning/inventory/host_vars/*'           \
+    '/srv/cocorico/provisioning/inventory/group_vars/all.yml'    \
+    '/srv/cocorico/provisioning/inventory/hosts.sh'              \
+    '/srv/cocorico/provisioning/provision.yml'
+do
+    for FILE in ${FILES}
+    do
+        FILE=${FILE#/srv/cocorico/}
+        test -e /vagrant/${FILE} || {
+            mkdir -p `dirname ${FILE}`
+            ln -sf /srv/cocorico/${FILE} /vagrant/${FILE}
+        }
+    done
+done
+
 # Make sure Ansible playbook exists.
 if [ ! -f ${PLAYBOOK} ]; then
     echo "Cannot find Ansible playbook."

@@ -4,43 +4,51 @@ require('babel-polyfill');
 var config = require('/opt/cocorico/app-web/config.json');
 
 var Raven = require('raven-js');
-var React = require('react');
-var ReactRouter = require('react-router');
-var ReactDOM = require('react-dom');
-
-var Router = ReactRouter.Router,
-  Route = ReactRouter.Route,
-  IndexRoute = ReactRouter.IndexRoute,
-  browserHistory = ReactRouter.browserHistory,
-
-  App = require('./App'),
-  Embed = require('./Embed'),
-  Page = require('./page/Page'),
-  Home = require('./page/Home'),
-  Login = require('./page/Login'),
-  ServiceStatus = require('./page/ServiceStatus'),
-  VotePage = require('./page/VotePage'),
-  EmbedVoteWidgetPage = require('./page/embed/VoteWidgetPage'),
-  BallotBox = require('./page/BallotBox'),
-
-  RouteAction = require('./action/RouteAction');
-
-var messages = require('./intl/locale.js').getCurrentLocaleMessages();
 
 function main() {
   // window.Intl polyfill
-  // https://github.com/andyearnshaw/Intl.js/issues/118#issuecomment-120123392
+  // https://github.com/andyearnshaw/Intl.js#intljs-and-browserifywebpack
   if (!window.Intl) {
-    require.ensure(['intl'], (require) => {
-      window.Intl = require('intl');
-      run();
-    }, 'IntlPolyfillBundle');
+    require.ensure([
+      'intl',
+      'intl/locale-data/jsonp/en.js',
+    ],
+      (require) => {
+        require('intl');
+        require('intl/locale-data/jsonp/en.js');
+        run();
+      },
+      'IntlPolyfillBundle'
+    );
   } else {
     run();
   }
 }
 
 function run() {
+  var React = require('react');
+  var ReactRouter = require('react-router');
+  var ReactDOM = require('react-dom');
+
+  var Router = ReactRouter.Router,
+    Route = ReactRouter.Route,
+    IndexRoute = ReactRouter.IndexRoute,
+    browserHistory = ReactRouter.browserHistory,
+
+    App = require('./App'),
+    Embed = require('./Embed'),
+    Page = require('./page/Page'),
+    Home = require('./page/Home'),
+    Login = require('./page/Login'),
+    ServiceStatus = require('./page/ServiceStatus'),
+    VotePage = require('./page/VotePage'),
+    EmbedVoteWidgetPage = require('./page/embed/VoteWidgetPage'),
+    BallotBox = require('./page/BallotBox'),
+
+    RouteAction = require('./action/RouteAction');
+
+  var messages = require('./intl/locale.js').getCurrentLocaleMessages();
+
   browserHistory.listen((location, action) => {
     RouteAction.change(browserHistory, location, action);
   });

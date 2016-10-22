@@ -4,7 +4,6 @@
     - image
     - staging
     - prod
-    - travis
   gather_facts: yes
   roles:
     - { role: "common" }
@@ -16,8 +15,16 @@
     - { role: "blockchain-worker", tags: ["blockchain", "worker"] }
     - { role: "blockchain", tags: ["blockchain", "database"] }
     - { role: "webhook" }
-
-    # Firewall must be set-up last so as to not interfere with any other
-    # provisionings. For example, provisionning of RabbitMQ may needsto access
-    # its admin web interface.
     - { role: "firewall" }
+
+- hosts:
+    - prod
+  gather_facts: yes
+  roles:
+    - { role: "backup-source", tags: ["backup"] }
+
+- hosts:
+    - prod-backup
+  gather_facts: yes
+  roles:
+    - { role: "backup-target", tags: ["backup"] }

@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# This script is started by a manual command from the backup client:
+# - it stops services
+# - it restores all the files back to the backup client
+# - it drop all databases and reimports backups
+# - it restarts services
+
+set -x
+
+
+test $# -eq 1 || {
+    echo "usage: restore.sh from-local-dir" 1>&2
+    exit 1
+}
+
+DATE=`date +"%Y-%m-%d-%H-%M-%S"`
+RESTORE_DIR_SRC=$1
+
+MINING=`ps ax | grep -v grep | grep "geth .* --mine "`
+
+# Stop all services.
+service cocorico-api-web stop
+service cocorico-blockchain stop
+service cocorico-blockchain-miner stop
+service rabbitmq-server stop
+
+geth --datadir {{ ethereum_datadir }} import ${BACKUP_DIR}/db/ethereum
+
+{% for item in backup_sources.mongodb %}
+DB="{{ item }}"
+test -r ${RESTORE_DIR_SRC}/db/${DB} && {
+    mongorestore --drop --db ${DB} ${RESTORE_DIR_SRC}/db/${DB}
+}
+{% endfor %}
+
+{% for item in backup_sources.storage %}
+DIR="{{ item }}"
+test -d ${RESTORE_DIR_SRC}/storage/${DIR} && {
+    rm -rf ${DIR}
+    mkdir -p ${DIR}
+    rsync -az ${RESTORE_DIR_SRC}/storage/${DIR}/ ${DIR}
+}
+{% endfor %}
+
+# Start all services.
+service cocorico-api-web start
+if [[ ! -z $MINING ]]; then
+  service cocorico-blockchain-miner start
+else
+  service cocorico-blockchain start
+fi
+service rabbitmq-server start

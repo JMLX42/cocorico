@@ -82,6 +82,7 @@ exports.create = function(req, res) {
           url: url,
           restricted: req.body.restricted === 'true',
           labels: labels,
+          question: req.body.question,
           title: req.body.title,
           description: req.body.description,
           image: req.body.image,
@@ -115,6 +116,10 @@ exports.update = function(req, res) {
 
       if (vote.app.toString() !== req.user.id) {
         return res.status(403).send();
+      }
+
+      if (!!req.body.labels && req.body.labels.length !== vote.labels.length) {
+        return res.status(400).send({error: 'invalid labels'});
       }
 
       for (var propertyName in vote) {

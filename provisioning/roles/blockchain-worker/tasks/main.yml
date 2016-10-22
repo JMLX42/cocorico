@@ -7,10 +7,10 @@
   file: path={{ project_dir}}/{{ role_name }} state=directory
 
 - file: path={{ project_dir }}/{{ role_name }}/node_modules state=directory recurse=yes
-- file: src={{ project_dir }}/{{ role_name }}/node_modules dest=/vagrant/{{ role_name }}/node_modules state=link
+- file: src={{ project_dir }}/{{ role_name }}/node_modules dest=/srv/cocorico/{{ role_name }}/node_modules state=link
 
 - name: install npm modules
-  npm: path=/vagrant/blockchain-worker
+  npm: path=/srv/cocorico/blockchain-worker
 
 - name: install leader upstart script
   template: src={{ role_name }}.upstart.conf.j2 dest=/etc/init/{{ project_name }}-{{ role_name }}.conf
@@ -21,5 +21,5 @@
     - ballot
     - vote
 
-- name: start the worker services
-  service: name=cocorico-blockchain-worker state=started
+- name: restart the worker services
+  service: name=cocorico-blockchain-worker state=restarted

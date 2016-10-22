@@ -36,7 +36,7 @@ function getCompiledVoteContract(web3, callback) {
   });
 }
 
-function mineVoteContract(next) {
+function mineVoteContract(numProposals, next) {
   var hash = '';
   var web3 = new Web3();
 
@@ -60,7 +60,7 @@ function mineVoteContract(next) {
         );
 
         web3.eth.contract(abi).new(
-          3, // num proposals
+          numProposals,
           {
             from: accounts[0],
             data: code,
@@ -97,29 +97,34 @@ function mineVoteContract(next) {
 }
 
 function handleVote(voteMsg, callback) {
-  mineVoteContract((err, contract, abi) => {
-    if (err) {
-      callback(err, null);
-      return;
+  mineVoteContract(
+    voteMsg.numProposals,
+    (err, contract, abi) => {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      Vote.model.findById(voteMsg.id)
+        .exec((findErr, vote) => {
+          if (findErr) {
+            callback(findErr, null);
+            return;
+          }
+
+          vote.status = 'open';
+          vote.voteContractABI = JSON.stringify(abi);
+          vote.voteContractAddress = contract.address;
+
+          vote.save(callback);
+        });
     }
-
-    Vote.model.findById(voteMsg.id)
-      .exec((findErr, vote) => {
-        if (findErr) {
-          callback(findErr, null);
-          return;
-        }
-
-        vote.status = 'open';
-        vote.voteContractABI = JSON.stringify(abi);
-        vote.voteContractAddress = contract.address;
-
-        vote.save(callback);
-      });
-  });
+  );
 }
 
 module.exports.run = function() {
+  log.info('connecting');
+
   require('amqplib/callback_api').connect(
       'amqp://localhost',
       (err, conn) => {
@@ -127,8 +132,6 @@ module.exports.run = function() {
           log.error({error: err}, 'error');
           return;
         }
-
-        log.info('connecting');
 
         conn.createChannel((channelErr, ch) => {
           if (channelErr != null) {

@@ -29,7 +29,6 @@ App.schema.methods.isValidURL = function(url) {
 
 transform.toJSON(App, (app) => {
   delete app.secret;
-  delete app.webhookURL;
 });
 
 App.defaultColumns = 'title, key, secret';

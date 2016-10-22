@@ -217,6 +217,7 @@ function handleBallot(ballot, next) {
   var address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
   var rootAccount = null;
 
+
   async.waterfall(
     [
       (callback) => updateBallotStatus(
@@ -323,15 +324,26 @@ function updateBallotStatus(ballot, status, callback) {
       if (err2) {
         return callback(err2, dbBallot);
       }
-      if (status !== 'complete') {
-        return callback(null, dbBallot);
+
+      if (status === 'pending') {
+        return triggerWebhookOnPending(ballot, (err3, webhookMsg) => {
+          if (err3) {
+            return callback(err3, webhookMsg);
+          }
+          return callback(null, dbBallot);
+        });
       }
-      return triggerWebhookOnSuccess(ballot, (err3, webhookMsg) => {
-        if (err3) {
-          return callback(err3, webhookMsg);
-        }
-        return callback(null, dbBallot);
-      });
+
+      if (status === 'complete') {
+        return triggerWebhookOnSuccess(ballot, (err3, webhookMsg) => {
+          if (err3) {
+            return callback(err3, webhookMsg);
+          }
+          return callback(null, dbBallot);
+        });
+      }
+
+      return callback(null, dbBallot);
     });
   });
 }
@@ -364,6 +376,9 @@ function ballotError(ballot, msg, callback) {
   });
 }
 
+function triggerWebhookOnPending(ballot, callback) {
+  return triggerWebhook(ballot, 'pending', callback)
+}
 
 function triggerWebhookOnSuccess(ballot, callback) {
   return triggerWebhook(ballot, 'success', callback)
@@ -399,7 +414,7 @@ function triggerWebhook(ballot, status, callback) {
         new Buffer(JSON.stringify(msg)),
         { persistent : true }
       );
-      log.info('Message appended to webhooks queue: ' + JSON.stringify(msg));
+      log.info({webhook: msg}, 'pushed webhook call');
       return callback(null, msg);
     });
   });
@@ -416,13 +431,13 @@ module.exports.run = function() {
         process.exit(1);
       }
 
-      log.info('connected');
-
       conn.createChannel((channelErr, ch) => {
         if (channelErr != null) {
           log.error({error: channelErr}, 'error');
           process.exit(1);
         }
+
+        log.info('connected');
 
         ch.assertQueue('ballots');
         ch.consume(
@@ -436,9 +451,9 @@ module.exports.run = function() {
             }
 
             if (!msgObj.ballot) {
-              log.info('invalid ballot message received');
+              log.info('skipping invalid message', msgObj);
               ch.ack(msg);
-              return
+              return;
             }
 
             log.info(
