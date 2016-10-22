@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# This script runs on the backup client, automatically triggered by the backup server:
+# - it dumps all the databases
+# - it links storage directories
+
+set -x
+
+test $# -eq 1 || {
+    echo "usage: backup.sh to-local-dir" 1>&2
+    exit 1
+}
+
+BACKUP_DIR=$1
+
+mkdir -p ${BACKUP_DIR}/db
+mkdir -p ${BACKUP_DIR}/storage
+
+echo "admin.exportChain('${BACKUP_DIR}/db/ethereum')" | geth attach ipc:/{{ ethereum_datadir }}/geth.ipc
+
+{% for item in backup_sources.mongodb %}
+mongodump --host {{ api_db_private_host }} --port {{ api_db_private_port }} --db {{ item }} --out ${BACKUP_DIR}/db/mongodb
+{% endfor %}
+
+{% for item in backup_sources.storage %}
+mkdir -p ${BACKUP_DIR}/storage/{{ item }}
+rsync -az {{ item }}/* ${BACKUP_DIR}/storage/{{ item }}
+{% endfor %}
+
+chmod -R go-rwx ${BACKUP_DIR}/db ${BACKUP_DIR}/storage

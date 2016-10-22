@@ -1,0 +1,63 @@
+- set_fact: role_name=backup-target
+
+- name: create backup users
+  user: name={{ item.local_user }} shell=/bin/bash append=yes system=yes
+  with_items: "{{ backups }}"
+
+- name: create backup directories with permissions
+  file: path=/home/{{ item.local_user }}/backup owner={{ item.local_user }} group={{ item.local_user }} state=directory
+  with_items: "{{ backups }}"
+
+- name: create ssh directory
+  file: path=/home/{{ item.local_user }}/.ssh owner={{ item.local_user }} group={{ item.local_user }} state=directory
+  with_items: "{{ backups }}"
+
+- name: install dependencies
+  apt: name={{ item }} state=latest
+  with_items:
+    - rdiff-backup
+
+- name: install scripts
+  copy: src={{ item }} dest=/usr/local/bin/{{ item | basename }} mode=0755
+  with_items:
+    - backup.sh
+    - restore.sh
+
+- name: create .ssh directory
+  file: path=~{{ item.local_user }}/.ssh owner={{ item.local_user }} group={{ item.local_user }} state=directory
+  become: true
+  become_user: "{{ item.local_user }}"
+  with_items: "{{ backups }}"
+
+- name: configure ssh
+  template: src=ssh_config dest=~{{ item.local_user }}/.ssh/config
+  become: true
+  become_user: "{{ item.local_user }}"
+  with_items: "{{ backups }}"
+
+- name: copy ssh keys
+  copy: src={{ item.remote_key }} dest=~{{ item.local_user }}/.ssh/ owner={{ item.local_user }} group={{ item.local_user }} mode=0600
+  with_items: "{{ backups }}"
+
+- name: accept key
+  shell: ssh -oStrictHostKeyChecking=no {{ item.remote_user }}@{{ item.remote_host }} true
+  become: true
+  become_user: "{{ item.local_user }}"
+  changed_when: no
+  with_items: "{{ backups }}"
+
+- name: test connection
+  shell: rdiff-backup --test-server {{ item.remote_user }}@{{ item.remote_host }}::/tmp
+  become: true
+  become_user: "{{ item.local_user }}"
+  changed_when: no
+  with_items: "{{ backups }}"
+
+- name: install cron job
+  cron:
+    name: "retrieve backup for {{ item.remote_host }}"
+    user: "{{ item.local_user }}"
+    special_time: "{{ item.frequency }}"
+    job: "/usr/local/bin/backup.sh \"{{ item.remote_user }}\" \"{{ item.remote_host }}\""
+    state: present
+  with_items: "{{ backups }}"

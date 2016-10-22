@@ -16,6 +16,14 @@ project_dir: "/opt/{{ project_name }}"
 log_dir: "{{ project_dir }}/log"
 documentation_dir: "{{ cocorico_app_dir }}/public/documentation"
 
+backup_sources:
+  mongodb:
+    - cocorico
+  storage:
+    - /var/lib/rabbitmq/mnesia/
+    - /opt/cocorico/blockchain/
+    - /opt/cocorico/log/
+
 supported_web_browsers:
   firefox:
     name: "Mozilla Firefox"

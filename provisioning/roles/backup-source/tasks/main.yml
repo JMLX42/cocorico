@@ -1,0 +1,17 @@
+- set_fact: role_name=backup-source
+
+- name: authorize ssh key
+  authorized_key:
+    user: root
+    key: "{{ lookup('file', backup_target_pubkey) }}"
+
+- name: install dependencies
+  apt: name={{ item }} state=present
+  with_items:
+    - rdiff-backup
+
+- name: install backup script
+  template: src=backup.sh.j2 dest=/usr/local/bin/backup.sh mode=0755
+
+- name: install restore script
+  template: src=restore.sh.j2 dest=/usr/local/bin/restore.sh mode=0755
