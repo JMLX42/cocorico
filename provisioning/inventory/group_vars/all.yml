@@ -33,6 +33,9 @@ supported_web_browsers:
   microsoft edge:
     name: "Microsoft Edge"
     version: "14.14393"
+  safari:
+    name: "Safari"
+    version: "9.1"
 
 supported_locales:
   fr-FR: Français
