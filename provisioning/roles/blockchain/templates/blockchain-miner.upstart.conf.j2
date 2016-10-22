@@ -36,7 +36,7 @@ script
 {% if ethereum_miner_threads is defined and ethereum_miner_threads %}
         --minerthreads {{ ethereum_miner_threads }} \
 {% else %}
-        --minerthreads 1
+        --minerthreads 1 \
 {% endif %}
 {% if ethereum_etherbase_address is defined and ethereum_etherbase_address %}
         --etherbase {{ ethereum_etherbase_address }} \
