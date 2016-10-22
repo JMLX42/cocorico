@@ -20,12 +20,12 @@ script
         -o {{ log_dir }}/{{ role_name }}-ballot.log \
         -e {{ log_dir }}/{{ role_name }}-ballot.error.log \
         --pidFile /var/run/{{ project_name }}-{{ role_name }}-ballot.pid \
-        --sourceDir /vagrant/blockchain-worker/src \
-        --workingDir /vagrant/blockchain-worker/src \
+        --sourceDir /srv/cocorico/blockchain-worker/src \
+        --workingDir /srv/cocorico/blockchain-worker/src \
         ballot.js
 end script
 
 pre-stop script
     rm /var/run/{{ project_name }}-{{ role_name }}-ballot.pid
-    exec forever stop /vagrant/blockchain-worker/src/ballot.js
+    exec forever stop /srv/cocorico/blockchain-worker/src/ballot.js
 end script
