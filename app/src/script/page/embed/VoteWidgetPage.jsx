@@ -17,11 +17,13 @@ var VoteWidgetPage = React.createClass({
     ReactIntl.IntlMixin,
   ],
 
-  postMessage: function(msg, vote) {
-    console.log('postMessage: ' + msg, vote);
+  postMessage: function(msg, data) {
     if (!!window.parent) {
       // FIXME: we should not use a wildcard
-      window.parent.postMessage(msg, '*');
+      window.parent.postMessage(
+        JSON.stringify(Object.assign({}, data, {message: msg})),
+        '*'
+      );
     }
   },
 
