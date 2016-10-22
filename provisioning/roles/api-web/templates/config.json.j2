@@ -15,6 +15,9 @@
     "blockchain" : {
         "httpProvider" : "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}"
     }
+{% if sentry is defined and sentry.secret is defined %}
+    , "sentry" : {{ sentry | to_json }}
+{% endif %}
 {% if franceconnect_client_id is defined and franceconnect_client_secret is defined %}
     , "franceConnect" : {
         "URL": "{{ franceconnect_url }}/",

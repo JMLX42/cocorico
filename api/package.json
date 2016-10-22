@@ -11,6 +11,7 @@
     "client-sessions": "0.7.0",
     "ethereumjs-tx": "^1.1.1",
     "ethereumjs-util": "^4.0.1",
+    "express-winston": "^2.0.0",
     "follow-redirects": "0.2.0",
     "html-entities": "1.2.0",
     "js-beautify": "1.6.2",
@@ -34,6 +35,7 @@
     "passport-http-bearer": "^1.0.1",
     "passport-jwt": "^2.1.0",
     "passport-oauth2-client-password": "^0.1.2",
+    "raven": "^0.12.1",
     "request": "^2.60.0",
     "secure-random-string": "^1.0.0",
     "source-map-support": "^0.4.2",
@@ -41,7 +43,8 @@
     "uid": "0.0.2",
     "underscore": "^1.8.3",
     "web3": "^0.16.0",
-    "webshot": "0.18.0"
+    "webshot": "0.18.0",
+    "winston": "^2.2.0"
   },
   "engines": {
     "node": ">=0.10.22",

@@ -27,6 +27,8 @@ keystone.init({
   'auth': true,
   'user model': 'Admin',
   'cookie secret': srs(64),
+
+  'logger': false,
 });
 
 keystone.import('models');

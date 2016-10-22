@@ -1,5 +1,8 @@
 var keystone = require('keystone');
 var passport = require('passport');
+var winston = require('winston');
+var expressWinston = require('express-winston');
+var raven = require('raven');
 
 var config = require('/opt/cocorico/api-web/config.json');
 
@@ -17,6 +20,50 @@ function isAuthenticated(req, res, next) {
 
 // Setup Route Bindings
 exports = module.exports = function(app) {
+
+  if (!!config.sentry) {
+    var sentryUri = 'https://' + config.sentry.public_key
+      + ':' + config.sentry.secret
+      + '@sentry.io/'
+      + config.sentry.project_id;
+
+    app.use(raven.middleware.express.requestHandler(sentryUri));
+    app.use(raven.middleware.express.errorHandler(sentryUri));
+  }
+
+  app.use(expressWinston.logger({
+    transports: [
+      new winston.transports.Console({
+        json: true,
+        colorize: true,
+        level: 'debug',
+        timestamp: true,
+      }),
+    ],
+    bodyBlacklist: ['user'],
+    requestFilter: (req, propName) => {
+      if (propName === 'headers') {
+        if ('authorization' in req.headers) {
+          var authMethod = req.headers.authorization.split(' ')[0];
+          req.headers.authorization = (!!authMethod ? authMethod + ' ' : '')
+          + '*****';
+        }
+
+        delete req.headers.referer;
+      }
+
+      return req[propName];
+    },
+    colorize: true,
+  }));
+  app.use(expressWinston.errorLogger({
+    transports: [
+      new winston.transports.Console({
+        json: true,
+        colorize: true,
+      }),
+    ],
+  }));
 
   app.use(passport.initialize());
   app.use(passport.session());
