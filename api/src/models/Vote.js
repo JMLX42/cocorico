@@ -70,7 +70,7 @@ Vote.schema.methods.getBallotByUserUID = function(uid, callback) {
   Ballot.model.findOne({hash: bcrypt.hashSync(uid, this.salt)}).exec(callback);
 }
 
-function completeVote(vote, next) {
+function closeVoteContract(vote, next) {
   if (!vote.voteContractAddress) {
     next(null);
   }
@@ -138,7 +138,7 @@ Vote.schema.pre('validate', function(next) {
   }
 
   if (self.isModified('status') && self.status === 'complete') {
-    return completeVote(self, next);
+    return closeVoteContract(self, next);
   }
 
   var updateTitle = (self.isModified('url') || !self.isModified('title'))
