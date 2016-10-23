@@ -189,6 +189,9 @@ exports.result = function(req, res) {
       if (!vote)
         return res.status(404).send();
 
+      if (vote.status !== 'complete')
+        return res.status(403).send();
+
       var web3 = new Web3();
       web3.setProvider(new web3.providers.HttpProvider(
         'http://127.0.0.1:8545'
