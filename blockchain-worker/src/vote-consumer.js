@@ -16,7 +16,7 @@ keystone.import('../../api/dist/models');
 var Vote = keystone.list('Vote');
 
 function getCompiledVoteContract(web3, callback) {
-  var path = '/vagrant/contract/Vote.sol';
+  var path = '/srv/cocorico/contract/Vote.sol';
   var source = fs.readFileSync(path, {encoding: 'utf-8'});
 
   log.info(
