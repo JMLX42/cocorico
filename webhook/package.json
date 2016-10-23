@@ -1,9 +1,8 @@
 {
   "name": "cocorico-webhook",
   "version": "0.0.1",
-  "description": "",
+  "private": true,
   "main": "index.js",
-  "author": "",
   "license": "MIT",
   "dependencies": {
     "amqplib": "^0.4.2",
