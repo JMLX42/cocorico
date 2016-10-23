@@ -6,7 +6,7 @@ try {
 var config = require('/opt/cocorico/api-web/config.json');
 var keystone = require('keystone');
 var srs = require('secure-random-string');
-var winston = require('winston');
+var logger = require('./logger');
 
 keystone.init({
 
@@ -48,5 +48,8 @@ keystone.set('nav', {
   'votes': ['Vote', 'Ballot', 'Source', 'VerifiedBallot'],
 });
 
+logger.info('starting');
+
 keystone.start();
-winston.info('started');
+
+logger.info('started');

@@ -5,6 +5,7 @@ var passport = require('passport');
 var winston = require('winston');
 var expressWinston = require('express-winston');
 var raven = require('raven');
+var logger = require('../logger');
 
 var importRoutes = keystone.importer(__dirname);
 
@@ -12,7 +13,7 @@ var routes = {
   api: importRoutes('./api'),
 };
 
-winston.info('imported routes');
+logger.info('imported routes');
 
 function isAuthenticated(req, res, next) {
   if (!req.isAuthenticated() || !req.user.sub)
@@ -48,7 +49,7 @@ exports = module.exports = function(app) {
         if ('authorization' in req.headers) {
           var authMethod = req.headers.authorization.split(' ')[0];
           req.headers.authorization = (!!authMethod ? authMethod + ' ' : '')
-          + '*****';
+            + '*****';
         }
 
         delete req.headers.referer;
@@ -67,17 +68,17 @@ exports = module.exports = function(app) {
     ],
   }));
 
-  winston.info('initialize passport');
+  logger.info('initialize passport');
   app.use(passport.initialize());
   app.use(passport.session());
-  winston.info('initialized passport');
+  logger.info('initialized passport');
 
-  winston.info('setup keystone middleware');
+  logger.info('setup keystone middleware');
   app.use(keystone.middleware.api);
 
   // JWT authentication does not use sessions, so we have to check for a user
   // without throwing an error if there is none.
-  winston.info('setup JWT authentication middleware');
+  logger.info('setup JWT authentication middleware');
   app.use((req, res, next) => passport.authenticate('jwt', (err, user, info) => {
     if (err) {
       return next(err);
@@ -96,7 +97,7 @@ exports = module.exports = function(app) {
     return req.logIn(user, { session: false }, next);
   })(req, res, next));
 
-  winston.info('setup routes');
+  logger.info('setup routes');
 
   /**
    * @apiDefine user A user that has been properly logged in using any of the `/auth` endpoints.
