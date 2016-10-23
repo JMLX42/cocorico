@@ -56,7 +56,7 @@ module Vagrant
     end
 
     def self.provision_with_ansible(config, name, params)
-      script_path = self.is_main_project ? "deployment/ansible.sh" : "/srv/cocorico-cloud/deployment/ansible.sh"
+      script_path = self.is_main_project ? "deployment/ansible.sh" : "/srv/cocorico/deployment/ansible.sh"
 
       script = <<-SH
         export PLAYBOOK=provisioning/provision.yml
