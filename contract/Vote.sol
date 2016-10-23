@@ -45,8 +45,10 @@ contract Vote {
 
     modifier onlyChairPerson()
     {
-        if (msg.sender != chairperson)
-            throw;
+        if (msg.sender != chairperson) {
+            VoteError(msg.sender, 'invalid sender');
+            return;
+        }
         _;
     }
 
@@ -54,15 +56,30 @@ contract Vote {
     {
         Voter voter = voters[msg.sender];
 
-        if (voter.voted || !voter.registered)
-            throw;
+        if (voter.voted || !voter.registered) {
+            VoteError(msg.sender, 'voter is not registered');
+            return;
+        }
         _;
+    }
+
+    modifier notAlreadyVoted()
+    {
+      Voter voter = voters[msg.sender];
+
+      if (voter.voted) {
+          VoteError(msg.sender, 'voter already voted');
+          return;
+      }
+      _;
     }
 
     modifier onlyWhenStatusIs(Status testStatus)
     {
-        if (status != testStatus)
-            throw;
+        if (status != testStatus) {
+            VoteError(msg.sender, 'invalid status');
+            return;
+        }
         _;
     }
 
@@ -73,7 +90,7 @@ contract Vote {
     {
         Voter voter = voters[voterAddress];
 
-        if (voter.voted || voter.registered) {
+        if (voter.registered) {
             VoteError(voterAddress, 'already registered');
             return;
         }
@@ -83,17 +100,18 @@ contract Vote {
         VoterRegistered(voterAddress);
     }
 
-    // Give a single vote to proposal $(proposal).
+    // Give a single vote to proposal proposal.
     function vote(uint8 proposal)
     public
     onlyRegisteredVoter()
+    notAlreadyVoted()
     onlyWhenStatusIs(Status.Open)
     {
         Voter voter = voters[msg.sender];
 
         if (proposal >= results.length) {
-          VoteError(msg.sender, 'invalid proposal');
-          return;
+            VoteError(msg.sender, 'invalid proposal');
+            return;
         }
 
         voter.voted = true;

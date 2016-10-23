@@ -26,10 +26,10 @@ function noRetryError(err) {
 function whenTransactionMined(web3, tx, callback) {
   async.during(
     function(cb) {
-      web3.eth.getTransaction(
+      web3.eth.getTransactionReceipt(
         tx,
         function(e, r) {
-          if (r && r.blockHash)
+          if (!!r && !!r.blockHash)
             return cb(e, false, r);
 
           return cb(e, true, null);
@@ -64,6 +64,11 @@ function initializeVoterAccount(web3, rootAccount, address, callback) {
       value: value,
     },
     function(error, result) {
+      if (error) {
+        callback(error, null);
+        return;
+      }
+
       whenTransactionMined(
         web3,
         result,
@@ -89,22 +94,39 @@ function initializeVoterAccount(web3, rootAccount, address, callback) {
 }
 
 function registerVoter(web3, rootAccount, address, voteInstance, callback) {
-  var voterRegisteredEvent = voteInstance.VoterRegistered();
-  var voteErrorEvent = voteInstance.VoteError();
+  var voterRegisteredEvent = voteInstance.VoterRegistered(
+    {voter: address},
+    {fromBlock: 0, toBlock: 'latest'}
+  );
+  var voteErrorEvent = voteInstance.VoteError(
+    {user: address},
+    {fromBlock: 0, toBlock: 'latest'}
+  );
+
+  var timeout = setTimeout(
+    () => {
+      voterRegisteredEvent.stopWatching();
+      voteErrorEvent.stopWatching();
+      callback(noRetryError({error : 'Vote.registerVoter timeout '}), null);
+    },
+    600000 // 10 minutes
+  );
 
   voterRegisteredEvent.watch((err, e) => {
     if (e.args.voter === address) {
       voterRegisteredEvent.stopWatching();
       voteErrorEvent.stopWatching();
+      clearTimeout(timeout);
       callback(noRetryError(err), e);
     }
   });
 
   voteErrorEvent.watch((err, e) => {
-    if (e.args.voter === address) {
+    if (e.args.user === address) {
       voteErrorEvent.stopWatching();
       voterRegisteredEvent.stopWatching();
-      callback(noRetryError(err), e);
+      clearTimeout(timeout);
+      callback(noRetryError(!!err ? err : {error:e.args.message}), null);
     }
   });
 
@@ -119,6 +141,7 @@ function registerVoter(web3, rootAccount, address, voteInstance, callback) {
       if (err) {
         voteErrorEvent.stopWatching();
         voterRegisteredEvent.stopWatching();
+        clearTimeout(timeout);
         callback(err, null, null);
       } else {
         log.info(
@@ -135,14 +158,41 @@ function registerVoter(web3, rootAccount, address, voteInstance, callback) {
 }
 
 function sendVoteTransaction(web3, voteInstance, transaction, callback) {
-  var ballotEvent = voteInstance.Ballot();
+  var ballotEvent = voteInstance.Ballot(
+    {voter: address},
+    {fromBlock: 0, toBlock: 'latest'}
+  );
+  var voteErrorEvent = voteInstance.VoteError(
+    {user: address},
+    {fromBlock: 0, toBlock: 'latest'}
+  );
   var signedTx = new EthereumTx(transaction);
   var address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
+
+  var timeout = setTimeout(
+    () => {
+      ballotEvent.stopWatching();
+      voteErrorEvent.stopWatching();
+      callback(noRetryError({error : 'Vote.vote timeout '}), null);
+    },
+    600000 // 10 minutes
+  );
 
   ballotEvent.watch((err, e) => {
     if (e.args.voter === address) {
       ballotEvent.stopWatching();
+      voteErrorEvent.stopWatching();
+      clearTimeout(timeout);
       callback(err, e);
+    }
+  });
+
+  voteErrorEvent.watch((err, e) => {
+    if (e.args.user === address) {
+      ballotEvent.stopWatching();
+      voteErrorEvent.stopWatching();
+      clearTimeout(timeout);
+      callback(noRetryError(!!err ? err : {error:e.args.message}), null);
     }
   });
 
@@ -150,7 +200,9 @@ function sendVoteTransaction(web3, voteInstance, transaction, callback) {
     transaction,
     function(err, txhash) {
       if (err) {
-        ballotEvent.stopWatching();
+        voteErrorEvent.stopWatching();
+        voterRegisteredEvent.stopWatching();
+        clearTimeout(timeout);
         callback(err, null, null);
       } else {
         log.info(
@@ -323,12 +375,36 @@ function updateBallotStatus(ballot, status, callback) {
 
       dbBallot.status = status;
 
-      return dbBallot.save(callback);
+      return dbBallot.save((err2, _) => {
+        if (err2) {
+          return callback(err2, dbBallot);
+        }
+
+        if (status === 'pending') {
+          return triggerWebhookOnPending(ballot, (err3, webhookMsg) => {
+            if (err3) {
+              return callback(err3, webhookMsg);
+            }
+            return callback(null, dbBallot);
+          });
+        }
+
+        if (status === 'complete') {
+          return triggerWebhookOnSuccess(ballot, (err3, webhookMsg) => {
+            if (err3) {
+              return callback(err3, webhookMsg);
+            }
+            return callback(null, dbBallot);
+          });
+        }
+
+        return callback(null, dbBallot);
+      });
     });
 }
 
 function ballotError(ballot, msg, callback) {
-  log.error(msg.toString());
+  // log.error(msg.toString());
 
   Ballot.model.findById(ballot.id)
     .exec(function(err, dbBallot) {
@@ -340,12 +416,69 @@ function ballotError(ballot, msg, callback) {
         dbBallot.error = JSON.stringify(msg);
 
         return dbBallot.save(function(saveErr) {
+          return triggerWebhookOnError(ballot, (err3, webhookMsg) => {
+            if (err3) {
+              return callback(err3, webhookMsg);
+            }
+            return callback(null, null);
+          });
+
           return callback(saveErr, dbBallot);
         });
       }
 
       return callback(null, null);
     });
+}
+
+function triggerWebhookOnPending(ballot, callback) {
+  return triggerWebhook(ballot, 'pending', callback)
+}
+
+function triggerWebhookOnSuccess(ballot, callback) {
+  return triggerWebhook(ballot, 'success', callback)
+}
+
+function triggerWebhookOnError(ballot, callback) {
+  return triggerWebhook(ballot, 'error', callback)
+}
+
+function triggerWebhook(ballot, status, callback) {
+  if (!ballot.app.webhookURL) {
+    log.info({status:status}, 'App.webhookURL is not set: skipping webhook');
+    callback(null, null);
+    return;
+  }
+
+  require('amqplib/callback_api').connect('amqp://localhost', (err, conn) => {
+    if (err) {
+      log.error('Unable to connect to AMQP service.');
+      return callback(err, null);
+    }
+    return conn.createChannel((err2, ch) => {
+      if (err2) {
+        log.error('Unable to create new AMQP channel.');
+        return callback(err2, null);
+      }
+      msg = {
+        url: ballot.app.webhookURL,
+        event: {
+          app: ballot.app,
+          vote: {id: ballot.vote.id},
+          user: {sub: ballot.user.sub},
+          status: status,
+        },
+        createdAt: Date.now(),
+      };
+      ch.assertQueue('webhooks');
+      ch.sendToQueue('webhooks',
+        new Buffer(JSON.stringify(msg)),
+        { persistent : true }
+      );
+      log.info({message:msg}, 'pushed webhook');
+      return callback(null, msg);
+    });
+  });
 }
 
 module.exports.run = function() {
@@ -414,9 +547,9 @@ module.exports.run = function() {
                   );
                   ch.ack(msg);
                 });
+              } else {
+                ch.ack(msg);
               }
-
-              ch.ack(msg);
             });
           }
         );
