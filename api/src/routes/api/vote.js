@@ -297,21 +297,21 @@ exports.permissions = function(req, res) {
   var voteId = req.params.voteId;
 
   Vote.model.findById(voteId)
-        .exec((err, vote) => {
-          if (err) {
-            return res.apiError('database error', err);
-          }
+    .exec((err, vote) => {
+      if (err) {
+        return res.apiError('database error', err);
+      }
 
-          if (!vote) {
-            return res.status(404).send();
-          }
+      if (!vote) {
+        return res.status(404).send();
+      }
 
-          return res.apiResponse({
-            permissions : {
-              read: config.capabilities.vote.read,
-              vote: !!req.user && vote.userIsAuthorizedToVote(req.user),
-              update: config.capabilities.vote.update,
-            },
-          });
-        });
+      return res.apiResponse({
+        permissions : {
+          read: config.capabilities.vote.read,
+          vote: !!req.user && vote.userIsAuthorizedToVote(req.user),
+          update: config.capabilities.vote.update,
+        },
+      });
+    });
 }
