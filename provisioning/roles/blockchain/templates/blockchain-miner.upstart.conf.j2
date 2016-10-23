@@ -30,7 +30,7 @@ script
         >>{{ log_dir }}/blockchain.log 2>&1
 {% else %}
     exec geth \
-{% if ethereum_max_peers is defined and ethereum_max_peers %}
+{% if ethereum_max_peers is defined %}
         --maxpeers {{ ethereum_max_peers }} \
 {% endif %}
 {% if ethereum_no_discover is defined and ethereum_no_discover %}
