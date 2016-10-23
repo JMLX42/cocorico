@@ -238,5 +238,5 @@ transform.toJSON(Vote, (vote) => {
   delete vote.key;
 });
 
-Vote.defaultColumns = 'title, url, status, voteContractAddress';
+Vote.defaultColumns = 'title, url, status, voteContractAddress, createdAt';
 Vote.register();
