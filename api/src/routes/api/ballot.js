@@ -311,7 +311,7 @@ exports.getTransactions = function(req, res) {
                 result = result.filter(filter);
               }
 
-              var page = parseInt(req.body.page);
+              var page = !req.body.page ? 0 : parseInt(req.body.page);
               var numPages = Math.ceil(result.length / 10);
               result = result.slice(page * 10, page * 10 + 10);
 
