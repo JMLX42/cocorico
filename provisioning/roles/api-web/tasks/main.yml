@@ -56,7 +56,7 @@
     --title={{ test_app.title }}
     --secret={{ test_app.secret }}
     --url={{ test_app.url }}
-    --mongoUri=mongodb://{{ home_db_private_host }}/{{ mongodb_database_name }}
+    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: create_api_test_app
