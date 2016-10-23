@@ -2,6 +2,8 @@ pragma solidity ^0.4.2;
 
 contract Vote {
 
+    enum Status { Open, Closed }
+
     event Ballot (
         address indexed voter,
         uint8 proposal
@@ -25,25 +27,31 @@ contract Vote {
     mapping(address => Voter) voters;
     address chairperson;
     uint[] results;
+    Status status;
 
     /* This unnamed function is called whenever someone tries to send ether to it */
     function () {
         throw; // Prevents accidental sending of ether
     }
 
-    // Create a new vote with $(_numProposals) different results.
-    function Vote(uint8 _numProposals) {
+    // Create a new vote with numProposals different results.
+    function Vote(uint8 numProposals)
+    public
+    {
         chairperson = msg.sender;
-        results.length = _numProposals;
+        results.length = numProposals;
+        status = Status.Open;
     }
 
-    modifier onlyChairPerson() {
+    modifier onlyChairPerson()
+    {
         if (msg.sender != chairperson)
             throw;
         _;
     }
 
-    modifier onlyRegisteredVoter() {
+    modifier onlyRegisteredVoter()
+    {
         Voter voter = voters[msg.sender];
 
         if (voter.voted || !voter.registered)
@@ -51,7 +59,18 @@ contract Vote {
         _;
     }
 
-    function registerVoter(address voterAddress) onlyChairPerson {
+    modifier onlyWhenStatusIs(Status testStatus)
+    {
+        if (status != testStatus)
+            throw;
+        _;
+    }
+
+    function registerVoter(address voterAddress)
+    public
+    onlyChairPerson()
+    onlyWhenStatusIs(Status.Open)
+    {
         Voter voter = voters[voterAddress];
 
         if (voter.voted || voter.registered) {
@@ -65,7 +84,11 @@ contract Vote {
     }
 
     // Give a single vote to proposal $(proposal).
-    function vote(uint8 proposal) onlyRegisteredVoter {
+    function vote(uint8 proposal)
+    public
+    onlyRegisteredVoter()
+    onlyWhenStatusIs(Status.Open)
+    {
         Voter voter = voters[msg.sender];
 
         if (proposal >= results.length) {
@@ -80,19 +103,35 @@ contract Vote {
         Ballot(msg.sender, proposal);
     }
 
-    function cancelVote() onlyRegisteredVoter {
+    /*function cancelVote() onlyRegisteredVoter onlyWhenStatusIs(Status.Open) {
         Voter voter = voters[msg.sender];
 
         results[voter.vote] -= 1;
 
         voter.voted = false;
-    }
+    }*/
 
-    function getVoteResults() constant returns (uint[]) {
+    function getVoteResults()
+    public
+    onlyWhenStatusIs(Status.Closed)
+    constant returns (uint[])
+    {
         return results;
     }
 
-    function end() onlyChairPerson {
+    function close()
+    public
+    onlyChairPerson()
+    onlyWhenStatusIs(Status.Open)
+    {
+        status = Status.Closed;
+    }
+
+    function destroy()
+    public
+    onlyChairPerson()
+    onlyWhenStatusIs(Status.Closed)
+    {
         selfdestruct(chairperson);
     }
 }

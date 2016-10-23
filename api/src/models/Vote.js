@@ -90,7 +90,7 @@ function completeVote(vote, next) {
         vote.voteContractAddress,
         (err, instance) => callback(err, accounts, instance)
       ),
-      (accounts, instance, callback) => instance.end
+      (accounts, instance, callback) => instance.close
         .sendTransaction({from: accounts[0]}, (err, txhash) => {
           callback(err, txhash);
         }),
