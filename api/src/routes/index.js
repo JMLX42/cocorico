@@ -1,16 +1,18 @@
+var config = require('/opt/cocorico/api-web/config.json');
+
 var keystone = require('keystone');
 var passport = require('passport');
 var winston = require('winston');
 var expressWinston = require('express-winston');
 var raven = require('raven');
 
-var config = require('/opt/cocorico/api-web/config.json');
-
 var importRoutes = keystone.importer(__dirname);
 
 var routes = {
   api: importRoutes('./api'),
 };
+
+winston.info('imported routes');
 
 function isAuthenticated(req, res, next) {
   if (!req.isAuthenticated() || !req.user.sub)
@@ -65,22 +67,26 @@ exports = module.exports = function(app) {
     ],
   }));
 
+  winston.info('initialize passport');
   app.use(passport.initialize());
   app.use(passport.session());
+  winston.info('initialized passport');
 
+  winston.info('setup keystone middleware');
   app.use(keystone.middleware.api);
 
   // JWT authentication does not use sessions, so we have to check for a user
   // without throwing an error if there is none.
+  winston.info('setup JWT authentication middleware');
   app.use((req, res, next) => passport.authenticate('jwt', (err, user, info) => {
     if (err) {
       return next(err);
     }
     if (!user) {
-      // if the JWT authentification failed
+      // if the JWT authentication failed
       if (info) {
         return res.status(401).apiResponse({
-          error: 'authentification failed',
+          error: 'authentication failed',
           message: info.message,
         });
       }
@@ -90,6 +96,8 @@ exports = module.exports = function(app) {
     return req.logIn(user, { session: false }, next);
   })(req, res, next));
 
+  winston.info('setup routes');
+
   /**
    * @apiDefine user A user that has been properly logged in using any of the `/auth` endpoints.
    */
@@ -97,6 +105,8 @@ exports = module.exports = function(app) {
   /**
    * @apiDefine app A registered 3rd party app providing a valid OAuth token fetched using `/oauth/token`.
    */
+
+  app.get('/ping', (req, res) => res.apiResponse('pong'));
 
   /**
    * @api {post} /oauth/token Get an OAuth access token

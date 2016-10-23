@@ -161,6 +161,11 @@ Vote.schema.pre('validate', function(next) {
           http: { timeout: 30000 },
         },
         (err, meta) => {
+          if (err) {
+            callback(new Error(err));
+            return;
+          }
+
           if (updateTitle) {
             self.title = meta.title;
           }

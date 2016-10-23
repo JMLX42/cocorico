@@ -139,7 +139,7 @@ exports.vote = function(req, res) {
           res.status(err.code);
         }
         if (err.error) {
-          return res.apiError(err.error);
+          return res.apiResponse({error: err.error});
         }
         return res.apiError(err);
       }

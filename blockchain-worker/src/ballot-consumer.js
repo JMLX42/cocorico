@@ -217,7 +217,6 @@ function handleBallot(ballot, next) {
   var address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
   var rootAccount = null;
 
-
   async.waterfall(
     [
       (callback) => updateBallotStatus(
@@ -310,114 +309,43 @@ function handleBallot(ballot, next) {
 }
 
 function updateBallotStatus(ballot, status, callback) {
-  Ballot.model.findById(ballot.id).exec(function(err, dbBallot) {
-    if (err) {
-      return callback(err, null);
-    }
-    if (!dbBallot) {
-      return callback('unknown ballot with id ' + ballot.id, null);
-    }
+  Ballot.model.findById(ballot.id)
+    .exec(function(err, dbBallot) {
+      if (err)
+        return callback(err, null);
 
-    dbBallot.status = status;
-
-    return dbBallot.save((err2, _) => {
-      if (err2) {
-        return callback(err2, dbBallot);
+      if (!dbBallot) {
+        return callback(
+          noRetryError({error:'unknown ballot with id ' + ballot.id}),
+          null
+        );
       }
 
-      if (status === 'pending') {
-        return triggerWebhookOnPending(ballot, (err3, webhookMsg) => {
-          if (err3) {
-            return callback(err3, webhookMsg);
-          }
-          return callback(null, dbBallot);
-        });
-      }
+      dbBallot.status = status;
 
-      if (status === 'complete') {
-        return triggerWebhookOnSuccess(ballot, (err3, webhookMsg) => {
-          if (err3) {
-            return callback(err3, webhookMsg);
-          }
-          return callback(null, dbBallot);
-        });
-      }
-
-      return callback(null, dbBallot);
+      return dbBallot.save(callback);
     });
-  });
 }
 
 function ballotError(ballot, msg, callback) {
   log.error(msg.toString());
 
-  Ballot.model.findById(ballot.id).exec(function(err, dbBallot) {
-    if (err) {
-      return callback(err, null);
-    }
-    if (!dbBallot) {
-      return callback('unknown ballot with id ' + ballot.id, null);
-    }
+  Ballot.model.findById(ballot.id)
+    .exec(function(err, dbBallot) {
+      if (err)
+        return callback(err, null);
 
-    dbBallot.status = 'error';
-    dbBallot.error = JSON.stringify(msg);
+      if (dbBallot) {
+        dbBallot.status = 'error';
+        dbBallot.error = JSON.stringify(msg);
 
-    return dbBallot.save((err2, _) => {
-      if (err2) {
-        return callback(err2, dbBallot);
+        return dbBallot.save(function(saveErr) {
+          return callback(saveErr, dbBallot);
+        });
       }
-      return triggerWebhookOnError(ballot, (err3, webhookMsg) => {
-        if (err3) {
-          return callback(err3, webhookMsg);
-        }
-        return callback(null, null);
-      });
+
+      return callback(null, null);
     });
-  });
-}
-
-function triggerWebhookOnPending(ballot, callback) {
-  return triggerWebhook(ballot, 'pending', callback)
-}
-
-function triggerWebhookOnSuccess(ballot, callback) {
-  return triggerWebhook(ballot, 'success', callback)
-}
-
-function triggerWebhookOnError(ballot, callback) {
-  return triggerWebhook(ballot, 'error', callback)
-}
-
-function triggerWebhook(ballot, status, callback) {
-  require('amqplib/callback_api').connect('amqp://localhost', (err, conn) => {
-    if (err) {
-      log.error('Unable to connect to AMQP service.');
-      return callback(err, null);
-    }
-    return conn.createChannel((err2, ch) => {
-      if (err2) {
-        log.error('Unable to create new AMQP channel.');
-        return callback(err2, null);
-      }
-      msg = {
-        url: ballot.app.webhookURL,
-        event: {
-          app: ballot.app,
-          vote: {id: ballot.vote.id},
-          user: {sub: ballot.user.sub},
-          status: status,
-        },
-        createdAt: Date.now(),
-      };
-      ch.assertQueue('webhooks');
-      ch.sendToQueue('webhooks',
-        new Buffer(JSON.stringify(msg)),
-        { persistent : true }
-      );
-      log.info({webhook: msg}, 'pushed webhook call');
-      return callback(null, msg);
-    });
-  });
 }
 
 module.exports.run = function() {
@@ -431,13 +359,13 @@ module.exports.run = function() {
         process.exit(1);
       }
 
+      log.info('connected');
+
       conn.createChannel((channelErr, ch) => {
         if (channelErr != null) {
           log.error({error: channelErr}, 'error');
           process.exit(1);
         }
-
-        log.info('connected');
 
         ch.assertQueue('ballots');
         ch.consume(
@@ -451,9 +379,9 @@ module.exports.run = function() {
             }
 
             if (!msgObj.ballot) {
-              log.info('skipping invalid message', msgObj);
+              log.info('invalid ballot message received');
               ch.ack(msg);
-              return;
+              return
             }
 
             log.info(

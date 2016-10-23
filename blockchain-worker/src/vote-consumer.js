@@ -36,7 +36,7 @@ function getCompiledVoteContract(web3, callback) {
   });
 }
 
-function mineVoteContract(numProposals, next) {
+function mineVoteContract(next) {
   var hash = '';
   var web3 = new Web3();
 
@@ -60,7 +60,7 @@ function mineVoteContract(numProposals, next) {
         );
 
         web3.eth.contract(abi).new(
-          numProposals,
+          3, // num proposals
           {
             from: accounts[0],
             data: code,
@@ -92,39 +92,41 @@ function mineVoteContract(numProposals, next) {
         );
       },
     ],
-        next
-    );
-}
-
-function handleVote(voteMsg, callback) {
-  mineVoteContract(
-    voteMsg.numProposals,
-    (err, contract, abi) => {
-      if (err) {
-        callback(err, null);
-        return;
-      }
-
-      Vote.model.findById(voteMsg.id)
-        .exec((findErr, vote) => {
-          if (findErr) {
-            callback(findErr, null);
-            return;
-          }
-
-          vote.status = 'open';
-          vote.voteContractABI = JSON.stringify(abi);
-          vote.voteContractAddress = contract.address;
-
-          vote.save(callback);
-        });
-    }
+    next
   );
 }
 
-module.exports.run = function() {
-  log.info('connecting');
+function handleVote(voteMsg, callback) {
+  mineVoteContract((err, contract, abi) => {
+    if (err) {
+      callback(err, null);
+      return;
+    }
 
+    Vote.model.findById(voteMsg.id)
+      .exec((findErr, vote) => {
+        if (findErr) {
+          callback(findErr, null);
+          return;
+        }
+
+        // FIXME: should not fail silently
+        if (!vote) {
+          log.error('unable to find/update Vote object');
+          callback(null, null);
+          return;
+        }
+
+        vote.status = 'open';
+        vote.voteContractABI = JSON.stringify(abi);
+        vote.voteContractAddress = contract.address;
+
+        vote.save(callback);
+      });
+  });
+}
+
+module.exports.run = function() {
   require('amqplib/callback_api').connect(
       'amqp://localhost',
       (err, conn) => {
@@ -132,6 +134,8 @@ module.exports.run = function() {
           log.error({error: err}, 'error');
           return;
         }
+
+        log.info('connecting');
 
         conn.createChannel((channelErr, ch) => {
           if (channelErr != null) {

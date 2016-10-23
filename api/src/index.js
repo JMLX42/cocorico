@@ -6,6 +6,7 @@ try {
 var config = require('/opt/cocorico/api-web/config.json');
 var keystone = require('keystone');
 var srs = require('secure-random-string');
+var winston = require('winston');
 
 keystone.init({
 
@@ -48,3 +49,4 @@ keystone.set('nav', {
 });
 
 keystone.start();
+winston.info('started');

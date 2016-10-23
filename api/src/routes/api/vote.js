@@ -48,13 +48,12 @@ exports.getBySlug = function(req, res) {
 }
 
 exports.create = function(req, res) {
-  var app = req.user;
-
-  var url = decodeURIComponent(req.body.url);
-  if (!url) {
+  if (!req.body.url) {
     return res.status(400).send({error: 'missing url'});
   }
 
+  var app = req.user;
+  var url = decodeURIComponent(req.body.url);
   var labels = [];
 
   if (req.body.labels) {
@@ -93,10 +92,7 @@ exports.create = function(req, res) {
         if (err.code) {
           res.status(err.code);
         }
-        if (err.error) {
-          return res.apiError(err.error);
-        }
-        return res.apiError(err);
+        return res.apiResponse({error : err});
       }
       return res.apiResponse({vote: vote});
     }

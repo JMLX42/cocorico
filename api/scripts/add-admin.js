@@ -1,3 +1,5 @@
+#!/usr/bin/env headstone
+
 var keystone = require('keystone');
 var Admin = keystone.list('Admin');
 
