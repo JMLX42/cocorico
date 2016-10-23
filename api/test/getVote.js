@@ -3,28 +3,20 @@ import getAPIURL from './getAPIURL';
 import request from './getRequest';
 import delay from 'timeout-as-promise';
 
-var vote = null;
-
-afterAll(() => {
-  vote = null;
-})
+var id = 0;
 
 async function createVote(url) {
-  if (!!vote) {
-    return new Promise((resolve) => resolve(vote));
-  }
-
   const accesToken = await getAccessToken();
 
   if (!url) {
-    url = 'https://localhost/';
+    url = 'https://localhost/?test=' + id++;
   }
 
   return request
     .post(getAPIURL('/vote'))
     .set('Authorization', 'Bearer ' + accesToken)
     .send({'url': url})
-    .then((res) => vote = res.body.vote);
+    .then((res) => res.body.vote);
 }
 
 export default async function(waitForSmartContract, url) {

@@ -1,10 +1,9 @@
 var config = require('/opt/cocorico/api-web/config.json');
 
-var request = require('superagent-promise')(require('superagent'), Promise);
-var delay = require('timeout-as-promise');
-
-var getAccessToken = require('./getAccessToken');
-var getAPIURL = require('./getAPIURL');
+import request from './getRequest';
+import getAccessToken from './getAccessToken';
+import getAPIURL from './getAPIURL';
+import getVote from './getVote';
 
 const url = 'https://localhost/';
 
@@ -82,15 +81,14 @@ describe('POST /vote', () => {
   });
 
   it('has a valid smart contract address and ABI', async () => {
-    await delay(15000);
+    try {
+      const vote = await getVote(true);
 
-    const voteId = await request
-      .get(getAPIURL('/vote'))
-      .then((res) => res.body.votes.slice(-1)[0].id);
-    const res = await request.get(getAPIURL('/vote/'+ voteId));
-
-    expect(res.body.vote.voteContractABI).not.toBeFalsy();
-    expect(res.body.vote.voteContractAddress).not.toBeFalsy();
+      expect(vote.voteContractABI).not.toBeFalsy();
+      expect(vote.voteContractAddress).not.toBeFalsy();
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   it('returns 400 when a vote with the same URL exists', async () => {
@@ -150,5 +148,20 @@ describe('PUT /vote/:voteId', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.vote.image).toBe(getAPIURL('/img.jpg'));
+  });
+});
+
+describe('GET /vote/result/:voteId', () => {
+  it ('returns 403 if Vote.status is not "complete"', async () => {
+    const vote = await getVote(true);
+
+    try {
+      const res = await request
+        .get(getAPIURL('/vote/result/' + vote.id));
+
+      expect(res).toBeFalsy();
+    } catch (err) {
+      expect(err.status).toBe(403);
+    }
   });
 });
