@@ -250,16 +250,16 @@ var BallotBox = React.createClass({
       ]
       : [
         '#2ecc71',
-        '#e74c3c',
         '#bdc3c7',
+        '#e74c3c',
       ];
 
     var hoverColors = !!vote.labels.length
       ? colors
       : [
         '#27ae60',
-        '#c0392b',
         '#95a5a6',
+        '#c0392b',
       ];
 
     return (
