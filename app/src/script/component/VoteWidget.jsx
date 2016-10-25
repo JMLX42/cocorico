@@ -407,7 +407,7 @@ var VoteWidget = React.createClass({
           className={className ? className : 'btn btn-primary'}
           voteId={this.props.voteId}
           onClick={this.voterCardDownloaded}>
-        Download my proof of vote
+        {this.getIntlMessage('vote.DOWNLOAD_PROOF_OF_VOTE')}
       </SVGDownloadButton>
     );
   },
@@ -415,7 +415,7 @@ var VoteWidget = React.createClass({
   renderLoginDialog: function() {
     return (
       <div className="vote-step-description">
-          <LoginPage />
+        <LoginPage />
       </div>
     );
   },
@@ -597,7 +597,7 @@ var VoteWidget = React.createClass({
           ? <Row>
             <Col xs={12}>
               <ButtonToolbar className="vote-step-actions">
-                <PrintButton text="Print my proof of vote">
+                <PrintButton text={this.getIntlMessage('vote.PRINT_PROOF_OF_VOTE')}>
                   <SVGImage data={proofOfVoteSVG}/>
                 </PrintButton>
                 {this.renderSVGDownloadButton()}

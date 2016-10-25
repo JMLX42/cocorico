@@ -84,7 +84,9 @@
 
       "STEP_4_NAME": "Voted!",
       "STEP_4_HINT": "<h3>Recording your vote</h3><p>Each vote is permanently and anonymously written in a database stored by citizens like you. This way, each of them can recounted without knowing who votes what.</p><p>This process guarantees the vote results are reliable, but it's not immediate and can take a few minutes.</p>",
-      "YOUR_VOTE_IS_COMPLETE": "Your vote \"{ value }\" about { vote } has been sent!"
+      "YOUR_VOTE_IS_COMPLETE": "Your vote \"{ value }\" about { vote } has been sent!",
+      "DOWNLOAD_PROOF_OF_VOTE" : "Download my proof of vote",
+      "PRINT_PROOF_OF_VOTE" : "Print my proof of vote"
     },
 
     "voterCard": {
