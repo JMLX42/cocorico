@@ -88,9 +88,9 @@
 
       "STEP_4_NAME": "A voté !",
       "STEP_4_HINT": "<h3>Enregistrement Du Vote</h3><p>Chaque vote est enregistré de façon indélébile et anonyme dans une base de données hébergée par chaque citoyen. Ils peuvent ainsi être recomptés en toute transparence sans jamais divulguer qui vote quoi.</p><p>Ce processus d'écriture indélébile est le garant de la sécurité du vote, mais il n'est pas immédiat et peut prendre jusqu'à quelques minutes.</p>",
-      "YOUR_VOTE_IS_COMPLETE": "Votre vote \"{ value }\" au sujet de { vote } a bien été envoyé !",
+      "YOUR_VOTE_IS_COMPLETE": "<p>Votre vote \"{ value }\" au sujet de { vote } a bien été envoyé !<p><p>Vous pouvez récupérer votre \"preuve de vote\" : une fois le vote terminé, cette dernière vous permettra de vérifier que votre bulletin est bien dans l'urne numérique.",
       "DOWNLOAD_PROOF_OF_VOTE" : "Télécharger ma preuve de vote",
-      "PRINT_PROOF_OF_VOTE" : "Impriver ma preuve de vote"
+      "PRINT_PROOF_OF_VOTE" : "Imprimer ma preuve de vote"
     },
 
     "voterCard": {
