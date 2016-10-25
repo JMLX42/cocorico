@@ -125,7 +125,7 @@
         },
         "babel-messages": {
           "version": "6.8.0",
-          "from": "babel-messages@>=6.8.0 <7.0.0",
+          "from": "https://registry.npmjs.org/babel-messages/-/babel-messages-6.8.0.tgz",
           "resolved": "https://registry.npmjs.org/babel-messages/-/babel-messages-6.8.0.tgz"
         },
         "babel-template": {
@@ -1543,6 +1543,11 @@
         }
       }
     },
+    "deepmerge": {
+      "version": "1.2.0",
+      "from": "deepmerge@latest",
+      "resolved": "https://registry.npmjs.org/deepmerge/-/deepmerge-1.2.0.tgz"
+    },
     "eth-lightwallet": {
       "version": "2.5.2",
       "from": "https://registry.npmjs.org/eth-lightwallet/-/eth-lightwallet-2.5.2.tgz",
@@ -1934,7 +1939,7 @@
     },
     "intl": {
       "version": "1.2.5",
-      "from": "intl@latest",
+      "from": "https://registry.npmjs.org/intl/-/intl-1.2.5.tgz",
       "resolved": "https://registry.npmjs.org/intl/-/intl-1.2.5.tgz"
     },
     "jquery": {
@@ -2122,7 +2127,7 @@
           "dependencies": {
             "through": {
               "version": "2.3.8",
-              "from": "https://registry.npmjs.org/through/-/through-2.3.8.tgz",
+              "from": "through@>=2.3.6 <3.0.0",
               "resolved": "https://registry.npmjs.org/through/-/through-2.3.8.tgz"
             },
             "jstransform": {

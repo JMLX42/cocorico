@@ -1,5 +1,5 @@
 module.exports = {
-    {% for code, name in supported_locales.iteritems() %}
-    '{{ code }}': require('{{ cocorico_app_dir }}/src/script/intl/{{ code }}.json').messages,
-    {% endfor %}
+  {% for code, name in supported_locales.iteritems() %}
+  '{{ code }}': require('{{ cocorico_app_dir }}/src/script/intl/{{ code }}.json').messages,
+  {% endfor %}
 };

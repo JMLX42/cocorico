@@ -1,5 +1,17 @@
+var deepmerge = require('deepmerge');
+
 var messages = require('/opt/cocorico/app-web/messages.js');
 var config = require('/opt/cocorico/app-web/config.json');
+
+const defaultLocale = 'en-US';
+
+if (process.ENV.NODE_ENV === 'production') {
+  for (var l in messages) {
+    if (l !== defaultLocale) {
+      messages[l] = deepmerge(messages[defaultLocale], messages[l]);
+    }
+  }
+}
 
 module.exports = {
   getSupportedLocales: function() {
@@ -25,7 +37,7 @@ module.exports = {
   },
 
   getLocaleMessages: function(locale) {
-    return locale in messages ? messages[locale] : messages['en-US'];
+    return locale in messages ? messages[locale] : messages[defaultLocale];
   },
 
   getCurrentLocaleMessages: function() {
