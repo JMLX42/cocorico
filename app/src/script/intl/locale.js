@@ -5,7 +5,7 @@ var config = require('/opt/cocorico/app-web/config.json');
 
 const defaultLocale = 'en-US';
 
-if (process.ENV.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production') {
   for (var l in messages) {
     if (l !== defaultLocale) {
       messages[l] = deepmerge(messages[defaultLocale], messages[l]);

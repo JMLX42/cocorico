@@ -47,6 +47,11 @@ module.exports = {
       '__BUILD_NUMBER__': JSON.stringify(process.env.TRAVIS_BUILD_NUMBER || 'NA'),
       '__BUILD_DATE__': JSON.stringify(new Date().toString()),
     }),
+    new webpack.DefinePlugin({
+      'process.env': {
+        'NODE_ENV': JSON.stringify('development'),
+      },
+    }),
   ],
   output: {
     path: path.resolve('./public/build'),
