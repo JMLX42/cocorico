@@ -50,6 +50,9 @@ script
 {% if ethereum_network_id is defined and ethereum_network_id %}
         --networkid "{{ ethereum_network_id }}" \
 {% endif %}
+{% if ethereum_target_gas_limit is defined and ethereum_target_gas_limit %}
+        --targetgaslimit "{{ ethereum_target_gas_limit }}" \
+{% endif %}
         --unlock 0 \
         --password {{ project_dir }}/{{ role_name }}/password \
         --datadir {{ ethereum_datadir }} \
