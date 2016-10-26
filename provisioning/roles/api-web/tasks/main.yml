@@ -50,7 +50,7 @@
   failed_when: result.stderr
 
 - name: create test app
-  when: is_development_environment
+  when: test_app is defined
   shell: headstone {{ cocorico_api_dir }}/scripts/add-app.js
     --cwd={{ cocorico_api_dir }}/src
     --title={{ test_app.title }}
@@ -60,8 +60,8 @@
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: create_api_test_app
-  changed_when: "'created' in result.stdout"
-  failed_when: result.stderr
+  changed_when: "'created' in create_api_test_app.stdout"
+  failed_when: create_api_test_app.stderr
 
 - name: update configuration
   template: src=config.json.j2 dest={{ project_dir }}/{{ role_name }}/config.json

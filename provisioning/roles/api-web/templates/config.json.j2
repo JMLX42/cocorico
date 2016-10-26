@@ -1,6 +1,9 @@
 {
 {% if is_development_environment %}
     "env": "development",
+{% else %}
+    "env": "production",
+{% endif %}
 {% if create_api_test_app is defined %}
     "testApp": {
       "id": "{{ create_api_test_app.stdout_lines[2] | regex_replace('.*ID (.*)\.', '\\1') }}",
@@ -8,9 +11,6 @@
       "title": "{{ test_app.title }}",
       "url": "{{ test_app.url }}"
     },
-{% endif %}
-{% else %}
-    "env": "production",
 {% endif %}
     "hostname" : "{{ front_web_public_host }}",
     "mongo" : {
