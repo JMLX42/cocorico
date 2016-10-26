@@ -107,12 +107,20 @@ function registerVoter(web3, rootAccount, address, voteInstance, callback) {
     () => {
       voterRegisteredEvent.stopWatching();
       voteErrorEvent.stopWatching();
-      callback(noRetryError({error : 'Vote.registerVoter timeout '}), null);
+      callback(noRetryError({error : 'Vote.registerVoter timeout'}), null);
     },
     600000 // 10 minutes
   );
 
   voterRegisteredEvent.watch((err, e) => {
+    if (!!err) {
+      voterRegisteredEvent.stopWatching();
+      voteErrorEvent.stopWatching();
+      clearTimeout(timeout);
+      callback(err, e);
+      return;
+    }
+
     if (e.args.voter === address) {
       voterRegisteredEvent.stopWatching();
       voteErrorEvent.stopWatching();
@@ -122,11 +130,19 @@ function registerVoter(web3, rootAccount, address, voteInstance, callback) {
   });
 
   voteErrorEvent.watch((err, e) => {
+    if (!!err) {
+      voterRegisteredEvent.stopWatching();
+      voteErrorEvent.stopWatching();
+      clearTimeout(timeout);
+      callback(err, e);
+      return;
+    }
+
     if (e.args.user === address) {
       voteErrorEvent.stopWatching();
       voterRegisteredEvent.stopWatching();
       clearTimeout(timeout);
-      callback(noRetryError(!!err ? err : {error:e.args.message}), null);
+      callback(noRetryError({error:e.args.message}), null);
     }
   });
 
@@ -138,7 +154,7 @@ function registerVoter(web3, rootAccount, address, voteInstance, callback) {
       gasPrice: 20000000000,
     },
     function(err, txhash) {
-      if (err) {
+      if (!!err) {
         voteErrorEvent.stopWatching();
         voterRegisteredEvent.stopWatching();
         clearTimeout(timeout);
@@ -173,12 +189,20 @@ function sendVoteTransaction(web3, voteInstance, transaction, callback) {
     () => {
       ballotEvent.stopWatching();
       voteErrorEvent.stopWatching();
-      callback(noRetryError({error : 'Vote.vote timeout '}), null);
+      callback(noRetryError({error : 'Vote.vote timeout'}), null);
     },
     600000 // 10 minutes
   );
 
   ballotEvent.watch((err, e) => {
+    if (!!err) {
+      ballotEvent.stopWatching();
+      voteErrorEvent.stopWatching();
+      clearTimeout(timeout);
+      callback(err, e);
+      return;
+    }
+
     if (e.args.voter === address) {
       ballotEvent.stopWatching();
       voteErrorEvent.stopWatching();
@@ -188,20 +212,28 @@ function sendVoteTransaction(web3, voteInstance, transaction, callback) {
   });
 
   voteErrorEvent.watch((err, e) => {
+    if (!!err) {
+      ballotEvent.stopWatching();
+      voteErrorEvent.stopWatching();
+      clearTimeout(timeout);
+      callback(err, e);
+      return;
+    }
+
     if (e.args.user === address) {
       ballotEvent.stopWatching();
       voteErrorEvent.stopWatching();
       clearTimeout(timeout);
-      callback(noRetryError(!!err ? err : {error:e.args.message}), null);
+      callback(noRetryError({error:e.args.message}), null);
     }
   });
 
   web3.eth.sendRawTransaction(
     transaction,
     function(err, txhash) {
-      if (err) {
+      if (!!err) {
+        ballotEvent.stopWatching();
         voteErrorEvent.stopWatching();
-        voterRegisteredEvent.stopWatching();
         clearTimeout(timeout);
         callback(err, null, null);
       } else {
@@ -376,14 +408,14 @@ function updateBallotStatus(ballot, status, callback) {
       dbBallot.status = status;
 
       return dbBallot.save((err2, _) => {
-        if (err2) {
+        if (!!err2) {
           return callback(err2, dbBallot);
         }
 
         if (status === 'pending') {
           return triggerWebhookOnPending(ballot, (err3, webhookMsg) => {
-            if (err3) {
-              return callback(err3, webhookMsg);
+            if (!!err3) {
+              return callback(err3, dbBallot);
             }
             return callback(null, dbBallot);
           });
@@ -392,7 +424,7 @@ function updateBallotStatus(ballot, status, callback) {
         if (status === 'complete') {
           return triggerWebhookOnSuccess(ballot, (err3, webhookMsg) => {
             if (err3) {
-              return callback(err3, webhookMsg);
+              return callback(err3, dbBallot);
             }
             return callback(null, dbBallot);
           });
@@ -408,26 +440,34 @@ function ballotError(ballot, msg, callback) {
 
   Ballot.model.findById(ballot.id)
     .exec(function(err, dbBallot) {
-      if (err)
+      if (!!err)
         return callback(err, null);
 
-      if (dbBallot) {
-        dbBallot.status = 'error';
-        dbBallot.error = JSON.stringify(msg);
-
-        return dbBallot.save(function(saveErr) {
-          return triggerWebhookOnError(ballot, (err3, webhookMsg) => {
-            if (err3) {
-              return callback(err3, webhookMsg);
-            }
-            return callback(null, null);
-          });
-
-          return callback(saveErr, dbBallot);
-        });
+      if (!dbBallot) {
+        return callback(
+          noRetryError({error:'unknown ballot with id ' + ballot.id}),
+          null
+        );
       }
 
-      return callback(null, null);
+      var errorMsg = JSON.stringify(msg);
+      if (!errorMsg) {
+        errorMsg = 'unknown error';
+      }
+      dbBallot.error = errorMsg;
+
+      return dbBallot.save(function(saveErr) {
+        if (!!saveErr) {
+          return callback(saveErr, dbBallot);
+        }
+
+        return triggerWebhookOnError(ballot, (err3, webhookMsg) => {
+          if (!!err3) {
+            return callback(err3, dbBallot);
+          }
+          return callback(null, dbBallot);
+        });
+      });
     });
 }
 
@@ -450,16 +490,26 @@ function triggerWebhook(ballot, status, callback) {
     return;
   }
 
+  log.info({status:status}, 'preparing to push webhook');
+
   require('amqplib/callback_api').connect('amqp://localhost', (err, conn) => {
-    if (err) {
+    if (!!err) {
       log.error('Unable to connect to AMQP service.');
-      return callback(err, null);
+      callback(err, null);
+      return;
     }
-    return conn.createChannel((err2, ch) => {
-      if (err2) {
+
+    log.info('connected to webhook queue');
+
+    conn.createChannel((err2, ch) => {
+      if (!!err2) {
         log.error('Unable to create new AMQP channel.');
-        return callback(err2, null);
+        callback(err2, null);
+        return;
       }
+
+      log.info('created channel');
+
       msg = {
         url: ballot.app.webhookURL,
         event: {
@@ -475,8 +525,13 @@ function triggerWebhook(ballot, status, callback) {
         new Buffer(JSON.stringify(msg)),
         { persistent : true }
       );
-      log.info({message:msg}, 'pushed webhook');
-      return callback(null, msg);
+      log.info({status:status}, 'pushed webhook');
+
+      // ch.close();
+
+      callback(null, msg);
+
+      return;
     });
   });
 }
