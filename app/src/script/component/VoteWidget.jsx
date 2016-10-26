@@ -3,6 +3,7 @@ var ReactIntl = require('react-intl');
 var ReactBootstrap = require('react-bootstrap');
 var Reflux = require('reflux');
 var classNames = require('classnames');
+var dateFormat = require('dateformat');
 
 var Button = ReactBootstrap.Button,
   ButtonToolbar = ReactBootstrap.ButtonToolbar,
@@ -77,6 +78,7 @@ var VoteWidget = React.createClass({
       skipVoterCardButtonEnabled: false,
       fetchedVoterCard: false,
       error: VoteWidget.ERROR_NONE,
+      ballotValue: null,
     };
   },
 
@@ -92,7 +94,7 @@ var VoteWidget = React.createClass({
   componentWillReceiveProps: function(nextProps) {
     this.setState({
       visible: nextProps.visible,
-      ballotValue: this.props.ballotValue,
+      // ballotValue: this.props.ballotValue,
     });
 
     var vote = this.state.vote;
@@ -110,14 +112,14 @@ var VoteWidget = React.createClass({
       return ;
     }
 
-    if (!!ballot.error) {
-            // FIXME: this.goToStep(VoteWidget.STEP_ERROR)
-            // this.error(VoteWidget.ERROR_BALLOT_ERROR);
-      return;
-    }
+    // if (!!ballot.error) {
+    //   // FIXME: this.goToStep(VoteWidget.STEP_ERROR)
+    //   // this.error(VoteWidget.ERROR_BALLOT_ERROR);
+    //   return;
+    // }
 
     var completeStatus = [
-      'queued', 'pending', 'initialized', 'registered', 'complete',
+      'queued', 'pending', 'initialized', 'registered', 'complete', 'error',
     ];
     if (completeStatus.indexOf(ballot.status) >= 0) {
       BallotAction.stopPolling();
@@ -365,7 +367,7 @@ var VoteWidget = React.createClass({
 
     return {
       'positive': !hasLabels && this.state.ballotValue === 0,
-      'neutral': !hasLabels || this.state.ballotValue === 1,
+      'neutral': !hasLabels && this.state.ballotValue === 1,
       'negative': !hasLabels && this.state.ballotValue === 2,
     };
   },
@@ -454,7 +456,6 @@ var VoteWidget = React.createClass({
       return this.renderLoginDialog();
 
     var user = this.state.users.getCurrentUser();
-    var birthdate = new Date(user.birthdate);
 
     return (
       <Grid>
@@ -467,7 +468,7 @@ var VoteWidget = React.createClass({
                 <FormattedHTMLMessage
                   message={this.getIntlMessage('vote.ANNOUNCE_VOTER_ID')}
                   name={user.firstName + ' ' + user.lastName}
-                  birthdate={birthdate.toLocaleDateString()}/> :
+                  birthdate={user.birthdate}/> :
               </p>
               <ButtonToolbar className="vote-step-actions">
                 <Button bsStyle="primary" onClick={(e)=>this.goToNextStep()}>
@@ -570,27 +571,44 @@ var VoteWidget = React.createClass({
     var proofOfVoteSVG = this.state.ballots.getProofOfVoteSVGByVoteId(
       this.props.voteId
     );
+    var ballot = this.state.ballots.getByVoteId(this.props.voteId);
+
+    // If there is a ballot record but the ballotValue state has not
+    // been set, it means the ballot has been fetched from the API and the user
+    // already voted.
+    if (!!ballot && this.state.ballotValue === null && !!this.state.users.getCurrentUser()) {
+      return (
+        <Grid>
+          <Row className="vote-step-description">
+            <Col xs={12}>
+              <FormattedHTMLMessage
+                message={this.getIntlMessage('vote.ALREADY_VOTED')}
+                date={dateFormat(ballot.createdAt, 'UTC:dd-mm-yyyy')}
+                time={dateFormat(ballot.createdAt, 'UTC:HH:MM:ss Z')}/>
+            </Col>
+          </Row>
+        </Grid>
+      );
+    }
 
     return (
       <Grid>
         <Row className="vote-step-description">
           <Col xs={12}>
-            <p>
-              <FormattedMessage
-                message={this.getIntlMessage('vote.YOUR_VOTE_IS_COMPLETE')}
-                value={
-                  <strong>
-                    <span className={classNames(this.getVoteValueMessageClassNames())}>
-                      {this.getVoteValueDisplayMessage()}
-                    </span>
-                  </strong>
-                }
-                vote={
-                  <strong>
-                    <Title text={this.state.vote.title}/>
-                  </strong>
-                }/>
-            </p>
+            <FormattedHTMLMessage
+              message={this.getIntlMessage('vote.YOUR_VOTE_IS_COMPLETE')}
+              value={
+                <strong>
+                  <span className={classNames(this.getVoteValueMessageClassNames())}>
+                    {this.getVoteValueDisplayMessage()}
+                  </span>
+                </strong>
+              }
+              vote={
+                <strong>
+                  <Title text={this.state.vote.title}/>
+                </strong>
+              }/>
           </Col>
         </Row>
         {!!proofOfVoteSVG

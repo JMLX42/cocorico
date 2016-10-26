@@ -42,8 +42,8 @@
     "vote": {
       "VOTE": "Vote",
       "VOTE_UNAVAILABLE": "Unable to vote at the moment. Please try again later.",
-      "ALREADY_VOTED": "You have voted the { date }.",
-      "TOO_LATE_TO_VOTE": "You cannot vote for this texte any more.",
+      "ALREADY_VOTED": "You have voted the { date } at { time }.",
+      "TOO_LATE_TO_VOTE": "You cannot vote for this text any more.",
       "BEFORE_UNLOAD_MESSAGE": "If you leave or refresh this page, you will lose your vote card forever.",
       "EXIT": "Finish",
       "CANCEL_MY_VOTE": "Cancel my vote",
