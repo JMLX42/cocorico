@@ -17,7 +17,6 @@ Ballot.add({
   status: {
     type: Types.Select,
     options: [
-      'signing',
       'queued',
       'pending',
       'initialized',
