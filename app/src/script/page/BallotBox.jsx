@@ -602,7 +602,9 @@ var BallotBox = React.createClass({
   },
 
   selectPageHandler: function(eventKey) {
-    this.setState({page: parseInt(eventKey) - 1}, this.search);
+    if (parseInt(eventKey) - 1 !== this.state.page) {
+      this.setState({page: parseInt(eventKey) - 1}, this.search);
+    }
   },
 
   renderPagination: function() {
