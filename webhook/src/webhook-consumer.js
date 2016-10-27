@@ -1,97 +1,115 @@
-var bunyan = require('bunyan');
-var request = require('superagent');
-var cluster = require('cluster');
+import bunyan from 'bunyan';
+import request from 'superagent';
+import cluster from 'cluster';
+import amqplib from 'amqplib';
 
-var log = bunyan.createLogger({name: 'webhook-consumer-' + cluster.worker.id});
+const log = bunyan.createLogger({name: 'webhook-consumer-' + cluster.worker.id});
 
-var RETRY_DELAY = 60 * 1000;  // 1 minute in milliseconds
-var RETRY_TTL = 24 * 60 * 60 * 1000;  // 1 day in milliseconds
+const RETRY_DELAY = 1000;//60 * 1000;  // 1 minute in milliseconds
+const RETRY_TTL = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+const TIMEOUT = 30000; // 30 seconds
 
 function isWebhookEvent(content) {
   return !!content.event && !!content.url && !!content.createdAt;
 }
 
-module.exports.run = function() {
-  log.info('connecting');
+function handleWebhookError(channel, messageData, error) {
+  log.error({error:error}, 'failed to call webhook, retrying later');
 
-  require('amqplib/callback_api').connect('amqp://localhost', (err, conn) => {
-    if (err) {
-      log.error({error: err}, 'Failed to connect to message broker');
-      process.exit(1);
+  if (!('firstTriedAt' in messageData)) {
+    messageData.firstTriedAt = Date.now();
+  }
+  messageData.lastTriedAt = Date.now();
+
+  channel.sendToQueue(
+    'webhooks',
+    new Buffer(JSON.stringify(messageData)),
+    { persistent : true }
+  );
+}
+
+async function handleMessage(channel, msg) {
+  const messageData = JSON.parse(msg.content.toString());
+
+  log.info({message:messageData}, 'message received');
+
+  // Skip invalid messages
+  if (!isWebhookEvent(messageData)) {
+    log.error({ message: messageData }, 'invalid message, skipping');
+    channel.ack(msg);
+    return;
+  }
+
+  // Delay messages already processed recently
+  if (!!messageData.lastTriedAt) {
+    var elapsedTime = Date.now() - messageData.lastTriedAt;
+    if (elapsedTime < RETRY_DELAY) {
+      channel.nack(msg);  // append message back to queue
+      return;
+    }
+  }
+
+  // Skip messages failing for too long
+  if (!!messageData.firstTriedAt) {
+    var elapsedTime = Date.now() - messageData.firstTriedAt;
+    if (elapsedTime > RETRY_TTL) {
+      log.error({ message: messageData }, 'message failed for too long, skipping');
+      channel.ack(msg);
+      return;
+    }
+  }
+
+  // Send HTTP request to remote webhook
+  log.info({ message: messageData }, 'calling webhook');
+
+  try {
+    const res = await request
+      .post(messageData.url)
+      .timeout(TIMEOUT)
+      .send({event: messageData.event});
+
+    // if the server answered with 2XX
+    if (res.status >= 200 && res.status < 300) {
+      log.info({ http_status: res.status }, 'webhook call succeeded');
+    } else {
+      // any other code is considered a failure
+      handleWebhookError(channel, messageData, { http_status: res.status });
+    }
+  } catch (err) {
+    handleWebhookError(channel, messageData, err);
+  }
+
+  channel.ack(msg);
+}
+
+var queue = null;
+var channel = null;
+
+export async function run() {
+  try {
+    log.info('connecting to the queue');
+
+    queue = await amqplib.connect(null, {heartbeat:30});
+
+    log.info('connected to the queue');
+
+    channel = await queue.createChannel();
+
+    log.info('channel created, waiting for messages...');
+
+    await channel.assertQueue('webhooks', {autoDelete: false, durable: true});
+    channel.consume('webhooks', (message) => handleMessage(channel, message));
+  } catch (err) {
+    log.error({error : err}, 'queue error');
+
+    if (!!channel) {
+      await channel.close();
     }
 
-    conn.createChannel((err2, ch) => {
-      if (err2) {
-        log.error({error: err}, 'Failed to create message channel');
-        process.exit(1);
-      }
+    if (!!queue) {
+      await queue.close();
+    }
 
-      log.info('connected');
-
-      ch.assertQueue('webhooks', {autoDelete: false, durable: true});
-      ch.consume('webhooks', (msg) => {
-        msg.content = JSON.parse(msg.content.toString());
-
-        // Delay messages already processed recently
-        if (!!msg.content.lastTriedAt) {
-          var elapsedTime = Date.now() - msg.content.lastTriedAt;
-          if (elapsedTime < RETRY_DELAY) {
-            ch.nack(msg);  // append message back to queue
-            return;
-          }
-        }
-
-        // Skip messages failing for too long
-        if (!!msg.content.firstTriedAt) {
-          var elapsedTime = Date.now() - msg.content.firstTriedAt;
-          if (elapsedTime > RETRY_TTL) {
-            log.error({ message: msg },
-              'Message failed for too long, skipping');
-            ch.ack(msg);
-            return;
-          }
-        }
-
-        // Skip invalid messages
-        if (!isWebhookEvent(msg.content)) {
-          log.error({ message: msg }, 'Invalid message, skipping');
-          ch.ack(msg);
-          return;
-        }
-
-        // Send HTTP request to remote webhook
-        log.info({ message: msg }, 'Calling webhook');
-        request
-          .post(msg.content.url)
-          .send({event: msg.content.event})
-          .end((err3, res) => {
-            if (err3 || res.error) {
-              if (err3) {
-                log.error({ error: err3 },
-                  'Failed to call webhook, retrying later');
-              } else if (res.error) {
-                log.error({ http_status: res.status },
-                  'Failed to call webhook, retrying later');
-              }
-              if (!msg.content.firstTriedAt) {
-                msg.content.firstTriedAt = Date.now();
-              }
-              msg.content.lastTriedAt = Date.now();
-              // Requeue updated message
-              ch.sendToQueue('webhooks',
-                new Buffer(JSON.stringify(msg.content)),
-                { persistent : true }
-              )
-              ch.ack(msg);
-              return;
-            }
-
-            log.info({ http_status: res.status },
-              'Webhook call succeeded');
-            ch.ack(msg);
-          })
-        ;
-      });
-    });
-  });
+    process.exit(1);
+  }
 }

@@ -1,7 +1,9 @@
-var cluster = require('cluster');
-var bunyan = require('bunyan');
+import 'babel-polyfill';
 
-var log = bunyan.createLogger({name: 'webhook-service'});
+import cluster from 'cluster';
+import bunyan from 'bunyan';
+
+const log = bunyan.createLogger({name: 'webhook-service'});
 
 if (cluster.isMaster) {
 
