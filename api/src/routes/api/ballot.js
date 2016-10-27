@@ -48,23 +48,24 @@ function pushBallotMessageOnQueue(data, callback) {
           return callback(err, null);
 
         return conn.createChannel((channelErr, ch) => {
-          if (channelErr != null)
-            return callback(channelErr, null);
+          if (channelErr != null) {
+            callback(channelErr, null);
+            return;
+          }
 
-          var ballotObj = { ballot : data };
+          var ballotObj = {ballot : data};
 
-          ch.assertQueue('ballots');
+          ch.assertQueue('ballots', {autoDelete: false, durable: true});
           ch.sendToQueue(
             'ballots',
             new Buffer(JSON.stringify(ballotObj)),
             { persistent : true }
           );
 
-          ch.close();
-
-          conn.close();
-
-          return callback(null, ballotObj);
+          ch.close(() => {
+            // conn.close();
+            callback(null, ballotObj);
+          });
         });
       }
     );

@@ -109,22 +109,27 @@ function pushVoteOnQueue(vote, callback) {
         return callback(err, null);
 
       return conn.createChannel((channelErr, ch) => {
-        if (channelErr != null)
-          return callback(channelErr, null);
+        if (channelErr != null) {
+          callback(channelErr, null);
+          return;
+        }
 
         var voteMsg = { vote : {
           id: vote.id,
           numProposals: vote.labels.length === 0 ? 3 : vote.labels.length,
         } };
 
-        ch.assertQueue('votes');
+        ch.assertQueue('votes', {autoDelete: false, durable: true});
         ch.sendToQueue(
           'votes',
           new Buffer(JSON.stringify(voteMsg)),
           { persistent : true }
         );
 
-        return callback(null, voteMsg);
+        ch.close(() => {
+          // conn.close();
+          callback(null, voteMsg);
+        });
       });
     }
 	);

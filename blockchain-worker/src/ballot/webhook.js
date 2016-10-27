@@ -1,6 +1,23 @@
-import queue from 'amqplib';
+import amqplib from 'amqplib';
 
 import logger from './logger';
+
+var queue = null;
+var channel = null;
+
+process.once('SIGINT', async () => {
+  logger.info('closing webhook queue/channel');
+
+  if (!!channel) {
+    await channel.close();
+    channel = null;
+  }
+
+  if (!!queue) {
+    await queue.close();
+    queue = null;
+  }
+});
 
 export default async function(ballot, status) {
   if (!ballot.app.webhookURL) {
@@ -10,15 +27,11 @@ export default async function(ballot, status) {
 
   logger.info({status:status}, 'preparing to push webhook');
 
-  const q = await queue.connect(null, {heartbeat:30});
-
-  logger.info('connected to the webhook queue');
-
-  const channel = await q.createChannel();
-
-  logger.info('webhook channel created');
-
-  await channel.assertQueue('webhook');
+  if (!queue) {
+    queue = await amqplib.connect(null, {heartbeat:30});
+    channel = await queue.createChannel();
+    await channel.assertQueue('webhook', {autoDelete: false, durable: true});
+  }
 
   var msg = {
     url: ballot.app.webhookURL,
@@ -35,7 +48,6 @@ export default async function(ballot, status) {
     new Buffer(JSON.stringify(msg)),
     { persistent : true }
   );
-  channel.close();
 
   logger.info({status:status}, 'pushed webhook');
 }

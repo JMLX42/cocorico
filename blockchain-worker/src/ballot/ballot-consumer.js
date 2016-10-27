@@ -1,4 +1,4 @@
-import queue from 'amqplib';
+import amqplib from 'amqplib';
 import EthereumTx from 'ethereumjs-tx';
 import EthereumUtil from 'ethereumjs-util';
 import promise from 'thenify';
@@ -346,22 +346,34 @@ async function handleMessage(channel, message) {
   }
 }
 
+var queue;
+var channel;
+
 export async function run() {
   try {
     logger.info('connecting to the queue');
 
-    const q = await queue.connect(null, {heartbeat:30});
+    queue = await amqplib.connect(null, {heartbeat:30});
 
     logger.info('connected to the queue');
 
-    const channel = await q.createChannel();
+    channel = await queue.createChannel();
 
     logger.info('channel created, waiting for messages...');
 
-    await channel.assertQueue('ballots');
+    await channel.assertQueue('ballots', {autoDelete: false, durable: true});
     channel.consume('ballots', (message) => handleMessage(channel, message));
   } catch (err) {
     logger.error({error : err}, 'queue error');
+
+    if (!!channel) {
+      await channel.close();
+    }
+
+    if (!!queue) {
+      await queue.close();
+    }
+
     process.exit(1);
   }
 }
