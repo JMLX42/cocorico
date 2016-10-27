@@ -132,7 +132,7 @@ module.exports.run = function() {
       (err, conn) => {
         if (err != null) {
           log.error({error: err}, 'error');
-          return;
+          process.exit(1);
         }
 
         log.info('connecting');
@@ -140,7 +140,7 @@ module.exports.run = function() {
         conn.createChannel((channelErr, ch) => {
           if (channelErr != null) {
             log.error({error: channelErr}, 'error');
-            return;
+            process.exit(1);
           }
 
           log.info('connected');
