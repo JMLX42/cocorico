@@ -2,7 +2,7 @@
   "name": "cocorico-webhook",
   "version": "0.0.1",
   "private": true,
-  "main": "index.js",
+  "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
     "amqplib": "^0.4.2",
@@ -11,7 +11,7 @@
     "superagent-no-cache": "^0.1.0"
   },
   "scripts": {
-      "start": "service cocorico-webhook stop ; nodemon -w src -d 5 ./index.js",
+      "start": "service cocorico-webhook stop ; nodemon -w . -d 5 ./src/index.js",
       "test": "eslint ."
   },
   "devDependencies": {

@@ -20,12 +20,12 @@ script
         -o {{ log_dir }}/{{ role_name }}.log \
         -e {{ log_dir }}/{{ role_name }}.error.log \
         --pidFile /var/run/{{ project_name }}-{{ role_name }}.pid \
-        --sourceDir /srv/cocorico/{{ role_name }} \
-        --workingDir /srv/cocorico/{{ role_name }} \
+        --sourceDir /srv/cocorico/{{ role_name }}/src \
+        --workingDir /srv/cocorico/{{ role_name }}/src \
         index.js
 end script
 
 pre-stop script
     rm /var/run/{{ project_name }}-{{ role_name }}.pid
-    exec forever stop /srv/cocorico/{{ role_name }}/index.js
+    exec forever stop /srv/cocorico/{{ role_name }}/src/index.js
 end script
