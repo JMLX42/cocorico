@@ -26,7 +26,7 @@ require('amqplib/callback_api').connect('amqp://localhost', (err, conn) => {
 
     log.info('connected');
 
-    ch.assertQueue('webhooks');
+    ch.assertQueue('webhooks', {autoDelete: false, durable: true});
     ch.consume('webhooks', (msg) => {
       msg.content = JSON.parse(msg.content.toString());
 
