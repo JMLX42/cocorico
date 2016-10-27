@@ -1,9 +1,10 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import 'babel-polyfill';
 
-var cluster = require('cluster');
-var bunyan = require('bunyan');
+import config from '/opt/cocorico/api-web/config.json';
+import cluster from 'cluster';
+import bunyan from 'bunyan';
 
-var log = bunyan.createLogger({name: 'ballot-service'});
+const log = bunyan.createLogger({name: 'ballot-service'});
 
 if (cluster.isMaster) {
 

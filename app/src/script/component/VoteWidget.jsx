@@ -113,13 +113,13 @@ var VoteWidget = React.createClass({
     }
 
     // if (!!ballot.error) {
-    //   // FIXME: this.goToStep(VoteWidget.STEP_ERROR)
-    //   // this.error(VoteWidget.ERROR_BALLOT_ERROR);
-    //   return;
+      // FIXME: this.goToStep(VoteWidget.STEP_ERROR)
+      // this.error(VoteWidget.ERROR_BALLOT_ERROR);
+      // return;
     // }
 
     var completeStatus = [
-      'queued', 'pending', 'initialized', 'registered', 'complete', 'error',
+      'queued', 'pending', 'initialized', 'registered', 'complete',
     ];
     if (completeStatus.indexOf(ballot.status) >= 0) {
       BallotAction.stopPolling();
@@ -708,10 +708,10 @@ var VoteWidget = React.createClass({
   render: function() {
     var vote = this.state.vote;
 
-    if (!vote || !vote.title || !vote.permissions) {
+    if (!vote || !vote.createdAt || !vote.permissions) {
       return (
         <div className="text-center" style={{paddingTop:'200px'}}>
-            <LoadingIndicator/>
+          <LoadingIndicator/>
         </div>
       );
     }

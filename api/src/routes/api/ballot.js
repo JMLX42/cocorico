@@ -60,6 +60,10 @@ function pushBallotMessageOnQueue(data, callback) {
             { persistent : true }
           );
 
+          ch.close();
+
+          conn.close();
+
           return callback(null, ballotObj);
         });
       }
@@ -119,6 +123,7 @@ exports.vote = function(req, res) {
           app: vote.app,
           vote: {id: vote.id},
           user: {sub: req.user.sub},
+          status: ballot.status, // queued
           transaction: req.body.transaction,
           voteContractAddress: vote.voteContractAddress,
           voteContractABI: JSON.parse(vote.voteContractABI),

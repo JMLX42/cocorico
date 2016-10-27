@@ -12,6 +12,12 @@ env NODE_ENV={{ environment_name }}
 env NODE_TLS_REJECT_UNAUTHORIZED=0
 {% endif %}
 
+chdir "/srv/cocorico/blockchain-worker"
+
+pre-start script
+    npm run build-ballot
+end script
+
 script
     exec forever \
         start \
@@ -20,9 +26,9 @@ script
         -o {{ log_dir }}/{{ role_name }}-ballot.log \
         -e {{ log_dir }}/{{ role_name }}-ballot.error.log \
         --pidFile /var/run/{{ project_name }}-{{ role_name }}-ballot.pid \
-        --sourceDir /srv/cocorico/blockchain-worker/src \
-        --workingDir /srv/cocorico/blockchain-worker/src \
-        ballot.js
+        --sourceDir /srv/cocorico/blockchain-worker/dist/ballot \
+        --workingDir /srv/cocorico/blockchain-worker/dist/ballot \
+        index.js
 end script
 
 pre-stop script
