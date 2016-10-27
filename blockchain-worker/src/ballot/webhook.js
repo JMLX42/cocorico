@@ -30,7 +30,7 @@ export default async function(ballot, status) {
   if (!queue) {
     queue = await amqplib.connect(null, {heartbeat:30});
     channel = await queue.createChannel();
-    await channel.assertQueue('webhook', {autoDelete: false, durable: true});
+    await channel.assertQueue('webhooks', {autoDelete: false, durable: true});
   }
 
   var msg = {
@@ -44,7 +44,8 @@ export default async function(ballot, status) {
     createdAt: Date.now(),
   };
 
-  channel.sendToQueue('webhooks',
+  channel.sendToQueue(
+    'webhooks',
     new Buffer(JSON.stringify(msg)),
     { persistent : true }
   );
