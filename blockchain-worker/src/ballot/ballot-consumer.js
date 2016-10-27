@@ -12,20 +12,13 @@ import isValidBallotMessage from './isValidBallotMessage';
 import web3 from './web3';
 import watchContractEvents from './watchContractEvents';
 import webhook from './webhook';
+import noRetryError from './noRetryError';
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
 keystone.import('../../../api/dist/models');
 
 const Ballot = keystone.list('Ballot');
-
-function noRetryError(err) {
-  if (!!err) {
-    err.noRetry = true;
-  }
-
-  return err;
-}
 
 async function pushBackToQueueWithStatus(channel, ballot, status) {
   await updateBallotStatus(ballot, status);

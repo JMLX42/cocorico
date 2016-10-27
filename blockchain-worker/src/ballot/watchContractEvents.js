@@ -1,3 +1,5 @@
+import noRetryError from './noRetryError';
+
 export default function(errorEvents, events) {
   return new Promise((resolve, reject) => {
     var timeout = setTimeout(
