@@ -33,5 +33,5 @@ end script
 
 pre-stop script
     rm /var/run/{{ project_name }}-{{ role_name }}-ballot.pid
-    exec forever stop /srv/cocorico/blockchain-worker/src/ballot.js
+    exec forever stop /srv/cocorico/blockchain-worker/dist/ballot/index.js
 end script
