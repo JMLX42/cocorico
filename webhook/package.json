@@ -16,7 +16,7 @@
   "scripts": {
       "build": "rm -rf dist ; babel src --out-dir dist --source-maps inline",
       "start": "service cocorico-webhook stop ; nodemon dist/index.js -w src -d 5 --exec 'npm run build && nodejs'",
-      "test": "eslint ."
+      "test": "eslint src"
   },
   "devDependencies": {
     "babel-eslint": "^6.1.2",
