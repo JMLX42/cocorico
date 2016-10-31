@@ -1,4 +1,5 @@
-#!/usr/bin/env headstone
+#!/bin/sh
+':' //# http://sambal.org/?p=1014; exec /usr/bin/env node --require babel-polyfill /usr/lib/node_modules/headstone/cli.js $0 $@
 
 var async = require('async');
 var keystone = require('keystone');

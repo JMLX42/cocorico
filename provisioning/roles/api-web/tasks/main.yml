@@ -36,13 +36,13 @@
 
 - name: create admin
   when: is_development_environment
-  shell: headstone {{ cocorico_api_dir }}/scripts/add-admin.js
-    --cwd={{ cocorico_api_dir }}/src
+  shell: "{{ cocorico_api_dir }}/scripts/add-admin.js
+    --cwd={{ cocorico_api_dir }}/dist
     --userEmail={{ api_web_admin_email }}
     --userPassword={{ api_web_admin_password }}
     --userName={{ api_web_admin_name }}
     --userIsAdmin=true
-    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}
+    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}"
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: result
@@ -51,12 +51,12 @@
 
 - name: create test app
   when: test_app is defined
-  shell: headstone {{ cocorico_api_dir }}/scripts/add-app.js
-    --cwd={{ cocorico_api_dir }}/src
+  shell: "{{ cocorico_api_dir }}/scripts/add-app.js
+    --cwd={{ cocorico_api_dir }}/dist
     --title={{ test_app.title }}
     --secret={{ test_app.secret }}
     --url={{ test_app.url }}
-    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}
+    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}"
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: create_api_test_app
@@ -70,9 +70,9 @@
     - restart cocorico-api-web service
 
 - name: import pages
-  shell: headstone {{ cocorico_api_dir }}/scripts/import-pages.js
-    --cwd={{ cocorico_api_dir }}/src
-    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}
+  shell: "{{ cocorico_api_dir }}/scripts/import-pages.js
+    --cwd={{ cocorico_api_dir }}/dist
+    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}"
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: result

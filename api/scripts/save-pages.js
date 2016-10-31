@@ -1,4 +1,5 @@
-#!/usr/bin/env headstone
+#!/bin/sh
+':' //# http://sambal.org/?p=1014; exec /usr/bin/env node --require babel-polyfill /usr/lib/node_modules/headstone/cli.js $0 $@
 
 var async = require('async');
 var keystone = require('keystone');
@@ -47,7 +48,7 @@ function savePage(page, next) {
     delete page.html;
 
     fs.writeFileSync(
-      './db/pages/' + page.slug + '.json',
+      '../db/pages/' + page.slug + '.json',
       stringify(page, { space : '\t' }),
       'utf8'
     );
@@ -76,10 +77,10 @@ function savePages(pages, done) {
 }
 
 module.exports = function(slugs, done) {
-  if (!fs.existsSync('./db/pages'))
-    fs.mkdirSync('./db/pages');
-  if (!fs.existsSync('./db/media'))
-    fs.mkdirSync('./db/media');
+  if (!fs.existsSync('../db/pages'))
+    fs.mkdirSync('../db/pages');
+  if (!fs.existsSync('.//db/media'))
+    fs.mkdirSync('../db/media');
 
   if (slugs) {
     Page.model.find().where({slug : {$in : slugs.split(',')} }).select('-_id').exec((err, pages) => {
