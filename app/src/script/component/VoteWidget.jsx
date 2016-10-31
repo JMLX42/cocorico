@@ -119,7 +119,11 @@ var VoteWidget = React.createClass({
     // }
 
     var completeStatus = [
-      'queued', 'pending', 'initialized', 'registered', 'complete',
+      'queued',
+      'pending',
+      'initialized', 'initializing',
+      'registering', 'registered',
+      'complete',
     ];
     if (completeStatus.indexOf(ballot.status) >= 0) {
       BallotAction.stopPolling();
