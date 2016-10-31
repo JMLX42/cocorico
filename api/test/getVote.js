@@ -21,12 +21,17 @@ async function createVote(url) {
 
 export default async function(waitForSmartContract, url) {
   if (waitForSmartContract) {
-    const v = await createVote();
-    await delay(10000);
+    var vote = await createVote(url);
 
-    return request
-      .get(getAPIURL('/vote/' + v.id))
-      .then((res) => res.body.vote);
+    while (!vote.voteContractAddress) {
+      await delay(5000);
+
+      vote = await request
+        .get(getAPIURL('/vote/' + vote.id))
+        .then((res) => res.body.vote);
+    }
+
+    return vote;
   } else {
     return createVote(url);
   }
