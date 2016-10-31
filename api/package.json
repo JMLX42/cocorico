@@ -26,6 +26,7 @@
     "markdown": "0.5.0",
     "md5": "2.1.0",
     "metafetch": "1.2.11",
+    "minimist": "^1.2.0",
     "model-transform": "^2.0.0",
     "node-fetch": "1.5.3",
     "oauth": "~0.9.12",
@@ -72,8 +73,6 @@
   "devDependencies": {
     "babel-eslint": "^6.1.2",
     "babel-jest": "^16.0.0",
-    "babel-plugin-transform-async-to-generator": "^6.16.0",
-    "babel-polyfill": "^6.16.0",
     "eslint": "^3.6.0",
     "eth-lightwallet": "^2.5.2",
     "jest": "^16.0.0",
