@@ -20,12 +20,12 @@ script
         -o {{ log_dir }}/{{ role_name }}-vote.log \
         -e {{ log_dir }}/{{ role_name }}-vote.error.log \
         --pidFile /var/run/{{ project_name }}-{{ role_name }}-vote.pid \
-        --sourceDir /srv/cocorico/blockchain-worker/src \
-        --workingDir /srv/cocorico/blockchain-worker/src \
-        vote.js
+        --sourceDir /srv/cocorico/blockchain-worker/dist/vote \
+        --workingDir /srv/cocorico/blockchain-worker/dist/vote \
+        index.js
 end script
 
 pre-stop script
     rm /var/run/{{ project_name }}-{{ role_name }}-vote.pid
-    exec forever stop /srv/cocorico/blockchain-worker/src/vote.js
+    exec forever stop /srv/cocorico/blockchain-worker/dist/vote/index.js
 end script
