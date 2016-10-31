@@ -35,11 +35,7 @@ Ballot.add({
 });
 
 transform.toJSON(Ballot, (ballot) => {
-  // FIXME: this is a big workaround for the client that expects Ballot.error
-  // to be either falsy or set with an actual error message.
-  if (ballot.error.length === 0) {
-    delete ballot.error;
-  }
+  delete ballot.hash;
 });
 
 Ballot.defaultColumns = 'status, hash, createdAt, updatedAt';

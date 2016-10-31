@@ -55,6 +55,13 @@ module.exports = Reflux.createStore({
     jquery.get(
       '/api/ballot/' + voteId,
       (data) => {
+        // To simplify error handling, Ballot.error must be easily casted to
+        // a boolean. So if the Ballot.error array is empty, we simply delete
+        // the field.
+        if (Array.isArray(data.ballot.error) && data.ballot.error.length === 0) {
+          delete data.ballot.error;
+        }
+
         this._ballots[voteId] = data.ballot;
         delete this._loadingBallot[voteId];
 
