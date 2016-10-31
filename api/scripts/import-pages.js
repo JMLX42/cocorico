@@ -1,10 +1,15 @@
 #!/bin/sh
-':' //# http://sambal.org/?p=1014; exec /usr/bin/env node --require babel-polyfill /usr/lib/node_modules/headstone/cli.js $0 $@
+':' //# http://sambal.org/?p=1014; exec /usr/bin/env node --require babel-polyfill $0 $@
 
+var config = require('/opt/cocorico/api-web/config.json');
 var async = require('async');
 var keystone = require('keystone');
 var fs = require('fs');
 var path = require('path');
+
+keystone.init({mongo: config.mongo.uri, headless: true});
+keystone.mongoose.connect(config.mongo.uri);
+keystone.import('../dist/models');
 
 var Page = keystone.list('Page'),
   Media = keystone.list('Media');
@@ -16,10 +21,10 @@ function find(startPath,filter) {
     return null;
   }
 
-  var files=fs.readdirSync(startPath);
-  for (var i=0;i<files.length;i++) {
-    var filename=path.join(startPath,files[i]);
-    if (filename.indexOf(filter)>=0) {
+  var files = fs.readdirSync(startPath);
+  for (var i = 0; i < files.length; i++) {
+    var filename=path.join(startPath, files[i]);
+    if (filename.indexOf(filter) >= 0) {
       res.push(filename);
     };
   };
@@ -27,9 +32,9 @@ function find(startPath,filter) {
   return res;
 }
 
-module.exports = function(done) {
-  var pageFiles = find('../db/pages', '.json');
-  var mediaFiles = find('../db/media', '.json');
+function importPages(done) {
+  var pageFiles = find(path.resolve('../db/pages'), '.json');
+  var mediaFiles = find(path.resolve('../db/media'), '.json');
 
   async.waterfall(
     mediaFiles.map((mediaFile) => (callback) => {
@@ -98,3 +103,12 @@ module.exports = function(done) {
     }
   );
 }
+
+importPages((err) => {
+  if (!!err) {
+    console.error(err);
+    process.exit(1);
+  }
+
+  process.exit(0);
+});

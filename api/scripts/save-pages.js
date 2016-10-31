@@ -1,11 +1,17 @@
 #!/bin/sh
-':' //# http://sambal.org/?p=1014; exec /usr/bin/env node --require babel-polyfill /usr/lib/node_modules/headstone/cli.js $0 $@
+':' //# http://sambal.org/?p=1014; exec /usr/bin/env node --require babel-polyfill $0 $@
 
+var config = require('/opt/cocorico/api-web/config.json');
 var async = require('async');
 var keystone = require('keystone');
 var stringify = require('json-stable-stringify');
 var fs = require('fs');
 var beautify_html = require('js-beautify').html;
+var argv = require('minimist')(process.argv.slice(2));
+
+keystone.init({mongo: config.mongo.uri, headless: true});
+keystone.mongoose.connect(config.mongo.uri);
+keystone.import('../dist/models');
 
 var Page = keystone.list('Page'),
   Media = keystone.list('Media');
@@ -76,10 +82,10 @@ function savePages(pages, done) {
   async.waterfall(ops);
 }
 
-module.exports = function(slugs, done) {
+function savePagesBySlug(slugs, done) {
   if (!fs.existsSync('../db/pages'))
     fs.mkdirSync('../db/pages');
-  if (!fs.existsSync('.//db/media'))
+  if (!fs.existsSync('../db/media'))
     fs.mkdirSync('../db/media');
 
   if (slugs) {
@@ -92,3 +98,15 @@ module.exports = function(slugs, done) {
     });
   }
 }
+
+savePagesBySlug(
+  argv.slugs,
+  (err) => {
+    if (!!err) {
+      console.error(err);
+      process.exit(1);
+    }
+
+    process.exit(0);
+  }
+);

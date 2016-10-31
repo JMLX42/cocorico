@@ -2,7 +2,7 @@
 ':' //# http://sambal.org/?p=1014; exec /usr/bin/env node --require babel-polyfill $0 $@
 
 var config = require('/opt/cocorico/api-web/config.json');
-var keystone = require('/opt/cocorico/api-web/node_modules/keystone');
+var keystone = require('keystone');
 var fs = require('fs');
 var async = require('async');
 var argv = require('minimist')(process.argv.slice(2));

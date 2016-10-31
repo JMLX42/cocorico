@@ -14,20 +14,10 @@
 - name: install npm modules
   npm: path={{ cocorico_api_dir }}
 
-- name: install headstone
-  npm: name=headstone version=1.1.0 global=yes
-
 - name: generate the documentation
   shell: npm run doc
   args:
     chdir: "{{ cocorico_api_dir }}"
-
-# headstone will read the mongo URI from the .env file
-- name: generate .env file
-  template: src=.env.j2 dest={{ project_dir }}/{{ role_name }}/.env
-
-- name: link .env file
-  file: src={{ project_dir }}/{{ role_name }}/.env dest={{ cocorico_api_dir }}/.env state=link
 
 - name: generate configuration
   template: src=config.json.j2 dest={{ project_dir }}/{{ role_name }}/config.json
@@ -37,12 +27,10 @@
 - name: create admin
   when: is_development_environment
   shell: "{{ cocorico_api_dir }}/scripts/add-admin.js
-    --cwd={{ cocorico_api_dir }}/dist
-    --userEmail={{ api_web_admin_email }}
-    --userPassword={{ api_web_admin_password }}
-    --userName={{ api_web_admin_name }}
-    --userIsAdmin=true
-    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}"
+    --email={{ api_web_admin_email }}
+    --password={{ api_web_admin_password }}
+    --username={{ api_web_admin_name }}
+    --isAdmin=true"
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: result
@@ -52,11 +40,9 @@
 - name: create test app
   when: test_app is defined
   shell: "{{ cocorico_api_dir }}/scripts/add-app.js
-    --cwd={{ cocorico_api_dir }}/dist
     --title={{ test_app.title }}
     --secret={{ test_app.secret }}
-    --url={{ test_app.url }}
-    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}"
+    --url={{ test_app.url }}"
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: create_api_test_app
@@ -70,9 +56,7 @@
     - restart cocorico-api-web service
 
 - name: import pages
-  shell: "{{ cocorico_api_dir }}/scripts/import-pages.js
-    --cwd={{ cocorico_api_dir }}/dist
-    --mongoUri=mongodb://{{ api_db_private_host }}/{{ mongodb_database_name }}"
+  shell: "{{ cocorico_api_dir }}/scripts/import-pages.js"
   args:
     chdir: "{{ cocorico_api_dir }}"
   register: result
