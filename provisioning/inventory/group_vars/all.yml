@@ -70,3 +70,6 @@ certbot_enabled: yes
 certbot_dir: /opt/cerbot
 certbot_email: contact@cocorico.cc
 certbot_renew: yes
+
+whitelisted_ips:
+  - 127.0.0.1

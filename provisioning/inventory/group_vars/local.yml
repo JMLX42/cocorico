@@ -84,3 +84,7 @@ test_app:
 
 ballot_consumer_count: 1
 vote_consumer_count: 1
+
+whitelisted_ips:
+  - 192.168.50.1
+  - 127.0.0.1

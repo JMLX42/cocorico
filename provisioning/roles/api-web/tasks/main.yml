@@ -63,6 +63,16 @@
   failed_when: result.stderr
   changed_when: "'Updated page' in result.stdout"
 
+- name: whitelist IPs
+  shell: "{{ cocorico_api_dir }}/scripts/whitelist-ip.js --ip={{ item }}"
+  args:
+    chdir: "{{ cocorico_api_dir }}"
+  register: result
+  failed_when: result.stderr
+  changed_when: "'already whitelisted' not in result.stdout"
+  with_items: "{{ whitelisted_ips }}"
+  when: whitelisted_ips is defined
+
 - name: link app configuration
   file: src={{ project_dir }}/{{ role_name }}/config.json dest={{ cocorico_api_dir }}/config.json state=link
 
