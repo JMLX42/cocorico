@@ -40,7 +40,7 @@ async function updateBallotStatus(ballot, status) {
 }
 
 async function getDatabaseBallot(ballot) {
-  var ballotRecord = await promise((c)=>Ballot.model.findById(ballot.id).exec(c))();
+  var ballotRecord = await Ballot.model.findById(ballot.id).exec();
   if (!ballotRecord) {
     throw noRetryError({error:'unknown ballot with id ' + ballot.id});
   }
@@ -59,7 +59,7 @@ async function saveBallotError(ballot, errorMessage) {
 
   ballotRecord.error.push(errorMessage);
 
-  return await promise((c)=>ballotRecord.save(c))();
+  return await ballotRecord.save();
 }
 
 async function updateDatabaseBallot(ballot, data) {
@@ -67,7 +67,7 @@ async function updateDatabaseBallot(ballot, data) {
 
   ballotRecord = Object.assign(ballotRecord, data);
 
-  return await promise((c)=>ballotRecord.save(c))();
+  return await ballotRecord.save();
 }
 
 async function handlePendingBallot(ballot) {
