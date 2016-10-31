@@ -44,6 +44,11 @@ supported_web_browsers:
   safari:
     name: "Safari"
     version: "9.1"
+  opera:
+    name: "Opera"
+    version: "41.0"
+    installLink: "https://www.opera.com/download"
+    updateLink: "https://www.opera.com/download"
 
 supported_locales:
   fr-FR: Français
