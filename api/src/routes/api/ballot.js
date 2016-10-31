@@ -6,9 +6,13 @@ var EthereumUtil = require('ethereumjs-util');
 var async = require('async');
 var jwt = require('jsonwebtoken');
 var Web3 = require('web3');
+var CryptoJS = require('crypto-js');
+
+var pushBallotOnQueue = require('../../pushBallotOnQueue');
 
 var Vote = keystone.list('Vote'),
-  VerifiedBallot = keystone.list('VerifiedBallot');
+  VerifiedBallot = keystone.list('VerifiedBallot'),
+  Event = keystone.list('Event');
 
 exports.get = function(req, res) {
   Vote.model.findById(req.params.voteId).exec((voteErr, vote) => {
@@ -39,41 +43,6 @@ exports.get = function(req, res) {
   });
 }
 
-function pushBallotMessageOnQueue(data, callback) {
-  try {
-    return require('amqplib/callback_api').connect(
-      'amqp://localhost',
-      (err, conn) => {
-        if (err != null)
-          return callback(err, null);
-
-        return conn.createChannel((channelErr, ch) => {
-          if (channelErr != null) {
-            callback(channelErr, null);
-            return;
-          }
-
-          var ballotObj = {ballot : data};
-
-          ch.assertQueue('ballots', {autoDelete: false, durable: true});
-          ch.sendToQueue(
-            'ballots',
-            new Buffer(JSON.stringify(ballotObj)),
-            { persistent : true }
-          );
-
-          ch.close(() => {
-            // conn.close();
-            callback(null, ballotObj);
-          });
-        });
-      }
-    );
-  } catch (e) {
-    return callback(e, null);
-  }
-}
-
 function ballotTransactionError(res, ballot, msg) {
   ballot.status = 'error';
   ballot.error = JSON.stringify(msg);
@@ -83,6 +52,25 @@ function ballotTransactionError(res, ballot, msg) {
 
     return res.status(400).send({error:msg});
   });
+}
+
+function getTxFunctionSignature(abi, functionName) {
+  function matchesFunctionName(json) {
+    return (json.name === functionName && json.type === 'function');
+  }
+
+  function getTypes(json) {
+    return json.type;
+  }
+
+  var funcJson = abi.filter(matchesFunctionName)[0];
+  var types = (funcJson.inputs).map(getTypes);
+
+  return CryptoJS.SHA3(
+      functionName + '(' + types.join() + ')',
+      { outputLength: 256 }
+    )
+    .toString(CryptoJS.enc.Hex).slice(0, 8);
 }
 
 exports.vote = function(req, res) {
@@ -97,28 +85,47 @@ exports.vote = function(req, res) {
       (callback) => Vote.model.findById(req.params.voteId)
         .populate('app')
         .exec(callback),
-      (vote, callback) => {
+      async (vote, callback) => {
         if (!vote)
           return callback({code: 404, error: 'vote not found'});
-        // FIXME: log the unauthorized attempt
-        if (!vote.userIsAuthorizedToVote(req.user))
+        if (!vote.userIsAuthorizedToVote(req.user)) {
+          await Event.logWarningEventAndBlacklist(req, 'unauthorized user');
           return callback({code: 403, error: 'unauthorized user'});
-        if (vote.voteContractAddress !== voteContractAddress)
+        }
+        if (vote.voteContractAddress !== voteContractAddress) {
+          await Event.logWarningEventAndBlacklist(
+            req, 'contract address mismatch'
+          );
           return callback({code: 300, error: 'contract address mismatch'});
+        }
+
+        // The transaction *must* call Vote.vote(). To enforce this, we check
+        // that the function signature in the tx data matches with the one we
+        // expect.
+        var sig = getTxFunctionSignature(
+          JSON.parse(vote.voteContractABI),
+          'vote'
+        );
+        if (signedTx.data.toString('hex', 0, 4) !== sig) {
+          await Event.logWarningEventAndBlacklist(req, 'invalid transaction');
+          return callback({code: 300, error: 'invalid transaction'});
+        }
 
         return vote.getBallotByUserUID(
           req.user.sub,
           (err, ballot) => callback(err, vote, ballot)
         );
       },
-      (vote, ballot, callback) => {
-        if (!!ballot)
+      async (vote, ballot, callback) => {
+        if (!!ballot) {
+          await Event.logWarningEventAndBlacklist(req, 'user already voted');
           return callback({code: 403, error: 'user already voted'});
+        }
 
         return vote.createBallot(req.user.sub)
           .save((err, newBallot) => callback(err, vote, newBallot));
       },
-      (vote, ballot, callback) => pushBallotMessageOnQueue(
+      async (vote, ballot, callback) => await pushBallotOnQueue(
         {
           id: ballot.id,
           app: vote.app,

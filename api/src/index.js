@@ -48,6 +48,7 @@ keystone.set('nav', {
   'apps': 'apps',
   'pages': ['Page', 'Media'],
   'votes': ['Vote', 'Ballot', 'Source', 'VerifiedBallot'],
+  'events': ['Event', 'IPAddress'],
 });
 
 logger.info('starting');

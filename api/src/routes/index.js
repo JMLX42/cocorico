@@ -5,7 +5,10 @@ var passport = require('passport');
 var winston = require('winston');
 var expressWinston = require('express-winston');
 var raven = require('raven');
+
 var logger = require('../logger');
+
+const Event = keystone.list('Event');
 
 var importRoutes = keystone.importer(__dirname);
 
@@ -79,13 +82,18 @@ exports = module.exports = function(app) {
   // JWT authentication does not use sessions, so we have to check for a user
   // without throwing an error if there is none.
   logger.info('setup JWT authentication middleware');
-  app.use((req, res, next) => passport.authenticate('jwt', (err, user, info) => {
+  app.use((req, res, next) => passport.authenticate('jwt', async (err, user, info) => {
     if (err) {
       return next(err);
     }
     if (!user) {
       // if the JWT authentication failed
-      if (info) {
+      if (!!info) {
+
+        await Event.logWarningEventAndBlacklist(
+          req, 'JWT forgery attempt detected'
+        );
+
         return res.status(401).apiResponse({
           error: 'authentication failed',
           message: info.message,
