@@ -125,19 +125,24 @@ exports.vote = function(req, res) {
         return vote.createBallot(req.user.sub)
           .save((err, newBallot) => callback(err, vote, newBallot));
       },
-      async (vote, ballot, callback) => await pushBallotOnQueue(
-        {
-          id: ballot.id,
-          app: vote.app,
-          vote: {id: vote.id},
-          user: {sub: req.user.sub},
-          status: ballot.status, // queued
-          transaction: req.body.transaction,
-          voteContractAddress: vote.voteContractAddress,
-          voteContractABI: JSON.parse(vote.voteContractABI),
-        },
-        (err, msg) => callback(err, vote, ballot)
-      ),
+      async (vote, ballot, callback) => {
+        try {
+          await pushBallotOnQueue({
+            id: ballot.id,
+            app: vote.app,
+            vote: {id: vote.id},
+            user: {sub: req.user.sub},
+            status: ballot.status, // queued
+            transaction: req.body.transaction,
+            voteContractAddress: vote.voteContractAddress,
+            voteContractABI: JSON.parse(vote.voteContractABI),
+          });
+
+          callback(null, vote, ballot);
+        } catch (err) {
+          callback(err);
+        }
+      },
       (vote, ballot, callback) => {
         vote.numBallots += 1;
         vote.save((err) => callback(err, vote, ballot));
