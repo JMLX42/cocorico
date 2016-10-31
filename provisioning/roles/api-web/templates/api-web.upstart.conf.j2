@@ -1,7 +1,7 @@
 description "{{ role_name }}"
 
 {% if is_development_environment %}
-start on vagrant-mounted
+start on vagrant-mounted MOUNTPOINT={{ cocorico_local_dir }}
 {% else %}
 start on startup
 {% endif %}

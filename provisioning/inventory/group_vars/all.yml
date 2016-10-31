@@ -5,8 +5,9 @@ api_web_private_port: 3000
 api_db_private_host: 127.0.0.1
 api_db_private_port: 27017
 
-cocorico_api_dir: /srv/cocorico/api
-cocorico_app_dir: /srv/cocorico/app
+cocorico_local_dir: /srv/cocorico
+cocorico_api_dir: {{ cocorico_local_dir }}/api
+cocorico_app_dir: {{ cocorico_local_dir }}/app
 
 data_dir: "/var/data"
 backup_dir: "/var/backup"
