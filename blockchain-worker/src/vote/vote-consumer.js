@@ -11,7 +11,7 @@ var log = bunyan.createLogger({name: 'vote-consumer-' + cluster.worker.id});
 
 keystone.init({'mongo' : config.mongo.uri});
 keystone.mongoose.connect(config.mongo.uri);
-keystone.import('../../api/dist/models');
+keystone.import('../../../api/dist/models');
 
 var Vote = keystone.list('Vote');
 
