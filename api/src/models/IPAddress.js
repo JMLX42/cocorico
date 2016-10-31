@@ -12,12 +12,13 @@ var IPAddress = new keystone.List('IPAddress', {
   map: { name: 'ip' },
   track: { createdAt: true, updatedAt: true },
   nodelete: config.env !== 'development',
-  defaultColumns: 'ip, blacklisted, createdAt, updatedAt',
+  defaultColumns: 'ip, blacklisted, whitelisted, createdAt, updatedAt',
 });
 
 IPAddress.add({
-  ip: { type: Types.Text, required: true, initial: true, unique: true, noedit: true },
-  blacklisted: { type: Types.Boolean, required: true, initial: true },
+  ip: { type: Types.Text, required: true, initial: true, unique: true, noedit: true, index: true },
+  blacklisted: { type: Types.Boolean, dependsOn: { whitelisted: false } },
+  whitelisted: { type: Types.Boolean },
 });
 
 IPAddress.relationship({ path: 'events', ref: 'Event', refPath: 'ip' });
@@ -53,6 +54,14 @@ function removeFromIpTables(ip) {
 IPAddress.schema.pre('save', function(next) {
   this.wasNew = this.isNew;
   this.blacklistedWasModified = this.isModified('blacklisted');
+
+  next();
+});
+
+IPAddress.schema.pre('validate', function(next) {
+  if (this.whitelisted) {
+    this.blacklisted = false;
+  }
 
   next();
 });
