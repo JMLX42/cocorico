@@ -6,7 +6,7 @@ var transform = require('model-transform');
 var Types = keystone.Field.Types;
 
 var Ballot = new keystone.List('Ballot', {
-  defaultSort: '-updatedAt',
+  defaultSort: '-createdAt',
   track: { createdAt: true, updatedAt: true },
   nodelete: config.env !== 'development',
   nocreate: true,
