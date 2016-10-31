@@ -1,3 +1,5 @@
+require('babel-polyfill');
+
 try {
   require('source-map-support').install();
 } catch (e) {
