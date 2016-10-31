@@ -351,6 +351,7 @@ export async function run() {
     logger.info('connected to the queue');
 
     channel = await queue.createChannel();
+    channel.prefetch(32);
 
     logger.info('channel created, waiting for messages...');
 
