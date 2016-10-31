@@ -9,7 +9,7 @@ var cluster = require('cluster');
 
 var log = bunyan.createLogger({name: 'vote-consumer-' + cluster.worker.id});
 
-keystone.init({'mongo' : config.mongo.uri});
+keystone.init({'mongo' : config.mongo.uri, headless: true});
 keystone.mongoose.connect(config.mongo.uri);
 keystone.import('../../../api/dist/models');
 

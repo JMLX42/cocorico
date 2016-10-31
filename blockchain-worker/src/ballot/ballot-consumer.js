@@ -14,7 +14,7 @@ import watchContractEvents from './watchContractEvents';
 import webhook from './webhook';
 import noRetryError from './noRetryError';
 
-keystone.init({'mongo' : config.mongo.uri});
+keystone.init({'mongo' : config.mongo.uri, headless: true});
 keystone.mongoose.connect(config.mongo.uri);
 keystone.import('../../../api/dist/models');
 
