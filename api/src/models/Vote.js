@@ -17,6 +17,7 @@ var Types = keystone.Field.Types;
 var Vote = new keystone.List('Vote', {
   autokey: { path: 'slug', from: 'title', unique: true },
   // map: { name: 'title' },
+  defaultSort: '-createdAt',
   track: { createdAt: true, updatedAt: true },
   noedit: config.env !== 'development',
   nocreate: config.env !== 'development',
