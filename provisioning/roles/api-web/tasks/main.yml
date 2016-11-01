@@ -56,9 +56,9 @@
     - restart cocorico-api-web service
 
 - name: import pages
-  shell: "{{ cocorico_api_dir }}/scripts/import-pages.js"
+  shell: "./import-pages.js"
   args:
-    chdir: "{{ cocorico_api_dir }}"
+    chdir: "{{ cocorico_api_dir }}/scripts"
   register: result
   failed_when: result.stderr
   changed_when: "'Updated page' in result.stdout"
