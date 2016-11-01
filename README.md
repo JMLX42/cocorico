@@ -11,6 +11,7 @@ Cocorico is an open online voting platform powered by the blockchain.
 * [Localization](./doc/Localization.md)
 * [REST API](https://cocorico.cc/documentation/index.html)
 * [External users](./doc/External_Users.md)
+* [Moderation](./doc/Moderation.md)
 
 ## Contribute
 
