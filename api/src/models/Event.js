@@ -7,8 +7,6 @@ import './IPAddress'
 const Types = keystone.Field.Types;
 const IPAddress = keystone.list('IPAddress');
 
-const MAX_NUM_WARNINGS = 50;
-
 var Event = new keystone.List('Event', {
   defaultColumns: 'createdAt, ip, type, message',
   defaultSort: '-createdAt',
@@ -39,20 +37,25 @@ Event.add({
   message: { type: Types.Textarea, required: true, initial: true },
 });
 
+IPAddress.schema.post('remove', async function(removed) {
+  await Event.model.find({ip:removed}).remove().exec();
+});
+
 Event.logWarningEventAndBlacklist = async function(requestOrIP, message) {
   const address = await IPAddress.getIPAddress(requestOrIP);
 
   await Event.model({ip: address, type: 'warning', message: message}).save();
 
-  const events = await await Event.model.find({ip:address}).exec();
-  const warnings = events.filter(e => e.type === 'warning');
+  address.numWarningsLeft -= 1;
 
-  if (warnings.length > MAX_NUM_WARNINGS) {
-    await Event.model({ip: address, type: 'alert', message: 'too many warnings, blacklisting IP'}).save();
+  if (address.numWarningsLeft === 0) {
+    await Event.model({ip: address, type: 'alert', message: 'no warning left, blacklisting IP'}).save();
     await address.blacklist();
 
     return true;
   }
+
+  await address.save();
 
   return false;
 }

@@ -1,24 +1,39 @@
-import config from '/opt/cocorico/api-web/config.json';
-
 import childProcess from 'child_process';
 import keystone from 'keystone';
 import transform from 'model-transform';
 
 const Types = keystone.Field.Types;
 
+const MAX_NUM_WARNINGS = 50;
+
 var IPAddress = new keystone.List('IPAddress', {
   singular: 'IP Address',
   defaultSort: '-updatedAt',
   map: { name: 'ip' },
   track: { createdAt: true, updatedAt: true },
-  nodelete: config.env !== 'development',
-  defaultColumns: 'ip, blacklisted, whitelisted, createdAt, updatedAt',
+  defaultColumns: 'ip, blacklisted|10%, whitelisted|10%, createdAt, updatedAt, description',
 });
 
 IPAddress.add({
-  ip: { type: Types.Text, required: true, initial: true, unique: true, noedit: true, index: true },
+  ip: {
+    type: Types.Text,
+    required: true,
+    initial: true,
+    unique: true,
+    noedit: true,
+    index: true,
+  },
   blacklisted: { type: Types.Boolean, dependsOn: { whitelisted: false } },
   whitelisted: { type: Types.Boolean },
+  numWarningsLeft: {
+    type: Types.Number,
+    default: MAX_NUM_WARNINGS,
+    dependsOn: {
+      whitelisted: false,
+      blacklisted: false,
+    },
+  },
+  description: { type: Types.Textarea },
 });
 
 IPAddress.relationship({ path: 'events', ref: 'Event', refPath: 'ip' });
@@ -55,12 +70,20 @@ IPAddress.schema.pre('save', function(next) {
   this.wasNew = this.isNew;
   this.blacklistedWasModified = this.isModified('blacklisted');
 
+  if (this.blacklistedWasModified && !this.blacklisted) {
+    this.numWarningsLeft = MAX_NUM_WARNINGS;
+  }
+
   next();
 });
 
 IPAddress.schema.pre('validate', function(next) {
   if (this.whitelisted) {
     this.blacklisted = false;
+  }
+
+  if (this.numWarningsLeft < 0) {
+    this.numWarningsLeft = 0;
   }
 
   next();
@@ -107,10 +130,10 @@ IPAddress.register();
 // synchronize the blacklisted IP addresses with iptables
 IPAddress.model.find().exec((err, addresses) => {
   for (var address of addresses) {
-    if (!address.blacklisted) {
-      removeFromIpTables(address.ip);
-    } else {
+    if (address.blacklisted) {
       addToIptables(address.ip);
+    } else {
+      removeFromIpTables(address.ip);
     }
   }
 });
