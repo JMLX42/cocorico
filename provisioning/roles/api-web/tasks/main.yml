@@ -24,8 +24,13 @@
   notify:
     - restart cocorico-api-web service
 
+- name: build the API
+  shell: npm run build
+  args:
+    chdir: "{{ cocorico_api_dir }}"
+    creates: "{{ cocorico_api_dir }}/dist"
+
 - name: create admin
-  when: is_development_environment
   shell: "{{ cocorico_api_dir }}/scripts/add-admin.js
     --email={{ api_web_admin_email }}
     --password={{ api_web_admin_password }}
