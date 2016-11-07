@@ -1,15 +1,15 @@
+import keystone from '/opt/cocorico/api-web/node_modules/keystone';
+import config from '/opt/cocorico/api-web/config.json';
+
 import amqplib from 'amqplib';
 import EthereumTx from 'ethereumjs-tx';
 import EthereumUtil from 'ethereumjs-util';
 import promise from 'thenify';
 import delay from 'timeout-as-promise';
-
-import keystone from '/opt/cocorico/api-web/node_modules/keystone';
-import config from '/opt/cocorico/api-web/config.json';
+import Web3 from 'web3';
 
 import logger from './logger';
 import isValidBallotMessage from './isValidBallotMessage';
-import web3 from './web3';
 import watchContractEvents from './watchContractEvents';
 import webhook from './webhook';
 import noRetryError from './noRetryError';
@@ -19,6 +19,14 @@ keystone.mongoose.connect(config.mongo.uri);
 keystone.import('../../../api/dist/models');
 
 const Ballot = keystone.list('Ballot');
+
+const ACCOUNT_INIT_TIMEOUT = 1200000; // 20 minutes
+const ACCOUNT_INIT_DELAY = 5000;
+
+const web3 = new Web3();
+web3.setProvider(new web3.providers.HttpProvider(
+  'http://127.0.0.1:8545'
+));
 
 async function pushBackToQueueWithStatus(channel, ballot, status) {
   await updateBallotStatus(ballot, status);
@@ -94,6 +102,15 @@ async function handlePendingBallot(ballot) {
     to: address,
     value: value,
   });
+
+  logger.info(
+    {
+      from : rootAccount,
+      value : value,
+      address : address,
+    },
+    'account init transaction sent'
+  );
 }
 
 async function handleInitializingBallot(ballot) {
@@ -104,13 +121,20 @@ async function handleInitializingBallot(ballot) {
 
   var initialized = false;
   var balance = 0;
+  var totalTime = 0;
 
   while (!initialized) {
     balance = await promise((...c)=>web3.eth.getBalance(...c))(address);
     initialized = balance.toString(10) !== '0';
 
     if (!initialized) {
-      await delay(5000);
+      await delay(ACCOUNT_INIT_DELAY);
+
+      totalTime += ACCOUNT_INIT_DELAY;
+
+      if (totalTime >= ACCOUNT_INIT_TIMEOUT) {
+        throw noRetryError({error:'account init timeout'});
+      }
     }
   }
 
@@ -161,6 +185,7 @@ async function handleInitializedBallot(ballot) {
       },
       'Vote.registerVoter() call transaction sent'
     );
+
   } catch (err) {
     if (err.message === 'Nonce too low'
         || err.message.indexOf('Known transaction:') === 0) {
@@ -174,18 +199,19 @@ async function handleInitializedBallot(ballot) {
 async function handleRegisteringBallot(ballot) {
   logger.info('handling registering ballot');
 
+  const blockNumber = await promise((cb)=>web3.eth.getBlockNumber(cb))();
   const signedTx = new EthereumTx(ballot.transaction);
   const address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
-  const contract = await promise((...c)=>web3.eth.contract(ballot.voteContractABI).at(...c))(
+  const contract = await promise((a, cb)=>web3.eth.contract(ballot.voteContractABI).at(a, cb))(
     ballot.voteContractAddress
   );
   const voterRegisteredEvent = contract.VoterRegistered(
     {voter: address},
-    {fromBlock: 0, toBlock: 'latest'}
+    {fromBlock: blockNumber, toBlock: 'latest'}
   );
   const voteErrorEvent = contract.VoteError(
     {user: address},
-    {fromBlock: 0, toBlock: 'latest'}
+    {fromBlock: blockNumber, toBlock: 'latest'}
   );
 
   logger.info('listening for Vote.registerVoter() events');
@@ -200,7 +226,7 @@ async function handleRegisteredBallot(ballot) {
 
   const signedTx = new EthereumTx(ballot.transaction);
   const address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
-  const contract = await promise((...c)=>web3.eth.contract(ballot.voteContractABI).at(...c))(
+  const contract = await promise((a, cb)=>web3.eth.contract(ballot.voteContractABI).at(a, cb))(
     ballot.voteContractAddress
   );
 
@@ -213,7 +239,7 @@ async function handleRegisteredBallot(ballot) {
   );
 
   try {
-    const txHash = await promise((...c)=>web3.eth.sendRawTransaction(...c))(
+    const txHash = await promise((tx, cb)=>web3.eth.sendRawTransaction(tx, cb))(
       ballot.transaction
     );
 
@@ -225,6 +251,7 @@ async function handleRegisteredBallot(ballot) {
       },
       'Vote.vote() call transaction sent'
     );
+
   } catch (err) {
     if (err.message === 'Nonce too low'
         || err.message.indexOf('Known transaction:') === 0) {
@@ -238,18 +265,19 @@ async function handleRegisteredBallot(ballot) {
 async function handleCastingBallot(ballot) {
   logger.info('handling casting ballot');
 
+  const blockNumber = await promise((cb)=>web3.eth.getBlockNumber(cb))();
   const signedTx = new EthereumTx(ballot.transaction);
   const address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
-  const contract = await promise((...c)=>web3.eth.contract(ballot.voteContractABI).at(...c))(
+  const contract = await promise((a, cb)=>web3.eth.contract(ballot.voteContractABI).at(a, cb))(
     ballot.voteContractAddress
   );
   const ballotEvent = contract.Ballot(
     {voter: address},
-    {fromBlock: 0, toBlock: 'latest'}
+    {fromBlock: blockNumber, toBlock: 'latest'}
   );
   const voteErrorEvent = contract.VoteError(
     {user: address},
-    {fromBlock: 0, toBlock: 'latest'}
+    {fromBlock: blockNumber, toBlock: 'latest'}
   );
 
   logger.info('listening for Vote.vote() events');
@@ -351,7 +379,7 @@ export async function run() {
     logger.info('connected to the queue');
 
     channel = await queue.createChannel();
-    channel.prefetch(32);
+    channel.prefetch(4);
 
     logger.info('channel created, waiting for messages...');
 
