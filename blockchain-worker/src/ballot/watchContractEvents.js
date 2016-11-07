@@ -1,5 +1,7 @@
 import noRetryError from './noRetryError';
 
+const BLOCKCHAIN_EVENT_TIMEOUT = 1200000; // 20 minutes
+
 export default function(errorEvents, events) {
   return new Promise((resolve, reject) => {
     var timeout = setTimeout(
@@ -7,14 +9,17 @@ export default function(errorEvents, events) {
         cleanup();
         reject(noRetryError({error : 'contract event timeout'}));
       },
-      600000 // 10 minutes
+      BLOCKCHAIN_EVENT_TIMEOUT
     );
 
     function cleanup() {
       try {
         clearTimeout(timeout);
-        for (var event of events.concat(errorEvents)) {
+        for (var event of events) {
           event.stopWatching();
+        }
+        for (var errorEvent of errorEvents) {
+          errorEvent.stopWatching();
         }
       } catch (err) {
         reject(err);
@@ -25,7 +30,7 @@ export default function(errorEvents, events) {
       try {
         cleanup();
         if (!!err) return reject(err);
-        return reject(noRetryError({error:e.args.message}));
+        return reject({error:e.args.message});
       } catch (err2) {
         return reject(err2);
       }
