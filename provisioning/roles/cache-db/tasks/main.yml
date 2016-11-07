@@ -1,0 +1,35 @@
+---
+- name: install redis
+  apt: name={{ item }} state=present
+  when:
+    - ansible_os_family == 'Debian'
+  with_items:
+   - redis-server
+
+- name: install redis
+  yum: name={{ item }} state=present
+  when:
+    - ansible_os_family == 'RedHat'
+  with_items:
+   - redis
+
+- name: disable old init redis scripts
+  shell: update-rc.d redis-server disable
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: install redis upstart script
+  template: src=redis.upstart.conf.j2 dest=/etc/init/redis-server.conf
+
+- name: install redis init script
+  template: src=redis.init.j2 dest=/etc/init.d/redis mode=0755
+
+- name: update redis configuration
+  lineinfile: dest={{ redis_conf }} regexp="^daemonize " line="daemonize no"
+  when:
+    - provider != 'docker'
+
+- name: start redis service
+  service: name={{ redis_daemon }} state=started
+  when:
+    - provider != 'docker'

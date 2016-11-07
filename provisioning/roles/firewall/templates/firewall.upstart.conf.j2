@@ -1,9 +1,10 @@
 description "Start firewall"
 
 start on net-device-up IFACE=lo
-console output
 
 pre-start exec /etc/init.d/local/firewall start
+pre-start exec /etc/init.d/fail2ban start
 
 pre-stop exec /etc/init.d/local/firewall stop
 post-stop exec /etc/init.d/local/firewall save
+pre-stop exec /etc/init.d/fail2ban stop

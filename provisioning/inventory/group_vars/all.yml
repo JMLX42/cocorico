@@ -17,6 +17,9 @@ project_dir: "/opt/{{ project_name }}"
 log_dir: "{{ project_dir }}/log"
 documentation_dir: "{{ cocorico_app_dir }}/public/documentation"
 
+redis_daemon: redis-server
+redis_conf: /etc/redis/redis.conf
+
 backup_sources:
   mongodb:
     - cocorico

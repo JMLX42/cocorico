@@ -1,6 +1,9 @@
 ---
 - set_fact: role_name=firewall
 
+- name: install fail2ban
+  apt: name=fail2ban state=present
+
 - name: create /etc/init.d/local/ directory
   file: path=/etc/init.d/local/ state=directory
 
@@ -9,6 +12,14 @@
 
 - name: generate and install Upstart script
   template: src=firewall.upstart.conf.j2 dest=/etc/init/firewall.conf
+
+- name: update fail2ban whitelist
+  lineinfile:
+    dest: /etc/fail2ban/jail.conf
+    line: "ignoreip = {{ whitelisted_ips | join(' ') }}"
+    regexp: "^ignoreip ="
+  notify:
+    - restart firewall service
 
 - name: start firewall
   service: name=firewall state=restarted

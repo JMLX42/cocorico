@@ -1,0 +1,5 @@
+---
+- name: restart firewall service
+  service: name=firewall state=restarted
+  when:
+    - provider != 'docker'
