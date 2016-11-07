@@ -6,7 +6,7 @@ var Admin = new keystone.List('Admin');
 
 Admin.add({
   name: { type: String, initial: true },
-  email: { type: Types.Email, initial: true, index: true },
+  email: { type: Types.Email, initial: true, index: true, unique: true },
   password: { type: Types.Password, initial: true },
 }, 'Permissions', {
   isAdmin: { type: Boolean, label: 'Can access Keystone', index: true },
