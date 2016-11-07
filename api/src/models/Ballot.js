@@ -30,7 +30,7 @@ Ballot.add({
     required: true,
     initial: true,
   },
-  hash: { type: String, required: true, initial: true, index: true },
+  hash: { type: String, required: true, initial: true, index: true, unique: true },
   error: { type: Types.TextArray },
 });
 
