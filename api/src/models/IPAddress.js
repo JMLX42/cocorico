@@ -11,7 +11,7 @@ var IPAddress = new keystone.List('IPAddress', {
   defaultSort: '-updatedAt',
   map: { name: 'ip' },
   track: { createdAt: true, updatedAt: true },
-  defaultColumns: 'ip, blacklisted|10%, whitelisted|10%, createdAt, updatedAt, description',
+  defaultColumns: 'ip, blacklisted|10%, whitelisted|10%, numWarningsLeft|15%, updatedAt, description',
 });
 
 IPAddress.add({
@@ -39,7 +39,7 @@ IPAddress.add({
 IPAddress.relationship({ path: 'events', ref: 'Event', refPath: 'ip' });
 
 function isInIptables(ip) {
-  var iptables = childProcess.execSync('iptables -L -n');
+  var iptables = childProcess.execSync('iptables -L -n -w');
 
   return iptables.indexOf('DROP       all  --  ' + ip) >= 0;
 }
@@ -49,7 +49,7 @@ function addToIptables(ip) {
     return false;
   }
 
-  childProcess.execSync('iptables -I INPUT 1 -s "' + ip + '" -j DROP');
+  childProcess.execSync('iptables -I INPUT 1 -s "' + ip + '" -j DROP -w');
 
   return true;
 }
@@ -60,7 +60,7 @@ function removeFromIpTables(ip) {
   }
 
   while (isInIptables(ip)) {
-    childProcess.execSync('iptables -D INPUT -s "' + ip + '" -j DROP');
+    childProcess.execSync('iptables -D INPUT -s "' + ip + '" -j DROP -w');
   }
 
   return true;
@@ -69,8 +69,10 @@ function removeFromIpTables(ip) {
 IPAddress.schema.pre('save', function(next) {
   this.wasNew = this.isNew;
   this.blacklistedWasModified = this.isModified('blacklisted');
+  this.whitelistedWasModified = this.isModified('whitelisted');
 
-  if (this.blacklistedWasModified && !this.blacklisted) {
+  if (this.blacklistedWasModified && !this.blacklisted
+      && this.numWarningsLeft <= 0) {
     this.numWarningsLeft = MAX_NUM_WARNINGS;
   }
 
