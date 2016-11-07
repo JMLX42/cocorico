@@ -15,6 +15,7 @@ module.exports = Reflux.createStore({
     this._authError = null;
 
     jquery.ajaxPrefilter(this._ajaxPrefilter);
+    jquery(document).ajaxError(this._ajaxError);
   },
 
   attemptedJWTAuthentication() {
@@ -33,8 +34,8 @@ module.exports = Reflux.createStore({
 
   getAuthenticationError: function() {
     return this._authError && this._authError !== true
-            ? this._authError
-            : null;
+      ? this._authError
+      : null;
   },
 
   authenticationFailed: function() {
@@ -58,7 +59,7 @@ module.exports = Reflux.createStore({
     if (!this.isAuthenticated())
       this._fetchCurrentUser();
     else
-            this.trigger(this);
+      this.trigger(this);
   },
 
   _fetchCurrentUser: function() {
@@ -127,6 +128,21 @@ module.exports = Reflux.createStore({
     if (!!this._jwt && !!this._appId) {
       jqXHR.setRequestHeader('Authorization', 'JWT ' + this._jwt);
       jqXHR.setRequestHeader('Cocorico-App-Id', this._appId);
+    }
+  },
+
+  _ajaxError: function(event, request, settings) {
+    if (request.status === 401) {
+      // If we get a 401 and the user is logged in using JWT, the JWT is
+      // invalid. It can happen at anytime since we support the "exp"
+      // (expiration time) field. When it happens, we make sure the user is
+      // marked as logged out.
+      if (!!this._jwt && !!this._appId) {
+        this._currentUser = null;
+        this._jwt = null;
+        this._appId = null;
+        this.trigger(this);
+      }
     }
   },
 });
