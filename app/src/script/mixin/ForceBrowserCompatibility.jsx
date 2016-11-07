@@ -39,18 +39,17 @@ var ForceBrowserCompatibility = {
         <Hint style="danger">
           <h3>Ohoo... votre navigateur n'est pas compatible :(</h3>
           <p>
-            Voter, c'est du sérieux ! <strong>Votre navigateur Web
-            ({platform.name} {platform.version}) est trop
-            ancien ou mal sécurisé et pourrait permettre à
-            des gens mal intentionnés d'usurper
-            votre identité ou de traffiquer vos bulletins de
-            vote.</strong>
+            Pour des raisons de sécurité, nous n'autorisons que les navigateurs
+            Web qui ont pu être testés et approuvés. Malheureusement, votre
+            navigateur Web ({platform.name} {platform.version}) n'a pas
+            été testé et <strong>nous ne pouvons donc pas garantir la fiabilité de
+            votre vote</strong>.
           </p>
           {name in supported && supported[name].updateLink
             ? <p>
               Vous pouvez&nbsp;
               <RedirectLink href={supported[name].updateLink}>
-                mettre à jour votre navigateur Web
+                mettre à jour {platform.name}
               </RedirectLink>
               &nbsp;ou installer et utiliser l'un des
               navigateurs Web suivants :
