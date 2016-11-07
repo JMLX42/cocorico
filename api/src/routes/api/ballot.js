@@ -7,7 +7,10 @@ var async = require('async');
 var jwt = require('jsonwebtoken');
 var Web3 = require('web3');
 var CryptoJS = require('crypto-js');
+var promise = require('thenify');
+var stringify = require('json-stable-stringify');
 
+var cache = require('../../cache');
 var pushBallotOnQueue = require('../../pushBallotOnQueue');
 
 var Vote = keystone.list('Vote'),
@@ -272,88 +275,117 @@ exports.verify = function(req, res) {
     });
 }
 
-exports.getTransactions = function(req, res) {
-  var voteId = req.params.voteId;
+exports.getTransactions = async function(req, res) {
+  const voteId = req.params.voteId;
 
-  return Vote.model.findById(voteId)
-    .exec((err, vote) => {
-      if (err) {
-        return res.apiError('database error', err);
-      }
+  try {
+    const vote = await Vote.model.findById(voteId).exec();
 
-      if (!vote) {
-        return res.status(404).send();
-      }
+    if (!vote) {
+      return res.status(404).send();
+    }
 
-      if (vote.status !== 'complete') {
-        return res.status(403).send();
-      }
+    if (vote.status !== 'complete') {
+      return res.status(403).send();
+    }
 
-      var filter = null;
-
-      if (!!req.body.transactionHash) {
-        if (req.body.transactionHash.indexOf('0x') !== 0) {
-          req.body.transactionHash = '0x' + req.body.transactionHash;
-        }
-        filter = (tx) => tx.transactionHash.indexOf(req.body.transactionHash) === 0;
-      } else if (!!req.body.voter) {
-        if (req.body.voter.indexOf('0x') !== 0) {
-          req.body.voter = '0x' + req.body.voter;
-        }
-        filter = (tx) => tx.args.voter.indexOf(req.body.voter) === 0;
-      } else if (!!req.body.proposal) {
-        filter = (tx) => Math.round(tx.args.proposal.toNumber()) === parseInt(req.body.proposal);
-      }
-
-      var web3 = new Web3();
-      web3.setProvider(new web3.providers.HttpProvider('http://127.0.0.1:8545'));
-
-      return web3.eth.contract(JSON.parse(vote.voteContractABI))
-        .at(
-          vote.voteContractAddress,
-          (atErr, instance) => {
-            if (atErr) {
-              return res.apiError('blockchain error', atErr);
-            }
-
-            var ballotEvent = instance.Ballot(null, {fromBlock:0, toBlock: 'latest'});
-            return ballotEvent.get((ballotEventErr, result) => {
-              if (ballotEventErr) {
-                res.apiError('blockchain error', ballotEventErr);
-                return;
-              }
-
-              var numItems = result.length;
-
-              if (!!filter) {
-                result = result.filter(filter);
-              }
-
-              var page = !req.body.page ? 0 : parseInt(req.body.page);
-              var numPages = Math.ceil(result.length / 10);
-              result = result.slice(page * 10, page * 10 + 10);
-
-              VerifiedBallot.model.find({
-                transactionHash: {$in: result.map((r)=>r.transactionHash)}}
-              ).exec((findErr, ballots) => {
-                for (var ballot of ballots) {
-                  for (var tx of result) {
-                    if (tx.transactionHash === ballot.transactionHash) {
-                      tx.verified = ballot.valid;
-                    }
-                  }
-                }
-
-                res.apiResponse({
-                  numItems: numItems,
-                  page: page,
-                  numPages: numPages,
-                  transactions: result,
-                });
-              });
-            });
-          }
-        );
-
+    var transactionHash = req.body.transactionHash;
+    var voter = req.body.voter;
+    const proposal = req.body.proposal;
+    const page = !req.body.page ? 0 : parseInt(req.body.page);
+    const key = '/ballot/transactions/' + voteId + '&params=' + stringify({
+      vote: voteId,
+      page: page,
+      transactionHash: transactionHash,
+      voter: voter,
+      proposal: proposal,
     });
+
+    const cached = await cache.get(key);
+
+    if (!!cached) {
+      return res.apiResponse(cached);
+    }
+
+    var filter = null;
+    if (!!transactionHash) {
+      if (transactionHash.indexOf('0x') !== 0) {
+        transactionHash = '0x' + transactionHash;
+      }
+      filter = (tx) => tx.transactionHash.indexOf(transactionHash) === 0;
+    } else if (!!voter) {
+      if (voter.indexOf('0x') !== 0) {
+        voter = '0x' + voter;
+      }
+      filter = (tx) => tx.args.voter.indexOf(voter) === 0;
+    } else if (!!proposal) {
+      filter = (tx) => Math.round(tx.args.proposal.toNumber()) === parseInt(proposal);
+    }
+
+    try {
+
+      const key2 = '/ballot/transactions/' + voteId;
+
+      var result = await cache.get(key2);
+
+      if (!result) {
+        try {
+          const web3 = new Web3();
+          web3.setProvider(new web3.providers.HttpProvider('http://127.0.0.1:8545'));
+
+          const contract = web3.eth.contract(JSON.parse(vote.voteContractABI));
+          const instance = await promise((...c)=>contract.at(...c))(
+              vote.voteContractAddress
+            );
+          const ballotEvent = instance.Ballot(null, {fromBlock:0, toBlock: 'latest'});
+
+          result = await promise((cb)=>ballotEvent.get(cb))();
+          cache.set(key2, result);
+        } catch (atErr) {
+          return res.apiError('blockchain error', atErr);
+        }
+      }
+
+      var numItems = result.length;
+
+      if (!!filter) {
+        result = result.filter(filter);
+      }
+
+      var numPages = Math.ceil(result.length / 10);
+      result = result.slice(page * 10, page * 10 + 10);
+
+      try {
+        const verifiedBallots = await VerifiedBallot.model.find({
+          transactionHash: {$in: result.map((r)=>r.transactionHash)}}
+          ).exec();
+
+        for (var ballot of verifiedBallots) {
+          for (var tx of result) {
+            if (tx.transactionHash === ballot.transactionHash) {
+              tx.verified = ballot.valid;
+            }
+          }
+        }
+
+        var response = {
+          numItems: numItems,
+          page: page,
+          numPages: numPages,
+          transactions: result,
+        };
+
+        cache.set(key, response);
+
+        return res.apiResponse(response);
+      } catch (findBallotErr) {
+        return res.apiError('database error', findBallotErr);
+      }
+    } catch (ballotEventErr) {
+      return res.apiError('blockchain error', ballotEventErr);
+    }
+
+  } catch (findVoteErr) {
+    return res.apiError('database error', findVoteErr);
+  }
 }
