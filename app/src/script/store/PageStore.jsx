@@ -5,7 +5,6 @@ var jquery = require('jquery');
 module.exports = Reflux.createStore({
   init: function() {
     this.listenTo(PageAction.list, this.fetchPages);
-    this.listenTo(PageAction.showNavBar, this.fetchNavBar);
     this.listenTo(PageAction.readPage, this.fetchPageBySlug);
 
     this._pages = [];
@@ -23,21 +22,6 @@ module.exports = Reflux.createStore({
 
   navBar: function() {
     return this._navBar;
-  },
-
-  fetchNavBar: function() {
-    if (this._navBar != null)
-      return;
-
-    this._navBar = [];
-
-    jquery.get(
-      '/api/page/navbar',
-      (data) => {
-        this._navBar = data.pages;
-        this.trigger(this);
-      }
-    );
   },
 
   fetchPages: function() {

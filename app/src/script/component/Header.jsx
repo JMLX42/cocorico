@@ -9,8 +9,7 @@ var PageStore = require('../store/PageStore'),
   UserStore = require('../store/UserStore'),
   ConfigStore = require('../store/ConfigStore');
 
-var PageAction = require('../action/PageAction'),
-  UserAction = require('../action/UserAction');
+var UserAction = require('../action/UserAction');
 
 var LoginButton = require('./LoginButton'),
   AccountDropdown = require('./AccountDropdown'),
@@ -29,10 +28,6 @@ var Header = React.createClass({
     Reflux.connect(ConfigStore, 'config'),
     ReactIntl.IntlMixin,
   ],
-
-  componentWillMount: function() {
-    PageAction.showNavBar();
-  },
 
   componentDidMount: function() {
     UserAction.requireLogin();
