@@ -16,7 +16,7 @@
     "md5": "2.1.0",
     "thenify": "^3.2.1",
     "timeout-as-promise": "^1.0.0",
-    "web3": "0.15.0"
+    "web3": "0.17.0-beta"
   },
   "engines": {
     "node": ">=0.10.22",
