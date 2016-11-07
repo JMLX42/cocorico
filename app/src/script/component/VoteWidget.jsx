@@ -101,7 +101,7 @@ var VoteWidget = React.createClass({
     var user = this.state.users.getCurrentUser();
     // if there is a user and it's not authorized to vote
     // or there is no JWT user and the vote is restricted to 3rd party users
-    if ((!!user && !this.userIsAuthorizedToVote())
+    if ((!!user && !!vote && !!vote.permissions && !this.userIsAuthorizedToVote())
         || (!this.state.users.attemptedJWTAuthentication() && vote.restricted)) {
       this.error(VoteWidget.ERROR_UNAUTHORIZED);
     }
@@ -128,8 +128,6 @@ var VoteWidget = React.createClass({
     if (completeStatus.indexOf(ballot.status) >= 0) {
       BallotAction.stopPolling();
       this.goToStep(VoteWidget.STEP_COMPLETE);
-    } else {
-      BallotAction.startPolling(this.props.voteId);
     }
   },
 
@@ -138,6 +136,7 @@ var VoteWidget = React.createClass({
 
     if (!!vote) {
       this.setState({vote: vote});
+      this.userStoreChanged();
     }
   },
 
@@ -145,10 +144,16 @@ var VoteWidget = React.createClass({
     this.checkBallot();
   },
 
-  userStoreChanged: function(users) {
+  userStoreChanged: function() {
     var user = this.state.users.getCurrentUser();
     if (!!user) {
       VoteAction.getPermissions(this.props.voteId);
+
+      if (this.userIsAuthorizedToVote()) {
+        BallotAction.startPolling(this.props.voteId);
+      }
+    } else {
+      BallotAction.stopPolling(this.props.voteId);
     }
   },
 
@@ -160,6 +165,7 @@ var VoteWidget = React.createClass({
     }
     // FIXME: handle this.props.voteSlug ?
 
+    this.userStoreChanged(this.users);
     this.checkBallot();
   },
 
@@ -452,7 +458,7 @@ var VoteWidget = React.createClass({
   userIsAuthorizedToVote: function() {
     var vote = this.state.vote;
 
-    return !vote.permissions || vote.permissions.vote;
+    return !!vote && !!vote.permissions && vote.permissions.vote;
   },
 
   renderVoterIdDialog: function() {
