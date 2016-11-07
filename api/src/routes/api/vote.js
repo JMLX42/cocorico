@@ -7,6 +7,9 @@ var metafetch = require('metafetch');
 var fetch = require('node-fetch');
 var webshot = require('webshot');
 var md5 = require('md5');
+var promise = require('thenify');
+
+var cache = require('../../cache');
 
 var Vote = keystone.list('Vote'),
   Source = keystone.list('Source');
@@ -178,32 +181,47 @@ exports.update = function(req, res) {
 //         });
 // }
 
-exports.result = function(req, res) {
-  var voteId = req.params.voteId;
+exports.result = async function(req, res) {
+  const voteId = req.params.voteId;
+  const cacheKey = '/vote/result/' + voteId;
+  const cached = await cache.get(cacheKey);
 
-  Vote.model.findById(voteId)
-    .exec((findVoteErr, vote) => {
-      if (findVoteErr)
-        return res.apiError('database error', findVoteErr);
+  if (!!cached) {
+    return res.apiResponse(cached);
+  }
 
-      if (!vote)
-        return res.status(404).send();
+  try {
+    const vote = await Vote.model.findById(voteId).exec();
 
-      if (vote.status !== 'complete')
-        return res.status(403).send();
+    if (!vote)
+      return res.status(404).send();
 
-      var web3 = new Web3();
-      web3.setProvider(new web3.providers.HttpProvider(
-        'http://127.0.0.1:8545'
-      ));
+    if (vote.status !== 'complete')
+      return res.status(403).send();
 
-      return web3.eth.contract(JSON.parse(vote.voteContractABI)).at(
-        vote.voteContractAddress,
-        (err, voteInstance) => res.apiResponse(
-          {result : voteInstance.getVoteResults().map((s) => parseInt(s))}
-        )
+    var web3 = new Web3();
+    web3.setProvider(new web3.providers.HttpProvider(
+      'http://127.0.0.1:8545'
+    ));
+
+    try {
+      const contract = web3.eth.contract(JSON.parse(vote.voteContractABI));
+      const instance = await promise((...c)=>contract.at(...c))(
+        vote.voteContractAddress
       );
-    });
+      const response = {
+        result : instance.getVoteResults().map((s) => parseInt(s)),
+      };
+
+      cache.set(cacheKey, response);
+
+      return res.apiResponse(response);
+    } catch (blockchainErr) {
+      return res.apiError('blockchain error', blockchainErr);
+    }
+  } catch (findVoteErr) {
+    return res.apiError('database error', findVoteErr);
+  }
 }
 
 exports.embed = function(req, res) {
