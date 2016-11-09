@@ -151,6 +151,8 @@ async function handleInitializingBallot(ballot) {
 async function handleInitializedBallot(ballot) {
   logger.info('handling initialized ballot');
 
+  ballot.registeringStartBlockNumber = await promise((cb)=>web3.eth.getBlockNumber(cb))();
+
   const signedTx = new EthereumTx(ballot.transaction);
   const address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
   const accounts = await promise((...c)=>web3.eth.getAccounts(...c))();
@@ -199,7 +201,7 @@ async function handleInitializedBallot(ballot) {
 async function handleRegisteringBallot(ballot) {
   logger.info('handling registering ballot');
 
-  const blockNumber = await promise((cb)=>web3.eth.getBlockNumber(cb))();
+  const blockNumber = ballot.registeringStartBlockNumber;
   const signedTx = new EthereumTx(ballot.transaction);
   const address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
   const contract = await promise((a, cb)=>web3.eth.contract(ballot.voteContractABI).at(a, cb))(
@@ -223,6 +225,8 @@ async function handleRegisteringBallot(ballot) {
 
 async function handleRegisteredBallot(ballot) {
   logger.info('handling registered ballot');
+
+  ballot.castingStartBlockNumber = await promise((cb)=>web3.eth.getBlockNumber(cb))();
 
   const signedTx = new EthereumTx(ballot.transaction);
   const address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
@@ -265,7 +269,7 @@ async function handleRegisteredBallot(ballot) {
 async function handleCastingBallot(ballot) {
   logger.info('handling casting ballot');
 
-  const blockNumber = await promise((cb)=>web3.eth.getBlockNumber(cb))();
+  const blockNumber = ballot.castingStartBlockNumber;
   const signedTx = new EthereumTx(ballot.transaction);
   const address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
   const contract = await promise((a, cb)=>web3.eth.contract(ballot.voteContractABI).at(a, cb))(
