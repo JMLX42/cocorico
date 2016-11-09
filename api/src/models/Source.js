@@ -1,9 +1,9 @@
-var keystone = require('keystone');
-var transform = require('model-transform');
+import keystone from 'keystone';
+import transform from 'model-transform';
 
-var Types = keystone.Field.Types;
+const Types = keystone.Field.Types;
 
-var Source = new keystone.List('Source', {
+const Source = new keystone.List('Source', {
   defaultSort: '-time',
 });
 

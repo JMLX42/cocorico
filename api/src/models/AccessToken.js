@@ -1,9 +1,9 @@
-var keystone = require('keystone');
-var transform = require('model-transform');
+import keystone from 'keystone';
+import transform from 'model-transform';
 
-var Types = keystone.Field.Types;
+const Types = keystone.Field.Types;
 
-var AccessToken = new keystone.List('AccessToken', {
+const AccessToken = new keystone.List('AccessToken', {
   hidden: true,
   noedit: true,
   nodelete: true,

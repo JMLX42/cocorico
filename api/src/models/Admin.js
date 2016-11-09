@@ -1,8 +1,9 @@
-var keystone = require('keystone');
-var transform = require('model-transform');
-var Types = keystone.Field.Types;
+import keystone from 'keystone';
+import transform from 'model-transform';
 
-var Admin = new keystone.List('Admin');
+const Types = keystone.Field.Types;
+
+const Admin = new keystone.List('Admin');
 
 Admin.add({
   name: { type: String, initial: true },

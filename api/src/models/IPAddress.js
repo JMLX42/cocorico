@@ -6,7 +6,7 @@ const Types = keystone.Field.Types;
 
 const MAX_NUM_WARNINGS = 50;
 
-var IPAddress = new keystone.List('IPAddress', {
+const IPAddress = new keystone.List('IPAddress', {
   singular: 'IP Address',
   defaultSort: '-updatedAt',
   map: { name: 'ip' },

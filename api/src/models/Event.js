@@ -7,7 +7,7 @@ import './IPAddress'
 const Types = keystone.Field.Types;
 const IPAddress = keystone.list('IPAddress');
 
-var Event = new keystone.List('Event', {
+const Event = new keystone.List('Event', {
   defaultColumns: 'createdAt, ip, type, message',
   defaultSort: '-createdAt',
   track: { createdAt: true, createdBy: true },

@@ -1,15 +1,17 @@
-var keystone = require('keystone');
-var transform = require('model-transform');
-var config = require('/opt/cocorico/api-web/config.json');
-var Types = keystone.Field.Types;
+import config from '/opt/cocorico/api-web/config.json';
 
-var Media = new keystone.List('Media', {
+import keystone from 'keystone';
+import transform from 'model-transform';
+
+const Types = keystone.Field.Types;
+
+const Media = new keystone.List('Media', {
   autokey: { path: 'slug', from: 'title', unique: true },
   map: { name: 'title' },
   track: { createdAt: true, updatedAt: true },
 });
 
-var storage = new keystone.Storage({
+const storage = new keystone.Storage({
   adapter: keystone.Storage.Adapters.FS,
   fs: {
     path: '/srv/cocorico/app/public/' + config.uploadDir,

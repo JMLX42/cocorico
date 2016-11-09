@@ -1,11 +1,11 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-var keystone = require('keystone');
-var transform = require('model-transform');
+import keystone from 'keystone';
+import transform from 'model-transform';
 
-var Types = keystone.Field.Types;
+const Types = keystone.Field.Types;
 
-var Ballot = new keystone.List('Ballot', {
+const Ballot = new keystone.List('Ballot', {
   defaultSort: '-createdAt',
   track: { createdAt: true, updatedAt: true },
   nodelete: config.env !== 'development',

@@ -1,10 +1,10 @@
-var keystone = require('keystone');
-var transform = require('model-transform');
-var srs = require('secure-random-string');
+import keystone from 'keystone';
+import transform from 'model-transform';
+import srs from 'secure-random-string';
 
-var Types = keystone.Field.Types;
+const Types = keystone.Field.Types;
 
-var App = new keystone.List('App', {
+const App = new keystone.List('App', {
   map: { name: 'title' },
 });
 

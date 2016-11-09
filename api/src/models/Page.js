@@ -1,8 +1,9 @@
-var keystone = require('keystone');
-var transform = require('model-transform');
-var Types = keystone.Field.Types;
+import keystone from 'keystone';
+import transform from 'model-transform';
 
-var Page = new keystone.List('Page', {
+const Types = keystone.Field.Types;
+
+const Page = new keystone.List('Page', {
   autokey: { path: 'slug', from: 'title', unique: true },
   map: { name: 'title' },
   track: { createdAt: true, updatedAt: true },
