@@ -1,7 +1,7 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-var keystone = require('keystone');
-var Web3 = require('web3');
+import keystone from 'keystone';
+import Web3 from 'web3';
 
 function getBlockchainStatus() {
   var web3 = new Web3();
@@ -33,7 +33,7 @@ function getDatabaseStatus() {
   return keystone.mongoose.connection.readyState !== 0;
 }
 
-exports.getStatus = function(req, res) {
+export function getStatus(req, res) {
   getQueueStatus((queueIsConnected) => {
     var blockchainMinerIsConnected = getBlockchainMinerStatus();
     var databaseIsConnected = getDatabaseStatus();

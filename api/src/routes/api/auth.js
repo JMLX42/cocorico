@@ -1,11 +1,12 @@
-var passport = require('passport');
-var keystone = require('keystone');
-var JwtStrategy = require('passport-jwt').Strategy;
-var ExtractJwt = require('passport-jwt').ExtractJwt;
+import config from '/opt/cocorico/api-web/config.json';
 
-var App = keystone.list('App');
+import passport from 'passport';
+import keystone from 'keystone';
 
-var config = require('/opt/cocorico/api-web/config.json');
+import {Strategy as JwtStrategy} from 'passport-jwt';
+import {ExtractJwt} from 'passport-jwt';
+
+const App = keystone.list('App');
 
 passport.serializeUser(function(user, done) {
   done(null, user);
@@ -15,28 +16,28 @@ passport.deserializeUser(function(user, done) {
   done(null, user);
 });
 
-exports.providers = function(req, res) {
-  var providers = [];
+export function providers(req, res) {
+  var authProviders = [];
 
   if (config.facebook)
-    providers.push({name: 'facebook', url: '/api/auth/facebook/login'});
+    authProviders.push({name: 'facebook', url: '/api/auth/facebook/login'});
 
   if (config.franceConnect)
-    providers.push({name: 'france-connect', url: '/api/auth/france-connect/login'});
+    authProviders.push({name: 'france-connect', url: '/api/auth/france-connect/login'});
 
   if (config.google)
-    providers.push({name: 'google', url: '/api/auth/google/login'});
+    authProviders.push({name: 'google', url: '/api/auth/google/login'});
 
-  res.apiResponse({ providers : providers });
+  res.apiResponse({ providers : authProviders });
 }
 
-exports.logout = function(req, res) {
+export function logout(req, res) {
   req.logout();
 
   return res.redirect(302, req.query.redirect ? req.query.redirect : '/');
 }
 
-exports.fakeLogin = function(req, res) {
+export function fakeLogin(req, res) {
   user = {
     sub: '1234567890',
     firstName: 'Fake',
@@ -51,7 +52,7 @@ exports.fakeLogin = function(req, res) {
 }
 
 function getLoginFunction(provider, options) {
-  return function(req, res) {
+  return (req, res) => {
     if (req.query.redirect)
       req.session.redirectAfterLogin = req.query.redirect;
 
@@ -93,7 +94,7 @@ function getLoginCallbackFunction(provider) {
 }
 
 if (config.franceConnect) {
-  var FranceConnectStrategy = require('passport-franceconnect').Strategy;
+  const FranceConnectStrategy = require('passport-franceconnect').Strategy;
 
   passport.use('france-connect', new FranceConnectStrategy(
     {
@@ -118,14 +119,18 @@ if (config.franceConnect) {
       return done(null, user);
     }
   ));
-
-  exports.franceConnectLogin = getLoginFunction('france-connect', {scope: config.franceConnect.oauth.scope});
-
-  exports.franceConnectCallback = getLoginCallbackFunction('france-connect');
 }
 
+export const franceConnectLogin = config.franceConnect
+  ? getLoginFunction('france-connect', {scope: config.franceConnect.oauth.scope})
+  : undefined;
+
+export const franceConnectCallback = config.franceConnect
+  ? getLoginCallbackFunction('france-connect')
+  : undefined;
+
 if (config.facebook) {
-  var FacebookStrategy = require('passport-facebook').Strategy;
+  const FacebookStrategy = require('passport-facebook').Strategy;
 
   passport.use(new FacebookStrategy(
     {
@@ -146,14 +151,18 @@ if (config.facebook) {
       return cb(null, user);
     }
   ));
-
-  exports.facebookLogin = getLoginFunction('facebook', { scope: [ 'public_profile', 'user_birthday' ] });
-
-  exports.facebookCallback = getLoginCallbackFunction('facebook');
 }
 
+export const facebookLogin = config.facebook
+  ? getLoginFunction('facebook', { scope: [ 'public_profile', 'user_birthday' ] })
+  : null;
+
+export const facebookCallback = config.facebook
+  ? getLoginCallbackFunction('facebook')
+  : null;
+
 if (config.google) {
-  var GoogleStrategy = require('passport-google-oauth20').Strategy;
+  const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
   passport.use(new GoogleStrategy(
     {
@@ -175,11 +184,15 @@ if (config.google) {
       return cb(null, user);
     }
   ));
-
-  exports.googleLogin = getLoginFunction('google', { scope: [ 'profile' ] });
-
-  exports.googleCallback = getLoginCallbackFunction('google');
 }
+
+export const googleLogin = config.google
+  ? getLoginFunction('google', { scope: [ 'profile' ] })
+  : undefined;
+
+export const googleCallback = config.google
+  ? getLoginCallbackFunction('google')
+  : undefined;
 
 var opts = {}
 opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
@@ -192,8 +205,8 @@ opts.ignoreExpiration = false;
 // we need the secret to be the one set for the corresponding App.
 // Thus, we override the JwtStrategy.prototype.authenticate method in order to set
 // the secret according to the App found using the "Cocorico-App-Id" header.
-var authenticate = JwtStrategy.prototype.authenticate;
-JwtStrategy.prototype.authenticate = function(req, options) {
+const authenticate = JwtStrategy.prototype.authenticate;
+JwtStrategy.prototype.authenticate = async function(req, options) {
   var token = this._jwtFromRequest(req);
   if (!token) {
     return this.fail();
@@ -205,10 +218,8 @@ JwtStrategy.prototype.authenticate = function(req, options) {
     return this.fail(new Error('Missing Cocorico-App-Id header'));
   }
 
-  return App.model.findById(appId).exec((err, app) => {
-    if (err) {
-      return this.fail(err);
-    }
+  try {
+    const app = await App.model.findById(appId).exec();
 
     if (!app) {
       return this.fail(new Error('Invalid app id'));
@@ -218,7 +229,10 @@ JwtStrategy.prototype.authenticate = function(req, options) {
     this._secretOrKey = app.secret;
 
     return authenticate.call(this, req, options);
-  });
+
+  } catch (err) {
+    return this.fail(err);
+  }
 }
 
 passport.use(new JwtStrategy(opts, function(jwt_payload, done) {

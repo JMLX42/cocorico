@@ -1,14 +1,14 @@
-require('babel-polyfill');
+import 'babel-polyfill';
 
 try {
   require('source-map-support').install();
 } catch (e) {
 }
 
-var config = require('/opt/cocorico/api-web/config.json');
-var keystone = require('keystone');
-var srs = require('secure-random-string');
-var logger = require('./logger');
+import config from '/opt/cocorico/api-web/config.json';
+import keystone from 'keystone';
+import srs from 'secure-random-string';
+import logger from './logger';
 
 keystone.init({
 

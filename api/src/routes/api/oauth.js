@@ -1,44 +1,42 @@
-var oauth2orize = require('oauth2orize');
-var uid = require('uid');
-var crypto = require('crypto');
-var passport = require('passport');
-var BasicStrategy = require('passport-http').BasicStrategy;
-var ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy;
-var BearerStrategy = require('passport-http-bearer').Strategy;
-var keystone = require('keystone');
+import oauth2orize from 'oauth2orize';
+import uid from 'uid';
+import crypto from 'crypto';
+import passport from 'passport';
+import {BasicStrategy} from 'passport-http';
+import {Strategy as ClientPasswordStrategy} from 'passport-oauth2-client-password';
+import {Strategy as BearerStrategy} from 'passport-http-bearer';
+import keystone from 'keystone';
 
-var App = keystone.list('App'),
+const App = keystone.list('App'),
   AccessToken = keystone.list('AccessToken');
 
-var server = oauth2orize.createServer();
+const server = oauth2orize.createServer();
 
-server.exchange(oauth2orize.exchange.clientCredentials(function(client, scope, done) {
-  var token = uid(256);
-  var tokenHash = crypto.createHash('sha1').update(token).digest('hex');
-  var expiresIn = 1800;
-  var expirationDate = new Date(new Date().getTime() + (expiresIn * 1000));
-
-  var accessToken = AccessToken.model({
+server.exchange(oauth2orize.exchange.clientCredentials(async (client, scope, done) => {
+  const token = uid(256);
+  const tokenHash = crypto.createHash('sha1').update(token).digest('hex');
+  const expiresIn = 1800;
+  const expirationDate = new Date(new Date().getTime() + (expiresIn * 1000));
+  const accessToken = AccessToken.model({
     token: tokenHash,
     expirationDate: expirationDate,
     client: client.id,
     scope: scope,
   });
 
-  accessToken.save((err, savedAccessToken) => {
-    if (err) {
-      return done(err);
-    }
+  try {
+    await accessToken.save();
 
     return done(null, token, {expires_in: expiresIn});
-  });
+  } catch (saveAccessTokenErr) {
+    return done(saveAccessTokenErr);
+  }
 }));
 
-passport.use('clientBasic', new BasicStrategy((clientId, clientSecret, done) => {
-  App.model.findById(clientId).exec((err, app) => {
-    if (err) {
-      return done(err);
-    }
+passport.use('clientBasic', new BasicStrategy(async (clientId, clientSecret, done) => {
+  try {
+    const app = await App.model.findById(clientId).exec();
+
     if (!app) {
       return done(null, false);
     }
@@ -48,7 +46,9 @@ passport.use('clientBasic', new BasicStrategy((clientId, clientSecret, done) => 
     }
 
     return done(null, false);
-  });
+  } catch (findAppErr) {
+    return done(findAppErr);
+  }
 }));
 
 passport.use('clientPassword', new ClientPasswordStrategy((clientId, clientSecret, done) => {
@@ -72,40 +72,43 @@ passport.use('clientPassword', new ClientPasswordStrategy((clientId, clientSecre
  * This strategy is used to authenticate users based on an access token (aka a
  * bearer token).
  */
-passport.use('accessToken', new BearerStrategy((accessToken, done) => {
-  var accessTokenHash = crypto.createHash('sha1').update(accessToken).digest('hex');
+passport.use('accessToken', new BearerStrategy(async (accessToken, done) => {
+  const accessTokenHash = crypto.createHash('sha1').update(accessToken).digest('hex');
 
-  AccessToken.model.findOne({token: accessTokenHash}, (findErr, token) => {
-    if (findErr) {
-      return done(findErr);
-    }
+  try {
+    const token = await AccessToken.model.findOne({token: accessTokenHash}).exec();
+
     if (!token) {
       return done(null, false);
     }
+
     if (new Date() > token.expirationDate) {
       return token.remove((removeErr) => done(removeErr));
     } else {
-      return App.model.findById(token.client).exec((err, app) => {
-        if (err) {
-          return done(err);
-        }
+      try {
+        const app = await App.model.findById(token.client).exec();
+
         if (!app) {
           return done(null, false);
         }
-                // no use of scopes for now
-        var info = { scope: '*' };
+        // no use of scopes for now
+        const info = { scope: '*' };
 
         return done(null, app, info);
-      });
+      } catch (findAppErr) {
+        return done(findAppErr);
+      }
     }
-  })
+  } catch (findErr) {
+    return done(findErr);
+  }
 }));
 
-exports.checkAccessToken = function(req, res, next) {
+export function checkAccessToken(req, res, next) {
   passport.authenticate('accessToken', { session: false })(req, res, next);
 }
 
-exports.token = [
+export const token = [
   passport.authenticate(['clientBasic', 'clientPassword'], { session: false }),
   server.token(),
   server.errorHandler(),

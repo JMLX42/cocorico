@@ -1,60 +1,45 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-var keystone = require('keystone');
-var EthereumTx = require('ethereumjs-tx');
-var EthereumUtil = require('ethereumjs-util');
-var async = require('async');
-var jwt = require('jsonwebtoken');
-var Web3 = require('web3');
-var CryptoJS = require('crypto-js');
-var promise = require('thenify');
-var stringify = require('json-stable-stringify');
+import keystone from 'keystone';
+import EthereumTx from 'ethereumjs-tx';
+import EthereumUtil from 'ethereumjs-util';
+import jwt from 'jsonwebtoken';
+import Web3 from 'web3';
+import CryptoJS from 'crypto-js';
+import promise from 'thenify';
+import stringify from 'json-stable-stringify';
 
-var cache = require('../../cache');
-var pushBallotOnQueue = require('../../pushBallotOnQueue');
+import cache from '../../cache';
+import pushBallotOnQueue from '../../pushBallotOnQueue';
 
-var Vote = keystone.list('Vote'),
+const Vote = keystone.list('Vote'),
   VerifiedBallot = keystone.list('VerifiedBallot'),
   Event = keystone.list('Event');
 
-exports.get = function(req, res) {
-  Vote.model.findById(req.params.voteId).exec((voteErr, vote) => {
-    if (voteErr) {
-      return res.apiError('database error', voteErr)
-    }
+export async function get(req, res) {
+  try {
+    const v = await Vote.model.findById(req.params.voteId).exec();
 
-    if (!vote) {
+    if (!v) {
       return res.status(404).apiResponse({error: 'vote does not exist'});
     }
 
-    return vote.getBallotByUserUID(
-      req.user.sub,
-      (err, ballot) => {
-        if (err) {
-          return res.apiError('database error', err);
-        }
+    try {
+      const ballot = await v.getBallotByUserUID(req.user.sub);
 
-        if (!ballot) {
-          return res.status(404).apiResponse({
-            error: 'ballot does not exist',
-          });
-        }
-
-        return res.apiResponse({ ballot: ballot });
+      if (!ballot) {
+        return res.status(404).apiResponse({
+          error: 'ballot does not exist',
+        });
       }
-    );
-  });
-}
 
-function ballotTransactionError(res, ballot, msg) {
-  ballot.status = 'error';
-  ballot.error = JSON.stringify(msg);
-  ballot.save((err) => {
-    if (err)
+      return res.apiResponse({ballot: ballot});
+    } catch (ballotErr) {
       return res.apiError('database error', err);
-
-    return res.status(400).send({error:msg});
-  });
+    }
+  } catch (findVoteErr) {
+    return res.apiError('database error', findVoteErr);
+  }
 }
 
 function getTxFunctionSignature(abi, functionName) {
@@ -76,107 +61,103 @@ function getTxFunctionSignature(abi, functionName) {
     .toString(CryptoJS.enc.Hex).slice(0, 8);
 }
 
-exports.vote = function(req, res) {
+export async function post(req, res) {
   if (!config.capabilities.vote.enabled)
     return res.status(403).send();
 
-  var signedTx = new EthereumTx(req.body.transaction);
-  var voteContractAddress = EthereumUtil.bufferToHex(signedTx.to);
+  const signedTx = new EthereumTx(req.body.transaction);
+  const voteContractAddress = EthereumUtil.bufferToHex(signedTx.to);
 
-  return async.waterfall(
-    [
-      (callback) => Vote.model.findById(req.params.voteId)
-        .populate('app')
-        .exec(callback),
-      async (vote, callback) => {
-        if (!vote)
-          return callback({code: 404, error: 'vote not found'});
-        if (!vote.userIsAuthorizedToVote(req.user)) {
-          await Event.logWarningEventAndBlacklist(req, 'unauthorized user');
-          return callback({code: 403, error: 'unauthorized user'});
-        }
-        if (vote.voteContractAddress !== voteContractAddress) {
-          await Event.logWarningEventAndBlacklist(
-            req, 'contract address mismatch'
-          );
-          return callback({code: 300, error: 'contract address mismatch'});
-        }
+  try {
+    const vote = await Vote.model.findById(req.params.voteId)
+      .populate('app')
+      .exec();
 
-        // The transaction *must* call Vote.vote(). To enforce this, we check
-        // that the function signature in the tx data matches with the one we
-        // expect.
-        var sig = getTxFunctionSignature(
-          JSON.parse(vote.voteContractABI),
-          'vote'
-        );
-        if (signedTx.data.toString('hex', 0, 4) !== sig) {
-          await Event.logWarningEventAndBlacklist(req, 'invalid transaction');
-          return callback({code: 300, error: 'invalid transaction'});
-        }
+    if (!vote)
+      return callback({code: 404, error: 'vote not found'});
+    if (!vote.userIsAuthorizedToVote(req.user)) {
+      await Event.logWarningEventAndBlacklist(req, 'unauthorized user');
+      return callback({code: 403, error: 'unauthorized user'});
+    }
+    if (vote.voteContractAddress !== voteContractAddress) {
+      await Event.logWarningEventAndBlacklist(
+        req, 'contract address mismatch'
+      );
+      return callback({code: 300, error: 'contract address mismatch'});
+    }
 
-        return vote.getBallotByUserUID(
-          req.user.sub,
-          (err, ballot) => callback(err, vote, ballot)
-        );
-      },
-      async (vote, ballot, callback) => {
-        if (!!ballot) {
-          await Event.logWarningEventAndBlacklist(req, 'user already voted');
-          return callback({code: 403, error: 'user already voted'});
-        }
+    // The transaction *must* call Vote.vote(). To enforce this, we check
+    // that the function signature in the tx data matches with the one we
+    // expect.
+    const sig = getTxFunctionSignature(
+      JSON.parse(vote.voteContractABI),
+      'vote'
+    );
+    if (signedTx.data.toString('hex', 0, 4) !== sig) {
+      await Event.logWarningEventAndBlacklist(req, 'invalid transaction');
+      return callback({code: 300, error: 'invalid transaction'});
+    }
 
-        return vote.createBallot(req.user.sub)
-          .save((err, newBallot) => callback(err, vote, newBallot));
-      },
-      async (vote, ballot, callback) => {
+    try {
+      // Check if there is an existing ballot for this user.
+      const existingBallot = await vote.getBallotByUserUID(req.user.sub);
+
+      // Log a warning event and return 403 if there is.
+      if (!!existingBallot) {
+        await Event.logWarningEventAndBlacklist(req, 'user already voted');
+        return callback({code: 403, error: 'user already voted'});
+      }
+
+      try {
+        // Create and save the new ballot otherwise.
+        // From this point, subsequent request to this endpoint will return 403.
+        const newBallot = await vote.createBallot(req.user.sub).save();
+
         try {
+          // Push the ballot on the queue for the ballot service to handle.
           await pushBallotOnQueue({
-            id: ballot.id,
+            id: newBallot.id,
             app: vote.app,
             vote: {id: vote.id},
             user: {sub: req.user.sub},
-            status: ballot.status, // queued
+            status: newBallot.status, // queued
             transaction: req.body.transaction,
             voteContractAddress: vote.voteContractAddress,
             voteContractABI: JSON.parse(vote.voteContractABI),
           });
 
-          callback(null, vote, ballot);
-        } catch (err) {
-          callback(err);
-        }
-      },
-      (vote, ballot, callback) => {
-        vote.numBallots += 1;
-        vote.save((err) => callback(err, vote, ballot));
-      },
-    ],
-    (err, vote, ballot) => {
-      if (err) {
-        if (ballot) {
-          return ballotTransactionError(res, ballot, err);
-        }
-        if (err.code) {
-          res.status(err.code);
-        }
-        if (err.error) {
-          return res.apiResponse({error: err.error});
-        }
-        return res.apiError(err);
-      }
+          // Update the ballot counter.
+          vote.numBallots += 1;
 
-      return res.apiResponse({
-        ballot: ballot,
-        proof: vote.getProofOfVote(signedTx),
-      });
+          try {
+            // Save the updated vote and return the ballot + the proof of vote.
+            await vote.save();
+
+            return res.apiResponse({
+              ballot: newBallot,
+              proof: vote.getProofOfVote(signedTx),
+            });
+
+          } catch (voteSaveErr) {
+            return res.apiError('database error when saving Vote', voteSaveErr);
+          }
+        } catch (pushOnQueueErr) {
+          return res.apiError('queue error', pushOnQueueErr);
+        }
+      } catch (newBallotErr) {
+        return res.apiError('database error when saving Ballot', newBallotErr);
+      }
+    } catch (ballotErr) {
+      return res.apiError('database error when finding Ballot', ballotErr);
     }
-  );
+  } catch (findVoteErr) {
+    return res.apiError('database error when finding Vote', findVoteErr);
+  }
 }
 
-exports.verify = function(req, res) {
+export async function verify(req, res) {
   if (!req.body.proofOfVote) {
-    res.status(400).send();
-    return;
+    return res.status(400).send({error:'missing proofOfVote'});
   }
 
   // First, we decode the JWT without checking the signature because we need
@@ -184,98 +165,104 @@ exports.verify = function(req, res) {
   var decoded = jwt.decode(req.body.proofOfVote);
 
   if (!decoded) {
-    res.status(400).send();
-    return;
+    return res.status(400).send();
   }
 
-  VerifiedBallot.model.findOne({voterAddress: '0x' + decoded.a})
-    .exec((findErr, ballot) => {
-      if (findErr) {
-        res.apiError('database error', err);
-        return;
-      }
+  try {
+    const ballot = await VerifiedBallot.model
+      .findOne({voterAddress: '0x' + decoded.a})
+      .exec();
 
-      if (!!ballot) {
-        res.apiResponse({verified: ballot});
-        return;
-      }
+    // If there is an existing verified ballot, we return it directly.
+    if (!!ballot) {
+      return res.apiResponse({verified: ballot});
+    }
 
-      var web3 = new Web3();
-      web3.setProvider(new web3.providers.HttpProvider('http://127.0.0.1:8545'));
+    // Otherwise, we do have to verify the provided proof of vote and save
+    // the corresponding VerifiedBallot.
+    const web3 = new Web3();
+    web3.setProvider(new web3.providers.HttpProvider('http://127.0.0.1:8545'));
 
-      async.waterfall(
-        [
-          // We fetch the vote that match the smart contract address.
-          (callback) => Vote.model
-            .findOne({voteContractAddress: '0x' + decoded.c})
-            .exec(callback),
-          // If the vote does not exist => 404
-          // Otherwise, we verify the JWT
-          (vote, callback) => !vote
-            ? callback({code: 404, msg: 'vote does not exist'})
-            : jwt.verify(
-              req.body.proofOfVote,
-              vote.key,
-              (err, verified) => callback(err, vote, verified)
-            ),
-          // If the JWT is verified, we find the corresponding smart contract
-          // instance.
-          (vote, verified, callback) => web3.eth
-            .contract(JSON.parse(vote.voteContractABI))
-            .at(
-              vote.voteContractAddress,
-              (err, instance) => callback(err, vote, verified, instance)
-            ),
-          // We fetch the ballot events that match the voter address.
-          (vote, verified, instance, callback) => instance
-            .Ballot(
-              {voter: '0x' + verified.a},
-              {fromBlock:0, toBlock: 'latest'}
-            )
-            .get((err, transactions) => callback(
-              err, vote, verified, transactions
-            )),
-          // We create the corresponding VerifiedBallot and we save it.
-          (vote, verified, transactions, callback) => {
-            var valid = !!transactions[0] && !!transactions[0].args
-              && parseInt(transactions[0].args.proposal) === verified.p;
+    // We fetch the vote that match the smart contract address.
+    const vote = await Vote.model
+      .findOne({voteContractAddress: '0x' + decoded.c})
+      .exec();
 
-            VerifiedBallot
+    // If the vote does not exist => 404
+    if (!vote) {
+      return res.status(404).send({error:'vote does not exist'});
+    } else {
+      // Otherwise, we verify the JWT
+      try {
+        const verified = jwt.verify(req.body.proofOfVote, vote.key);
+
+        // If the JWT is verified, we find the corresponding smart contract
+        // instance.
+        try {
+          const contract = web3.eth.contract(JSON.parse(vote.voteContractABI));
+          const instance = await promise((...c)=>contract.at(...c))(
+            vote.voteContractAddress
+          );
+          // Fetch all the BallotEvent from the smart contract for the address
+          // specified in the proof of vote (the 'a' field for 'address').
+          // FIXME: we should set 'fromBlock' to the block of the smart contract
+          // to avoid querying the whole blockchain.
+          const ballotEvent = instance.Ballot(
+            {voter: '0x' + verified.a},
+            {fromBlock:0, toBlock: 'latest'}
+          );
+          const events = await promise((...c)=>ballotEvent.get(...c))();
+          // The proof of vote/ballot is valid if:
+          // * there is a matching BallotEvent
+          // * its args.proposal field matches the one in the proof of vote
+          // (the 'p' field for 'proposal')
+          const valid = !!events[0] && !!events[0].args
+            && parseInt(events[0].args.proposal) === verified.p;
+
+          try {
+            // Create and save the corresponding VerifiedBallot.
+            const verifiedBallot = await VerifiedBallot
               .model({
                 vote: vote,
                 valid: valid,
-                transactionHash: valid ? transactions[0].transactionHash : '',
+                transactionHash: valid ? events[0].transactionHash : '',
                 voterAddress: '0x' + verified.a,
               })
-              .save((err, verifiedBallot) => callback(
-                err, vote, verifiedBallot
-              ))
-          },
-          // Update the Vote counters.
-          (vote, verifiedBallot, callback) => {
+              .save();
+
+            // Update and save the vote.
             if (verifiedBallot.valid) {
               vote.numValidBallots += 1;
             } else {
               vote.numInvalidBallots += 1;
             }
-            vote.save((err) => callback(err, verifiedBallot))
-          },
-        ],
-        (err, verifiedBallot) => {
-          if (err) {
-            return res.status(err.code ? err.code : 400)
-              .apiResponse({error: err.msg ? err.msg : err});
-          } else {
-            return res.apiResponse({
-              verified: verifiedBallot,
-            });
+
+            try {
+              await vote.save();
+
+              return res.apiResponse({
+                verified: verifiedBallot,
+              });
+
+            } catch (voteSaveErr) {
+              return res.apiError('database error', voteSaveErr);
+            }
+          } catch (verifiedBallotSaveErr) {
+            return res.apiError('database error', verifiedBallotSaveErr);
           }
+        } catch (blockchainErr) {
+          return res.apiError('blockchain error', blockchainErr);
         }
-      );
-    });
+      } catch (verifyErr) {
+        return res.apiError('invalid JWT', verifyErr);
+      }
+    }
+  } catch (findBallotErr) {
+    return res.apiError('database error', err);
+  }
 }
 
-exports.getTransactions = async function(req, res) {
+export async function getTransactions(req, res) {
   const voteId = req.params.voteId;
 
   try {

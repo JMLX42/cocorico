@@ -1,6 +1,6 @@
-var winston = require('winston');
+import winston from 'winston';
 
-module.exports = new winston.Logger({
+export default new winston.Logger({
   transports: [
     new winston.transports.Console({
       handleExceptions: true,

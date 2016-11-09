@@ -1,12 +1,12 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-var keystone = require('keystone');
-var metafetch = require('metafetch');
+import keystone from 'keystone';
+import metafetch from 'metafetch';
 
-var Source = keystone.list('Source'),
+const Source = keystone.list('Source'),
   Vote = keystone.list('Vote');
 
-exports.list = function(req, res) {
+export function list(req, res) {
   if (!config.capabilities.source.read)
     return res.status(403).send();
 
@@ -30,7 +30,7 @@ exports.list = function(req, res) {
     });
 }
 
-exports.add = function(req, res) {
+export function add(req, res) {
   if (!config.capabilities.source.create)
     return res.status(403).send();
 

@@ -1,62 +1,64 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-var keystone = require('keystone');
-var Web3 = require('web3');
-var async = require('async');
-var metafetch = require('metafetch');
-var fetch = require('node-fetch');
-var webshot = require('webshot');
-var md5 = require('md5');
-var promise = require('thenify');
+import keystone from 'keystone';
+import Web3 from 'web3';
+import async from 'async';
+import metafetch from 'metafetch';
+import fetch from 'node-fetch';
+import webshot from 'webshot';
+import md5 from 'md5';
+import promise from 'thenify';
 
-var cache = require('../../cache');
+import cache from '../../cache';
 
-var Vote = keystone.list('Vote'),
+const Vote = keystone.list('Vote'),
   Source = keystone.list('Source');
 
-exports.list = function(req, res) {
-  Vote.model.find()
-    .exec((err, votes) => {
-      if (err)
-        return res.apiError('database error', err);
+export async function list(req, res) {
+  try {
+    const votes = await Vote.model.find.exec();
 
-      return res.apiResponse({votes: votes});
-    });
+    return res.apiResponse({votes: votes});
+  } catch (findVoteErr) {
+    return res.apiError('database error', findVoteErr);
+  }
 }
 
-exports.get = function(req, res) {
-  Vote.model.findById(req.params.voteId)
-    .exec((err, vote) => {
-      if (err)
-        return res.apiError('database error', err);
+export async function get(req, res) {
+  try {
+    const vote = await Vote.model.findById(req.params.voteId).exec();
 
-      if (!vote)
-        return res.status(404).send();
+    if (!vote) {
+      return res.status(404).send();
+    }
 
-      return res.apiResponse({vote: vote});
-    });
+    return res.apiResponse({vote: vote});
+  } catch (findVoteErr) {
+    return res.apiError('database error', findVoteErr);
+  }
 }
 
-exports.getBySlug = function(req, res) {
-  Vote.model.findOne({slug: req.params.voteSlug})
-    .exec((err, vote) => {
-      if (err)
-        return res.apiError('database error', err);
+export async function getBySlug(req, res) {
+  try {
+    const vote = await Vote.model.findOne({slug: req.params.voteSlug}).exec();
 
-      if (!vote)
-        return res.status(404).send();
+    if (!vote) {
+      return res.status(404).send();
+    }
 
-      return res.apiResponse({vote: vote});
-    });
+    return res.apiResponse({vote: vote});
+  } catch (findVoteErr) {
+    return res.apiError('database error', findVoteErr);
+  }
 }
 
-exports.create = function(req, res) {
+export async function create(req, res) {
   if (!req.body.url) {
     return res.status(400).send({error: 'missing url'});
   }
 
-  var app = req.user;
-  var url = decodeURIComponent(req.body.url);
+  const app = req.user;
+  const url = decodeURIComponent(req.body.url);
   var labels = [];
 
   if (req.body.labels) {
@@ -69,74 +71,78 @@ exports.create = function(req, res) {
     }
   }
 
-  return async.waterfall(
-    [
-      (callback) => !app.isValidURL(url)
-        ? callback({code: 403, error: 'invalid url'}, null)
-        : Vote.model.findOne({url: url})
-            .exec((err, vote) => callback(err, vote)),
-      // Step 2: check there is no vote for this URL and fetch meta fields
-      // if there is not.
-      (vote, callback) => !!vote
-        ? callback({code: 400, error: 'invalid url'}, null)
-        : Vote.model({
-          app: app.id,
-          url: url,
-          restricted: req.body.restricted === 'true',
-          labels: labels,
-          question: req.body.question,
-          title: req.body.title,
-          description: req.body.description,
-          image: req.body.image,
-        }).save((err, savedVote) => callback(err, savedVote)),
-    ],
-    (err, vote) => {
-      if (err) {
-        if (err.code) {
-          res.status(err.code);
-        }
-        return res.apiResponse({error : err});
-      }
-      return res.apiResponse({vote: vote});
+  if (!app.isValidURL(url)) {
+    return res.status(403).send({error: 'invalid url'});
+  }
+
+  try {
+    const existingVote = await Vote.model.findOne({url: url}).exec();
+
+    // Check there is no vote for this URL and fetch meta fields if there is
+    // not.
+    if (!!existingVote) {
+      return res.status(400).send({error: 'invalid url'});
     }
-  );
-}
 
-exports.update = function(req, res) {
-  var voteId = req.params.voteId;
-
-  Vote.model.findById(voteId)
-    .exec((findVoteErr, vote) => {
-      if (findVoteErr)
-        return res.apiError('database error', findVoteErr);
-
-      if (!vote)
-        return res.status(404).send();
-
-      if (vote.app.toString() !== req.user.id) {
-        return res.status(403).send();
-      }
-
-      if (!!req.body.labels && req.body.labels.length !== vote.labels.length) {
-        return res.status(400).send({error: 'invalid labels'});
-      }
-
-      for (var propertyName in vote) {
-        if (propertyName in req.body) {
-          vote[propertyName] = req.body[propertyName];
-        }
-      }
-
-      return vote.save((err) => {
-        if (err)
-          return res.apiError('database error', err);
-
-        return res.apiResponse({vote: vote});
-      });
+    const newVote = Vote.model({
+      app: app.id,
+      url: url,
+      restricted: req.body.restricted === 'true',
+      labels: labels,
+      question: req.body.question,
+      title: req.body.title,
+      description: req.body.description,
+      image: req.body.image,
     });
+
+    try {
+      await newVote.save();
+    } catch (newVoteSaveErr) {
+      return res.apiError('database error when saving new vote', newVoteSaveErr);
+    }
+
+    return res.apiResponse({vote: newVote});
+  } catch (findVoteErr) {
+    return res.apiError('database error when finding vote', findVoteErr);
+  }
 }
 
-// exports.resultPerDate = function(req, res) {
+export async function update(req, res) {
+  const voteId = req.params.voteId;
+
+  try {
+    const vote = await Vote.model.findById(voteId).exec();
+
+    if (!vote)
+      return res.status(404).send();
+
+    if (vote.app.toString() !== req.user.id) {
+      return res.status(403).send();
+    }
+
+    if (!!req.body.labels && req.body.labels.length !== vote.labels.length) {
+      return res.status(400).send({error: 'invalid labels'});
+    }
+
+    for (var propertyName in vote) {
+      if (propertyName in req.body) {
+        vote[propertyName] = req.body[propertyName];
+      }
+    }
+
+    try {
+      await vote.save();
+
+      return res.apiResponse({vote: vote});
+    } catch (voteSaveErr) {
+      return res.apiError('database error', voteSaveErr);
+    }
+  } catch (findVoteErr) {
+    return res.apiError('database error', findVoteErr);
+  }
+}
+
+// export function resultPerDate(req, res) {
 //     var voteId = req.params.voteId;
 //
 //     Vote.model.findById(voteId)
@@ -151,7 +157,7 @@ exports.update = function(req, res) {
 //         });
 // }
 //
-// exports.resultPerGender = function(req, res) {
+// export function resultPerGender(req, res) {
 //     var voteId = req.params.voteId;
 //
 //     Vote.model.findById(voteId)
@@ -166,7 +172,7 @@ exports.update = function(req, res) {
 //         });
 // }
 //
-// exports.resultPerAge = function(req, res) {
+// export function resultPerAge(req, res) {
 //     var voteId = req.params.voteId;
 //
 //     Vote.model.findById(voteId)
@@ -181,7 +187,7 @@ exports.update = function(req, res) {
 //         });
 // }
 
-exports.result = async function(req, res) {
+export async function result(req, res) {
   const voteId = req.params.voteId;
   const cacheKey = '/vote/result/' + voteId;
   const cached = await cache.get(cacheKey);
@@ -199,7 +205,7 @@ exports.result = async function(req, res) {
     if (vote.status !== 'complete')
       return res.status(403).send();
 
-    var web3 = new Web3();
+    const web3 = new Web3();
     web3.setProvider(new web3.providers.HttpProvider(
       'http://127.0.0.1:8545'
     ));
@@ -224,7 +230,7 @@ exports.result = async function(req, res) {
   }
 }
 
-exports.embed = function(req, res) {
+export function embed(req, res) {
   if (!req.headers.referer) {
     return res.status(400).send({error : 'missing referer'});
   }
@@ -311,25 +317,24 @@ exports.embed = function(req, res) {
     );
 }
 
-exports.permissions = function(req, res) {
-  var voteId = req.params.voteId;
+export async function permissions(req, res) {
+  const voteId = req.params.voteId;
 
-  Vote.model.findById(voteId)
-    .exec((err, vote) => {
-      if (err) {
-        return res.apiError('database error', err);
-      }
+  try {
+    const vote = await Vote.model.findById(voteId).exec();
 
-      if (!vote) {
-        return res.status(404).send();
-      }
+    if (!vote) {
+      return res.status(404).send();
+    }
 
-      return res.apiResponse({
-        permissions : {
-          read: config.capabilities.vote.read,
-          vote: !!req.user && vote.userIsAuthorizedToVote(req.user),
-          update: config.capabilities.vote.update,
-        },
-      });
+    return res.apiResponse({
+      permissions : {
+        read: config.capabilities.vote.read,
+        vote: !!req.user && vote.userIsAuthorizedToVote(req.user),
+        update: config.capabilities.vote.update,
+      },
     });
+  } catch (findVoteErr) {
+    return res.apiError('database error', findVoteErr);
+  }
 }

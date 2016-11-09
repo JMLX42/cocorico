@@ -1,9 +1,9 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-var http = require('follow-redirects').http,
+const http = require('follow-redirects').http,
   url = require('url');
 
-exports.redirect = function(req, res) {
+export function redirect(req, res) {
   if (!req.headers.referer)
     return res.status(400).send();
 
@@ -14,7 +14,7 @@ exports.redirect = function(req, res) {
   return res.redirect(301, req.query.url);
 }
 
-exports.proxy = function(req, res) {
+export function proxy(req, res) {
   if (!req.headers.referer)
     return res.status(400).send();
 

@@ -1,18 +1,18 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-var keystone = require('keystone');
-var passport = require('passport');
-var winston = require('winston');
-var expressWinston = require('express-winston');
-var raven = require('raven');
+import keystone from 'keystone';
+import passport from 'passport';
+import winston from 'winston';
+import expressWinston from 'express-winston';
+import raven from 'raven';
 
-var logger = require('../logger');
+import logger from '../logger';
 
 const Event = keystone.list('Event');
 
-var importRoutes = keystone.importer(__dirname);
+const importRoutes = keystone.importer(__dirname);
 
-var routes = {
+const routes = {
   api: importRoutes('./api'),
 };
 
@@ -25,10 +25,10 @@ function isAuthenticated(req, res, next) {
 }
 
 // Setup Route Bindings
-exports = module.exports = function(app) {
+export default function(app) {
 
   if (!!config.sentry) {
-    var sentryUri = 'https://' + config.sentry.public_key
+    const sentryUri = 'https://' + config.sentry.public_key
       + ':' + config.sentry.secret
       + '@sentry.io/'
       + config.sentry.project_id;
@@ -357,8 +357,8 @@ exports = module.exports = function(app) {
    *
    * @apiExample {javascript} JavaScript example:
    *
-   *    var jquery = require('jquery');
-   *    var lightwallet = require('eth-lightwallet');
+   *    import jquery from 'jquery';
+   *    import lightwallet from 'eth-lightwallet';
    *
    *     var tx = lightwallet.txutils.functionTx(
    *      voteContractABI,
@@ -402,12 +402,11 @@ exports = module.exports = function(app) {
    * ballot using [the `/ballot/verify` API endpoint](#api-Ballot-VerifyBallot).
    *
    */
-  app.post('/ballot/:voteId', isAuthenticated, routes.api.ballot.vote);
+  app.post('/ballot/:voteId', isAuthenticated, routes.api.ballot.post);
 
   app.get('/source/:voteId', routes.api.source.list);
 
   app.get('/page/list', routes.api.page.list);
-  app.get('/page/navbar', routes.api.page.navbar);
   app.get('/page/:id', routes.api.page.get);
   app.get('/page/getBySlug/:slug', routes.api.page.getBySlug);
 

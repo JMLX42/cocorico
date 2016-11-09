@@ -1,20 +1,20 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-var keystone = require('keystone');
-var transform = require('model-transform');
-var metafetch = require('metafetch');
-var async = require('async');
-var Web3 = require('web3');
-var bcrypt = require('bcrypt');
-var srs = require('secure-random-string');
-var SolidityCoder = require('web3/lib/solidity/coder');
-var jwt = require('jsonwebtoken');
+import keystone from 'keystone';
+import transform from 'model-transform';
+import metafetch from 'metafetch';
+import async from 'async';
+import Web3 from 'web3';
+import bcrypt from 'bcrypt';
+import srs from 'secure-random-string';
+import SolidityCoder from 'web3/lib/solidity/coder';
+import jwt from 'jsonwebtoken';
 
-var Ballot = keystone.list('Ballot');
+const Ballot = keystone.list('Ballot');
 
-var Types = keystone.Field.Types;
+const Types = keystone.Field.Types;
 
-var Vote = new keystone.List('Vote', {
+const Vote = new keystone.List('Vote', {
   autokey: { path: 'slug', from: 'title', unique: true },
   // map: { name: 'title' },
   defaultSort: '-createdAt',
@@ -67,8 +67,8 @@ Vote.schema.methods.createBallot = function(uid) {
   });
 }
 
-Vote.schema.methods.getBallotByUserUID = function(uid, callback) {
-  Ballot.model.findOne({hash: bcrypt.hashSync(uid, this.salt)}).exec(callback);
+Vote.schema.methods.getBallotByUserUID = async function(uid) {
+  return Ballot.model.findOne({hash: bcrypt.hashSync(uid, this.salt)}).exec();
 }
 
 function closeVoteContract(vote, next) {
