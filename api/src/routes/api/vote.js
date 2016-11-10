@@ -9,7 +9,7 @@ import webshot from 'webshot';
 import md5 from 'md5';
 import promise from 'thenify';
 
-import cache from '../../cache';
+import * as cache from '../../cache';
 
 const Vote = keystone.list('Vote'),
   Source = keystone.list('Source');

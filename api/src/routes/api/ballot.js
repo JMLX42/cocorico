@@ -9,7 +9,7 @@ import CryptoJS from 'crypto-js';
 import promise from 'thenify';
 import stringify from 'json-stable-stringify';
 
-import cache from '../../cache';
+import * as cache from '../../cache';
 import pushBallotOnQueue from '../../pushBallotOnQueue';
 
 const Vote = keystone.list('Vote'),
@@ -281,17 +281,20 @@ export async function getTransactions(req, res) {
     const proposal = req.body.proposal;
     const page = !req.body.page ? 0 : parseInt(req.body.page);
     const key = '/ballot/transactions/' + voteId + '&params=' + stringify({
-      vote: voteId,
       page: page,
       transactionHash: transactionHash,
       voter: voter,
       proposal: proposal,
     });
 
-    const cached = await cache.get(key);
+    try {
+      const cached = await cache.get(key);
 
-    if (!!cached) {
-      return res.apiResponse(cached);
+      if (!!cached) {
+        return res.apiResponse(cached);
+      }
+    } catch (cacheErr) {
+      return res.apiError('cache error', cacheErr);
     }
 
     var filter = null;
@@ -310,7 +313,6 @@ export async function getTransactions(req, res) {
     }
 
     try {
-
       const key2 = '/ballot/transactions/' + voteId;
 
       var result = await cache.get(key2);
@@ -322,9 +324,13 @@ export async function getTransactions(req, res) {
 
           const contract = web3.eth.contract(JSON.parse(vote.voteContractABI));
           const instance = await promise((...c)=>contract.at(...c))(
-              vote.voteContractAddress
-            );
-          const ballotEvent = instance.Ballot(null, {fromBlock:0, toBlock: 'latest'});
+            vote.voteContractAddress
+          );
+          const ballotEvent = instance.Ballot(
+            null,
+            // FIXME: fromBlock should be the block of vote.voteContractAddress
+            {fromBlock: 0, toBlock: 'latest'}
+          );
 
           result = await promise((cb)=>ballotEvent.get(cb))();
           cache.set(key2, result);
@@ -345,7 +351,7 @@ export async function getTransactions(req, res) {
       try {
         const verifiedBallots = await VerifiedBallot.model.find({
           transactionHash: {$in: result.map((r)=>r.transactionHash)}}
-          ).exec();
+        ).exec();
 
         for (var ballot of verifiedBallots) {
           for (var tx of result) {
@@ -366,13 +372,12 @@ export async function getTransactions(req, res) {
 
         return res.apiResponse(response);
       } catch (findBallotErr) {
-        return res.apiError('database error', findBallotErr);
+        return res.apiError('database error when finding ballot', findBallotErr);
       }
     } catch (ballotEventErr) {
       return res.apiError('blockchain error', ballotEventErr);
     }
-
   } catch (findVoteErr) {
-    return res.apiError('database error', findVoteErr);
+    return res.apiError('database error when finding vote', findVoteErr);
   }
 }
