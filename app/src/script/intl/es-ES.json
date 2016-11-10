@@ -6,13 +6,6 @@
       "POWERED_BY": "Con tecnología de {productName}"
     },
 
-    "route": {
-      "SIGN_IN": "/iniciar-sesion",
-      "VOTE": "/voto",
-      "SERVICE_STATUS": "/systema/estado",
-      "BALLOT_BOX": "/voto/urna"
-    },
-
     "slug": {
       "HOME": "portada",
       "ABOUT": "acerca-de-esto",

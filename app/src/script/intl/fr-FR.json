@@ -6,13 +6,6 @@
       "POWERED_BY": "Propulsé par {productName}"
     },
 
-    "route": {
-      "SIGN_IN": "/connexion",
-      "VOTE": "/vote",
-      "SERVICE_STATUS": "/systeme/etat",
-      "BALLOT_BOX": "/vote/urne"
-    },
-
     "slug": {
       "HOME": "accueil",
       "ABOUT": "a-propos",

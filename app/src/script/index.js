@@ -57,10 +57,10 @@ function run() {
     <Router history={browserHistory}>
       <Route path="/" component={App}>
         <IndexRoute component={Home}/>
-        <Route path={messages.route.SIGN_IN} component={Login}/>
-        <Route path={messages.route.SERVICE_STATUS} component={ServiceStatus}/>
+        <Route path="sign-in" component={Login}/>
+        <Route path="system-status" component={ServiceStatus}/>
         <Route path="vote/:slug" component={VotePage}/>
-        <Route path={messages.route.BALLOT_BOX + '/:voteId'} component={BallotBox}/>
+        <Route path="vote/ballot-box/:voteId" component={BallotBox}/>
       </Route>
       <Route path="/embed" component={Embed}>
         <Route path="vote-widget/:voteId" component={EmbedVoteWidgetPage}/>
