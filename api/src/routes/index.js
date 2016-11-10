@@ -287,6 +287,7 @@ export default function(app) {
    * @apiParam {String} voteId The ID of the vote.
    * @apiParam (POST) {String} title (Optionnal) The title of the vote. If missing,
    * the value is read from the vote's URL `og:title` OpenGraph tag.
+   * @apiParam (POST) {String} status (Optionnal) The status of the vote.
    * @apiParam (POST) {String} image (Optionnal) The URL of the image of the vote. If missing,
    * the value is read from the vote's URL `og:image` OpenGraph tag.
    * @apiParam (POST) {String} description (Optionnal) The description of the
