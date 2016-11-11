@@ -4,10 +4,11 @@ var async = require('async');
 var Web3 = require('web3');
 var fs = require('fs');
 var md5 = require('md5');
-var bunyan = require('bunyan');
-var cluster = require('cluster');
 
-var log = bunyan.createLogger({name: 'vote-consumer-' + cluster.worker.id});
+import cluster from 'cluster';
+import Logger from 'cocorico-logger';
+
+const logger = new Logger('vote-consumer-' + cluster.worker.id);
 
 keystone.init({'mongo' : config.mongo.uri, headless: true});
 keystone.mongoose.connect(config.mongo.uri);
@@ -19,14 +20,14 @@ function getCompiledVoteContract(web3, callback) {
   var path = '/srv/cocorico/contract/Vote.sol';
   var source = fs.readFileSync(path, {encoding: 'utf-8'});
 
-  log.info(
+  logger.info(
     { path: path },
     'compiling smart contract'
   );
 
   web3.eth.compile.solidity(source, (error, compiled) => {
     if (!error) {
-      log.info(
+      logger.info(
         { md5Hash: md5(source) },
         'compiled smart contract'
       );
@@ -54,7 +55,7 @@ function mineVoteContract(numProposals, next) {
         var code = compiled.code;
         var abi = compiled.info.abiDefinition;
 
-        log.info(
+        logger.info(
           { address: accounts[0] },
           'start mining contract'
         );
@@ -77,7 +78,7 @@ function mineVoteContract(numProposals, next) {
                 hash = contract.transactionHash
               } else {
                     // tx mined
-                log.info(
+                logger.info(
                   {
                     hash: hash,
                     contractAddress: contract.address,
@@ -112,7 +113,7 @@ function handleVote(voteMsg, callback) {
 
         // FIXME: should not fail silently
         if (!vote) {
-          log.error('unable to find/update Vote object');
+          logger.error('unable to find/update Vote object');
           callback(null, null);
           return;
         }
@@ -131,19 +132,19 @@ module.exports.run = function() {
       'amqp://localhost',
       (err, conn) => {
         if (err != null) {
-          log.error({error: err}, 'error');
+          logger.error({error: err}, 'error');
           process.exit(1);
         }
 
-        log.info('connecting');
+        logger.info('connecting');
 
         conn.createChannel((channelErr, ch) => {
           if (channelErr != null) {
-            log.error({error: channelErr}, 'error');
+            logger.error({error: channelErr}, 'error');
             process.exit(1);
           }
 
-          log.info('connected');
+          logger.info('connected');
 
           ch.assertQueue('votes');
           ch.consume(
@@ -152,12 +153,12 @@ module.exports.run = function() {
               if (msg !== null) {
                 var obj = JSON.parse(msg.content.toString());
 
-                log.info({ vote: obj }, 'vote received');
+                logger.info({ vote: obj }, 'vote received');
 
                 if (obj.vote) {
                   handleVote(obj.vote, (voteErr, vote) => {
                     if (!!voteErr) {
-                      log.error({error: voteErr}, 'error');
+                      logger.error({error: voteErr}, 'error');
                       return ch.nack(msg);
                     }
 

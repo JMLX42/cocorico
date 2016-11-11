@@ -1,14 +1,15 @@
 import keystone from '/opt/cocorico/api-web/node_modules/keystone';
 import config from '/opt/cocorico/api-web/config.json';
 
+import cluster from 'cluster';
 import amqplib from 'amqplib';
 import EthereumTx from 'ethereumjs-tx';
 import EthereumUtil from 'ethereumjs-util';
 import promise from 'thenify';
 import delay from 'timeout-as-promise';
 import Web3 from 'web3';
+import Logger from 'cocorico-logger';
 
-import logger from './logger';
 import isValidBallotMessage from './isValidBallotMessage';
 import watchContractEvents from './watchContractEvents';
 import webhook from './webhook';
@@ -19,6 +20,7 @@ keystone.mongoose.connect(config.mongo.uri);
 keystone.import('../../../api/dist/models');
 
 const Ballot = keystone.list('Ballot');
+const logger = new Logger('ballot-consumer-' + cluster.worker.id);
 
 const ACCOUNT_INIT_TIMEOUT = 1200000; // 20 minutes
 const ACCOUNT_INIT_DELAY = 5000;

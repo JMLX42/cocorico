@@ -1,9 +1,9 @@
-import bunyan from 'bunyan';
 import request from 'superagent';
 import cluster from 'cluster';
 import amqplib from 'amqplib';
+import Logger from 'cocorico-logger';
 
-const log = bunyan.createLogger({name: 'webhook-consumer-' + cluster.worker.id});
+const logger = new Logger('webhook-consumer-' + cluster.worker.id);
 
 const RETRY_DELAY = 1000;//60 * 1000;  // 1 minute in milliseconds
 const RETRY_TTL = 24 * 60 * 60 * 1000; // 1 day in milliseconds
@@ -14,7 +14,7 @@ function isWebhookEvent(content) {
 }
 
 function handleWebhookError(channel, messageData, error) {
-  log.error({error:error}, 'failed to call webhook, retrying later');
+  logger.error({error:error}, 'failed to call webhook, retrying later');
 
   if (!('firstTriedAt' in messageData)) {
     messageData.firstTriedAt = Date.now();
@@ -31,11 +31,11 @@ function handleWebhookError(channel, messageData, error) {
 async function handleMessage(channel, msg) {
   const messageData = JSON.parse(msg.content.toString());
 
-  log.info({message:messageData}, 'message received');
+  logger.info({message:messageData}, 'message received');
 
   // Skip invalid messages
   if (!isWebhookEvent(messageData)) {
-    log.error({ message: messageData }, 'invalid message, skipping');
+    logger.error({ message: messageData }, 'invalid message, skipping');
     channel.ack(msg);
     return;
   }
@@ -53,14 +53,14 @@ async function handleMessage(channel, msg) {
   if (!!messageData.firstTriedAt) {
     var elapsedTime = Date.now() - messageData.firstTriedAt;
     if (elapsedTime > RETRY_TTL) {
-      log.error({ message: messageData }, 'message failed for too long, skipping');
+      logger.error({ message: messageData }, 'message failed for too long, skipping');
       channel.ack(msg);
       return;
     }
   }
 
   // Send HTTP request to remote webhook
-  log.info({ message: messageData }, 'calling webhook');
+  logger.info({ message: messageData }, 'calling webhook');
 
   try {
     const res = await request
@@ -70,7 +70,7 @@ async function handleMessage(channel, msg) {
 
     // if the server answered with 2XX
     if (res.status >= 200 && res.status < 300) {
-      log.info({ http_status: res.status }, 'webhook call succeeded');
+      logger.info({ http_status: res.status }, 'webhook call succeeded');
     } else {
       // any other code is considered a failure
       handleWebhookError(channel, messageData, { http_status: res.status });
@@ -87,20 +87,20 @@ var channel = null;
 
 export async function run() {
   try {
-    log.info('connecting to the queue');
+    logger.info('connecting to the queue');
 
     queue = await amqplib.connect(null, {heartbeat:30});
 
-    log.info('connected to the queue');
+    logger.info('connected to the queue');
 
     channel = await queue.createChannel();
 
-    log.info('channel created, waiting for messages...');
+    logger.info('channel created, waiting for messages...');
 
     await channel.assertQueue('webhooks', {autoDelete: false, durable: true});
     channel.consume('webhooks', (message) => handleMessage(channel, message));
   } catch (err) {
-    log.error({error : err}, 'queue error');
+    logger.error({error : err}, 'queue error');
 
     if (!!channel) {
       await channel.close();

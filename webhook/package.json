@@ -9,7 +9,7 @@
     "babel-plugin-transform-async-to-generator": "^6.16.0",
     "babel-polyfill": "^6.16.0",
     "babel-preset-es2015": "^6.14.0",
-    "bunyan": "1.8.0",
+    "cocorico-logger": "/srv/cocorico/lib/cocorico-logger",
     "superagent": "^2.2.0",
     "superagent-no-cache": "^0.1.0"
   },

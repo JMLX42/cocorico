@@ -40,6 +40,7 @@ export default function(app) {
   app.use(expressWinston.logger({
     transports: [
       new winston.transports.Console({
+        label: 'api',
         json: true,
         colorize: true,
         level: 'debug',
@@ -65,6 +66,7 @@ export default function(app) {
   app.use(expressWinston.errorLogger({
     transports: [
       new winston.transports.Console({
+        label: 'api',
         json: true,
         colorize: true,
       }),

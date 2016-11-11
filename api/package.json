@@ -13,6 +13,7 @@
     "bcrypt": "0.8.5",
     "client-sessions": "0.7.0",
     "crypto-js": "^3.1.8",
+    "cocorico-logger": "/srv/cocorico/lib/cocorico-logger",
     "ethereumjs-tx": "^1.1.1",
     "ethereumjs-util": "^4.0.1",
     "express-winston": "^2.0.0",

@@ -4,6 +4,8 @@ import request from './getRequest';
 import getAccessToken from './getAccessToken';
 import getAPIURL from './getAPIURL';
 import getVote from './getVote';
+import updateVote from './updateVote';
+import sendBallot from './sendBallot';
 
 const url = 'https://localhost/';
 
@@ -163,5 +165,45 @@ describe('GET /vote/result/:voteId', () => {
     } catch (err) {
       expect(err.status).toBe(403);
     }
+  });
+
+  it ('returns 200 if Vote.status is "complete"', async () => {
+    const vote = await getVote(true);
+    await updateVote(vote, {status: 'complete'});
+
+    const res = await request
+      .get(getAPIURL('/vote/result/' + vote.id));
+
+    expect(res.status).toBe(200);
+  });
+
+  it ('returns 200 and the results', async () => {
+    console.log('test');
+    try {
+      const vote = await getVote(true);
+      expect(vote).not.toBeFalsy();
+    } catch (err) {
+      console.log(err);
+    }
+
+    // console.log(vote);
+    // const ballots = [
+    //   await sendBallot(vote, 0),
+    //   await sendBallot(vote, 1),
+    //   await sendBallot(vote, 1),
+    //   await sendBallot(vote, 1),
+    //   await sendBallot(vote, 2),
+    //   await sendBallot(vote, 2),
+    // ];
+    //
+    // console.log(ballots);
+    //
+    // await updateVote(vote, {status: 'complete'});
+    //
+    // const res = await request
+    //   .get(getAPIURL('/vote/result/' + vote.id));
+    //
+    // expect(res.status).toBe(200);
+    // console.log(res.body);
   });
 });
