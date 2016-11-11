@@ -24,7 +24,7 @@
   when:
     - is_development_environment
 
-- name: check installed global npm modules
+- name: check installed global npm packages
   shell: cat /usr/lib/node_modules/{{ item.name }}/package.json | jq -r '.version'
   with_items:
     - { name: forever, version: 0.14.2 }
@@ -35,7 +35,18 @@
   failed_when: no
   changed_when: result.stdout != "{{ item.version }}"
 
-- name: install global npm modules
+- name: install global npm packages
   npm: name={{ item.item.name }} version={{ item.item.version }} global=yes state=present
   with_items: "{{ result.results }}"
   when: item.changed
+
+- name: list custom global npm packages
+  find: file_type=directory paths=/srv/cocorico/lib
+  register: global_custom_npm_packages
+
+- name: build custom global npm packages
+  shell: npm run build
+  args:
+    creates: "{{ item.path }}/lib"
+    chdir: "{{ item.path }}"
+  with_items: "{{ global_custom_npm_packages.files }}"
