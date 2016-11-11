@@ -24,6 +24,9 @@
   notify:
     - restart cocorico-api-web service
 
+- name: install logrotate configuration
+  template: src=logrotate.j2 dest=/etc/logrotate.d/{{ project_name }}-{{ role_name}}
+
 - name: build the API
   shell: npm run build
   args:

@@ -1,0 +1,10 @@
+{{ log_dir }}/{{ role_name }}.log {
+  daily
+  missingok
+  notifempty
+  compress
+  sharedscripts
+  copytruncate
+  dateext
+  dateformat
+}

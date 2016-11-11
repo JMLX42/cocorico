@@ -23,9 +23,7 @@ script
     exec forever \
         start \
         -a \
-        -l {{ log_dir }}/{{ role_name }}.forever.log \
         -o {{ log_dir }}/{{ role_name }}.log \
-        -e {{ log_dir }}/{{ role_name }}.error.log \
         --pidFile /var/run/{{ project_name }}-{{ role_name }}.pid \
         --sourceDir {{ cocorico_api_dir }}/dist \
         --workingDir {{ cocorico_api_dir }}/dist \

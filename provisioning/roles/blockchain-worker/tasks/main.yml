@@ -1,5 +1,8 @@
 - set_fact: role_name=blockchain-worker
 
+- name: install logrotate configuration
+  template: src=logrotate.j2 dest=/etc/logrotate.d/{{ project_name }}-{{ role_name}}
+
 - name: install nodejs
   include: ../../../tasks/install_node.yml
 

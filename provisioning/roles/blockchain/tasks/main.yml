@@ -3,6 +3,9 @@
 - name: create role directory
   file: path={{ project_dir}}/{{ role_name }} state=directory
 
+- name: install logrotate configuration
+  template: src=logrotate.j2 dest=/etc/logrotate.d/{{ project_name }}-{{ role_name}}
+
 - name: install ethereum dependencies
   apt: name=software-properties-common state=present
 

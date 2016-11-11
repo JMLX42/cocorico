@@ -16,9 +16,7 @@ script
     exec forever \
         start \
         -a \
-        -l {{ log_dir }}/{{ role_name }}-vote.forever.log \
         -o {{ log_dir }}/{{ role_name }}-vote.log \
-        -e {{ log_dir }}/{{ role_name }}-vote.error.log \
         --pidFile /var/run/{{ project_name }}-{{ role_name }}-vote.pid \
         --sourceDir /srv/cocorico/blockchain-worker/dist/vote \
         --workingDir /srv/cocorico/blockchain-worker/dist/vote \
