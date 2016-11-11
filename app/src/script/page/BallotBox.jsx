@@ -214,6 +214,30 @@ var BallotBox = React.createClass({
     );
   },
 
+  getColors: function(vote) {
+    return !!vote.labels.length
+      ? [
+        '#0074D9',
+        '#FF851B',
+        '#3D9970',
+        '#006fa3',
+        '#ff550c',
+        '#00CE18',
+        '#2ECC40',
+        '#FFDC00',
+        '#B10DC9',
+        '#7FDBFF',
+        '#F012BE',
+        '#39CCCC',
+        '#85144B',
+      ]
+      : [
+        '#2ecc71',
+        '#bdc3c7',
+        '#e74c3c',
+      ]
+  },
+
   renderVoteResultChart: function(vote) {
     var data = this.state.votes.getVoteResultByVoteId(this.props.params.voteId);
 
@@ -228,39 +252,7 @@ var BallotBox = React.createClass({
         this.getIntlMessage('vote.VOTE_BLANK').toLowerCase(),
         this.getIntlMessage('vote.VOTE_NO').toLowerCase(),
       ];
-    var colors = !!vote.labels.length
-      ? [
-        '#001F3F',
-        '#0074D9',
-        '#7FDBFF',
-        '#39CCCC',
-        '#3D9970',
-        '#2ECC40',
-        '#01FF70',
-        '#FFDC00',
-        '#FF851B',
-        '#FF4136',
-        '#F012BE',
-        '#B10DC9',
-        '#85144B',
-        '#FFFFFF',
-        '#AAAAAA',
-        '#DDDDDD',
-        '#111111',
-      ]
-      : [
-        '#2ecc71',
-        '#bdc3c7',
-        '#e74c3c',
-      ];
-
-    var hoverColors = !!vote.labels.length
-      ? colors
-      : [
-        '#27ae60',
-        '#95a5a6',
-        '#c0392b',
-      ];
+    var colors = this.getColors(vote);
 
     return (
       <DoughnutChart data={{
@@ -269,7 +261,7 @@ var BallotBox = React.createClass({
           {
             data: data,
             backgroundColor: colors,
-            hoverBackgroundColor: hoverColors,
+            hoverBackgroundColor: colors,
           }],
       }}
       options={{
@@ -508,7 +500,7 @@ var BallotBox = React.createClass({
       this.state.page
     );
     var vote = this.state.votes.getById(this.props.params.voteId);
-    var hasLabels = vote.labels.length !== 0;
+    var colors = this.getColors(vote);
 
     return (
       <div className="ballot-box-content">
@@ -539,11 +531,9 @@ var BallotBox = React.createClass({
                     <td className="truncate">
                       <span className={classNames({
                         'label': true,
-                        'label-primary': hasLabels,
-                        'positive-background': !hasLabels && tx.args.proposal === '0',
-                        'neutral-background': !hasLabels && tx.args.proposal === '1',
-                        'negative-background': !hasLabels && tx.args.proposal === '2',
-                      })}>
+                      })} style={{
+                        backgroundColor: colors[parseInt(tx.args.proposal)],
+                      }}>
                         <Title text={this.getVoteValueDisplayMessage(tx.args.proposal)}/>
                       </span>
                     </td>
