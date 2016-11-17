@@ -10,3 +10,4 @@ key/*
 !key/cocorico.cc.enc
 .DS_Store
 node_modules
+.idea
