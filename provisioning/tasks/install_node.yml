@@ -50,3 +50,7 @@
     creates: "{{ item.path }}/lib"
     chdir: "{{ item.path }}"
   with_items: "{{ global_custom_npm_packages.files }}"
+
+- name: link custom global npm packages
+  file: src={{ item.path }} dest=/usr/lib/node_modules/{{ item.path | basename }} state=link
+  with_items: "{{ global_custom_npm_packages.files }}"
