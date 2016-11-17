@@ -45,7 +45,7 @@
   register: global_custom_npm_packages
 
 - name: build custom global npm packages
-  shell: npm run build
+  shell: npm install && npm run build
   args:
     creates: "{{ item.path }}/lib"
     chdir: "{{ item.path }}"
