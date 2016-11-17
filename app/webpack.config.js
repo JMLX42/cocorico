@@ -20,7 +20,7 @@ module.exports = {
     loaders : [
       {
         test : /\.(js|jsx)$/,
-        loader : 'babel',
+        loader : 'babel-loader',
         exclude: /node_modules/,
         query: {
           presets : ['es2015', 'react'],
@@ -28,7 +28,7 @@ module.exports = {
       },
       {
         test: /\.less$/,
-        loader: 'style!css!less',
+        loader: 'style-loader!css!less',
       },
       {
         test: /\.json$/,
