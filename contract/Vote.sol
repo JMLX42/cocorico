@@ -117,22 +117,25 @@ contract Vote {
     {
         Voter voter = voters[msg.sender];
 
-        uint[] proposals;
-        proposals.length = _numCandidates;
-
-        for(uint8 i = 0; i < numCandidates; i++) {
-            uint proposal = ballot[i];
-            if (proposal >= _numProposals) {
+        if(ballot.length < _numCandidates)
+        {
+            VoteError(msg.sender, 'invalid number of candidates');
+            return;
+        }
+        for(uint8 i = 0; i < numCandidates; i++)
+        {
+            if (ballot[i] >= _numProposals)
+            {
                 VoteError(msg.sender, 'invalid proposal');
                 return;
             }
-            proposals[i] = proposal;
         }
 
         voter.voted = true;
 
-        for(uint8 i = 0; i < numCandidates; i++) {
-            results[i][proposals[i]]  += 1;
+        for(uint8 i = 0; i < numCandidates; i++)
+        {
+            results[i][ballot[i]]  += 1;
         }
 
         Ballot(msg.sender, proposals);
@@ -154,8 +157,10 @@ contract Vote {
         uint[] flatResults;
         flatResults.length = _numProposals * _numCandidates;
 
-        for(uint8 i = 0; i < _numCandidates; i++) {
-              for(uint8 j = 0; j < _numProposals; j++) {
+        for(uint8 i = 0; i < _numCandidates; i++)
+        {
+            for(uint8 j = 0; j < _numProposals; j++)
+            {
                 uint index = i * _numCandidates + j;
                 flatResults[index] = results[i][j];
             }

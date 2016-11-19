@@ -207,7 +207,7 @@ export async function result(req, res) {
 
     const web3 = new Web3();
     web3.setProvider(new web3.providers.HttpProvider(
-      'http://127.0.0.1:8545'
+      'http://127.0.0.1:8545' // TODO configurable ?
     ));
 
     try {
