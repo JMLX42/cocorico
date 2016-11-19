@@ -27,6 +27,7 @@ var LoadingIndicator = require('./LoadingIndicator'),
   SVGDownloadButton = require('./SVGDownloadButton'),
   VoteButtonBar = require('./VoteButtonBar'),
   VoteRadioButtons = require('./VoteRadioButtons'),
+  VoteMatrixButtons = require('./VoteMatrixButtons'),
   LoginPage = require('../page/Login'),
   SVGImage = require('./SVGImage'),
   PrintButton = require('./PrintButton');
@@ -435,6 +436,18 @@ var VoteWidget = React.createClass({
   renderVoteDialog: function() {
     var vote = this.state.vote;
 
+    let voteDialog = null;
+
+    if(!!vote.labels && vote.labels.length) {
+      if (!!vote.candidateNames && vote.candidateNames.length) {
+        voteDialog = <VoteMatrixButtons vote={vote} onVote={this.voteHandler}/>;
+      } else {
+        voteDialog = <VoteRadioButtons vote={vote} onVote={this.voteHandler}/>;
+      }
+    } else {
+      voteDialog = <VoteButtonBar vote={vote} onVote={this.voteHandler}/>;
+    }
+
     return (
       <Grid>
         <Row>
@@ -444,9 +457,7 @@ var VoteWidget = React.createClass({
                 ? <p>{vote.question}</p>
                 : null}
               <div className="vote-step-actions">
-              {!!vote.labels && vote.labels.length !== 0
-                ? <VoteRadioButtons vote={vote} onVote={this.voteHandler}/>
-                : <VoteButtonBar vote={vote} onVote={this.voteHandler}/>}
+                { voteDialog }
               </div>
             </div>
           </Col>

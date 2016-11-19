@@ -6,7 +6,7 @@ contract Vote {
 
     event Ballot (
         address indexed voter,
-        uint8 proposal
+        uint8[] proposals
     );
 
     event VoterRegistered (
@@ -26,7 +26,9 @@ contract Vote {
 
     mapping(address => Voter) voters;
     address chairperson;
-    uint[] results;
+    uint8 _numCandidates;
+    uint8 _numProposals;
+    uint[][] results;
     Status status;
 
     /* This unnamed function is called whenever someone tries to send ether to it */
@@ -35,11 +37,17 @@ contract Vote {
     }
 
     // Create a new vote with numProposals different results.
-    function Vote(uint8 numProposals)
+    function Vote(uint8 numCandidates, uint8 numProposals)
     public
     {
+        // Format results matrix
+        _numCandidates = numCandidates;
+        _numProposals = numProposals;
+        results.length = numCandidates;
+        for(uint8 i = 0; i < numCandidates; i++) {
+            results[i].length = numProposals;
+        }
         chairperson = msg.sender;
-        results.length = numProposals;
         status = Status.Open;
     }
 
@@ -100,8 +108,8 @@ contract Vote {
         VoterRegistered(voterAddress);
     }
 
-    // Give a single vote to proposal proposal.
-    function vote(uint8 proposal)
+    // Give a multiple vote to proposal.
+    function vote(uint8[] ballot)
     public
     onlyRegisteredVoter()
     notAlreadyVoted()
@@ -109,16 +117,28 @@ contract Vote {
     {
         Voter voter = voters[msg.sender];
 
-        if (proposal >= results.length) {
-            VoteError(msg.sender, 'invalid proposal');
+        if(ballot.length < _numCandidates)
+        {
+            VoteError(msg.sender, 'invalid number of candidates');
             return;
+        }
+        for(uint8 i = 0; i < numCandidates; i++)
+        {
+            if (ballot[i] >= _numProposals)
+            {
+                VoteError(msg.sender, 'invalid proposal');
+                return;
+            }
         }
 
         voter.voted = true;
-        voter.vote = proposal;
-        results[proposal] += 1;
 
-        Ballot(msg.sender, proposal);
+        for(uint8 i = 0; i < numCandidates; i++)
+        {
+            results[i][ballot[i]]  += 1;
+        }
+
+        Ballot(msg.sender, proposals);
     }
 
     /*function cancelVote() onlyRegisteredVoter onlyWhenStatusIs(Status.Open) {
@@ -134,7 +154,26 @@ contract Vote {
     onlyWhenStatusIs(Status.Closed)
     constant returns (uint[])
     {
-        return results;
+        uint[] flatResults;
+        flatResults.length = _numProposals * _numCandidates;
+
+        for(uint8 i = 0; i < _numCandidates; i++)
+        {
+            for(uint8 j = 0; j < _numProposals; j++)
+            {
+                uint index = i * _numCandidates + j;
+                flatResults[index] = results[i][j];
+            }
+        }
+        return flatResults;
+    }
+
+    function getCandidateResults(uint candidate)
+    public
+    onlyWhenStatusIs(Status.Closed)
+    constant returns (uint[])
+    {
+        return results[candidate];
     }
 
     function close()

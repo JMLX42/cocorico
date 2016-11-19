@@ -207,7 +207,7 @@ export async function result(req, res) {
 
     const web3 = new Web3();
     web3.setProvider(new web3.providers.HttpProvider(
-      'http://127.0.0.1:8545'
+      'http://127.0.0.1:8545' // TODO configurable ?
     ));
 
     try {
@@ -215,8 +215,25 @@ export async function result(req, res) {
       const instance = await promise((...c)=>contract.at(...c))(
         vote.voteContractAddress
       );
+      const flatResponses = instance.getVoteResults().map((s) => parseInt(s));
+      const matrixResponses = [];
+      const namedResponses = {};
+      for (let i = 0; i < vote.candidateNames.length; i++) {
+        var candidateName = vote.candidateNames[i];
+        matrixResponses[i] = [];
+        namedResponses[candidateName] = {};
+
+        for (let j = 0; j < vote.labels.length; j++) {
+          var label = vote.labels[j];
+          let response = flatResponses[i*vote.candidateNames.length + j];
+          matrixResponses[i][j] = response;
+          namedResponses[candidateName][label] = response;
+        }
+      }
+
       const response = {
-        result : instance.getVoteResults().map((s) => parseInt(s)),
+        result : matrixResponses,
+        // result : namedResponses, // depend if we want indexes or names
       };
 
       cache.set(cacheKey, response);
