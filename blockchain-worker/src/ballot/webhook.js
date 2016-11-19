@@ -1,6 +1,9 @@
 import amqplib from 'amqplib';
 
-import logger from './logger';
+import cluster from 'cluster';
+import Logger from 'cocorico-logger';
+
+const logger = new Logger('ballot-consumer-' + cluster.worker.id);
 
 var queue = null;
 var channel = null;

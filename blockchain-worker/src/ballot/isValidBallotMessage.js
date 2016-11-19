@@ -1,4 +1,7 @@
-import logger from './logger';
+import cluster from 'cluster';
+import Logger from 'cocorico-logger';
+
+const logger = new Logger('ballot-consumer-' + cluster.worker.id);
 
 export default function(message) {
   if (!message.ballot) {
