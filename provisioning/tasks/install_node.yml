@@ -44,8 +44,13 @@
   find: file_type=directory paths=/srv/cocorico/lib
   register: global_custom_npm_packages
 
+- file: path={{ project_dir }}/lib/{{ item.path | basename }}/node_modules state=directory
+  with_items: "{{ global_custom_npm_packages.files }}"
+- file: dest={{ item.path }}/node_modules src={{ project_dir }}/lib/{{ item.path | basename }}/node_modules state=link
+  with_items: "{{ global_custom_npm_packages.files }}"
+
 - name: build custom global npm packages
-  shell: npm run build
+  shell: npm install && npm run build
   args:
     creates: "{{ item.path }}/lib"
     chdir: "{{ item.path }}"
