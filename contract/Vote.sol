@@ -6,7 +6,7 @@ contract Vote {
 
     event Ballot (
         address indexed voter,
-        uint8 proposal
+        uint8[] proposals
     );
 
     event VoterRegistered (
@@ -108,8 +108,8 @@ contract Vote {
         VoterRegistered(voterAddress);
     }
 
-    // Give a single vote to proposal proposal.
-    function vote(uint8 candidate, uint8 proposal)
+    // Give a multiple vote to proposal.
+    function vote(uint8[] ballot)
     public
     onlyRegisteredVoter()
     notAlreadyVoted()
@@ -117,20 +117,25 @@ contract Vote {
     {
         Voter voter = voters[msg.sender];
 
-        if (candidate >= _numCandidates) {
-            VoteError(msg.sender, 'invalid candidate');
-            return;
-        }
+        uint[] proposals;
+        proposals.length = _numCandidates;
 
-        if (proposal >= _numProposals) {
-            VoteError(msg.sender, 'invalid proposal');
-            return;
+        for(uint8 i = 0; i < numCandidates; i++) {
+            uint proposal = ballot[i];
+            if (proposal >= _numProposals) {
+                VoteError(msg.sender, 'invalid proposal');
+                return;
+            }
+            proposals[i] = proposal;
         }
 
         voter.voted = true;
-        results[candidate][proposal] += 1;
 
-        Ballot(msg.sender, proposal);
+        for(uint8 i = 0; i < numCandidates; i++) {
+            results[i][proposals[i]]  += 1;
+        }
+
+        Ballot(msg.sender, proposals);
     }
 
     /*function cancelVote() onlyRegisteredVoter onlyWhenStatusIs(Status.Open) {
@@ -146,16 +151,16 @@ contract Vote {
     onlyWhenStatusIs(Status.Closed)
     constant returns (uint[])
     {
-        uint[] flattenResults;
-        flattenResults.length = _numProposals * _numCandidates;
+        uint[] flatResults;
+        flatResults.length = _numProposals * _numCandidates;
 
         for(uint8 i = 0; i < _numCandidates; i++) {
               for(uint8 j = 0; j < _numProposals; j++) {
                 uint index = i * _numCandidates + j;
-                flattenResults[index] = results[i][j];
+                flatResults[index] = results[i][j];
             }
         }
-        return flattenResults;
+        return flatResults;
     }
 
     function getCandidateResults(uint candidate)
