@@ -21,7 +21,7 @@ var VoteRadioButtons = React.createClass({
 
   getInitialState() {
     return {
-      ballotValue: null,
+      ballotValue: [],
     }
   },
 
@@ -36,7 +36,7 @@ var VoteRadioButtons = React.createClass({
               <li>
                 <label className="vote-label">
                   <input type="radio" name="ballot" value={index}
-                      onChange={(e) => this.setState({ballotValue: index})}/>
+                      onChange={(e) => this.setState({ballotValue: [index]})}/>
                   <i>
                       <Title text={label}/>
                   </i>

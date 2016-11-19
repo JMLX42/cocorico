@@ -26,7 +26,9 @@ contract Vote {
 
     mapping(address => Voter) voters;
     address chairperson;
-    uint[] results;
+    uint8 _numCandidates;
+    uint8 _numProposals;
+    uint[][] results;
     Status status;
 
     /* This unnamed function is called whenever someone tries to send ether to it */
@@ -35,11 +37,17 @@ contract Vote {
     }
 
     // Create a new vote with numProposals different results.
-    function Vote(uint8 numProposals)
+    function Vote(uint8 numCandidates, uint8 numProposals)
     public
     {
+        // Format results matrix
+        _numCandidates = numCandidates;
+        _numProposals = numProposals;
+        results.length = numCandidates;
+        for(uint8 i = 0; i < numCandidates; i++) {
+            results[i].length = numProposals;
+        }
         chairperson = msg.sender;
-        results.length = numProposals;
         status = Status.Open;
     }
 
@@ -101,7 +109,7 @@ contract Vote {
     }
 
     // Give a single vote to proposal proposal.
-    function vote(uint8 proposal)
+    function vote(uint8 candidate, uint8 proposal)
     public
     onlyRegisteredVoter()
     notAlreadyVoted()
@@ -109,14 +117,18 @@ contract Vote {
     {
         Voter voter = voters[msg.sender];
 
-        if (proposal >= results.length) {
+        if (candidate >= _numCandidates) {
+            VoteError(msg.sender, 'invalid candidate');
+            return;
+        }
+
+        if (proposal >= _numProposals) {
             VoteError(msg.sender, 'invalid proposal');
             return;
         }
 
         voter.voted = true;
-        voter.vote = proposal;
-        results[proposal] += 1;
+        results[candidate][proposal] += 1;
 
         Ballot(msg.sender, proposal);
     }
@@ -134,7 +146,24 @@ contract Vote {
     onlyWhenStatusIs(Status.Closed)
     constant returns (uint[])
     {
-        return results;
+        uint[] flattenResults;
+        flattenResults.length = _numProposals * _numCandidates;
+
+        for(uint8 i = 0; i < _numCandidates; i++) {
+              for(uint8 j = 0; j < _numProposals; j++) {
+                uint index = i * _numCandidates + j;
+                flattenResults[index] = results[i][j];
+            }
+        }
+        return flattenResults;
+    }
+
+    function getCandidateResults(uint candidate)
+    public
+    onlyWhenStatusIs(Status.Closed)
+    constant returns (uint[])
+    {
+        return results[candidate];
     }
 
     function close()

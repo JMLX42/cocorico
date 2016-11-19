@@ -21,25 +21,30 @@ var VoteMatrixButtons = React.createClass({
 
   getInitialState() {
     return {
-      ballotValue: {},
+      ballotValue: [],
     }
   },
 
-  handleMatrixVote: (candidate, label) => (e) => {
-    let ballotValue = Object.assign({}, this.state.ballotValue);
-    ballotValue[candidate] = label; // TODO order ?
+  handleMatrixVote: (candidateIndex, labelIndex) => (e) => {
+    let ballotValue = this.state.ballotValue;
+    ballotValue[candidateIndex] = labelIndex;
+
     this.setState({ballotValue})
   },
 
   isMatrixFilled() {
-    this.props.vote.candidates.map(candidate => {
-      return (!!this.state.ballotValue[candidate])
+    this.props.vote.candidateNames.map((candidate, candidateIndex) => {
+      return (!!this.state.ballotValue[candidateIndex])
     }).reduce((a,b) => (a && b));
+  },
+
+  sendBallot() {
+    this.props.onVote(e, this.state.ballotValue);
   },
 
   render: function() {
     var labels = this.props.vote.labels;
-    var candidates = this.props.vote.candidates;
+    var candidates = this.props.vote.candidateNames;
 
     return (
         <form>
@@ -71,7 +76,7 @@ var VoteMatrixButtons = React.createClass({
                       candidates.map((candidate, candidateIndex) => (
                           <td key={candidateIndex}>
                             <input type="radio" name={"ballot-"+candidateIndex} value={labelIndex}
-                                   onChange={this.handleMatrixVote(candidate, label)}/>
+                                   onChange={this.handleMatrixVote(candidateIndex, labelIndex)}/>
                           </td>
                       ))
                     }
@@ -83,7 +88,7 @@ var VoteMatrixButtons = React.createClass({
 
           <Button disabled={this.isMatrixFilled}
                   className="btn-vote btn-primary"
-                  onClick={(e) => this.props.onVote(e, this.state.ballotValue)}>
+                  onClick={this.sendBallot}>
             {this.getIntlMessage('vote.VALIDATE_BALLOT')}
           </Button>
         </form>

@@ -439,7 +439,7 @@ var VoteWidget = React.createClass({
     let voteDialog = null;
 
     if(!!vote.labels && vote.labels.length) {
-      if (!!vote.candidates && vote.candidates.length) {
+      if (!!vote.candidateNames && vote.candidateNames.length) {
         voteDialog = <VoteMatrixButtons vote={vote} onVote={this.voteHandler}/>;
       } else {
         voteDialog = <VoteRadioButtons vote={vote} onVote={this.voteHandler}/>;

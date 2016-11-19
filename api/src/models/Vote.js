@@ -38,6 +38,7 @@ Vote.add({
   voteContractABI: { type: Types.Text, noedit: true },
   restricted: { type: Types.Boolean, default: false },
   labels: { type: Types.TextArray },
+  candidateNames: { types: Types.TextArray },
   question: { type: Types.Text },
   salt: { type: Types.Text, noedit: true, default: () => bcrypt.genSaltSync(10) },
   key: { type: Types.Key, noedit: true, default: () => srs(32).toLowerCase() },
@@ -115,9 +116,11 @@ function pushVoteOnQueue(vote, callback) {
           return;
         }
 
+        var defaultNumCandidates = 1;
         var voteMsg = { vote : {
           id: vote.id,
           numProposals: vote.labels.length === 0 ? 3 : vote.labels.length,
+          numCandidates: vote.candidateNames.length || defaultNumCandidates,
         } };
 
         ch.assertQueue('votes', {autoDelete: false, durable: true});
