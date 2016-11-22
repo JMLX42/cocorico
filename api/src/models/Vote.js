@@ -3,12 +3,15 @@ import config from '/opt/cocorico/api-web/config.json';
 import keystone from 'keystone';
 import transform from 'model-transform';
 import metafetch from 'metafetch';
-import async from 'async';
 import Web3 from 'web3';
 import bcrypt from 'bcrypt';
 import srs from 'secure-random-string';
 import SolidityCoder from 'web3/lib/solidity/coder';
 import jwt from 'jsonwebtoken';
+import promise from 'thenify';
+import amqplib from 'amqplib';
+
+import logger from '../logger';
 
 const Ballot = keystone.list('Ballot');
 
@@ -71,9 +74,9 @@ Vote.schema.methods.getBallotByUserUID = async function(uid) {
   return Ballot.model.findOne({hash: bcrypt.hashSync(uid, this.salt)}).exec();
 }
 
-function closeVoteContract(vote, next) {
+async function closeVoteContract(vote) {
   if (!vote.voteContractAddress) {
-    next(null);
+    return null;
   }
 
   var web3 = new Web3();
@@ -81,123 +84,97 @@ function closeVoteContract(vote, next) {
     'http://127.0.0.1:8545'
   ));
 
-  async.waterfall(
-    [
-      (callback) => web3.eth.getAccounts(callback),
-      (accounts, callback) => web3.eth.contract(
-        JSON.parse(vote.voteContractABI)
-      )
-      .at(
-        vote.voteContractAddress,
-        (err, instance) => callback(err, accounts, instance)
-      ),
-      (accounts, instance, callback) => instance.close
-        .sendTransaction({from: accounts[0]}, (err, txhash) => {
-          callback(err, txhash);
-        }),
-    ],
-    (err, txhash) => {
-      next(err);
-    }
+  try {
+    const accounts = await promise((...c)=>web3.eth.getAccounts(...c))();
+    const contract = web3.eth.contract(JSON.parse(vote.voteContractABI));
+    const instance = await promise((...c)=>contract.at(...c))(vote.voteContractAddress);
+    const txHash = await promise((...c)=>instance.close.sendTransaction(...c))({from: accounts[0]});
+
+    return txHash;
+  } catch (err) {
+    logger.error('blockchain error', err);
+    return null;
+  }
+}
+
+var conn = null;
+var ch = null;
+
+async function pushVoteOnQueue(vote) {
+  if (!conn) {
+    conn = await amqplib.connect();
+    ch = await conn.createChannel();
+    ch.assertQueue('votes', {autoDelete: false, durable: true});
+  }
+
+  const voteMsg = {vote : {
+    id: vote.id,
+    numProposals: vote.labels.length === 0 ? 3 : vote.labels.length,
+  }};
+
+  ch.sendToQueue(
+    'votes',
+    new Buffer(JSON.stringify(voteMsg)),
+    {persistent: true}
   );
 }
 
-function pushVoteOnQueue(vote, callback) {
-  require('amqplib/callback_api').connect(
-    'amqp://localhost',
-    (err, conn) => {
-      if (err != null)
-        return callback(err, null);
-
-      return conn.createChannel((channelErr, ch) => {
-        if (channelErr != null) {
-          callback(channelErr, null);
-          return;
-        }
-
-        var voteMsg = { vote : {
-          id: vote.id,
-          numProposals: vote.labels.length === 0 ? 3 : vote.labels.length,
-        } };
-
-        ch.assertQueue('votes', {autoDelete: false, durable: true});
-        ch.sendToQueue(
-          'votes',
-          new Buffer(JSON.stringify(voteMsg)),
-          { persistent : true }
-        );
-
-        ch.close(() => {
-          // conn.close();
-          callback(null, voteMsg);
-        });
-      });
-    }
-	);
-}
-
-Vote.schema.pre('validate', function(next) {
-  var self = this;
+Vote.schema.pre('validate', async function(next) {
+  const self = this;
 
   if (!self.url) {
     return next(null);
   }
 
   if (self.isModified('status') && self.status === 'complete') {
-    return closeVoteContract(self, next);
+    return await closeVoteContract(self);
   }
 
-  var updateTitle = (self.isModified('url') || !self.isModified('title'))
+  const updateTitle = (self.isModified('url') || !self.isModified('title'))
     && !self.title;
-  var updateDescription = (self.isModified('url') || !self.isModified('description'))
+  const updateDescription = (self.isModified('url') || !self.isModified('description'))
     && !self.description;
-  var updateImage = (self.isModified('url') || !self.isModified('image'))
+  const updateImage = (self.isModified('url') || !self.isModified('image'))
     && !self.image;
 
   if (!updateTitle && !updateDescription && !updateImage) {
     next(null);
   }
 
-  return async.waterfall(
-    [
-      (callback) => !metafetch.fetch(
-        self.url,
-        {
-          flags: { images: false, links: false },
-          http: { timeout: 30000 },
-        },
-        (err, meta) => {
-          if (err) {
-            callback(new Error(err));
-            return;
-          }
+  try {
+    const meta = await promise((...c)=>metafetch.fetch(...c))(
+      self.url,
+      {
+        flags: { images: false, links: false },
+        http: { timeout: 30000 },
+      }
+    );
 
-          if (updateTitle) {
-            self.title = meta.title;
-          }
-          if (updateDescription) {
-            self.description = meta.description;
-          }
-          if (updateImage) {
-            self.image = meta.image;
-          }
-
-          callback(null);
-        }
-      ),
-      (callback) => {
-        if (!self.status) {
-          self.status = 'initializing';
-          pushVoteOnQueue(self, (err, msg) => callback(err));
-        } else {
-          callback(null);
-        }
-      },
-    ],
-    (err) => {
-      next(err);
+    if (updateTitle) {
+      self.title = meta.title;
     }
-  );
+    if (updateDescription) {
+      self.description = meta.description;
+    }
+    if (updateImage) {
+      self.image = meta.image;
+    }
+
+    if (!self.status) {
+      self.status = 'initializing';
+      try {
+        await pushVoteOnQueue(self);
+      } catch (queueErr) {
+        logger.error(queueErr);
+        return next(new Error(queueErr));
+      }
+    }
+  } catch (metafetchErr) {
+    logger.error(metafetchErr);
+    return next(new Error(metafetchErr));
+  }
+
+  return next();
 });
 
 function getTypesFromAbi(abi, functionName) {
@@ -210,13 +187,13 @@ function getTypesFromAbi(abi, functionName) {
     return json.type;
   }
 
-  var funcJson = abi.filter(matchesFunctionName)[0];
+  const funcJson = abi.filter(matchesFunctionName)[0];
 
   return (funcJson.inputs).map(getTypes);
 }
 
 Vote.schema.methods.getProofOfVote = function(tx) {
-  var params = SolidityCoder.decodeParams(
+  const params = SolidityCoder.decodeParams(
     getTypesFromAbi(JSON.parse(this.voteContractABI), 'vote'),
     // the parameter value is in the last byte of the tx data
     tx.data.slice(tx.data.length - 1).toString('hex')
