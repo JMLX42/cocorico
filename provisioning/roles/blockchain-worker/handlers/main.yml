@@ -1,0 +1,4 @@
+- name: restart cocorico-blockchain-worker service
+  service: name={{ project_name }}-blockchain-worker state=restarted
+  when:
+    - provider != 'docker'

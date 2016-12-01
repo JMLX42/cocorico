@@ -1,5 +1,7 @@
-var config = require('/opt/cocorico/api-web/config.json');
-var keystone = require('/opt/cocorico/api-web/node_modules/keystone');
+import keystone from '/opt/cocorico/api-web/node_modules/keystone';
+import apiConfig from '/opt/cocorico/api-web/config.json';
+import config from '/opt/cocorico/blockchain-worker/config.json';
+
 var async = require('async');
 var Web3 = require('web3');
 var fs = require('fs');
@@ -10,8 +12,8 @@ import Logger from 'cocorico-logger';
 
 const logger = new Logger('vote-consumer-' + cluster.worker.id);
 
-keystone.init({'mongo' : config.mongo.uri, headless: true});
-keystone.mongoose.connect(config.mongo.uri);
+keystone.init({'mongo' : apiConfig.mongo.uri, headless: true});
+keystone.mongoose.connect(apiConfig.mongo.uri);
 keystone.import('../../../api/dist/models');
 
 var Vote = keystone.list('Vote');
@@ -149,25 +151,54 @@ module.exports.run = function() {
           ch.assertQueue('votes');
           ch.consume(
             'votes',
-            (msg) =>{
-              if (msg !== null) {
-                var obj = JSON.parse(msg.content.toString());
+function handleMessage(ch, msg) {
+  if (msg !== null) {
+    var obj = JSON.parse(msg.content.toString());
 
-                logger.info({ vote: obj }, 'vote received');
+    logger.info('vote received', { vote: obj });
 
-                if (obj.vote) {
-                  handleVote(obj.vote, (voteErr, vote) => {
-                    if (!!voteErr) {
-                      logger.error({error: voteErr}, 'error');
-                      return ch.nack(msg);
-                    }
+    if (obj.vote) {
+      handleVote(obj.vote, (voteErr, vote) => {
+        if (!!voteErr) {
+          logger.error({error: voteErr}, 'error');
+          return ch.nack(msg);
+        }
 
-                    return ch.ack(msg);
-                  });
-                }
-              }
-            });
-        });
-      }
-  );
+        return ch.ack(msg);
+      });
+    }
+  }
+}
+
+var queue;
+var channel;
+
+export async function run() {
+  try {
+    logger.info('connecting to the queue');
+
+    queue = await amqplib.connect(null, {heartbeat:30});
+
+    logger.info('connected to the queue');
+
+    channel = await queue.createChannel();
+    channel.prefetch(config.voteConsumerPrefetch);
+
+    logger.info('channel created, waiting for messages...');
+
+    await channel.assertQueue('votes', {autoDelete: false, durable: true});
+    channel.consume('votes', (message) => handleMessage(channel, message));
+  } catch (err) {
+    logger.error('queue error', {error : err});
+
+    if (!!channel) {
+      await channel.close();
+    }
+
+    if (!!queue) {
+      await queue.close();
+    }
+
+    process.exit(1);
+  }
 }

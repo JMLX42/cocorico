@@ -9,6 +9,11 @@
 - name: create role directory
   file: path={{ project_dir}}/{{ role_name }} state=directory
 
+- name: generate configuration
+  template: src=config.json.j2 dest={{ project_dir }}/{{ role_name }}/config.json
+  notify:
+    - restart cocorico-blockchain-worker service
+
 - file: path={{ project_dir }}/{{ role_name }}/node_modules state=directory recurse=yes
 - file: src={{ project_dir }}/{{ role_name }}/node_modules dest=/srv/cocorico/{{ role_name }}/node_modules state=link
 

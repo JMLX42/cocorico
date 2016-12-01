@@ -1,6 +1,6 @@
 import 'babel-polyfill';
 
-import config from '/opt/cocorico/api-web/config.json';
+import config from '/opt/cocorico/blockchain-worker/config.json';
 
 import cluster from 'cluster';
 

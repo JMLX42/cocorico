@@ -1,5 +1,6 @@
 import keystone from '/opt/cocorico/api-web/node_modules/keystone';
-import config from '/opt/cocorico/api-web/config.json';
+import apiConfig from '/opt/cocorico/api-web/config.json';
+import config from '/opt/cocorico/blockchain-worker/config.json';
 
 import cluster from 'cluster';
 import amqplib from 'amqplib';
@@ -15,8 +16,8 @@ import watchContractEvents from './watchContractEvents';
 import webhook from './webhook';
 import noRetryError from './noRetryError';
 
-keystone.init({'mongo' : config.mongo.uri, headless: true});
-keystone.mongoose.connect(config.mongo.uri);
+keystone.init({'mongo' : apiConfig.mongo.uri, headless: true});
+keystone.mongoose.connect(apiConfig.mongo.uri);
 keystone.import('../../../api/dist/models');
 
 const Ballot = keystone.list('Ballot');
@@ -306,7 +307,7 @@ export async function run() {
     logger.info('connected to the queue');
 
     channel = await queue.createChannel();
-    channel.prefetch(4);
+    channel.prefetch(config.ballotConsumerPrefetch);
 
     logger.info('channel created, waiting for messages...');
 
