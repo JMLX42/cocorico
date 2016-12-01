@@ -22,8 +22,8 @@ keystone.import('../../../api/dist/models');
 const Ballot = keystone.list('Ballot');
 const logger = new Logger('ballot-consumer-' + cluster.worker.id);
 
-const ACCOUNT_INIT_TIMEOUT = 1200000; // 20 minutes
-const ACCOUNT_INIT_DELAY = 5000;
+// the amount of ether given to each voter when calling Vote.registerVoter()
+const VOTER_ACCOUNT_ETH_INIT = '20000000000000000';
 
 const web3 = new Web3();
 web3.setProvider(new web3.providers.HttpProvider(
@@ -83,76 +83,6 @@ async function updateDatabaseBallot(ballot, data) {
 async function handlePendingBallot(ballot) {
   logger.info('handling pending ballot');
 
-  const signedTx = new EthereumTx(ballot.transaction);
-  const address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
-  const accounts = await promise((...c)=>web3.eth.getAccounts(...c))();
-  const rootAccount = accounts[0];
-  const value = '30000000000000000';
-
-  logger.info(
-    {
-      from : rootAccount,
-      value : value,
-      address : address,
-    },
-    'initialize account'
-  );
-
-  // send the ETH transaction
-  await promise((...c)=>web3.eth.sendTransaction(...c))({
-    from: rootAccount,
-    to: address,
-    value: value,
-  });
-
-  logger.info(
-    {
-      from : rootAccount,
-      value : value,
-      address : address,
-    },
-    'account init transaction sent'
-  );
-}
-
-async function handleInitializingBallot(ballot) {
-  logger.info('handling initializing ballot');
-
-  const signedTx = new EthereumTx(ballot.transaction);
-  const address = EthereumUtil.bufferToHex(signedTx.getSenderAddress());
-
-  var initialized = false;
-  var balance = 0;
-  var totalTime = 0;
-
-  while (!initialized) {
-    balance = await promise((...c)=>web3.eth.getBalance(...c))(address);
-    initialized = balance.toString(10) !== '0';
-
-    if (!initialized) {
-      await delay(ACCOUNT_INIT_DELAY);
-
-      totalTime += ACCOUNT_INIT_DELAY;
-
-      if (totalTime >= ACCOUNT_INIT_TIMEOUT) {
-        throw noRetryError({error:'account init timeout'});
-      }
-    }
-  }
-
-  logger.info(
-    {
-      address: address,
-      balance: balance,
-    },
-    'account initialized'
-  );
-}
-
-
-async function handleInitializedBallot(ballot) {
-  logger.info('handling initialized ballot');
-
   ballot.registeringStartBlockNumber = await promise((cb)=>web3.eth.getBlockNumber(cb))();
 
   const signedTx = new EthereumTx(ballot.transaction);
@@ -178,6 +108,7 @@ async function handleInitializedBallot(ballot) {
         from: rootAccount,
         gasLimit: 999999,
         gasPrice: 20000000000,
+        value: VOTER_ACCOUNT_ETH_INIT,
       }
     );
 
@@ -319,16 +250,6 @@ async function handleMessage(channel, message) {
         break;
       case 'pending':
         await handlePendingBallot(ballot);
-        await pushBackToQueueWithStatus(channel, ballot, 'initializing');
-        channel.ack(message);
-        break;
-      case 'initializing':
-        await handleInitializingBallot(ballot);
-        await pushBackToQueueWithStatus(channel, ballot, 'initialized');
-        channel.ack(message);
-        break;
-      case 'initialized':
-        await handleInitializedBallot(ballot);
         await pushBackToQueueWithStatus(channel, ballot, 'registering');
         channel.ack(message);
         break;

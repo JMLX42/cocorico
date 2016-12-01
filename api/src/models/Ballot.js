@@ -19,10 +19,8 @@ Ballot.add({
     options: [
       'queued',
       'pending',
-      'initialized',
-      'initializing',
-      'registered',
       'registering',
+      'registered',
       'casting',
       'complete',
     ],

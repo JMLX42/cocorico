@@ -84,7 +84,7 @@ contract Vote {
     }
 
     function registerVoter(address voterAddress)
-    public
+    public payable
     onlyChairPerson()
     onlyWhenStatusIs(Status.Open)
     {
@@ -95,9 +95,10 @@ contract Vote {
             return;
         }
 
-        voter.registered = true;
-
-        VoterRegistered(voterAddress);
+        if (voterAddress.send(msg.value)) {
+          voter.registered = true;
+          VoterRegistered(voterAddress);
+        }
     }
 
     // Give a single vote to proposal proposal.
