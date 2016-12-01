@@ -1,11 +1,13 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-import request from './getRequest';
-import getAccessToken from './getAccessToken';
-import getAPIURL from './getAPIURL';
-import getVote from './getVote';
-import updateVote from './updateVote';
-import sendBallot from './sendBallot';
+import {
+  request,
+  getAccessToken,
+  getAPIURL,
+  getVote,
+  updateVote,
+  sendBallot
+} from 'cocorico-test';
 
 const url = 'https://localhost/';
 

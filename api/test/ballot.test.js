@@ -1,11 +1,13 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-import request from './getRequest';
-import getAPIURL from './getAPIURL';
-import getVote from './getVote';
-import getUserJWT from './getUserJWT';
-import getBallotTransaction from './getBallotTransaction';
-import sendBallot from './sendBallot';
+import {
+  request,
+  getAPIURL,
+  getVote,
+  getUserJWT,
+  getBallotTransaction,
+  sendBallot
+} from 'cocorico-test';
 
 describe('POST /ballot/:voteId', () => {
   it('returns 200 and a valid ballot', async () => {

@@ -1,9 +1,7 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-var request = require('superagent-promise')(require('superagent'), Promise);
-var jwt = require('jsonwebtoken');
-
-var getAPIURL = require('./getAPIURL');
+import {request, getAPIURL} from 'cocorico-test';
+import jwt from 'jsonwebtoken';
 
 describe('/user/me', async () => {
   it('returns 401 when not signed in', async () => {

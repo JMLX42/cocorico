@@ -9,16 +9,6 @@ if (config.env === 'development') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 
-// Naive window.crypto polyfill. Required by eth-lightwallet.
-window.crypto = {
-  getRandomValues: function(array) {
-    var v = require('crypto').randomBytes(array.length);
-    for (var i = 0; i < array.length; i++) {
-      array[i] = v[i];
-    }
-  },
-};
-
 function dumpDatabase() {
   childProcess.execSync(
     'LC_ALL="en_US.UTF-8" mongodump --out /tmp/cocorico/dump',

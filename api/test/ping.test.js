@@ -1,6 +1,4 @@
-var request = require('superagent-promise')(require('superagent'), Promise);
-
-var getAPIURL = require('./getAPIURL');
+import {request, getAPIURL} from 'cocorico-test';
 
 describe('/ping', () => {
   it('returns 200 and "pong"', async () => {

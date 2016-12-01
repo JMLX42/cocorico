@@ -1,8 +1,6 @@
-var config = require('/opt/cocorico/api-web/config.json');
+import config from '/opt/cocorico/api-web/config.json';
 
-var request = require('superagent-promise')(require('superagent'), Promise);
-
-var getAPIURL = require('./getAPIURL');
+import {request, getAPIURL} from 'cocorico-test';
 
 describe('/oauth/token', async () => {
   it('returns 401 when appId or secret is invalid', async () => {
