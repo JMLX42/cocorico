@@ -2,10 +2,11 @@ import keystone from '/opt/cocorico/api-web/node_modules/keystone';
 import apiConfig from '/opt/cocorico/api-web/config.json';
 import config from '/opt/cocorico/blockchain-worker/config.json';
 
-var async = require('async');
-var Web3 = require('web3');
-var fs = require('fs');
-var md5 = require('md5');
+import async from 'async';
+import Web3 from 'web3';
+import fs from 'fs';
+import md5 from 'md5';
+import amqplib from 'amqplib';
 
 import cluster from 'cluster';
 import Logger from 'cocorico-logger';
@@ -16,22 +17,22 @@ keystone.init({'mongo' : apiConfig.mongo.uri, headless: true});
 keystone.mongoose.connect(apiConfig.mongo.uri);
 keystone.import('../../../api/dist/models');
 
-var Vote = keystone.list('Vote');
+const Vote = keystone.list('Vote');
 
 function getCompiledVoteContract(web3, callback) {
   var path = '/srv/cocorico/contract/Vote.sol';
   var source = fs.readFileSync(path, {encoding: 'utf-8'});
 
   logger.info(
+    'compiling smart contract',
     { path: path },
-    'compiling smart contract'
   );
 
   web3.eth.compile.solidity(source, (error, compiled) => {
     if (!error) {
       logger.info(
+        'compiled smart contract',
         { md5Hash: md5(source) },
-        'compiled smart contract'
       );
     }
 
@@ -58,8 +59,8 @@ function mineVoteContract(numProposals, next) {
         var abi = compiled.info.abiDefinition;
 
         logger.info(
+          'start mining contract',
           { address: accounts[0] },
-          'start mining contract'
         );
 
         web3.eth.contract(abi).new(
@@ -81,12 +82,12 @@ function mineVoteContract(numProposals, next) {
               } else {
                     // tx mined
                 logger.info(
+                  'contract transaction mined',
                   {
                     hash: hash,
                     contractAddress: contract.address,
                   },
-                        'contract transaction mined'
-                    );
+                );
 
                 callback(null, contract, abi);
               }
@@ -129,28 +130,6 @@ function handleVote(voteMsg, callback) {
   });
 }
 
-module.exports.run = function() {
-  require('amqplib/callback_api').connect(
-      'amqp://localhost',
-      (err, conn) => {
-        if (err != null) {
-          logger.error({error: err}, 'error');
-          process.exit(1);
-        }
-
-        logger.info('connecting');
-
-        conn.createChannel((channelErr, ch) => {
-          if (channelErr != null) {
-            logger.error({error: channelErr}, 'error');
-            process.exit(1);
-          }
-
-          logger.info('connected');
-
-          ch.assertQueue('votes');
-          ch.consume(
-            'votes',
 function handleMessage(ch, msg) {
   if (msg !== null) {
     var obj = JSON.parse(msg.content.toString());

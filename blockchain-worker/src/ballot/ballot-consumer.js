@@ -37,15 +37,15 @@ async function pushBackToQueueWithStatus(channel, ballot, status) {
   channel.sendToQueue(
     'ballots',
     new Buffer(JSON.stringify({ballot:ballot})),
-    { persistent : true }
+    {persistent: true}
   );
 }
 
 async function updateBallotStatus(ballot, status) {
   ballot.status = status;
-  await updateDatabaseBallot(ballot, {status:status});
+  await updateDatabaseBallot(ballot, {status: status});
 
-  logger.info({status:status}, 'ballot status changed');
+  logger.info('ballot status changed', {status: status});
 
   await webhook(ballot, status);
 }
@@ -95,11 +95,11 @@ async function handlePendingBallot(ballot) {
   );
 
   logger.info(
+    'preparing to call Vote.registerVoter()',
     {
       contract: contract.address,
       address: address,
     },
-    'preparing to call Vote.registerVoter()'
   );
 
   try {
@@ -114,12 +114,12 @@ async function handlePendingBallot(ballot) {
     );
 
     logger.info(
+      'Vote.registerVoter() call transaction sent',
       {
         contract: contract.address,
         address: address,
         transactionHash: txHash,
       },
-      'Vote.registerVoter() call transaction sent'
     );
 
   } catch (err) {
@@ -154,7 +154,7 @@ async function handleRegisteringBallot(ballot) {
 
   const event = await watchContractEvents([voteErrorEvent], [voterRegisteredEvent]);
 
-  logger.info({event:event}, 'received Vote.registerVoter() event');
+  logger.info('received Vote.registerVoter() event', {event:event});
 }
 
 async function handleRegisteredBallot(ballot) {
@@ -169,11 +169,11 @@ async function handleRegisteredBallot(ballot) {
   );
 
   logger.info(
+    'preparing to call Vote.vote()',
     {
       contract: contract.address,
       address: address,
     },
-    'preparing to call Vote.vote()'
   );
 
   try {
@@ -182,12 +182,12 @@ async function handleRegisteredBallot(ballot) {
     );
 
     logger.info(
+      'Vote.vote() call transaction sent',
       {
         contract: contract.address,
         address: address,
         transactionHash: txHash,
       },
-      'Vote.vote() call transaction sent'
     );
 
   } catch (err) {
@@ -222,13 +222,13 @@ async function handleCastingBallot(ballot) {
 
   const event = await watchContractEvents([voteErrorEvent], [ballotEvent]);
 
-  logger.info({event:event}, 'received Vote.vote() event');
+  logger.info('received Vote.vote() event', {event: event});
 }
 
 async function handleMessage(channel, message) {
   const messageData = JSON.parse(message.content.toString());
 
-  logger.info({message:messageData}, 'message received');
+  logger.info('message received', {message: messageData});
 
   if (!isValidBallotMessage(messageData)) {
     logger.info('invalid ballot message: ignoring')
@@ -314,7 +314,7 @@ export async function run() {
     await channel.assertQueue('ballots', {autoDelete: false, durable: true});
     channel.consume('ballots', (message) => handleMessage(channel, message));
   } catch (err) {
-    logger.error({error : err}, 'queue error');
+    logger.error('queue error', {error : err});
 
     if (!!channel) {
       await channel.close();

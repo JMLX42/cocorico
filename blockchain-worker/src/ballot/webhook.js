@@ -24,11 +24,11 @@ process.once('SIGINT', async () => {
 
 export default async function(ballot, status) {
   if (!ballot.app.webhookURL) {
-    logger.info({status:status}, 'App.webhookURL is not set: skipping webhook');
+    logger.info('App.webhookURL is not set: skipping webhook', {status: status});
     return;
   }
 
-  logger.info({status:status}, 'preparing to push webhook');
+  logger.info('preparing to push webhook', {status: status});
 
   if (!queue) {
     queue = await amqplib.connect(null, {heartbeat:30});
@@ -53,5 +53,5 @@ export default async function(ballot, status) {
     { persistent : true }
   );
 
-  logger.info({status:status}, 'pushed webhook');
+  logger.info('pushed webhook', {status: status});
 }

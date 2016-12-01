@@ -10,7 +10,10 @@ const logger = new Logger('vote-service');
 
 if (cluster.isMaster) {
 
-  logger.info('spawning consumers');
+  logger.info(
+    'spawning consumers',
+    {voteConsumerCount: config.voteConsumerCount}
+  );
 
   for (var i = 0; i < config.voteConsumerCount; i++) {
     cluster.fork();
@@ -20,13 +23,13 @@ if (cluster.isMaster) {
 
   // If a worker exits, we wait 30 seconds and restart it.
   cluster.on('exit', (deadWorker, code, signal) => {
-    logger.info({workerId: deadWorker.id}, 'consumer exited, waiting 30s');
+    logger.info('consumer exited, waiting 30s', {workerId: deadWorker.id});
 
     setTimeout(
       () => {
         var newWorker = cluster.fork();
 
-        logger.info({workerId: newWorker.id}, 'restarted consumer');
+        logger.info('restarted consumer', {workerId: newWorker.id});
       },
       30000
     );
