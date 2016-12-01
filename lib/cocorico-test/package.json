@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "webpack",
+    "start": "webpack --watch --progress",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
