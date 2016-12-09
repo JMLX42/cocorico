@@ -23,7 +23,7 @@ if (cluster.isMaster) {
 
   // If a worker exits, we wait 30 seconds and restart it.
   cluster.on('exit', (deadWorker, code, signal) => {
-    logger.info('consumer exited, waiting 30s', {workerId: deadWorker.id});
+    logger.info('consumer exited, waiting 10s', {workerId: deadWorker.id});
 
     setTimeout(
       () => {
@@ -31,7 +31,7 @@ if (cluster.isMaster) {
 
         logger.info('restarted consumer', {workerId: newWorker.id});
       },
-      30000
+      10000
     );
   });
 } else {
