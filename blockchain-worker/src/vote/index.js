@@ -1,4 +1,8 @@
 import 'babel-polyfill';
+try {
+  require('source-map-support').install();
+} catch (e) {
+}
 
 import config from '/opt/cocorico/blockchain-worker/config.json';
 
