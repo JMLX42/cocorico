@@ -1,8 +1,10 @@
 var config = require('/opt/cocorico/api-web/config.json');
 
 var childProcess = require('child_process');
+var amqplib = require('amqplib');
+var delay = require('timeout-as-promise');
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000; // 30 second timeout
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 300000; // 30 second timeout
 
 if (config.env === 'development') {
   // Allow self-signed SSL certificates.
@@ -35,15 +37,30 @@ function restoreDatabase() {
   );
 }
 
+var testrpc = null;
+function startBlockchainMiner() {
+  testrpc = childProcess.spawn('testrpc', ['--unlock', '0']);
+}
+
+function stopBlockchainMiner() {
+  if (!!testrpc) {
+    testrpc.kill('SIGKILL');
+    testrpc = null;
+  }
+}
+
 function restartBlockchainMiner() {
-  childProcess.execSync(
-    'rabbitmqctl stop_app ; rabbitmqctl reset ; rabbitmqctl start_app',
-    {stdio:'ignore'}
-  );
-  childProcess.execSync(
-    'service cocorico-blockchain-miner restart',
-    {stdio:'ignore'}
-  );
+  stopBlockchainMiner();
+  startBlockchainMiner();
+}
+
+async function emptyQueues() {
+  var conn = await amqplib.connect(null, {heartbeat:30});
+  var ch = await conn.createChannel();
+  await ch.purgeQueue('votes');
+  await ch.purgeQueue('ballots');
+  ch.close();
+  conn.close();
 }
 
 function exitHandler(err) {
@@ -52,14 +69,19 @@ function exitHandler(err) {
   }
 
   restoreDatabase();
-  restartBlockchainMiner();
+  emptyQueues();
   process.exit();
 }
 
-beforeAll(dumpDatabase);
+beforeAll(() => {
+  dumpDatabase();
+  startBlockchainMiner();
+  emptyQueues();
+});
 afterAll(() => {
   restoreDatabase();
-  restartBlockchainMiner();
+  stopBlockchainMiner();
+  emptyQueues();
 });
 
 //catches ctrl+c event
