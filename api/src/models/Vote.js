@@ -102,10 +102,11 @@ var ch = null;
 
 async function pushVoteOnQueue(vote) {
   if (!conn) {
-    conn = await amqplib.connect();
+    conn = await amqplib.connect(null, {heartbeat:30});
     ch = await conn.createChannel();
-    ch.assertQueue('votes', {autoDelete: false, durable: true});
   }
+
+  await ch.assertQueue('votes', {autoDelete: false, durable: true});
 
   const voteMsg = {vote : {
     id: vote.id,
