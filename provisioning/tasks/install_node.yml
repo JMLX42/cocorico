@@ -49,6 +49,10 @@
 - file: dest={{ item.path }}/node_modules src={{ project_dir }}/lib/{{ item.path | basename }}/node_modules state=link
   with_items: "{{ global_custom_npm_packages.files }}"
 
+- name: install global npm package dependencies
+  npm: path={{ item.path }}
+  with_items: "{{ global_custom_npm_packages.files }}"
+
 - name: build custom global npm packages
   shell: npm install && npm run build
   args:
