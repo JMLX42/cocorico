@@ -74,16 +74,16 @@ export async function post(req, res) {
       .exec();
 
     if (!vote)
-      return callback({code: 404, error: 'vote not found'});
+      return res.status(404).send({error: 'vote not found'});
     if (!vote.userIsAuthorizedToVote(req.user)) {
       await Event.logWarningEventAndBlacklist(req, 'unauthorized user');
-      return callback({code: 403, error: 'unauthorized user'});
+      return res.status(403).send({error: 'unauthorized user'});
     }
     if (vote.voteContractAddress !== voteContractAddress) {
       await Event.logWarningEventAndBlacklist(
         req, 'contract address mismatch'
       );
-      return callback({code: 300, error: 'contract address mismatch'});
+      return res.status(300).send({error: 'contract address mismatch'});
     }
 
     // The transaction *must* call Vote.vote(). To enforce this, we check
@@ -95,7 +95,7 @@ export async function post(req, res) {
     );
     if (signedTx.data.toString('hex', 0, 4) !== sig) {
       await Event.logWarningEventAndBlacklist(req, 'invalid transaction');
-      return callback({code: 300, error: 'invalid transaction'});
+      return res.status(300).send({error: 'invalid transaction'});
     }
 
     try {
@@ -105,7 +105,7 @@ export async function post(req, res) {
       // Log a warning event and return 403 if there is.
       if (!!existingBallot) {
         await Event.logWarningEventAndBlacklist(req, 'user already voted');
-        return callback({code: 403, error: 'user already voted'});
+        return res.status(403).send({error: 'user already voted'});
       }
 
       try {
