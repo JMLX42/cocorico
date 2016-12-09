@@ -77,7 +77,6 @@
     "babel-jest": "^16.0.0",
     "eslint": "^3.6.0",
     "eth-lightwallet": "^2.5.2",
-    "ethereumjs-testrpc": "^3.0.2",
     "jest": "^16.0.0",
     "promise": "^7.1.1",
     "superagent": "^2.3.0",
