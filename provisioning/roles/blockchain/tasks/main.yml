@@ -22,9 +22,6 @@
   command: npm install -g ethereumjs-testrpc --unsafe-perm
   args:
     creates: /usr/lib/node_modules/ethereumjs-testrpc
-  when:
-    - is_development_environment
-    - ethereum_testrpc
 
 - lineinfile: line={{ ethereum_etherbase_password }} dest={{ project_dir}}/{{ role_name }}/password mode=700 state=present create=yes
   register: ethereum_password_file
