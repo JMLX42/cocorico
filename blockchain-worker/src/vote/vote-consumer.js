@@ -29,14 +29,16 @@ function getCompiledVoteContract(web3, callback) {
   );
 
   web3.eth.compile.solidity(source, (error, compiled) => {
-    if (!error) {
-      logger.info(
-        'compiled smart contract',
-        { md5Hash: md5(source) },
-      );
+    if (!!error) {
+      return callback(error, null);
     }
 
-    callback(error, !!compiled.Vote ? compiled.Vote : compiled);
+    logger.info(
+      'compiled smart contract',
+      { md5Hash: md5(source) },
+    );
+
+    callback(null, !!compiled.Vote ? compiled.Vote : compiled);
   });
 }
 
