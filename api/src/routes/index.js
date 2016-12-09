@@ -48,19 +48,21 @@ export default function(app) {
       }),
     ],
     bodyBlacklist: ['user'],
-    requestFilter: (req, propName) => {
-      if (propName === 'headers') {
-        if ('authorization' in req.headers) {
-          var authMethod = req.headers.authorization.split(' ')[0];
-          req.headers.authorization = (!!authMethod ? authMethod + ' ' : '')
-            + '*****';
+    requestFilter: config.environment !== 'production'
+      ? null
+      : (req, propName) => {
+        if (propName === 'headers') {
+          if ('authorization' in req.headers) {
+            var authMethod = req.headers.authorization.split(' ')[0];
+            req.headers.authorization = (!!authMethod ? authMethod + ' ' : '')
+              + '*****';
+          }
+
+          delete req.headers.referer;
         }
 
-        delete req.headers.referer;
-      }
-
-      return req[propName];
-    },
+        return req[propName];
+      },
     colorize: true,
   }));
   app.use(expressWinston.errorLogger({
