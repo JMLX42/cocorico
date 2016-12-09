@@ -59,8 +59,8 @@ supported_locales:
   en-US: English
   es-ES: Español
 
-nodejs_nodesource_repository: https://deb.nodesource.com/node_4.x
-nodejs_version: 4.*
+nodejs_nodesource_repository: https://deb.nodesource.com/node_6.x
+nodejs_version: 6.*
 
 sentry:
   public_key: b4f860a54da0436eab32838de28d6514
