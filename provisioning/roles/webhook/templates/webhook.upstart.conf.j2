@@ -10,12 +10,15 @@ stop on shutdown
 expect fork
 respawn
 
+env PM2_HOME=/root/.pm2
+env NODE_PATH=/usr/lib/node_modules
 env NODE_ENV={{ environment_name }}
-
 {% if is_development_environment %}
 env NODE_TLS_REJECT_UNAUTHORIZED=0
 {% endif %}
 
+setuid root
+setgid root
 chdir "/srv/cocorico/{{ role_name }}"
 
 pre-start script
@@ -23,17 +26,20 @@ pre-start script
 end script
 
 script
-    exec forever \
+    exec pm2 \
         start \
-        -a \
-        -o {{ log_dir }}/{{ role_name }}.log \
-        --pidFile /var/run/{{ project_name }}-{{ role_name }}.pid \
-        --sourceDir /srv/cocorico/{{ role_name }}/dist \
-        --workingDir /srv/cocorico/{{ role_name }}/dist \
-        index.js
+        {{ cocorico_local_dir }}/{{ role_name }}/dist/index.js \
+        --log {{ log_dir }}/{{ role_name }}.log \
+        --merge-logs \
+        --name "{{ role_name }}"
 end script
 
-pre-stop script
-    rm /var/run/{{ project_name }}-{{ role_name }}.pid
-    exec forever stop /srv/cocorico/{{ role_name }}/dist/index.js
+post-start script
+    PID=`pm2 jlist | jq '.[] | select(.name == "{{ role_name }}") | .pid'`
+    echo $PID > /var/run/{{ project_name }}-{{ role_name }}.pid
+end script
+
+post-stop script
+    exec pm2 stop "{{ role_name }}"
+    rm -f /var/run/{{ project_name }}-{{ role_name }}.pid
 end script

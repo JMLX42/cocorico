@@ -6,24 +6,36 @@ stop on stopped {{ project_name }}-{{ role_name }}
 expect fork
 respawn
 
+env PM2_HOME=/root/.pm2
+env NODE_PATH=/usr/lib/node_modules
 env NODE_ENV={{ environment_name }}
-
 {% if is_development_environment %}
 env NODE_TLS_REJECT_UNAUTHORIZED=0
 {% endif %}
 
-script
-    exec forever \
-        start \
-        -a \
-        -o {{ log_dir }}/{{ role_name }}-vote.log \
-        --pidFile /var/run/{{ project_name }}-{{ role_name }}-vote.pid \
-        --sourceDir /srv/cocorico/blockchain-worker/dist/vote \
-        --workingDir /srv/cocorico/blockchain-worker/dist/vote \
-        index.js
+setuid root
+setgid root
+chdir "{{ cocorico_local_dir }}/blockchain-worker"
+
+pre-start script
+    npm run build-vote
 end script
 
-pre-stop script
-    rm /var/run/{{ project_name }}-{{ role_name }}-vote.pid
-    exec forever stop /srv/cocorico/blockchain-worker/dist/vote/index.js
+script
+    exec pm2 \
+        start \
+        ./dist/vote/index.js \
+        --log {{ log_dir }}/{{ role_name }}-vote.log \
+        --merge-logs \
+        --name "{{ role_name }}-vote"
+end script
+
+post-start script
+    PID=`pm2 jlist | jq '.[] | select(.name == "{{ role_name }}-vote") | .pid'`
+    echo $PID > /var/run/{{ project_name }}-{{ role_name }}-vote.pid
+end script
+
+post-stop script
+    exec pm2 stop "{{ role_name }}-vote"
+    rm -f /var/run/{{ project_name }}-{{ role_name }}-vote.pid
 end script
