@@ -108,41 +108,41 @@ export async function post(req, res) {
         return res.status(403).send({error: 'user already voted'});
       }
 
-      try {
-        // Create and save the new ballot otherwise.
-        // From this point, subsequent request to this endpoint will return 403.
-        const newBallot = await vote.createBallot(req.user.sub).save();
+      // Create and save the new ballot otherwise.
+      // From this point, subsequent request to this endpoint will return 403.
+      const newBallot = await vote.createBallot(req.user.sub).save();
 
+      try {
+        // Push the ballot on the queue for the ballot service to handle.
         try {
-          // Push the ballot on the queue for the ballot service to handle.
           await pushBallotOnQueue({
             id: newBallot.id,
             app: vote.app,
             vote: {id: vote.id},
             user: {sub: req.user.sub},
-            status: newBallot.status, // queued
+            step: newBallot.step, // queued
             transaction: req.body.transaction,
             voteContractAddress: vote.voteContractAddress,
             voteContractABI: JSON.parse(vote.voteContractABI),
           });
+        } catch (pushOnQueueErr) {
+          return res.apiError('queue error', pushOnQueueErr);
+        }
 
-          // Update the ballot counter.
-          vote.numBallots += 1;
+        // Update the ballot counter.
+        vote.numBallots += 1;
 
-          try {
-            // Save the updated vote and return the ballot + the proof of vote.
-            await vote.save();
+        try {
+          // Save the updated vote and return the ballot + the proof of vote.
+          await vote.save();
 
             return res.apiResponse({
               ballot: newBallot,
               proof: vote.getProofOfVote(signedTx),
             });
 
-          } catch (voteSaveErr) {
-            return res.apiError('database error when saving Vote', voteSaveErr);
-          }
-        } catch (pushOnQueueErr) {
-          return res.apiError('queue error', pushOnQueueErr);
+        } catch (voteSaveErr) {
+          return res.apiError('database error when saving Vote', voteSaveErr);
         }
       } catch (newBallotErr) {
         return res.apiError('database error when saving Ballot', newBallotErr);

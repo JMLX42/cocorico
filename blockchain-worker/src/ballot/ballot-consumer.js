@@ -31,8 +31,8 @@ web3.setProvider(new web3.providers.HttpProvider(
   'http://127.0.0.1:8545'
 ));
 
-async function pushBackToQueueWithStatus(channel, ballot, status) {
-  await updateBallotStatus(ballot, status);
+async function pushBackToQueueWithStep(channel, ballot, step) {
+  await updateBallotStep(ballot, step);
 
   channel.sendToQueue(
     'ballots',
@@ -46,8 +46,15 @@ async function updateBallotStatus(ballot, status) {
   await updateDatabaseBallot(ballot, {status: status});
 
   logger.info('ballot status changed', {status: status});
+}
 
-  await webhook(ballot, status);
+async function updateBallotStep(ballot, step) {
+  ballot.step = step;
+  await updateDatabaseBallot(ballot, {step: step});
+
+  logger.info('ballot step changed', {step: step});
+
+  await webhook(ballot, step);
 }
 
 async function getDatabaseBallot(ballot) {
@@ -81,8 +88,8 @@ async function updateDatabaseBallot(ballot, data) {
   return await ballotRecord.save();
 }
 
-async function handlePendingBallot(ballot) {
-  logger.info('handling pending ballot');
+async function handleQueuedBallot(ballot) {
+  logger.info('handling queued ballot');
 
   ballot.registeringStartBlockNumber = await promise((cb)=>web3.eth.getBlockNumber(cb))();
 
@@ -228,7 +235,7 @@ async function handleCastingBallot(ballot) {
 async function handleMessage(channel, message) {
   const messageData = JSON.parse(message.content.toString());
 
-  logger.info('message received', {message: messageData});
+  logger.info('message received', {data: messageData});
 
   if (!isValidBallotMessage(messageData)) {
     logger.info('invalid ballot message: ignoring')
@@ -238,35 +245,31 @@ async function handleMessage(channel, message) {
 
   const ballot = messageData.ballot;
 
-  if (!ballot.status) {
-    ballot.status = 'queued';
+  if (!ballot.step) {
+    ballot.step = 'queued';
   }
 
   try {
-    switch (ballot.status) {
+    switch (ballot.step) {
       case 'queued':
-        logger.info('handling queued ballot');
-        await pushBackToQueueWithStatus(channel, ballot, 'pending');
-        channel.ack(message);
-        break;
-      case 'pending':
-        await handlePendingBallot(ballot);
-        await pushBackToQueueWithStatus(channel, ballot, 'registering');
+        await handleQueuedBallot(ballot);
+        await pushBackToQueueWithStep(channel, ballot, 'registering');
         channel.ack(message);
         break;
       case 'registering':
         await handleRegisteringBallot(ballot);
-        await pushBackToQueueWithStatus(channel, ballot, 'registered');
+        await pushBackToQueueWithStep(channel, ballot, 'registered');
         channel.ack(message);
         break;
       case 'registered':
         await handleRegisteredBallot(ballot);
-        await pushBackToQueueWithStatus(channel, ballot, 'casting');
+        await pushBackToQueueWithStep(channel, ballot, 'casting');
         channel.ack(message);
         break;
       case 'casting':
         await handleCastingBallot(ballot);
-        await updateBallotStatus(ballot, 'complete');
+        await updateBallotStep(ballot, 'complete');
+        await updateBallotStatus(ballot, 'success');
         channel.ack(message);
         break;
       case 'complete':
@@ -286,6 +289,7 @@ async function handleMessage(channel, message) {
     }
 
     await saveBallotError(ballot, errorMessage);
+    await updateBallotStatus(ballot, 'error');
 
     if (err.noRetry) {
       channel.ack(message);

@@ -14,17 +14,28 @@ const Ballot = new keystone.List('Ballot', {
 });
 
 Ballot.add({
-  status: {
+  vote: { type: Types.Relationship, ref: 'Vote', required: true, initial: true },
+  step: {
     type: Types.Select,
     options: [
       'queued',
-      'pending',
       'registering',
       'registered',
       'casting',
       'complete',
     ],
     default: 'queued',
+    required: true,
+    initial: true,
+  },
+  status: {
+    type: Types.Select,
+    options: [
+      'pending',
+      'success',
+      'error',
+    ],
+    default: 'pending',
     required: true,
     initial: true,
   },

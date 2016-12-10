@@ -66,6 +66,7 @@ Vote.schema.methods.userIsAuthorizedToVote = function(user) {
 
 Vote.schema.methods.createBallot = function(uid) {
   return Ballot.model({
+    vote: this,
     hash: bcrypt.hashSync(uid, this.salt),
   });
 }

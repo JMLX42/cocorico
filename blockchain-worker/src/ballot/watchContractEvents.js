@@ -30,7 +30,7 @@ export default function(errorEvents, events) {
       try {
         cleanup();
         if (!!err) return reject(err);
-        return reject({error:e.args.message});
+        return reject(noRetryError({error:e.args.message}));
       } catch (err2) {
         return reject(err2);
       }
