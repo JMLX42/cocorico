@@ -8,41 +8,16 @@ start on startup
 {% endif %}
 {% endif %}
 stop on shutdown
+stop on stopping {{ project_name }}-blockchain
 
 respawn
 respawn limit 10 5
 
-pre-start script
-    service {{ project_name }}-blockchain stop || true
+post-start script
+    sleep 10s
+    echo "web3.miner.start({{ ethereum_miner_threads }})" | geth attach ipc:/{{ ethereum_datadir }}/geth.ipc
 end script
 
-script
-    exec geth \
-{% if ethereum_max_peers is defined %}
-        --maxpeers {{ ethereum_max_peers }} \
-{% endif %}
-{% if ethereum_no_discover is defined and ethereum_no_discover %}
-        --nodiscover \
-{% endif %}
-        --rpc \
-        --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" \
-        --mine \
-{% if ethereum_miner_threads is defined and ethereum_miner_threads %}
-        --minerthreads {{ ethereum_miner_threads }} \
-{% else %}
-        --minerthreads 1 \
-{% endif %}
-{% if ethereum_etherbase_address is defined and ethereum_etherbase_address %}
-        --etherbase {{ ethereum_etherbase_address }} \
-{% endif %}
-{% if ethereum_network_id is defined and ethereum_network_id %}
-        --networkid "{{ ethereum_network_id }}" \
-{% endif %}
-{% if ethereum_target_gas_limit is defined and ethereum_target_gas_limit %}
-        --targetgaslimit "{{ ethereum_target_gas_limit }}" \
-{% endif %}
-        --unlock 0 \
-        --password {{ project_dir }}/{{ role_name }}/password \
-        --datadir {{ ethereum_datadir }} \
-        >>{{ log_dir }}/blockchain.log 2>&1
+post-stop script
+    echo "web3.miner.stop()" | geth attach ipc:/{{ ethereum_datadir }}/geth.ipc || true
 end script

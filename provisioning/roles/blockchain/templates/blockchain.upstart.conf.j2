@@ -8,13 +8,10 @@ start on startup
 {% endif %}
 {% endif %}
 stop on shutdown
+start on starting {{ project_name }}-blockchain-miner
 
 respawn
 respawn limit 10 5
-
-pre-start script
-    service {{ project_name }}-blockchain-miner stop || true
-end script
 
 script
     exec geth \
@@ -28,6 +25,9 @@ script
         --rpccorsdomain "http://{{ ethereum_rpc_private_host }}:{{ ethereum_rpc_private_port }}" \
 {% if ethereum_network_id is defined and ethereum_network_id %}
         --networkid "{{ ethereum_network_id }}" \
+{% endif %}
+{% if ethereum_target_gas_limit is defined and ethereum_target_gas_limit %}
+        --targetgaslimit "{{ ethereum_target_gas_limit }}" \
 {% endif %}
         --unlock 0 \
         --password {{ project_dir }}/{{ role_name }}/password \
