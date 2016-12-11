@@ -11,6 +11,7 @@ const Ballot = new keystone.List('Ballot', {
   nodelete: config.env !== 'development',
   nocreate: true,
   noedit: true,
+  defaultColumns: 'vote, status, step, createdAt, updatedAt',
 });
 
 Ballot.add({
@@ -47,5 +48,4 @@ transform.toJSON(Ballot, (ballot) => {
   delete ballot.hash;
 });
 
-Ballot.defaultColumns = 'status, hash, createdAt, updatedAt';
 Ballot.register();

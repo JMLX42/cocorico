@@ -108,6 +108,15 @@ export async function post(req, res) {
         return res.status(403).send({error: 'user already voted'});
       }
 
+      var proofOfVote = null;
+      try {
+        // The call to getProofOfVote() will fail if we can't read the expected
+        // transaction parameters (ie uint8[numProposals]).
+        proofOfVote = vote.getProofOfVote(signedTx);
+      } catch (proofOfVoteErr) {
+        return res.status(300).send({error: 'invalid transaction'});
+      }
+
       // Create and save the new ballot otherwise.
       // From this point, subsequent request to this endpoint will return 403.
       const newBallot = await vote.createBallot(req.user.sub).save();
@@ -136,10 +145,10 @@ export async function post(req, res) {
           // Save the updated vote and return the ballot + the proof of vote.
           await vote.save();
 
-            return res.apiResponse({
-              ballot: newBallot,
-              proof: vote.getProofOfVote(signedTx),
-            });
+          return res.apiResponse({
+            ballot: newBallot,
+            proof: proofOfVote,
+          });
 
         } catch (voteSaveErr) {
           return res.apiError('database error when saving Vote', voteSaveErr);
@@ -333,6 +342,10 @@ export async function getTransactions(req, res) {
           );
 
           result = await promise((cb)=>ballotEvent.get(cb))();
+          // convert the ballot values to actual uints
+          for (var r of result) {
+            r.args.ballot = r.args.ballot.map((v) => ~~v.toNumber());
+          }
           cache.set(key2, result);
         } catch (atErr) {
           return res.apiError('blockchain error', atErr);

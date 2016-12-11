@@ -25,8 +25,8 @@
   "scripts": {
     "build-ballot": "babel src/ballot --out-dir dist/ballot --source-maps inline",
     "build-vote": "babel src/vote --out-dir dist/vote --source-maps inline",
-    "vote": "service cocorico-blockchain-worker-vote stop ; nodemon -w src -d 5  --exec 'npm run build-vote && nodejs ./dist/vote/index.js'",
-    "ballot": "service cocorico-blockchain-worker-ballot stop ; nodemon -w src -d 5  --exec 'npm run build-ballot && nodejs ./dist/ballot/index.js'",
+    "vote": "service cocorico-blockchain-worker-vote stop ; nodemon -w src/vote -d 5  --exec 'npm run build-vote && nodejs ./dist/vote/index.js'",
+    "ballot": "service cocorico-blockchain-worker-ballot stop ; nodemon -w src/ballot -d 5  --exec 'npm run build-ballot && nodejs ./dist/ballot/index.js'",
     "test": "eslint src"
   },
   "devDependencies": {

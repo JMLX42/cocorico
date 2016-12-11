@@ -172,7 +172,8 @@ export default function(app) {
    * @apiParam (POST) {Boolean} url The URL of the original vote content page.
    * @apiParam (POST) {Boolean} restricted (Optionnal) Restrict the vote to
    * the users provided by the app. Default value is `false`.
-   * @apiParam (POST) {String[]} labels (Optionnal) The vote proposal labels.
+   * @apiParam (POST) {String[]} proposals (Optionnal) The vote proposals.
+   * @apiParam (POST) {String[]} choices (Optionnal) The choices for each proposal.
    * @apiParam (POST) {String} title (Optionnal) The title of the vote. If missing,
    * the value is read from the vote's URL `og:title` OpenGraph tag.
    * @apiParam (POST) {String} image (Optionnal) The URL of the image of the vote. If missing,
@@ -180,7 +181,6 @@ export default function(app) {
    * @apiParam (POST) {String} description (Optionnal) The description of the
    * vote. If missing, the value is read from the vote's URL `og:description` OpenGraph
    * tag.
-   * @apiParam (POST) {String[]} labels (Optionnal) The ballot value labels.
    * @apiParam (POST) {String} question (Optionnal) The question that will be asked
    * to the voter.
    *
@@ -202,7 +202,8 @@ export default function(app) {
    * @apiSuccess {String} vote.status The status of the vote.
    * @apiSuccess {Object[]} vote.voteContractABI The ABI of the vote blockchain smart contract.
    * @apiSuccess {String} vote.voteContractAddress The blockchain block address of the vote smart contract.
-   * @apiSuccess {String} vote.labels The ballot value labels.
+   * @apiSuccess {String[]} vote.proposals The vote proposals.
+   * @apiSuccess {String[]} vote.choices The choices for each proposal.
    * @apiSuccess {String} vote.question The question that will be asked
    * to the voter.
    */
@@ -229,7 +230,8 @@ export default function(app) {
    * @apiSuccess {String} votes.status The status of the vote.
    * @apiSuccess {Object[]} votes.voteContractABI The ABI of the vote blockchain smart contract.
    * @apiSuccess {String} votes.voteContractAddress The blockchain block address of the vote smart contract.
-   * @apiSuccess {String} vote.labels The ballot value labels.
+   * @apiSuccess {String[]} vote.proposals The vote proposals.
+   * @apiSuccess {String[]} vote.choices The choices for each proposal.
    * @apiSuccess {String} vote.question The question that will be asked
    * to the voter.
    */
@@ -258,7 +260,8 @@ export default function(app) {
    * @apiSuccess {String} vote.status The status of the vote.
    * @apiSuccess {Object[]} vote.voteContractABI The ABI of the vote blockchain smart contract.
    * @apiSuccess {String} vote.voteContractAddress The blockchain block address of the vote smart contract.
-   * @apiSuccess {String} vote.labels The ballot value labels.
+   * @apiSuccess {String[]} vote.proposals The vote proposals.
+   * @apiSuccess {String[]} vote.choices The choices for each proposal.
    * @apiSuccess {String} vote.question The question that will be asked
    * to the voter.
    */

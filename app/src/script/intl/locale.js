@@ -24,16 +24,16 @@ module.exports = {
       .split(/[\?&]/)
       .filter((e) => !!e)
       .map((e) => e.split('='))
-      .map(e => e[0] === 'lang' ? e[1] : false)
+      .map(e => e[0] === 'locale' ? e[1] : false)
       .filter(e => !!e)[0];
 
-    // if the locale was explicitely set using ?lang=
+    // if the locale was explicitely set using ?locale=
     if (!!locale) {
       // we save it for later
-      cookie.set('lang', locale);
+      cookie.set('locale', locale);
     } else {
       // we try to read the saved one
-      locale = cookie.get('lang');
+      locale = cookie.get('locale');
 
       if (!locale) {
         // finally, we read it from the navigator object

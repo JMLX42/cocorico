@@ -42,7 +42,7 @@
       "CANCEL_MY_VOTE": "Cancel my vote",
       "IGNORE": "Ignore",
       "NOT_RECOMMENDED": "not recommended",
-      "WARNING_FETCH_VOTE_CARD": "<h3>Attention : read carefully !</h3><p>If you do not fetch your new vote card now, it will be completely impossible to get it back later. <strong>Impossible. For anyone. Forever.</strong>",
+      "WARNING_FETCH_VOTE_CARD": "<h3>Attention: read carefully !</h3><p>If you do not fetch your new vote card now, it will be completely impossible to get it back later. <strong>Impossible. For anyone. Forever.</strong>",
       "STEP_TITLE": "Step { step }/{ total } : { title }",
 
       "STEP_0_NAME": "ID",
@@ -53,7 +53,7 @@
       "DENY_VOTER_ID": "No, it's not me",
 
       "STEP_1_NAME": "Ballot",
-      "I_VOTE": "I vote \"{ value }\"",
+      "I_VOTE": "I vote { value }",
       "VOTE_YES": "for",
       "VOTE_BLANK": "blank",
       "VOTE_NO": "against",
@@ -68,16 +68,18 @@
       "PRINT_VOTER_CARD": "Print my vote card",
       "CREATING_NEW_VOTE_CARD": "Creating a new vote card...",
       "USE_EXISTING_VOTE_CARD": "Providing an existing vote card",
+      "DEFAULT_BALLOT_VALUE_SELECT_OPTION": "Select a mention",
 
       "STEP_3_NAME": "Confirmation",
       "STEP_3_WARNING": "<h3>Attention: no come back beyond this point!</h3><p>After confirming your vote, it will be sent away to be recorded and it will be impossible to cancel/modify it. <strong>Impossible. For anyone. Forever.</strong></p>",
-      "I_CONFIRM_MY_VOTE": "I confirm : ",
-      "CONFIRM_VOTE_MESSAGE": "You are about to vote \"{ value }\" about { vote }. Do you confirm your vote?",
+      "I_CONFIRM_MY_VOTE": "I confirm: ",
+      "CONFIRM_VOTE_MESSAGE": "You are about to vote about <strong>{ vote }</strong>. Do you confirm your vote?",
       "PENDING_BALLOT_TRANSACTION": "Sending your vote...",
+      "PROPOSAL_VALUE": "For <strong>{proposal}</strong>, I vote \"{ value }\".",
 
       "STEP_4_NAME": "Voted!",
       "STEP_4_HINT": "<h3>Recording your vote</h3><p>Each vote is permanently and anonymously written in a database stored by citizens like you. This way, each of them can recounted without knowing who votes what.</p><p>This process guarantees the vote results are reliable, but it's not immediate and can take a few minutes.</p>",
-      "YOUR_VOTE_IS_COMPLETE": "Your vote \"{ value }\" about { vote } has been sent!",
+      "YOUR_VOTE_IS_COMPLETE": "Your vote about { vote } has been sent!",
       "DOWNLOAD_PROOF_OF_VOTE" : "Download my proof of vote",
       "PRINT_PROOF_OF_VOTE" : "Print my proof of vote"
     },

@@ -713,6 +713,20 @@ ul.argument-list {
     }
   }
 
+  .form-control {
+    height: 34px;
+    padding: 0 12px;
+  }
+
+  .form-horizontal .form-group {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .control-label {
+    padding-top: 7px;
+    width: 100%;
+  }
 
   &-error {
     .progress-bar {
@@ -938,14 +952,17 @@ ul.source-list {
 
       td.truncate {
         max-width:1px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        -ms-text-overflow: ellipsis;
-        -o-text-overflow: ellipsis;
       }
     }
   }
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -ms-text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
 }
 
 .modal-footer {

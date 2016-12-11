@@ -25,6 +25,7 @@ const Vote = new keystone.List('Vote', {
   noedit: config.env !== 'development',
   nocreate: config.env !== 'development',
   nodelete: config.env !== 'development',
+  defaultColumns: 'title, url, status, voteContractAddress, createdAt',
 });
 
 Vote.add({
@@ -38,10 +39,11 @@ Vote.add({
     options: ['initializing', 'open', 'complete', 'error'],
   },
   voteContractAddress: { type: Types.Text, noedit: true },
-  voteContractABI: { type: Types.Text, noedit: true },
+  voteContractABI: { type: Types.Textarea, noedit: true },
   restricted: { type: Types.Boolean, default: false },
-  labels: { type: Types.TextArray },
-  question: { type: Types.Text },
+  question: { type: Types.Text, initial: true },
+  proposals: { type: Types.TextArray, initial: true },
+  choices: { type: Types.TextArray, initial: true },
   salt: { type: Types.Text, noedit: true, default: () => bcrypt.genSaltSync(10) },
   key: { type: Types.Key, noedit: true, default: () => srs(32).toLowerCase() },
   numBallots: { type: Types.Number, default: 0 },
@@ -49,6 +51,7 @@ Vote.add({
   numInvalidBallots: { type: Types.Number, default: 0 },
 });
 
+Vote.relationship({ path: 'ballots', ref: 'Ballot', refPath: 'vote' });
 Vote.relationship({ path: 'sources', ref: 'Source', refPath: 'vote' });
 Vote.relationship({ path: 'verified ballots', ref: 'VerifiedBallot', refPath: 'vote' });
 
@@ -111,7 +114,8 @@ async function pushVoteOnQueue(vote) {
 
   const voteMsg = {vote : {
     id: vote.id,
-    numProposals: vote.labels.length === 0 ? 3 : vote.labels.length,
+    numProposals: vote.proposals.length === 0 ? 1 : vote.proposals.length,
+    numChoices: vote.choices.length === 0 ? 3 : vote.choices.length,
   }};
 
   ch.sendToQueue(
@@ -129,7 +133,7 @@ Vote.schema.pre('validate', async function(next) {
   }
 
   if (self.isModified('status') && self.status === 'complete') {
-    return await closeVoteContract(self);
+    await closeVoteContract(self);
   }
 
   const updateTitle = (self.isModified('url') || !self.isModified('title'))
@@ -195,11 +199,21 @@ function getTypesFromAbi(abi, functionName) {
 }
 
 Vote.schema.methods.getProofOfVote = function(tx) {
+  const numProposals = Math.max(1, this.proposals.length);
   const params = SolidityCoder.decodeParams(
     getTypesFromAbi(JSON.parse(this.voteContractABI), 'vote'),
-    // the parameter value is in the last byte of the tx data
-    tx.data.slice(tx.data.length - 1).toString('hex')
+    // The parameter values are in the last byte of the tx data.
+    // We need to read an uint8 array so we slice the last n bytes.
+    // The array is also prefixed with its size and type, so we have to take 2
+    // more bytes.
+    tx.data.slice(tx.data.length - (numProposals + 2) * 32).toString('hex')
   );
+
+  if (params.length === 0 || params[0].length !== numProposals) {
+    throw new Error('invalid transaction parameters');
+  }
+
+  const ballotValues = params[0].map((v, k) => ~~v.toNumber());
 
   // We intend to embed this in a QR code. The lighter the JSON, the lighter the
   // QR code. And the lighter the QR code, the easier it is to read.
@@ -208,7 +222,7 @@ Vote.schema.methods.getProofOfVote = function(tx) {
       v: 1.0, // version
       a: tx.from.toString('hex'), // address
       c: tx.to.toString('hex'), // contract
-      p: ~~params[0].toNumber(), // proposal
+      p: ballotValues, // ballot values
       t: Date.now(), // date
     },
     this.key,
@@ -223,5 +237,4 @@ transform.toJSON(Vote, (vote) => {
   delete vote.key;
 });
 
-Vote.defaultColumns = 'title, url, status, voteContractAddress, createdAt';
 Vote.register();

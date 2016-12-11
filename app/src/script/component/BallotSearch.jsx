@@ -143,7 +143,7 @@ module.exports = React.createClass({
   },
 
   getColors: function(vote) {
-    return !!vote.labels.length
+    return !!vote.proposals && !!vote.proposals.length
       ? [
         '#0074D9',
         '#FF851B',
@@ -210,21 +210,23 @@ module.exports = React.createClass({
 
   getVoteValueDisplayMessage: function(id) {
     var vote = this.props.vote;
-    var labels = (!!vote.labels && vote.labels.length !== 0)
-      ? vote.labels
+    var proposals = (!!vote.proposals && vote.proposals.length !== 0)
+      ? vote.proposals
       : [
         this.getIntlMessage('vote.VOTE_YES'),
         this.getIntlMessage('vote.VOTE_BLANK'),
         this.getIntlMessage('vote.VOTE_NO'),
       ];
 
-    return labels[id];
+    return proposals[id];
   },
 
   renderTransactionTable: function() {
-    var vote = this.props.vote;
-    var colors = this.getColors(vote);
-    var transactions = this.state.transactions.getByVoteId(
+    const vote = this.props.vote;
+    const hasProposals = (!!vote.proposals && vote.proposals.length !== 0);
+    const hasChoices = (!!vote.choices && vote.choices.length !== 0);
+    const colors = this.getColors(vote);
+    const transactions = this.state.transactions.getByVoteId(
       vote.id,
       this.state.page
     );
@@ -256,13 +258,15 @@ module.exports = React.createClass({
                     <td className="truncate">{tx.transactionHash}</td>
                     <td className="truncate">{tx.args.voter}</td>
                     <td className="truncate">
-                      <span className={classNames({
-                        'label': true,
-                      })} style={{
-                        backgroundColor: colors[parseInt(tx.args.proposal)],
-                      }}>
-                        <Title text={this.getVoteValueDisplayMessage(tx.args.proposal)}/>
-                      </span>
+                      {!hasChoices
+                        ? <span className={classNames({
+                          'label': true,
+                          })} style={{
+                            backgroundColor: colors[parseInt(tx.args.proposal)],
+                          }}>
+                            <Title text={this.getVoteValueDisplayMessage(tx.args.proposal)}/>
+                        </span>
+                        : null}
                     </td>
                   </tr>
                 );

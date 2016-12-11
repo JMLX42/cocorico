@@ -33,16 +33,21 @@ function getCompiledVoteContract(web3, callback) {
       return callback(error, null);
     }
 
+    compiled = !!compiled.Vote ? compiled.Vote : compiled;
+
     logger.info(
       'compiled smart contract',
-      { md5Hash: md5(source) },
+      {
+        md5Hash: md5(source),
+        abi: compiled.info.abiDefinition,
+      },
     );
 
-    callback(null, !!compiled.Vote ? compiled.Vote : compiled);
+    callback(null, compiled);
   });
 }
 
-function mineVoteContract(numProposals, next) {
+function mineVoteContract(numProposals, numChoices, next) {
   var hash = '';
   var web3 = new Web3();
 
@@ -66,11 +71,12 @@ function mineVoteContract(numProposals, next) {
         );
 
         web3.eth.contract(abi).new(
-          numProposals, // num proposals
+          numProposals,
+          numChoices,
           {
             from: accounts[0],
             data: code,
-            gas: 999999,
+            gas: '0x8FCF80',
           },
           (error, contract) => {
             if (error) {
@@ -103,7 +109,10 @@ function mineVoteContract(numProposals, next) {
 }
 
 function handleVote(voteMsg, callback) {
-  mineVoteContract(voteMsg.numProposals, (err, contract, abi) => {
+  mineVoteContract(
+    voteMsg.numProposals,
+    voteMsg.numChoices,
+    (err, contract, abi) => {
     if (err) {
       callback(err, null);
       return;

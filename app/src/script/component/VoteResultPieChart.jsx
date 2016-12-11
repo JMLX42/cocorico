@@ -7,12 +7,20 @@ var StringHelper = require('../helper/StringHelper');
 
 var VoteStore = require('../store/VoteStore');
 
+var VoteAction = require('../action/VoteAction');
+
+var LoadingIndicator = require('./LoadingIndicator');
+
 var VoteResultPieChart = React.createClass({
 
   mixins: [
     ReactIntl.IntlMixin,
     Reflux.connect(VoteStore, 'votes'),
   ],
+
+  componentWillMount: function() {
+    VoteAction.showResults(this.props.vote.id);
+  },
 
   getColors: function(vote) {
     return !!vote.labels.length
@@ -43,7 +51,9 @@ var VoteResultPieChart = React.createClass({
     var data = this.state.votes.getVoteResultByVoteId(vote.id);
 
     if (!data) {
-      return null;
+      return (
+        <LoadingIndicator/>
+      );
     }
 
     var labels = !!vote.labels.length

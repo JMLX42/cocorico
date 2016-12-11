@@ -57,7 +57,7 @@
       "DENY_VOTER_ID": "Non, ça n'est pas moi",
 
       "STEP_1_NAME": "Bulletin de Vote",
-      "I_VOTE": "je vote \"{ value }\"",
+      "I_VOTE": "je vote { value }",
       "VOTE_YES": "pour",
       "VOTE_BLANK": "blanc",
       "VOTE_NO": "contre",
@@ -72,16 +72,18 @@
       "PRINT_VOTER_CARD": "Imprimer ma carte de vote",
       "CREATING_NEW_VOTE_CARD": "Création d'une nouvelle carte de vote en cours...",
       "USE_EXISTING_VOTE_CARD": "Utiliser une carte de vote existante",
+      "DEFAULT_BALLOT_VALUE_SELECT_OPTION": "Sélectionnez une mention",
 
       "STEP_3_NAME": "Confirmation",
       "STEP_3_WARNING": "<h3>Attention : impossible de revenir en arrière !</h3><p>Après avoir confirmé votre vote, ce dernier sera envoyé pour être enregistré et sera impossible à modifier/annuler. <strong>Impossible. Pour quiconque. Pour toujours.</strong></p>",
       "I_CONFIRM_MY_VOTE": "je confirme : ",
-      "CONFIRM_VOTE_MESSAGE": "Vous êtes sur le point de voter \"{ value }\" au sujet de { vote }. Confirmez-vous votre choix ?",
+      "CONFIRM_VOTE_MESSAGE": "Vous êtes sur le point de voter au sujet de <strong>{ vote }</strong>. Confirmez-vous votre choix ?",
       "PENDING_BALLOT_TRANSACTION": "Envoi de votre bulletin de vote en cours...",
+      "PROPOSAL_VALUE": "Pour <strong>{proposal}</strong>, je vote \"{ value }\".",
 
       "STEP_4_NAME": "A voté !",
       "STEP_4_HINT": "<h3>Enregistrement Du Vote</h3><p>Chaque vote est enregistré de façon indélébile et anonyme dans une base de données hébergée par chaque citoyen. Ils peuvent ainsi être recomptés en toute transparence sans jamais divulguer qui vote quoi.</p><p>Ce processus d'écriture indélébile est le garant de la sécurité du vote, mais il n'est pas immédiat et peut prendre jusqu'à quelques minutes.</p>",
-      "YOUR_VOTE_IS_COMPLETE": "<p>Votre vote \"{ value }\" au sujet de { vote } a bien été envoyé !<p><p>Vous pouvez récupérer votre \"preuve de vote\" : une fois le vote terminé, cette dernière vous permettra de vérifier que votre bulletin est bien dans l'urne numérique. Vous pouvez l'imprimer, la télécharger ou les deux :",
+      "YOUR_VOTE_IS_COMPLETE": "<p>Votre vote au sujet de { vote } a bien été envoyé !<p><p>Vous pouvez récupérer votre \"preuve de vote\" : une fois le vote terminé, cette dernière vous permettra de vérifier que votre bulletin est bien dans l'urne numérique. Vous pouvez l'imprimer, la télécharger ou les deux :",
       "DOWNLOAD_PROOF_OF_VOTE" : "Télécharger ma preuve de vote",
       "PRINT_PROOF_OF_VOTE" : "Imprimer ma preuve de vote"
     },

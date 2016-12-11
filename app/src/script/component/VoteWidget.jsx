@@ -25,8 +25,9 @@ var LoadingIndicator = require('./LoadingIndicator'),
   Title = require('./Title'),
   Icon = require('./Icon'),
   SVGDownloadButton = require('./SVGDownloadButton'),
-  VoteButtonBar = require('./VoteButtonBar'),
-  VoteRadioButtons = require('./VoteRadioButtons'),
+  BallotValueButtonBar = require('./BallotValueButtonBar'),
+  BallotValueRadioButtons = require('./BallotValueRadioButtons'),
+  BallotValueSelect = require('./BallotValueSelect'),
   LoginPage = require('../page/Login'),
   SVGImage = require('./SVGImage'),
   PrintButton = require('./PrintButton');
@@ -118,14 +119,7 @@ var VoteWidget = React.createClass({
       // return;
     // }
 
-    var completeStatus = [
-      'queued',
-      'pending',
-      'initialized', 'initializing',
-      'registering', 'registered',
-      'complete',
-    ];
-    if (completeStatus.indexOf(ballot.status) >= 0) {
+    if (!!ballot.status) {
       BallotAction.stopPolling();
       this.goToStep(VoteWidget.STEP_COMPLETE);
     }
@@ -134,7 +128,7 @@ var VoteWidget = React.createClass({
   voteStoreChanged: function(votes) {
     var vote = votes.getById(this.props.voteId);
 
-    if (!!vote) {
+    if (vote !== this.state.vote) {
       this.setState({vote: vote});
       this.userStoreChanged();
     }
@@ -146,12 +140,14 @@ var VoteWidget = React.createClass({
 
   userStoreChanged: function() {
     var user = this.state.users.getCurrentUser();
-    if (!!user) {
-      VoteAction.getPermissions(this.props.voteId);
 
-      if (this.userIsAuthorizedToVote()) {
-        BallotAction.startPolling(this.props.voteId);
-      }
+    if (user != this.state.user) {
+      this.setState({user: user});
+      VoteAction.getPermissions(this.props.voteId);
+    }
+
+    if (!!user && this.userIsAuthorizedToVote()) {
+      BallotAction.startPolling(this.props.voteId);
     } else {
       BallotAction.stopPolling(this.props.voteId);
     }
@@ -165,7 +161,7 @@ var VoteWidget = React.createClass({
     }
     // FIXME: handle this.props.voteSlug ?
 
-    this.userStoreChanged(this.users);
+    this.userStoreChanged();
     this.checkBallot();
   },
 
@@ -357,57 +353,73 @@ var VoteWidget = React.createClass({
     );
   },
 
-  getVoteValueDisplayMessage: function() {
-    var vote = this.state.vote;
-
-    var labels = (!!vote.labels && vote.labels.length !== 0)
-      ? vote.labels
+  renderBallotValue: function() {
+    const vote = this.state.vote;
+    const hasProposals = (!!vote.proposals && vote.proposals.length !== 0);
+    const hasChoices = (!!vote.choices && vote.choices.length !== 0);
+    const values = hasProposals
+      ? hasChoices
+        ? vote.choices
+        : vote.proposals
       : [
         this.getIntlMessage('vote.VOTE_YES'),
         this.getIntlMessage('vote.VOTE_BLANK'),
         this.getIntlMessage('vote.VOTE_NO'),
       ];
 
-    return labels[this.state.ballotValue];
+    if (hasProposals && hasChoices) {
+      return (
+        <ul>
+          {vote.proposals.map((proposal, k) =>
+            <li>
+              <FormattedHTMLMessage
+                message={this.getIntlMessage('vote.PROPOSAL_VALUE')}
+                proposal={<Title text={proposal}/>}
+                value={<Title text={values[this.state.ballotValue[k]]}/>}/>
+            </li>
+          )}
+        </ul>
+      );
+    }
+
+    return values[this.state.ballotValue[0]];
   },
 
-  getVoteValueMessageClassNames: function() {
-    var vote = this.state.vote;
-    var hasLabels = (!!vote.labels && vote.labels.length !== 0);
+  getBallotValueClassNames: function() {
+    const vote = this.state.vote;
+    const hasProposals = (!!vote.proposals && vote.proposals.length !== 0);
+    const hasChoices = (!!vote.choices && vote.choices.length !== 0);
 
     return {
-      'positive': !hasLabels && this.state.ballotValue === 0,
-      'neutral': !hasLabels && this.state.ballotValue === 1,
-      'negative': !hasLabels && this.state.ballotValue === 2,
+      'positive': !hasProposals && !hasChoices && this.state.ballotValue[0] === 0,
+      'neutral': !hasProposals && !hasChoices && this.state.ballotValue[0] === 1,
+      'negative': !hasProposals && !hasChoices && this.state.ballotValue[0] === 2,
     };
   },
 
-  getVoteValueButtonClassNames: function() {
-    var vote = this.state.vote;
-    var hasLabels = (!!vote.labels && vote.labels.length !== 0);
+  getBallotValueButtonClassNames: function() {
+    const vote = this.state.vote;
+    const hasProposals = (!!vote.proposals && vote.proposals.length !== 0);
+    const hasChoices = (!!vote.choices && vote.choices.length !== 0);
 
     return {
-      'btn-positive': !hasLabels && this.state.ballotValue === 0,
-      'btn-neutral': !hasLabels && this.state.ballotValue === 1,
-      'btn-negative': !hasLabels && this.state.ballotValue === 2,
-      'btn-primary': hasLabels,
+      'btn-positive': !hasProposals && !hasChoices && this.state.ballotValue === 0,
+      'btn-neutral': !hasProposals && !hasChoices && this.state.ballotValue === 1,
+      'btn-negative': !hasProposals && !hasChoices && this.state.ballotValue === 2,
+      'btn-primary': hasProposals || hasChoices,
       'btn-vote': true,
     };
   },
 
   renderSVGDownloadButton: function(className) {
-    var data = this.state.ballots.getProofOfVoteSVGByVoteId(this.props.voteId);
-    var vote = this.state.vote;
+    const data = this.state.ballots.getProofOfVoteSVGByVoteId(this.props.voteId);
+    const vote = this.state.vote;
 
-    // var ballot = this.state.ballots.getByVoteId(this.props.voteId);
-    // var date = new Date(ballot.time);
-    var date = new Date();
-    var filename = 'cocorico_' + vote.title
+    const date = new Date();
+    const filename = ('cocorico_' + vote.title
       + '_' + date.toLocaleDateString()
       + '_' + date.toLocaleTimeString()
-      + '.svg';
-
-    filename = filename
+      + '.svg')
       .toLowerCase()
       .replace(/ /g, '_')
       .replace(/[:\/]/g, '');
@@ -433,7 +445,9 @@ var VoteWidget = React.createClass({
   },
 
   renderVoteDialog: function() {
-    var vote = this.state.vote;
+    const vote = this.state.vote;
+    const hasProposals = (!!vote.proposals && vote.proposals.length !== 0);
+    const hasChoices = (!!vote.choices && vote.choices.length !== 0);
 
     return (
       <Grid>
@@ -444,9 +458,11 @@ var VoteWidget = React.createClass({
                 ? <p>{vote.question}</p>
                 : null}
               <div className="vote-step-actions">
-              {!!vote.labels && vote.labels.length !== 0
-                ? <VoteRadioButtons vote={vote} onVote={this.voteHandler}/>
-                : <VoteButtonBar vote={vote} onVote={this.voteHandler}/>}
+              {hasProposals
+                ? hasChoices
+                  ? <BallotValueSelect vote={vote} onVote={this.voteHandler}/>
+                  : <BallotValueRadioButtons vote={vote} onVote={this.voteHandler}/>
+                : <BallotValueButtonBar vote={vote} onVote={this.voteHandler}/>}
               </div>
             </div>
           </Col>
@@ -456,7 +472,7 @@ var VoteWidget = React.createClass({
   },
 
   userIsAuthorizedToVote: function() {
-    var vote = this.state.vote;
+    const vote = this.state.vote;
 
     return !!vote && !!vote.permissions && vote.permissions.vote;
   },
@@ -465,7 +481,7 @@ var VoteWidget = React.createClass({
     if (!this.state.users.isAuthenticated())
       return this.renderLoginDialog();
 
-    var user = this.state.users.getCurrentUser();
+    const user = this.state.users.getCurrentUser();
 
     return (
       <Grid>
@@ -503,29 +519,30 @@ var VoteWidget = React.createClass({
   },
 
   renderConfirmVoteButton: function() {
+    const vote = this.state.vote;
+    const hasChoices = (!!vote.choices && vote.choices.length !== 0);
+    const message = this.getIntlMessage('vote.I_CONFIRM_MY_VOTE')
+      + this.getIntlMessage('vote.I_VOTE');
+    const value = !hasChoices ? this.renderBallotValue() : null;
+
     return (
-      <Button className={classNames(this.getVoteValueButtonClassNames())}
+      <Button className={classNames(this.getBallotValueButtonClassNames())}
         disabled={!this.state.confirmVoteButtonEnabled}
         onClick={(e)=>this.confirmVoteValue()}>
           <Countdown count={VoteWidget.COUNTDOWN}
             format={(c) => c === 0
-              ? <FormattedMessage
-                message={this.getIntlMessage('vote.I_CONFIRM_MY_VOTE')
-                  + this.getIntlMessage('vote.I_VOTE')}
-                value={this.getVoteValueDisplayMessage()}/>
-              : <FormattedMessage
-                message={this.getIntlMessage('vote.I_CONFIRM_MY_VOTE')
-                  + this.getIntlMessage('vote.I_VOTE') + ' ('
-                  + c + ')'}
-                value={this.getVoteValueDisplayMessage()}/>}
-            onComplete={()=>this.setState({confirmVoteButtonEnabled : true})}/>
+              ? <FormattedHTMLMessage message={message} value={value}/>
+              : <FormattedHTMLMessage message={message + ' (' + c + ')'} value={value}/>}
+            onComplete={()=>this.setState({confirmVoteButtonEnabled: true})}/>
       </Button>
     );
   },
 
   renderConfirmDialog: function() {
-    var vote = this.state.vote;
-    var address = this.state.blockchainAccounts.getAddressByVoteId(
+    const vote = this.state.vote;
+    const hasProposals = (!!vote.proposals && vote.proposals.length !== 0);
+    const hasChoices = (!!vote.choices && vote.choices.length !== 0);
+    const address = this.state.blockchainAccounts.getAddressByVoteId(
       this.props.voteId
     );
 
@@ -534,21 +551,13 @@ var VoteWidget = React.createClass({
         <Row className="vote-step-description">
           <Col xs={12}>
             <p>
-              <FormattedMessage
+              <FormattedHTMLMessage
                 message={this.getIntlMessage('vote.CONFIRM_VOTE_MESSAGE')}
-                value={
-                  <strong>
-                    <span className={this.getVoteValueMessageClassNames()}>
-                    {this.getVoteValueDisplayMessage()}
-                    </span>
-                  </strong>
-                }
-                vote={
-                  <strong>
-                    <Title text={vote.title}/>
-                  </strong>
-                }/>
+                vote={<Title text={vote.title}/>}/>
             </p>
+            {hasProposals && hasChoices
+              ? this.renderBallotValue()
+              : null}
           </Col>
         </Row>
         <Row>
@@ -578,10 +587,10 @@ var VoteWidget = React.createClass({
   },
 
   renderVoteCompleteDialog: function() {
-    var proofOfVoteSVG = this.state.ballots.getProofOfVoteSVGByVoteId(
+    const proofOfVoteSVG = this.state.ballots.getProofOfVoteSVGByVoteId(
       this.props.voteId
     );
-    var ballot = this.state.ballots.getByVoteId(this.props.voteId);
+    const ballot = this.state.ballots.getByVoteId(this.props.voteId);
 
     // If there is a ballot record but the ballotValue state has not
     // been set, it means the ballot has been fetched from the API and the user
@@ -609,8 +618,8 @@ var VoteWidget = React.createClass({
               message={this.getIntlMessage('vote.YOUR_VOTE_IS_COMPLETE')}
               value={
                 <strong>
-                  <span className={classNames(this.getVoteValueMessageClassNames())}>
-                    {this.getVoteValueDisplayMessage()}
+                  <span className={classNames(this.getBallotValueClassNames())}>
+                    {this.renderBallotValue()}
                   </span>
                 </strong>
               }
@@ -716,7 +725,7 @@ var VoteWidget = React.createClass({
   },
 
   render: function() {
-    var vote = this.state.vote;
+    const vote = this.state.vote;
 
     if (!vote || !vote.createdAt || !vote.permissions) {
       return (

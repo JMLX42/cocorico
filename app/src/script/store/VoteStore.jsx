@@ -88,7 +88,7 @@ module.exports = Reflux.createStore({
     jquery.get(
       endpoint + voteId,
       (data) => {
-        collection[voteId] = data.result;
+        collection[voteId] = data.results;
         this.trigger(this);
       }
     ).error((xhr, voteStatus, err) => {

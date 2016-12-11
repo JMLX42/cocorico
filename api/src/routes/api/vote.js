@@ -59,14 +59,25 @@ export async function create(req, res) {
 
   const app = req.user;
   const url = decodeURIComponent(req.body.url);
-  var labels = [];
 
-  if (req.body.labels) {
+  var proposals = [];
+  if (req.body.proposals) {
     try {
-      labels = JSON.parse(req.body.labels);
+      proposals = JSON.parse(req.body.proposals);
     } catch (e) {
       return res.status(400).send({
-        error: 'invalid labels with error \'' + e.message + '\'',
+        error: 'invalid proposals with error \'' + e.message + '\'',
+      });
+    }
+  }
+
+  var choices = [];
+  if (req.body.choices) {
+    try {
+      choices = JSON.parse(req.body.choices);
+    } catch (e) {
+      return res.status(400).send({
+        error: 'invalid choices with error \'' + e.message + '\'',
       });
     }
   }
@@ -88,8 +99,9 @@ export async function create(req, res) {
       app: app.id,
       url: url,
       restricted: req.body.restricted === 'true',
-      labels: labels,
       question: req.body.question,
+      proposals: proposals,
+      choices: choices,
       title: req.body.title,
       description: req.body.description,
       image: req.body.image,
@@ -215,12 +227,17 @@ export async function result(req, res) {
       const instance = await promise((...c)=>contract.at(...c))(
         vote.voteContractAddress
       );
-      const response = {
-        result : instance.getVoteResults().map((s) => parseInt(s)),
-      };
+
+      const numProposals = Math.max(vote.proposals.length, 1);
+      const results = Array.apply(null, Array(numProposals))
+        .map((v, k) => instance.getProposalResults(k).map((s) => parseInt(s)));
+      const response = {results: results};
+
+      if (results[0].length === 0) {
+        return res.status(403).send();
+      }
 
       cache.set(cacheKey, response);
-
       return res.apiResponse(response);
     } catch (blockchainErr) {
       return res.apiError('blockchain error', blockchainErr);

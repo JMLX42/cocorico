@@ -27,11 +27,12 @@ var Login = React.createClass({
   },
 
   getInitialState: function() {
+    console.log(this.context.location);
     return {
       redirect: this.context.location
         ? !!this.context.location.query.redirect
           ? this.context.location.query.redirect
-          : this.context.location.pathname
+          : this.context.location.pathname + this.context.location.search
         : this.props.redirect,
     };
   },
