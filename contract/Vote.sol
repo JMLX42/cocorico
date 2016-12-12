@@ -133,14 +133,13 @@ contract Vote {
     }
 
     for (uint8 i = 0; i < _numProposals; i++) {
-      if (ballot[i] >= _numChoices) {
+      if (ballot[i] < 0 || ballot[i] >= _numChoices) {
         VoteError(msg.sender, 'invalid choice');
         return;
       }
     }
 
     voter.voted = true;
-
     for (uint8 j = 0; j < _numProposals; j++) {
       _results[j][ballot[j]] += 1;
     }
