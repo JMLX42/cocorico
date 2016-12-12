@@ -2,6 +2,8 @@ pragma solidity ^0.4.2;
 
 contract Vote {
 
+  string constant public VERSION = "1.0";
+
   enum Status { Open, Closed }
 
   event Ballot (
