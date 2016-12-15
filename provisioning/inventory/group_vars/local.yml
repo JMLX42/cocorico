@@ -64,7 +64,7 @@ api_web_upload_dir: upload
 ethereum_etherbase_password: "test"
 ethereum_etherbase_balance: "10015200000000000000000"
 ethereum_genesis_difficulty: "0x40000"
-ethereum_genesis_gas_limit: "0x4c4b40"
+ethereum_genesis_gas_limit: "0x8FCF88"
 ethereum_network_id: 424242
 ethereum_miner_threads: 1
 ethereum_rpc_private_host: 127.0.0.1
