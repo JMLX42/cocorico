@@ -76,7 +76,7 @@ function mineVoteContract(numProposals, numChoices, next) {
           {
             from: accounts[0],
             data: code,
-            gas: '0x8FCF80',
+            gas: 1999999,
           },
           (error, contract) => {
             if (error) {
