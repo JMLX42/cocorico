@@ -71,3 +71,6 @@
 - name: install jq
   apt: name=jq=1.3* state=present force=yes
   when: ansible_os_family == 'Debian'
+
+- name: install logrotate configuration
+  template: src=logrotate.j2 dest=/etc/logrotate.d/{{ project_name }}

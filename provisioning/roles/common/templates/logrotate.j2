@@ -1,10 +1,10 @@
-{{ log_dir }}/{{ role_name }}.log {
+{{ log_dir }}/*.log {
   daily
   missingok
   notifempty
   compress
+  delaycompress
   sharedscripts
   copytruncate
   dateext
-  dateformat
 }
