@@ -5,7 +5,7 @@
   with_items: "{{ backups }}"
 
 - name: create backup directories with permissions
-  file: path=/home/{{ item.local_user }}/backup owner={{ item.local_user }} group={{ item.local_user }} state=directory
+  file: path={{ item.local_dir }} owner={{ item.local_user }} group={{ item.local_user }} state=directory
   with_items: "{{ backups }}"
 
 - name: create ssh directory
