@@ -135,7 +135,7 @@ contract Vote {
     }
 
     for (uint8 i = 0; i < _numProposals; i++) {
-      if (ballot[i] < 0 || ballot[i] >= _numChoices) {
+      if (ballot[i] >= _numChoices) {
         VoteError(msg.sender, 'invalid choice');
         return;
       }
