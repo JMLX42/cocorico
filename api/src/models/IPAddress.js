@@ -39,7 +39,7 @@ IPAddress.add({
 IPAddress.relationship({ path: 'events', ref: 'Event', refPath: 'ip' });
 
 function isInIptables(ip) {
-  var iptables = childProcess.execSync('iptables -L -n -w');
+  var iptables = childProcess.execSync('iptables -L -n -w', {stdio:'ignore'});
 
   return iptables.indexOf('DROP       all  --  ' + ip) >= 0;
 }
@@ -49,7 +49,10 @@ function addToIptables(ip) {
     return false;
   }
 
-  childProcess.execSync('iptables -I INPUT 1 -s "' + ip + '" -j DROP -w');
+  childProcess.execSync(
+    'iptables -I INPUT 1 -s "' + ip + '" -j DROP -w',
+    {stdio:'ignore'}
+  );
 
   return true;
 }
@@ -60,7 +63,10 @@ function removeFromIpTables(ip) {
   }
 
   while (isInIptables(ip)) {
-    childProcess.execSync('iptables -D INPUT -s "' + ip + '" -j DROP -w');
+    childProcess.execSync(
+      'iptables -D INPUT -s "' + ip + '" -j DROP -w',
+      {stdio:'ignore'}
+    );
   }
 
   return true;
@@ -129,13 +135,14 @@ transform.toJSON(IPAddress);
 
 IPAddress.register();
 
-// synchronize the blacklisted IP addresses with iptables
-IPAddress.model.find().exec((err, addresses) => {
-  for (var address of addresses) {
-    if (address.blacklisted) {
-      addToIptables(address.ip);
-    } else {
-      removeFromIpTables(address.ip);
+IPAddress.syncWithIPTables = function() {
+  IPAddress.model.find().exec((err, addresses) => {
+    for (var address of addresses) {
+      if (address.blacklisted) {
+        addToIptables(address.ip);
+      } else {
+        removeFromIpTables(address.ip);
+      }
     }
-  }
-});
+  });
+}

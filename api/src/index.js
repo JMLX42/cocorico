@@ -56,3 +56,7 @@ logger.info('starting');
 keystone.start();
 
 logger.info('started');
+
+// synchronize the blacklisted IP addresses with iptables
+const IPAddress = keystone.list('IPAddress');
+IPAddress.syncWithIPTables();
