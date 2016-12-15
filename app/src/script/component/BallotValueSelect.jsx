@@ -4,6 +4,8 @@ var ReactIntl = require('react-intl');
 
 var Title = require('./Title');
 
+var StringHelper = require('./../helper/StringHelper');
+
 var Button = ReactBootstrap.Button;
 
 var BallotValueSelect = React.createClass({
@@ -68,7 +70,7 @@ var BallotValueSelect = React.createClass({
                 </option>
                 {choices.map((choice, c) =>
                   <option value={c} key={'ballot-' + c}>
-                    {choice}
+                    {StringHelper.toTitleCase(choice)}
                   </option>
                 )}
               </select>
