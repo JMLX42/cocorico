@@ -56,7 +56,7 @@
 - name: build custom global npm packages
   shell: npm install && npm run build
   args:
-    creates: "{{ item.path }}/lib"
+    # creates: "{{ item.path }}/lib"
     chdir: "{{ item.path }}"
   with_items: "{{ global_custom_npm_packages.files }}"
 
