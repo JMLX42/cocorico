@@ -32,11 +32,12 @@ Ballot.add({
   status: {
     type: Types.Select,
     options: [
+      'queued',
       'pending',
       'success',
       'error',
     ],
-    default: 'pending',
+    default: 'queued',
     required: true,
     initial: true,
   },

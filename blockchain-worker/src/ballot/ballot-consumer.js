@@ -253,6 +253,7 @@ async function handleMessage(channel, message) {
     switch (ballot.step) {
       case 'queued':
         await handleQueuedBallot(ballot);
+        await updateBallotStatus(ballot, 'pending');
         await pushBackToQueueWithStep(channel, ballot, 'registering');
         channel.ack(message);
         break;
