@@ -45,6 +45,8 @@ async function updateBallotStatus(ballot, status) {
   ballot.status = status;
   await updateDatabaseBallot(ballot, {status: status});
 
+  await webhook(ballot, status);
+
   logger.info('ballot status changed', {status: status});
 }
 
@@ -53,8 +55,6 @@ async function updateBallotStep(ballot, step) {
   await updateDatabaseBallot(ballot, {step: step});
 
   logger.info('ballot step changed', {step: step});
-
-  await webhook(ballot, step);
 }
 
 async function getDatabaseBallot(ballot) {
