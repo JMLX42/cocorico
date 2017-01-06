@@ -39,7 +39,7 @@ IPAddress.add({
 IPAddress.relationship({ path: 'events', ref: 'Event', refPath: 'ip' });
 
 function isInIptables(ip) {
-  var iptables = childProcess.execSync('iptables -L -n -w', {stdio:'ignore'});
+  var iptables = childProcess.execSync('iptables -L -n -w');
 
   return iptables.indexOf('DROP       all  --  ' + ip) >= 0;
 }
