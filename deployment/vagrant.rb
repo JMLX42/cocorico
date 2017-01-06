@@ -4,13 +4,13 @@ module Vagrant
   module AutoConfigure
 
     DIRECTORY_MAPPING = {
-      "." => {
-        :dest => "/vagrant",
+      ENV["COCORICO_HOME"] => {
+        :dest => "/srv/cocorico",
         :mount_options => [],
         :limit => false
       },
-      ENV["COCORICO_HOME"] => {
-        :dest => "/srv/cocorico",
+      "." => {
+        :dest => "/vagrant",
         :mount_options => [],
         :limit => false
       }
@@ -93,7 +93,7 @@ module Vagrant
           |src, dest|
 
           if (src && File.exist?(src)) && (!dest[:limit] || dest[:limit].include?(name))
-            config.vm.synced_folder src, dest[:dest], mount_options: dest[:mount_options]
+            config.vm.synced_folder src, dest[:dest], rsync__args: ["--verbose", "--archive", "--delete", "-z"]
           end
         }
 
