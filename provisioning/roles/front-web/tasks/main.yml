@@ -71,7 +71,7 @@
     name: "renew letsencrypt certificates"
     state: "{{ certbot_renew | ternary('present', 'absent') }}"
     special_time: daily
-    job: "{{ certbot_dir }}/certbot-auto renew --quiet --no-self-upgrade"
+    job: "service apache2 stop ; {{ certbot_dir }}/certbot-auto renew --quiet ; service apache2 start"
   when:
     - certbot_enabled
     - http_protocol_prefix == 'https'
