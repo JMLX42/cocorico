@@ -32,7 +32,9 @@ var Grid = ReactBootstrap.Grid,
   MenuItem = ReactBootstrap.MenuItem,
   ButtonToolbar = ReactBootstrap.ButtonToolbar,
   Modal = ReactBootstrap.Modal,
-  Button = ReactBootstrap.Button;
+  Button = ReactBootstrap.Button,
+  OverlayTrigger = ReactBootstrap.OverlayTrigger,
+  Tooltip = ReactBootstrap.Tooltip;
 
 module.exports = React.createClass({
   mixins: [
@@ -176,10 +178,18 @@ module.exports = React.createClass({
 
   renderSearchForm: function() {
     var searchModes = {
-      'transactionHash': 'Transaction Hash',
-      'voter' : 'Voter',
-      'proposal' : 'Proposal',
+      'transactionHash': this.getIntlMessage('ballotBox.TRANSACTION_HASH'),
+      'voter' : this.getIntlMessage('ballotBox.VOTER'),
+      'ballot' : this.getIntlMessage('ballotBox.BALLOT'),
     };
+
+    const vote = this.props.vote;
+    const hasChoices = (!!vote.choices && vote.choices.length !== 0);
+
+    // We don't support searching by ballot value if there are multiple choices
+    if (hasChoices) {
+      delete searchModes.ballot;
+    }
 
     return (
       <form>
@@ -187,7 +197,6 @@ module.exports = React.createClass({
           <InputGroup>
             <FormControl
               type="text"
-              placeholder="Type here to search..."
               value={this.state.searchQuery}
               onChange={this.searchQueryChangeHandler}/>
             <DropdownButton
@@ -238,9 +247,9 @@ module.exports = React.createClass({
           <thead>
             <tr>
               <th style={{width:45}}/>
-              <th>Transaction Hash</th>
-              <th>Voter</th>
-              <th>Proposal</th>
+              <th>{this.getIntlMessage('ballotBox.TRANSACTION_HASH')}</th>
+              <th>{this.getIntlMessage('ballotBox.VOTER')}</th>
+              <th>{this.getIntlMessage('ballotBox.BALLOT')}</th>
             </tr>
           </thead>
           <tbody>
@@ -249,9 +258,9 @@ module.exports = React.createClass({
                 return (
                   <tr key={tx.transactionHash}>
                     <td style={{width:45}} className="text-center">
-                      {'verified' in tx
-                        ? <span className={tx.verified ? 'positive' : 'negative'}>
-                          <Icon name={tx.verified ? 'checkmark' : 'cross'}/>
+                      {'valid' in tx
+                        ? <span className={tx.valid ? 'positive' : 'negative'}>
+                          <Icon name={tx.valid ? 'checkmark' : 'cross'}/>
                         </span>
                         : null}
                     </td>
@@ -262,11 +271,33 @@ module.exports = React.createClass({
                         ? <span className={classNames({
                           'label': true,
                           })} style={{
-                            backgroundColor: colors[parseInt(tx.args.proposal)],
+                            backgroundColor: colors[parseInt(tx.args.ballot)],
                           }}>
-                            <Title text={this.getVoteValueDisplayMessage(tx.args.proposal)}/>
+                            <Title text={this.getVoteValueDisplayMessage(tx.args.ballot)}/>
                         </span>
-                        : null}
+                        : <div>
+                            {tx.args.ballot.map((v, i) => {
+                              return (
+                                <OverlayTrigger placement="top"
+                                  overlay={<Tooltip>
+                                    {<Title text={vote.proposals[i]}/>}:&nbsp;
+                                    {<Title text={vote.choices[v]}/>}
+                                  </Tooltip>}>
+                                  <div className='label' style={{
+                                    backgroundColor: colors[v],
+                                    width: '30px',
+                                    paddingTop: '8px',
+                                    paddingBottom: '8px',
+                                    lineHeight: '14px',
+                                    display: 'inline-block',
+                                    marginRight: '5px'
+                                  }}>
+                                    {v}
+                                  </div>
+                                </OverlayTrigger>
+                              );
+                            })}
+                        </div>}
                     </td>
                   </tr>
                 );
@@ -294,34 +325,38 @@ module.exports = React.createClass({
         {this.renderQRCodeReaderModal()}
         <Row>
           <Col lg={6} md={12}>
-            <h2>Verify your ballot</h2>
+            <h2>{this.getIntlMessage('ballotBox.VERIFY_YOUR_BALLOT')}</h2>
             {!this.state.proofOfVote
               ? <ButtonToolbar>
                 <Button
                   bsStyle="primary"
                   onClick={(e)=>this.setState({qrCodeReader:true})}>
-                  <Icon name="qrcode"/>Scan my printed proof of vote
+                  <Icon name="qrcode"/>
+                  {this.getIntlMessage('ballotBox.SCAN_MY_PRINTED_PROOF_OF_VOTE')}
                 </Button>
                 <FileSelectButton onSuccess={this.readFromFileHandler}>
-                  <Icon name="cloud_upload"/>Select my downloaded proof of vote
+                  <Icon name="cloud_upload"/>
+                  {this.getIntlMessage('ballotBox.SELECT_MY_DOWNLOADED_PROOF_OF_VOTE')}
                 </FileSelectButton>
               </ButtonToolbar>
               : verifying
                 ? <LoadingIndicator text="Verifying..."/>
                 : <ButtonToolbar>
                   <Button onClick={this.resetProofOfVote}>
-                    Verify another proof of vote
+                    {this.getIntlMessage('ballotBox.VERIFY_ANOTHER_PROOF_OF_VOTE')}
                   </Button>
                 </ButtonToolbar>}
           </Col>
           <Col lg={6} md={12}>
-            <h2>Explore the ballot box</h2>
+            <h2>
+              {this.getIntlMessage('ballotBox.EXPLORE_THE_BALLOT_BOX')}
+            </h2>
             {this.renderSearchForm()}
           </Col>
         </Row>
         <Row>
           <Col xs={12}>
-            { this.renderTransactionTable() }
+            {this.renderTransactionTable()}
           </Col>
         </Row>
       </Grid>
@@ -413,11 +448,11 @@ module.exports = React.createClass({
         {verified.valid
           ? <span>
             <Icon name="checkmark"/>
-            Verified
+            {this.getIntMessage('ballotBox.VERIFIED')}
           </span>
           : <span>
             <Icon name="cross"/>
-            Invalid
+            {this.getIntMessage('ballotBox.INVALID')}
           </span>}
         <span className="ballot-verify-date">
           {dateFormat(verified.createdAt, 'UTC:dd-mm-yyyy HH:MM:ss Z')}

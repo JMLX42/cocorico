@@ -49,7 +49,7 @@ var VoteResultBarChart = React.createClass({
     const data = {
       labels: vote.proposals.map((p) => StringHelper.toTitleCase(p)),
       datasets: vote.choices.map((c, k) => ({
-        label: StringHelper.toTitleCase(c),
+        label: k + ' - ' + StringHelper.toTitleCase(c),
         data: results.map((r) => r[k]),
         backgroundColor: colors[k],
       }))
