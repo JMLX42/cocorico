@@ -50,7 +50,7 @@ module.exports = Reflux.createStore({
         page: page,
         transactionHash: search ? search.transactionHash : null,
         voter: search ? search.voter : null,
-        proposal: search ? search.proposal : null,
+        ballot: search ? search.ballot : null,
       },
       (data) => {
         this._transactions[voteId][data.page] = data.transactions;
