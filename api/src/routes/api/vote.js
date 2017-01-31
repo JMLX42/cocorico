@@ -128,7 +128,7 @@ export async function update(req, res) {
     if (!vote)
       return res.status(404).send();
 
-    if (vote.app.toString() !== req.user.id) {
+    if (!vote.app.equals(req.user.id)) {
       return res.status(403).send();
     }
 
