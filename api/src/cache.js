@@ -12,3 +12,11 @@ export async function get(key) {
 export function set(key, value) {
   client.set(key, JSON.stringify(value));
 }
+
+export function unset(keys) {
+  client.del(keys);
+}
+
+export async function keys(match) {
+  return await promise((...c)=>client.keys(...c))(match);
+}
