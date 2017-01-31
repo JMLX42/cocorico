@@ -1,4 +1,5 @@
 var React = require('react');
+var ReactIntl = require('react-intl');
 var ReactBootstrap = require('react-bootstrap');
 
 var VerifiedBallotChart = require('../component/VerifiedBallotChart'),
@@ -10,7 +11,13 @@ var Grid = ReactBootstrap.Grid,
   Row = ReactBootstrap.Row,
   Col = ReactBootstrap.Col;
 
+var FormattedMessage = ReactIntl.FormattedMessage;
+
 var VoteResult = React.createClass({
+
+  mixins: [
+    ReactIntl.IntlMixin,
+  ],
 
   render: function() {
     const vote = this.props.vote;
@@ -32,18 +39,22 @@ var VoteResult = React.createClass({
             <VerifiedAndValidBallotChart vote={vote}/>
             {numVerifiedBallots !== 0
               ? <span>
-                {Math.floor(vote.numValidBallots / numVerifiedBallots * 100.0)}%
-                valid verified ballots
+                <FormattedMessage
+                  message={this.getIntlMessage('ballotBox.VALID_VERIFIED_BALLOTS')}
+                  percent={Math.floor(vote.numValidBallots / numVerifiedBallots * 100.0)}/>
               </span>
-              : <span>Not enough data yet.</span>}
+              : <span>
+                {this.getIntlMessage('ballotBox.NOT_ENOUGH_DATA_YET')}
+              </span>}
           </Col>
           <Col md={2} sm={3} smPush={0} xs={6} className="text-center">
             <VerifiedBallotChart vote={vote}/>
             <span>
               {vote.numBallots !== 0
-                ? Math.floor(numVerifiedBallots / vote.numBallots * 100.0)
-                : 0}%
-              verified ballots
+                ? <FormattedMessage
+                  message={this.getIntlMessage('ballotBox.VALID_VERIFIED_BALLOTS')}
+                  percent={Math.floor(numVerifiedBallots / vote.numBallots * 100.0)}/>
+                : '0%'}
             </span>
           </Col>
         </Row>

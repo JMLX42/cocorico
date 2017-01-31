@@ -84,14 +84,6 @@
       "YOUR_VOTE_IS_COMPLETE": "Su voto \"{ value }\" sobre { vote } ha sido registrado !"
     },
 
-    "voterCard" : {
-      "PROVIDE_VOTER_CARD": "Para continuar, provee su tarjeta de voto",
-      "SCAN_PRINTED_FILE": "Usar mi webcam para escanear mi tarjeta de voto impresa",
-      "SEND_DOWNLOADED_FILE": "Mandar el archivo de mi tarjeta de voto descargada",
-      "BACK": "Volver",
-      "CANCEL": "Cancelar"
-    },
-
     "hint": {
       "HIDE_HINT_BUTTON": "Entendí, no vuelan a mostrarme este mensaje.",
       "LEARN_MORE_BUTTON": "Saber más..."

@@ -40,7 +40,10 @@ var BallotBox = React.createClass({
     return (
       <Row>
         <Col xs={12}>
-          <h1><Title text={vote.title}/> <small>Ballot Box</small></h1>
+          <h1>
+            <Title text={vote.title}/>&nbsp;
+            <small>{this.getIntlMessage('title.BALLOT_BOX')}</small>
+          </h1>
         </Col>
       </Row>
     );
@@ -83,11 +86,7 @@ var BallotBox = React.createClass({
     return (
       <div>
         <Grid>
-          <Row>
-            <Col xs={12}>
-              <h1><Title text={vote.title}/> <small>Ballot Box</small></h1>
-            </Col>
-          </Row>
+          {this.renderTitle(vote)}
         </Grid>
         <VoteResultCharts vote={vote}/>
         <BallotSearch vote={vote}/>

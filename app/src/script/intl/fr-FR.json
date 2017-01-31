@@ -16,7 +16,8 @@
       "ABOUT": "À Propos",
       "PRIVACY_POLICY": "Politique de Confidentialité",
       "SOURCE_CODE": "Code Source",
-      "SERVICE_STATUS": "Etat du Système"
+      "SERVICE_STATUS": "Etat du Système",
+      "BALLOT_BOX": "Urne Numérique"
     },
 
     "login": {
@@ -88,12 +89,20 @@
       "PRINT_PROOF_OF_VOTE" : "Imprimer ma preuve de vote"
     },
 
-    "voterCard": {
-      "PROVIDE_VOTER_CARD": "Pour continuer, merci de fournir votre carte de vote",
-      "SCAN_PRINTED_FILE": "Utiliser ma webcam pour scanner ma carte de vote imprimée",
-      "SEND_DOWNLOADED_FILE": "Envoyer le fichier de ma carte de vote téléchargée",
-      "BACK": "Retour",
-      "CANCEL": "Annuler"
+    "ballotBox": {
+      "VERIFIED_BALLOTS": "{percent}% bulletins vérifiés",
+      "VALID_VERIFIED_BALLOTS": "{percent}% bulletins vérifiés valides",
+      "NOT_ENOUGH_DATA_YET": "Pas assez de données.",
+      "VERIFY_YOUR_BALLOT": "Vérifier votre bulletin",
+      "SCAN_MY_PRINTED_PROOF_OF_VOTE": "Scanner ma preuve de vote",
+      "SELECT_MY_DOWNLOADED_PROOF_OF_VOTE": "Sélectionner ma preuve de vote",
+      "VERIFY_ANOTHER_PROOF_OF_VOTE": "Vérifier une autre preuve de vote",
+      "EXPLORE_THE_BALLOT_BOX": "Chercher dans l'urne",
+      "VERIFIED": "Vérifié",
+      "INVALID": "Invalide",
+      "TRANSACTION_HASH": "Signature de la transaction",
+      "VOTER": "Votant",
+      "BALLOT": "Bulletin"
     },
 
     "hint": {

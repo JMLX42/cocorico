@@ -16,7 +16,8 @@
       "ABOUT": "About",
       "PRIVACY_POLICY": "Privacy Policy",
       "SOURCE_CODE": "Source Code",
-      "SERVICE_STATUS": "System Status"
+      "SERVICE_STATUS": "System Status",
+      "BALLOT_BOX": "Ballot Box"
     },
 
     "login": {
@@ -84,12 +85,17 @@
       "PRINT_PROOF_OF_VOTE" : "Print my proof of vote"
     },
 
-    "voterCard": {
-      "PROVIDE_VOTER_CARD": "To continue, please provide your vote card",
-      "SCAN_PRINTED_FILE": "Use my webcam to scan my printed vote card",
-      "SEND_DOWNLOADED_FILE": "Select my downloaded vote card file",
-      "BACK": "Back",
-      "CANCEL": "Cancel"
+    "ballotBox": {
+      "VERIFIED_BALLOTS": "{percent}% verified ballots",
+      "VALID_VERIFIED_BALLOTS": "{percent}% valid verified ballots",
+      "NOT_ENOUGH_DATA_YET": "Not enough data yet.",
+      "VERIFY_YOUR_BALLOT": "Verify your ballot",
+      "SCAN_MY_PRINTED_PROOF_OF_VOTE": "Scan my printed proof of vote",
+      "SELECT_MY_DOWNLOADED_PROOF_OF_VOTE": "Select my downloaded proof of vote",
+      "VERIFY_ANOTHER_PROOF_OF_VOTE": "Verify another proof of vote",
+      "EXPLORE_THE_BALLOT_BOX": "Explore the ballot box",
+      "VERIFIED": "Verified",
+      "INVALID": "Invalid"
     },
 
     "hint": {
