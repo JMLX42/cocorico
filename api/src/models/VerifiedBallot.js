@@ -10,6 +10,7 @@ const VerifiedBallot = new keystone.List('VerifiedBallot', {
   nodelete: config.env !== 'development',
   nocreate: config.env !== 'development',
   track: { createdAt: true },
+  defaultColumns: 'vote, transactionHash, voterAddress, valid',
 });
 
 VerifiedBallot.add({
@@ -20,7 +21,5 @@ VerifiedBallot.add({
 });
 
 transform.toJSON(VerifiedBallot);
-
-VerifiedBallot.defaultColumns = 'transactionHash, createdAt';
 
 VerifiedBallot.register();
