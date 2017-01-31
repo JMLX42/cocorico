@@ -171,104 +171,134 @@ export async function verify(req, res) {
 
   // First, we decode the JWT without checking the signature because we need
   // to get the vote smart contract address from the payload.
-  var decoded = jwt.decode(req.body.proofOfVote);
+  var decoded = null;
+  try {
+    decoded = jwt.decode(req.body.proofOfVote);
+  } catch (decodeErr) {
+    return res.apiError('unable to decode JWT', decodeErr);
+  }
 
   if (!decoded) {
     return res.status(400).send();
   }
 
+  var vote = null;
   try {
-    const ballot = await VerifiedBallot.model
-      .findOne({voterAddress: '0x' + decoded.a})
-      .exec();
-
-    // If there is an existing verified ballot, we return it directly.
-    if (!!ballot) {
-      return res.apiResponse({verified: ballot});
-    }
-
-    // Otherwise, we do have to verify the provided proof of vote and save
-    // the corresponding VerifiedBallot.
-    const web3 = new Web3();
-    web3.setProvider(new web3.providers.HttpProvider('http://127.0.0.1:8545'));
-
     // We fetch the vote that match the smart contract address.
-    const vote = await Vote.model
+    vote = await Vote.model
       .findOne({voteContractAddress: '0x' + decoded.c})
       .exec();
+  } catch (findVoteErr) {
+    return res.apiError('database error when fetching the vote', findVoteErr);
+  }
 
-    // If the vote does not exist => 404
-    if (!vote) {
-      return res.status(404).send({error:'vote does not exist'});
-    } else {
-      // Otherwise, we verify the JWT
-      try {
-        const verified = jwt.verify(req.body.proofOfVote, vote.key);
+  // If the vote does not exist => 404
+  if (!vote) {
+    return res.status(404).send({error:'vote does not exist'});
+  }
 
-        // If the JWT is verified, we find the corresponding smart contract
-        // instance.
-        try {
-          const contract = web3.eth.contract(JSON.parse(vote.voteContractABI));
-          const instance = await promise((...c)=>contract.at(...c))(
-            vote.voteContractAddress
-          );
-          // Fetch all the BallotEvent from the smart contract for the address
-          // specified in the proof of vote (the 'a' field for 'address').
-          // FIXME: we should set 'fromBlock' to the block of the smart contract
-          // to avoid querying the whole blockchain.
-          const ballotEvent = instance.Ballot(
-            {voter: '0x' + verified.a},
-            {fromBlock:0, toBlock: 'latest'}
-          );
-          const events = await promise((...c)=>ballotEvent.get(...c))();
-          // The proof of vote/ballot is valid if:
-          // * there is a matching BallotEvent
-          // * its args.proposal field matches the one in the proof of vote
-          // (the 'p' field for 'proposal')
-          const valid = !!events[0] && !!events[0].args
-            && parseInt(events[0].args.proposal) === verified.p;
+  // Otherwise, we verify the JWT
+  var verified = null;
+  try {
+    verified = jwt.verify(req.body.proofOfVote, vote.key);
+  } catch (verifyErr) {
+    return res.apiError('invalid JWT', verifyErr);
+  }
 
-          try {
-            // Create and save the corresponding VerifiedBallot.
-            const verifiedBallot = await VerifiedBallot
-              .model({
-                vote: vote,
-                valid: valid,
-                transactionHash: valid ? events[0].transactionHash : '',
-                voterAddress: '0x' + verified.a,
-              })
-              .save();
-
-            // Update and save the vote.
-            if (verifiedBallot.valid) {
-              vote.numValidBallots += 1;
-            } else {
-              vote.numInvalidBallots += 1;
-            }
-
-            try {
-              await vote.save();
-
-              return res.apiResponse({
-                verified: verifiedBallot,
-              });
-
-            } catch (voteSaveErr) {
-              return res.apiError('database error', voteSaveErr);
-            }
-          } catch (verifiedBallotSaveErr) {
-            return res.apiError('database error', verifiedBallotSaveErr);
-          }
-        } catch (blockchainErr) {
-          return res.apiError('blockchain error', blockchainErr);
-        }
-      } catch (verifyErr) {
-        return res.apiError('invalid JWT', verifyErr);
-      }
-    }
+  var ballot = null;
+  try {
+    ballot = await VerifiedBallot.model
+      .findOne({voterAddress: '0x' + decoded.a})
+      .exec();
   } catch (findBallotErr) {
     return res.apiError('database error', err);
   }
+
+  // If there is an existing verified ballot, we return it directly.
+  if (!!ballot) {
+    return res.apiResponse({verified: ballot});
+  }
+
+  // Otherwise, we do have to verify the provided proof of vote and save
+  // the corresponding VerifiedBallot.
+  const web3 = new Web3();
+  web3.setProvider(new web3.providers.HttpProvider('http://127.0.0.1:8545'));
+
+  // If the JWT is verified, we find the corresponding smart contract
+  // instance.
+  var events = null;
+  try {
+    const contract = web3.eth.contract(JSON.parse(vote.voteContractABI));
+    const instance = await promise((...c)=>contract.at(...c))(
+      vote.voteContractAddress
+    );
+    // Fetch all the BallotEvent from the smart contract for the address
+    // specified in the proof of vote (the 'a' field for 'address').
+    // FIXME: we should set 'fromBlock' to the block of the smart contract
+    // to avoid querying the whole blockchain.
+    const ballotEvent = instance.Ballot(
+      {voter: '0x' + verified.a},
+      {fromBlock: 0, toBlock: 'latest'}
+    );
+
+    events = await promise((...c)=>ballotEvent.get(...c))();
+  } catch (blockchainErr) {
+    return res.apiError('blockchain error', blockchainErr);
+  }
+
+  // The proof of vote/ballot is valid if:
+  // * there is a matching BallotEvent
+  // * its args.proposal field matches the one in the proof of vote
+  // (the 'p' field for 'proposal')
+  const ballotValue = Array.isArray(verified.p)
+    // the new format, where each ballot is an uint[]
+    ? events[0].args.ballot.map((s) => parseInt(s))
+    // the "old" format, where each ballot was just an uint
+    : parseInt(events[0].args.proposal);
+  const equals = Array.isArray(verified.p)
+    ? (a, b) => Array.isArray(a) && Array.isArray(b) && a.every((u, i) => u === b[i])
+    : (a, b) => a === b;
+  const valid = !!events[0] && !!events[0].args
+    && equals(ballotValue, verified.p);
+
+  var verifiedBallot = null;
+  try {
+    // Create and save the corresponding VerifiedBallot.
+    verifiedBallot = await VerifiedBallot
+      .model({
+        vote: vote,
+        valid: valid,
+        transactionHash: !!events[0] && !!events[0].transactionHash
+          ? events[0].transactionHash
+          : '',
+        voterAddress: '0x' + verified.a,
+      })
+      .save();
+  } catch (verifiedBallotSaveErr) {
+    return res.apiError('database error', verifiedBallotSaveErr);
+  }
+
+  // Update and save the vote.
+  if (verifiedBallot.valid) {
+    vote.numValidBallots += 1;
+  } else {
+    vote.numInvalidBallots += 1;
+  }
+
+  // Invalidate the cache
+  cache.unset(
+    await cache.keys('/ballot/transactions/' + vote.id + '&*')
+  );
+
+  try {
+    await vote.save();
+  } catch (voteSaveErr) {
+    return res.apiError('database error', voteSaveErr);
+  }
+
+  return res.apiResponse({
+    verified: verifiedBallot,
+  });
 }
 
 export async function getTransactions(req, res) {
@@ -287,13 +317,13 @@ export async function getTransactions(req, res) {
 
     var transactionHash = req.body.transactionHash;
     var voter = req.body.voter;
-    const proposal = req.body.proposal;
+    const ballot = req.body.ballot;
     const page = !req.body.page ? 0 : parseInt(req.body.page);
     const key = '/ballot/transactions/' + voteId + '&params=' + stringify({
       page: page,
       transactionHash: transactionHash,
       voter: voter,
-      proposal: proposal,
+      ballot: ballot,
     });
 
     try {
@@ -317,8 +347,8 @@ export async function getTransactions(req, res) {
         voter = '0x' + voter;
       }
       filter = (tx) => tx.args.voter.indexOf(voter) === 0;
-    } else if (!!proposal) {
-      filter = (tx) => Math.round(tx.args.proposal.toNumber()) === parseInt(proposal);
+    } else if (!!ballot) {
+      filter = (tx) => Math.round(tx.args.ballot.toNumber()) === parseInt(ballot);
     }
 
     try {
@@ -352,24 +382,30 @@ export async function getTransactions(req, res) {
         }
       }
 
-      var numItems = result.length;
+      const numItems = result.length;
 
       if (!!filter) {
         result = result.filter(filter);
       }
 
-      var numPages = Math.ceil(result.length / 10);
+      const numPages = Math.ceil(result.length / 10);
       result = result.slice(page * 10, page * 10 + 10);
 
       try {
-        const verifiedBallots = await VerifiedBallot.model.find({
-          transactionHash: {$in: result.map((r)=>r.transactionHash)}}
-        ).exec();
+        const verifiedBallots = await VerifiedBallot.model
+          .find({
+            $or: [
+              { transactionHash: {$in: result.map((r)=>r.transactionHash)}},
+              { voterAddress: {$in: result.map((r)=>r.address)}},
+            ]
+          })
+          .exec();
 
         for (var ballot of verifiedBallots) {
           for (var tx of result) {
-            if (tx.transactionHash === ballot.transactionHash) {
-              tx.verified = ballot.valid;
+            if (tx.transactionHash === ballot.transactionHash
+                || tx.address === ballot.voterAddress) {
+              tx.valid = ballot.valid;
             }
           }
         }
