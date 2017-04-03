@@ -8,7 +8,15 @@ var Hint = require('../component/Hint.jsx');
 
 var RedirectLink = require('../component/RedirectLink');
 
+var Button = ReactBootstrap.Button;
+
 var ForceBrowserCompatibility = {
+
+  getInitialState: function() {
+    return {
+      override: false
+    };
+  },
 
     // https://gist.github.com/alexey-bass/1115557
   _compareVersion: function(left, right) {
@@ -36,14 +44,12 @@ var ForceBrowserCompatibility = {
 
     return (
       <ReactBootstrap.Grid>
-        <Hint style="danger">
+        <Hint style="warning">
           <h3>Ohoo... votre navigateur n'est pas compatible :(</h3>
           <p>
-            Pour des raisons de sécurité, nous n'autorisons que les navigateurs
-            Web qui ont pu être testés et approuvés. Malheureusement, votre
-            navigateur Web ({platform.name} {platform.version}) n'a pas
-            été testé et <strong>nous ne pouvons donc pas garantir la fiabilité de
-            votre vote</strong>.
+            Malheureusement, votre navigateur Web ({platform.name} {platform.version})
+            n'a pas été testé et <strong>nous ne pouvons donc pas garantir la
+            fiabilité de votre vote</strong>.
           </p>
           {name in supported && supported[name].updateLink
             ? <p>
@@ -73,9 +79,18 @@ var ForceBrowserCompatibility = {
               );
             })}
           </ul>
+          <p>ou bien choisir d'ignorer cet	avertissement.</p>
+          <Button bsStyle="warning" onClick={(e)=>this.ignoreButtonClickHandler(e)}>
+            Ignorer
+          </Button>
         </Hint>
       </ReactBootstrap.Grid>
     );
+  },
+
+  ignoreButtonClickHandler: function(e) {
+    this.render = this._renderMethodOverridenByBrowserCompat;
+    this.setState({override: true});
   },
 
   componentWillMount: function() {
@@ -83,7 +98,8 @@ var ForceBrowserCompatibility = {
     var name = platform.name.toLowerCase();
 
     if (!(name in supported)
-            || this._compareVersion(platform.version, supported[name].version) < 0) {
+        || this._compareVersion(platform.version, supported[name].version) < 0) {
+      this._renderMethodOverridenByBrowserCompat = this.render;
       this.render = this.renderUnsupportedWebBrowserDialog;
     }
   },
