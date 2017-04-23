@@ -29,7 +29,7 @@ geth --datadir {{ ethereum_datadir }} import ${BACKUP_DIR}/db/ethereum
 
 {% for item in backup_sources.mongodb %}
 DB="{{ item }}"
-test -r ${RESTORE_DIR_SRC}/db/${DB} && {
+test -r ${RESTORE_DIR_SRC}/db/mongodb/${DB} && {
     mongorestore --drop --db ${DB} ${RESTORE_DIR_SRC}/db/${DB}
 }
 {% endfor %}
