@@ -11,7 +11,7 @@ var LoadingIndicator = React.createClass({
         <span className="loading-indicator-animation"/>
         {this.props.text ? this.props.text : this.getIntlMessage('site.LOADING') + '...'}
       </span>
-		);
+    );
   },
 });
 

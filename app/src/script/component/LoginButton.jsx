@@ -50,7 +50,7 @@ var LoginButton = React.createClass({
       <Link to={link} activeClassName="active">
         {this.getIntlMessage('login.SIGN_IN')}
       </Link>
-		);
+    );
   },
 });
 

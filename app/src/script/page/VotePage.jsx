@@ -52,80 +52,79 @@ var VotePage = React.createClass({
     }
 
     return (
-            <ReactDocumentTitle title={StringHelper.toTitleCase(vote.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
-                <div>
-                    {this.state.showVoteWidget
-                        ? <VoteWidget vote={vote}/>
-                        : null}
-                    <div className="vote-banner">
-                        <div className="vote-banner-img"
-                            style={{backgroundImage: 'url(' + this.proxifyURL(vote.image) + ')'}}/>
-                        <div className="vote-banner-overlay"/>
-                    </div>
-                    <Grid >
-                        <Row>
-                            <Col xs={12}>
-                                <h1>
-                                    {vote.title}
-                                </h1>
-                                <small>
-                                    <RedirectLink href={vote.url}>
-                                        {vote.url}
-                                    </RedirectLink>
-                                </small>
-                                <p>
-                                    {vote.description}
-                                    {vote.description[-1] !== '.' ? '...' : null}
-                                    &nbsp;
-                                    <RedirectLink href={vote.url}>
-                                        Lire la suite
-                                    </RedirectLink>
-                                </p>
-                            </Col>
-                        </Row>
-                    </Grid>
-                    <SourceTab vote={vote}/>
-                    <Grid>
-                        <Row>
-                            <Col xs={12}>
-                                <h2>
-                                    <Icon name="megaphone"/>
-                                    Militer
-                                </h2>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col xs={12}>
-                                <h2>
-                                    <Icon name="enveloppe"/>
-                                    Voter
-                                </h2>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col xs={12}>
-                                <Button
-                                    bsSize="large"
-                                    bsStyle="primary"
-                                    onClick={(e)=>this.setState({showVoteWidget:true})}>
-                                    Voter
-                                </Button>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col xs={12}>
-                                <h2>
-                                    <Icon name="share"/>
-                                    Partager
-                                </h2>
-                            </Col>
-                        </Row>
-                    </Grid>
-                </div>
-            </ReactDocumentTitle>
-        );
+      <ReactDocumentTitle title={StringHelper.toTitleCase(vote.title) + ' - ' + this.getIntlMessage('site.TITLE')}>
+        <div>
+          {this.state.showVoteWidget
+            ? <VoteWidget vote={vote}/>
+            : null}
+          <div className="vote-banner">
+            <div className="vote-banner-img"
+              style={{backgroundImage: 'url(' + this.proxifyURL(vote.image) + ')'}}/>
+            <div className="vote-banner-overlay"/>
+          </div>
+          <Grid >
+            <Row>
+              <Col xs={12}>
+                <h1>
+                  {vote.title}
+                </h1>
+                <small>
+                  <RedirectLink href={vote.url}>
+                    {vote.url}
+                  </RedirectLink>
+                </small>
+                <p>
+                  {vote.description}
+                  {vote.description[-1] !== '.' ? '...' : null}
+                  &nbsp;
+                  <RedirectLink href={vote.url}>
+                    Lire la suite
+                  </RedirectLink>
+                </p>
+              </Col>
+            </Row>
+          </Grid>
+          <SourceTab vote={vote}/>
+          <Grid>
+            <Row>
+              <Col xs={12}>
+                <h2>
+                  <Icon name="megaphone"/>
+                  Militer
+                </h2>
+              </Col>
+            </Row>
+            <Row>
+              <Col xs={12}>
+                <h2>
+                  <Icon name="enveloppe"/>
+                  Voter
+                </h2>
+              </Col>
+            </Row>
+            <Row>
+              <Col xs={12}>
+                <Button
+                  bsSize="large"
+                  bsStyle="primary"
+                  onClick={(e)=>this.setState({showVoteWidget:true})}>
+                  Voter
+                </Button>
+              </Col>
+            </Row>
+            <Row>
+              <Col xs={12}>
+                <h2>
+                  <Icon name="share"/>
+                  Partager
+                </h2>
+              </Col>
+            </Row>
+          </Grid>
+        </div>
+      </ReactDocumentTitle>
+    );
   },
-
 });
 
 module.exports = VotePage;

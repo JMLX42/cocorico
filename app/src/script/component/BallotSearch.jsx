@@ -232,7 +232,6 @@ module.exports = React.createClass({
 
   renderTransactionTable: function() {
     const vote = this.props.vote;
-    const hasProposals = (!!vote.proposals && vote.proposals.length !== 0);
     const hasChoices = (!!vote.choices && vote.choices.length !== 0);
     const colors = this.getColors(vote);
     const transactions = this.state.transactions.getByVoteId(
@@ -270,10 +269,10 @@ module.exports = React.createClass({
                       {!hasChoices
                         ? <span className={classNames({
                           'label': true,
-                          })} style={{
-                            backgroundColor: colors[parseInt(tx.args.ballot)],
-                          }}>
-                            <Title text={this.getVoteValueDisplayMessage(tx.args.ballot)}/>
+                        })} style={{
+                          backgroundColor: colors[parseInt(tx.args.ballot)],
+                        }}>
+                          <Title text={this.getVoteValueDisplayMessage(tx.args.ballot)}/>
                         </span>
                         : <div>
                             {tx.args.ballot.map((v, i) => {
@@ -283,14 +282,14 @@ module.exports = React.createClass({
                                     {<Title text={vote.proposals[i]}/>}:&nbsp;
                                     {<Title text={vote.choices[v]}/>}
                                   </Tooltip>}>
-                                  <div className='label' style={{
+                                  <div className="label" style={{
                                     backgroundColor: colors[v],
                                     width: '30px',
                                     paddingTop: '8px',
                                     paddingBottom: '8px',
                                     lineHeight: '14px',
                                     display: 'inline-block',
-                                    marginRight: '5px'
+                                    marginRight: '5px',
                                   }}>
                                     {v}
                                   </div>

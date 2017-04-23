@@ -111,32 +111,33 @@ function handleVote(voteMsg, callback) {
     voteMsg.numProposals,
     voteMsg.numChoices,
     (err, contract, abi) => {
-    if (err) {
-      callback(err, null);
-      return;
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      Vote.model.findById(voteMsg.id)
+        .exec((findErr, vote) => {
+          if (findErr) {
+            callback(findErr, null);
+            return;
+          }
+
+          // FIXME: should not fail silently
+          if (!vote) {
+            logger.error('unable to find/update Vote object');
+            callback(null, null);
+            return;
+          }
+
+          vote.status = 'open';
+          vote.voteContractABI = JSON.stringify(abi);
+          vote.voteContractAddress = contract.address;
+
+          vote.save(callback);
+        });
     }
-
-    Vote.model.findById(voteMsg.id)
-      .exec((findErr, vote) => {
-        if (findErr) {
-          callback(findErr, null);
-          return;
-        }
-
-        // FIXME: should not fail silently
-        if (!vote) {
-          logger.error('unable to find/update Vote object');
-          callback(null, null);
-          return;
-        }
-
-        vote.status = 'open';
-        vote.voteContractABI = JSON.stringify(abi);
-        vote.voteContractAddress = contract.address;
-
-        vote.save(callback);
-      });
-  });
+  );
 }
 
 function handleMessage(ch, msg) {

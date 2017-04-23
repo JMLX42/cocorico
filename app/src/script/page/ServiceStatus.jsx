@@ -44,16 +44,16 @@ module.exports = React.createClass({
   render: function() {
     if (!this.state.serviceStatus)
       return (
-    <div className="page">
-      <Grid>
-      <Row>
-        <Col md={12}>
-        <LoadingIndicator/>
-        </Col>
-      </Row>
-      </Grid>
-    </div>
-    );
+        <div className="page">
+          <Grid>
+          <Row>
+            <Col md={12}>
+            <LoadingIndicator/>
+            </Col>
+          </Row>
+          </Grid>
+        </div>
+      );
 
     var system = this.state.serviceStatus.getSystemStatus();
     var capabilities = this.state.serviceStatus.getSystemCapabilities();
@@ -135,6 +135,6 @@ module.exports = React.createClass({
           </Grid>
         </div>
       </ReactDocumentTitle>
-		);
+    );
   },
 });

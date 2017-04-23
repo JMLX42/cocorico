@@ -7,7 +7,6 @@ import amqplib from 'amqplib';
 import EthereumTx from 'ethereumjs-tx';
 import EthereumUtil from 'ethereumjs-util';
 import promise from 'thenify';
-import delay from 'timeout-as-promise';
 import Web3 from 'web3';
 import Logger from 'cocorico-logger';
 

@@ -73,7 +73,7 @@ var Footer = React.createClass({
           </Row>
         </Grid>
       </div>
-		);
+    );
   },
 });
 

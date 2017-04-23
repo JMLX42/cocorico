@@ -65,7 +65,7 @@ var BallotValueSelect = React.createClass({
             <div className="col-xs-12 col-sm-6 col-md-4 col-lg-2">
               <select className="form-control"
                 onChange={(e) => this.setBallotValue(p, parseInt(e.target.value))}>
-                <option value="-1" disabled selected>
+                <option value="-1" disabled={true} selected={true}>
                   {this.getIntlMessage('vote.DEFAULT_BALLOT_VALUE_SELECT_OPTION')}
                 </option>
                 {choices.map((choice, c) =>

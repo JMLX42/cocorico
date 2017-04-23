@@ -62,7 +62,7 @@ var Page = React.createClass({
           : this.props.hideContent
             ? <div/>
             : this.getPageContent(page)
-		);
+    );
   },
 });
 

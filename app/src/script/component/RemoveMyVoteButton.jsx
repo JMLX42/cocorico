@@ -98,7 +98,7 @@ var RemoveMyVoteButton = React.createClass({
                 onCancel={this.voterCardReaderCancelled}/>
             : <span/>}
       </Button>
-		);
+    );
   },
 });
 

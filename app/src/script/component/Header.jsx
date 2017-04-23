@@ -85,16 +85,16 @@ var Header = React.createClass({
                   <Title text={this.getIntlMessage('title.ABOUT')}/>
                 </Link>
               </li>
-    			  </Nav>
+                  </Nav>
             <Nav pullRight={true}>
               <li>
                 {this.renderLoginButtonOrAccountDropDown()}
               </li>
             </Nav>
           </Navbar.Collapse>
-  		  	</Navbar>
+        </Navbar>
       </div>
-		);
+    );
   },
 });
 

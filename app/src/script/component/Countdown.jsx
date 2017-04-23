@@ -42,6 +42,6 @@ module.exports = React.createClass({
       <span>
         {this.props.format(this.state.count)}
       </span>
-		);
+    );
   },
 });

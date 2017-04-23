@@ -31,7 +31,7 @@ var Page = React.createClass({
           </Row>
         </Grid>
       </div>
-		);
+    );
   },
 });
 

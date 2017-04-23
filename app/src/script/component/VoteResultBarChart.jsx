@@ -52,7 +52,7 @@ var VoteResultBarChart = React.createClass({
         label: k + ' - ' + StringHelper.toTitleCase(c),
         data: results.map((r) => r[k]),
         backgroundColor: colors[k],
-      }))
+      })),
     };
 
     return (
@@ -61,12 +61,12 @@ var VoteResultBarChart = React.createClass({
         options={{
           scales: {
             xAxes: [{
-                stacked: true
+              stacked: true,
             }],
             yAxes: [{
-                stacked: true
-            }]
-        }}}/>
+              stacked: true,
+            }],
+          }}}/>
     );
   },
 });

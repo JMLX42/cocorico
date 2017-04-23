@@ -74,7 +74,7 @@ var Hint = React.createClass({
           </ButtonToolbar>
           : null}
       </div>
-		);
+    );
   },
 });
 

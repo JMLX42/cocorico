@@ -146,7 +146,7 @@ var CameraVideo = React.createClass({
           </div>
           : <span/>}
       </div>
-		);
+    );
   },
 
 });

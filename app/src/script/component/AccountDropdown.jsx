@@ -16,7 +16,7 @@ var AccountDropdown = React.createClass({
           {this.getIntlMessage('login.SIGN_OUT')}
         </MenuItem>
       </DropdownButton>
-		);
+    );
   },
 });
 

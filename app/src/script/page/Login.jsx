@@ -95,7 +95,7 @@ var Login = React.createClass({
           </Grid>
         </div>
       </ReactDocumentTitle>
-		);
+    );
   },
 });
 

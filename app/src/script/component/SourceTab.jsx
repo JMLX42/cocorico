@@ -333,7 +333,7 @@ var SourceTab = React.createClass({
           ? <LoadingIndicator/>
           : this.renderSources()}
       </Grid>
-		);
+    );
   },
 });
 
