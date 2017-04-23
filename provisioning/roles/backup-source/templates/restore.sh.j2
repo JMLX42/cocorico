@@ -44,10 +44,11 @@ test -d ${RESTORE_DIR_SRC}/storage/${DIR} && {
 {% endfor %}
 
 # Start all services.
+chown -R rabbitmq:rabbitmq /var/lib/rabbitmq/mnesia/
+service rabbitmq-server start
 service cocorico-api-web start
 if [[ ! -z $MINING ]]; then
   service cocorico-blockchain-miner start
 else
   service cocorico-blockchain start
 fi
-service rabbitmq-server start
