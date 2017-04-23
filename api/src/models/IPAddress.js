@@ -1,6 +1,10 @@
 import childProcess from 'child_process';
 import keystone from 'keystone';
 import transform from 'model-transform';
+import promise from 'thenify';
+import {iptables} from 'netfilter';
+
+import logger from '../logger';
 
 const Types = keystone.Field.Types;
 
@@ -38,35 +42,52 @@ IPAddress.add({
 
 IPAddress.relationship({ path: 'events', ref: 'Event', refPath: 'ip' });
 
-function isInIptables(ip) {
-  var iptables = childProcess.execSync('iptables -L -n -w');
-
-  return iptables.indexOf('DROP       all  --  ' + ip) >= 0;
+function getIpTableRule(ip) {
+  return {
+    table:    'filter',
+    chain:    'INPUT',
+    source:   ip,
+    jump:     'DROP'
+  };
 }
 
-function addToIptables(ip) {
-  if (isInIptables(ip)) {
+async function isInIptables(ip) {
+  try {
+    await promise(iptables.check)(getIpTableRule(ip));
+  } catch (e) {
     return false;
   }
-
-  childProcess.execSync(
-    'iptables -I INPUT 1 -s "' + ip + '" -j DROP -w',
-    {stdio:'ignore'}
-  );
 
   return true;
 }
 
-function removeFromIpTables(ip) {
-  if (!isInIptables(ip)) {
+async function addToIptables(ip) {
+  var exists = await isInIptables(ip);
+  if (exists) {
     return false;
   }
 
-  while (isInIptables(ip)) {
-    childProcess.execSync(
-      'iptables -D INPUT -s "' + ip + '" -j DROP -w',
-      {stdio:'ignore'}
-    );
+  try {
+    await promise(iptables.insert)(getIpTableRule(ip));
+  } catch (e) {
+    logger.error(e);
+    return false;
+  }
+
+  return true;
+}
+
+async function removeFromIpTables(ip) {
+  var exists = await isInIptables(ip);
+  if (!exists) {
+    return false;
+  }
+
+  try {
+    await promise(iptables.delete)(getIpTableRule(ip));
+  } catch (e) {
+    logger.error(e);
+    return false;
   }
 
   return true;
@@ -119,7 +140,14 @@ IPAddress.getIPAddress = async function(requestOrIP) {
   var address = await IPAddress.model.findOne({ip:ip}).exec();
 
   if (!address) {
-    address = await IPAddress.model({ip: ip, blacklisted: false}).save();
+    try {
+        address = await IPAddress.model({ip: ip, blacklisted: false}).save();
+    } catch (e) {
+        // In some rare occasions, concurrency will make findOne return nothing but then trying to create
+        // a new model will fail because another process already created an IPAdresse with the same 'ip'.
+        // We assume that's what happen if there is an error, and we call findOne again.
+        address = await IPAddress.model.findOne({ip:ip}).exec();
+    }
   }
 
   return address;
@@ -137,12 +165,19 @@ IPAddress.register();
 
 IPAddress.syncWithIPTables = function() {
   IPAddress.model.find().exec((err, addresses) => {
-    for (var address of addresses) {
-      if (address.blacklisted) {
-        addToIptables(address.ip);
-      } else {
-        removeFromIpTables(address.ip);
+      logger.info('start syncing iptables', {'num_ips': addresses.length});
+      var blacklisted = 0;
+      for (var address of addresses) {
+        if (address.blacklisted) {
+          blacklisted++;
+          addToIptables(address.ip);
+        } else {
+          removeFromIpTables(address.ip);
+        }
       }
-    }
+      logger.info(
+        'finished syncing iptables',
+        {'num_ips': addresses.length, 'num_blacklisted': blacklisted}
+      );
   });
 }
