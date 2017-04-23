@@ -32,7 +32,7 @@
   args:
     chdir: "{{ cocorico_app_dir }}"
   register: result
-  failed_when: result.stderr
+  failed_when: "{{ result | failed }}"
   when: is_development_environment
 
 - name: build release app
@@ -40,5 +40,5 @@
   args:
     chdir: "{{ cocorico_app_dir }}"
   register: result
-  failed_when: result.stderr
+  failed_when: "{{ result | failed }}"
   when: not is_development_environment
