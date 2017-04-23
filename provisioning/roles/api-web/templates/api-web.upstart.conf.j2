@@ -27,7 +27,8 @@ script
         {{ cocorico_api_dir }}/dist/index.js \
         --log {{ log_dir }}/{{ role_name }}.log \
         --merge-logs \
-        --name "{{ role_name }}"
+        --name "{{ role_name }}" \
+        --instances 4
 end script
 
 pre-start script
