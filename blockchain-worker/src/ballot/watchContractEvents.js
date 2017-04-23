@@ -1,6 +1,6 @@
 import noRetryError from './noRetryError';
 
-const BLOCKCHAIN_EVENT_TIMEOUT = 1200000; // 20 minutes
+const BLOCKCHAIN_EVENT_TIMEOUT = 300000; // 5 minutes
 
 export default function(errorEvents, events) {
   return new Promise((resolve, reject) => {
