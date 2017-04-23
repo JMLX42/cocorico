@@ -29,7 +29,8 @@ keystone.init({
   'session': true,
   'auth': true,
   'user model': 'Admin',
-  'cookie secret': srs(64),
+  'cookie secret': 'WIQ1S44fK0eOCTf!%iQ@Cc@0oKmjOAj5I37#C^#af9OaOXuy2xF97k*l5Q1Wxe49',
+  'session store': 'mongo',
 
   'logger': false,
 });
