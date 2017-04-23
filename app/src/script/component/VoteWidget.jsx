@@ -141,7 +141,7 @@ var VoteWidget = React.createClass({
   userStoreChanged: function() {
     var user = this.state.users.getCurrentUser();
 
-    if (user != this.state.user) {
+    if (user !== this.state.user) {
       this.setState({user: user});
       VoteAction.getPermissions(this.props.voteId);
     }
