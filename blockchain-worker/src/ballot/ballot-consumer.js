@@ -114,8 +114,6 @@ async function handleQueuedBallot(ballot) {
       address,
       {
         from: rootAccount,
-        gasLimit: 999999,
-        gasPrice: 20000000000,
         value: VOTER_ACCOUNT_ETH_INIT,
       }
     );
@@ -132,7 +130,7 @@ async function handleQueuedBallot(ballot) {
   } catch (err) {
     if (err.message === 'Nonce too low'
         || err.message.indexOf('Known transaction:') === 0) {
-      throw noRetryError({error:'rejected Vote.registerVoter() transaction'});
+      throw noRetryError({error:'rejected Vote.registerVoter() transaction with message "' + err.message + '"'});
     }
 
     throw err;
@@ -200,7 +198,7 @@ async function handleRegisteredBallot(ballot) {
   } catch (err) {
     if (err.message === 'Nonce too low'
         || err.message.indexOf('Known transaction:') === 0) {
-      throw noRetryError({error:'rejected Vote.vote() transaction'});
+      throw noRetryError({error:'rejected Vote.vote() transaction with message "' + err.message + '"'});
     }
 
     throw err;
@@ -279,6 +277,10 @@ async function handleMessage(channel, message) {
         // channel.ack(message);
     }
   } catch (err) {
+    if (ballot) {
+      err.ballot = ballot;
+    }
+
     var errorMessage = err instanceof Error
       ? err.stack
       : JSON.stringify(err);

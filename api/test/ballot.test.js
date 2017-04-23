@@ -1,5 +1,7 @@
 import config from '/opt/cocorico/api-web/config.json';
 
+import delay from 'timeout-as-promise';
+
 import {
   request,
   getAPIURL,
@@ -13,7 +15,7 @@ import {
 describe('POST /ballot/:voteId', () => {
   it('returns 200 and a valid ballot', async () => {
     const vote = await createVote(true);
-    const tx = await getBallotTransaction(vote, 0);
+    const tx = await getBallotTransaction(vote, [0]);
     const user = getRandomUser();
     const res = await request
       .post(getAPIURL('/ballot/' + vote.id))
@@ -35,8 +37,8 @@ describe('POST /ballot/:voteId', () => {
     const user = getRandomUser();
 
     try {
-      const ballot1 = await sendBallot(user, vote, 0);
-      const ballot2 = await sendBallot(user, vote, 0);
+      const ballot1 = await sendBallot(user, vote, [0]);
+      const ballot2 = await sendBallot(user, vote, [0]);
 
       expect(ballot2).toBeFalsy();
     } catch (err) {
@@ -45,29 +47,28 @@ describe('POST /ballot/:voteId', () => {
     }
   });
 
-  // it('returns 200 and a complete ballot', async () => {
-  //   try {
-  //     const vote = await createVote(true);
-  //     const tx = await getBallotTransaction(vote, 0)
-  //     const user = getUserJWT();
-  //
-  //     await request
-  //       .post(getAPIURL('/ballot/' + vote.id))
-  //       .set('Authorization', 'JWT ' + user)
-  //       .set('Cocorico-App-Id', config.testApp.id)
-  //       .send({'transaction': tx});
-  //     await delay(10000);
-  //
-  //     const res = await request
-  //       .get(getAPIURL('/ballot/' + vote.id))
-  //       .set('Authorization', 'JWT ' + user)
-  //       .set('Cocorico-App-Id', config.testApp.id);
-  //
-  //   } catch (e) {
-  //
-  //     console.log(e.response.body);
-  //   }
-  // });
+  it('returns 200 and a complete ballot', async () => {
+    try {
+      const vote = await createVote(true);
+      const tx = await getBallotTransaction(vote, [0]);
+      const user = getRandomUser();
+
+      await request
+        .post(getAPIURL('/ballot/' + vote.id))
+        .set('Authorization', 'JWT ' + getUserJWT(user))
+        .set('Cocorico-App-Id', config.testApp.id)
+        .send({'transaction': tx});
+      await delay(5000);
+
+      const res = await request
+        .get(getAPIURL('/ballot/' + vote.id))
+        .set('Authorization', 'JWT ' + getUserJWT(user))
+        .set('Cocorico-App-Id', config.testApp.id);
+
+    } catch (e) {
+      expect(e).toBeFalsy();
+    }
+  });
 });
 
 describe('GET /ballot/:voteId', () => {

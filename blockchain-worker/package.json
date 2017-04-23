@@ -13,10 +13,11 @@
     "ethereumjs-tx": "^1.1.1",
     "ethereumjs-util": "^4.0.1",
     "md5": "2.1.0",
+    "solc": "^0.4.10",
     "source-map-support": "^0.4.6",
     "thenify": "^3.2.1",
     "timeout-as-promise": "^1.0.0",
-    "web3": "0.17.0-beta"
+    "web3": "^0.18.4"
   },
   "engines": {
     "node": ">=0.10.22",

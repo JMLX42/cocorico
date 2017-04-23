@@ -7,7 +7,6 @@ try {
 
 import config from '/opt/cocorico/api-web/config.json';
 import keystone from 'keystone';
-import srs from 'secure-random-string';
 import logger from './logger';
 
 keystone.init({

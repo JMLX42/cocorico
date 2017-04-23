@@ -395,17 +395,17 @@ export async function getTransactions(req, res) {
         const verifiedBallots = await VerifiedBallot.model
           .find({
             $or: [
-              { transactionHash: {$in: result.map((r)=>r.transactionHash)}},
-              { voterAddress: {$in: result.map((r)=>r.address)}},
-            ]
+              { transactionHash: {$in: result.map((a)=>a.transactionHash)}},
+              { voterAddress: {$in: result.map((a)=>a.address)}},
+            ],
           })
           .exec();
 
-        for (var ballot of verifiedBallots) {
+        for (var verifiedBallot of verifiedBallots) {
           for (var tx of result) {
-            if (tx.transactionHash === ballot.transactionHash
-                || tx.address === ballot.voterAddress) {
-              tx.valid = ballot.valid;
+            if (tx.transactionHash === verifiedBallot.transactionHash
+                || tx.address === verifiedBallot.voterAddress) {
+              tx.valid = verifiedBallot.valid;
             }
           }
         }

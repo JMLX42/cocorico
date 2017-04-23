@@ -32,5 +32,7 @@ script
         --unlock 0 \
         --password {{ project_dir }}/{{ role_name }}/password \
         --datadir {{ ethereum_datadir }} \
+        --nodiscover \
+        --maxpeers 0 \
         >>{{ log_dir }}/blockchain.log 2>&1
 end script

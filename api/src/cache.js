@@ -13,8 +13,8 @@ export function set(key, value) {
   client.set(key, JSON.stringify(value));
 }
 
-export function unset(keys) {
-  client.del(keys);
+export function unset(keysArray) {
+  client.del(keysArray);
 }
 
 export async function keys(match) {

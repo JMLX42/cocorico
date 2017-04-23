@@ -1,4 +1,3 @@
-import childProcess from 'child_process';
 import keystone from 'keystone';
 import transform from 'model-transform';
 import promise from 'thenify';
@@ -47,7 +46,7 @@ function getIpTableRule(ip) {
     table:    'filter',
     chain:    'INPUT',
     source:   ip,
-    jump:     'DROP'
+    jump:     'DROP',
   };
 }
 
@@ -141,12 +140,12 @@ IPAddress.getIPAddress = async function(requestOrIP) {
 
   if (!address) {
     try {
-        address = await IPAddress.model({ip: ip, blacklisted: false}).save();
+      address = await IPAddress.model({ip: ip, blacklisted: false}).save();
     } catch (e) {
-        // In some rare occasions, concurrency will make findOne return nothing but then trying to create
-        // a new model will fail because another process already created an IPAdresse with the same 'ip'.
-        // We assume that's what happen if there is an error, and we call findOne again.
-        address = await IPAddress.model.findOne({ip:ip}).exec();
+      // In some rare occasions, concurrency will make findOne return nothing but then trying to create
+      // a new model will fail because another process already created an IPAdresse with the same 'ip'.
+      // We assume that's what happen if there is an error, and we call findOne again.
+      address = await IPAddress.model.findOne({ip:ip}).exec();
     }
   }
 
@@ -165,19 +164,19 @@ IPAddress.register();
 
 IPAddress.syncWithIPTables = function() {
   IPAddress.model.find().exec((err, addresses) => {
-      logger.info('start syncing iptables', {'num_ips': addresses.length});
-      var blacklisted = 0;
-      for (var address of addresses) {
-        if (address.blacklisted) {
-          blacklisted++;
-          addToIptables(address.ip);
-        } else {
-          removeFromIpTables(address.ip);
-        }
+    logger.info('start syncing iptables', {'num_ips': addresses.length});
+    var blacklisted = 0;
+    for (var address of addresses) {
+      if (address.blacklisted) {
+        blacklisted++;
+        addToIptables(address.ip);
+      } else {
+        removeFromIpTables(address.ip);
       }
-      logger.info(
-        'finished syncing iptables',
-        {'num_ips': addresses.length, 'num_blacklisted': blacklisted}
-      );
+    }
+    logger.info(
+      'finished syncing iptables',
+      {'num_ips': addresses.length, 'num_blacklisted': blacklisted}
+    );
   });
 }

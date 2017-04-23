@@ -77,7 +77,7 @@ describe('POST /vote', () => {
       expect(vote.voteContractABI).not.toBeFalsy();
       expect(vote.voteContractAddress).not.toBeFalsy();
     } catch (err) {
-      console.log(err);
+      expect(err).toBeFalsy();
     }
   });
 
@@ -133,8 +133,6 @@ describe('GET /vote/result/:voteId', () => {
   it ('returns 200 if Vote.status is "complete"', async () => {
     const vote = await createVote(true);
     const updatedVote = await updateVote(vote, {status: 'complete'});
-
-    console.log(updatedVote);
 
     const res = await request
       .get(getAPIURL('/vote/result/' + vote.id));

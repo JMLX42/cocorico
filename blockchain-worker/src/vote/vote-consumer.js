@@ -7,6 +7,7 @@ import Web3 from 'web3';
 import fs from 'fs';
 import md5 from 'md5';
 import amqplib from 'amqplib';
+import solc from 'solc';
 
 import cluster from 'cluster';
 import Logger from 'cocorico-logger';
@@ -28,23 +29,19 @@ function getCompiledVoteContract(web3, callback) {
     { path: path },
   );
 
-  web3.eth.compile.solidity(source, (error, compiled) => {
-    if (!!error) {
-      return callback(error, null);
-    }
+  var compiled = solc.compile(source, 1);
+  var abi = JSON.parse(compiled.contracts[':Vote'].interface);
+  var bin = '0x' + compiled.contracts[':Vote'].bytecode;
 
-    compiled = !!compiled.Vote ? compiled.Vote : compiled;
+  logger.info(
+    'compiled smart contract',
+    {
+      md5Hash: md5(source),
+      abi: abi,
+    },
+  );
 
-    logger.info(
-      'compiled smart contract',
-      {
-        md5Hash: md5(source),
-        abi: compiled.info.abiDefinition,
-      },
-    );
-
-    callback(null, compiled);
-  });
+  callback(null, {abi: abi, bin: bin});
 }
 
 function mineVoteContract(numProposals, numChoices, next) {
@@ -62,8 +59,9 @@ function mineVoteContract(numProposals, numChoices, next) {
         (err, accounts) => callback(err, accounts, compiled)
       ),
       (accounts, compiled, callback) => {
-        var code = compiled.code;
-        var abi = compiled.info.abiDefinition;
+        var code = compiled.bin;
+        var abi = compiled.abi;
+        var gasEstimate = '1999999';//web3.eth.estimateGas({data: code});
 
         logger.info(
           'start mining contract',
@@ -76,7 +74,7 @@ function mineVoteContract(numProposals, numChoices, next) {
           {
             from: accounts[0],
             data: code,
-            gas: 1999999,
+            gas: gasEstimate,
           },
           (error, contract) => {
             if (error) {
