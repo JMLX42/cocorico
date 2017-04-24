@@ -7,16 +7,16 @@
   gather_facts: yes
   roles:
     - { role: "common" }
-    - { role: "front-web", tags: ["website"] }
-    - { role: "app-web", tags: ["website"] }
-    - { role: "api-db", tags: ["website", "database"] }
-    - { role: "api-web", tags: ["website", "api"] }
-    - { role: "cache-db", tags: ["website", "database", "api"] }
-    - { role: "queue-service", tags: ["blockchain", "database", "queue"] }
-    - { role: "blockchain-worker", tags: ["blockchain", "worker"] }
-    - { role: "blockchain", tags: ["blockchain", "database"] }
+    # - { role: "front-web", tags: ["website"] }
+    # - { role: "app-web", tags: ["website"] }
+    # - { role: "api-db", tags: ["website", "database"] }
+    # - { role: "api-web", tags: ["website", "api"] }
+    # - { role: "cache-db", tags: ["website", "database", "api"] }
+    # - { role: "queue-service", tags: ["blockchain", "database", "queue"] }
+    # - { role: "blockchain-worker", tags: ["blockchain", "worker"] }
+    # - { role: "blockchain", tags: ["blockchain", "database"] }
     - { role: "webhook" }
-    - { role: "firewall" }
+    # - { role: "firewall" }
 
 - hosts:
     - prod
