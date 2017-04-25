@@ -40,26 +40,22 @@
   with_items: "{{ result.results }}"
   when: item.changed
 
-- name: list custom global npm packages
+- name: list local npm packages
   find: file_type=directory paths=/srv/cocorico/lib
-  register: global_custom_npm_packages
+  register: local_npm_packages
 
 - file: path={{ project_dir }}/lib/{{ item.path | basename }}/node_modules state=directory
-  with_items: "{{ global_custom_npm_packages.files }}"
+  with_items: "{{ local_npm_packages.files }}"
 - file: dest={{ item.path }}/node_modules src={{ project_dir }}/lib/{{ item.path | basename }}/node_modules state=link
-  with_items: "{{ global_custom_npm_packages.files }}"
+  with_items: "{{ local_npm_packages.files }}"
 
-- name: install global npm package dependencies
+- name: install local npm package dependencies
   npm: path={{ item.path }}
-  with_items: "{{ global_custom_npm_packages.files }}"
+  with_items: "{{ local_npm_packages.files }}"
 
-- name: build custom global npm packages
+- name: build local npm packages
   shell: npm install && npm run build
   args:
     # creates: "{{ item.path }}/lib"
     chdir: "{{ item.path }}"
-  with_items: "{{ global_custom_npm_packages.files }}"
-
-- name: link custom global npm packages
-  file: src={{ item.path }} dest=/usr/lib/node_modules/{{ item.path | basename }} state=link
-  with_items: "{{ global_custom_npm_packages.files }}"
+  with_items: "{{ local_npm_packages.files }}"

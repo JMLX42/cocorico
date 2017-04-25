@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "main": "lib/index.js",
+  "files": ["lib"],
   "scripts": {
       "build": "webpack",
       "start": "webpack --watch --watch-poll=5000 --progress",
