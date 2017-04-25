@@ -14,9 +14,8 @@ env:
 script:
   - sudo ln -s $TRAVIS_BUILD_DIR /vagrant
   - sudo ln -s $TRAVIS_BUILD_DIR /srv/cocorico
-  - echo $NODE_PATH
-  # - cd /vagrant && sudo bash ./deployment/ansible.sh
-  # - sudo ./script/run-tests.sh --verbose
+  - cd /vagrant && sudo bash ./deployment/ansible.sh
+  - sudo ./script/run-tests.sh --verbose
 
 deploy:
   provider: script
