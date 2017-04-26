@@ -10,6 +10,7 @@
     "babel-polyfill": "^6.16.0",
     "babel-preset-es2015": "^6.14.0",
     "callback-and-promise": "^2.0.0",
+    "cocorico-logger": "../lib/cocorico-logger",
     "ethereumjs-tx": "^1.1.1",
     "ethereumjs-util": "^4.0.1",
     "md5": "2.1.0",
