@@ -91,7 +91,7 @@
     "timeout-as-promise": "^1.0.0"
   },
   "jest": {
-    "setupTestFrameworkScriptFile": "test/index.js",
+    "setupTestFrameworkScriptFile": "./test/index.js",
     "verbose": true
   }
 }
