@@ -22,7 +22,9 @@ fi
 set +e
 
 pushd api
-npm install && npm run build && npm test
+npm install && npm run build
+service cocorico-api-web restart
+npm test
 API_RC=$?
 if [[ $API_RC != 0 ]] && [[ $VERBOSE != 0 ]]; then
     cat /opt/cocorico/log/api-web.forever.log
