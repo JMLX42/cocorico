@@ -77,7 +77,7 @@
     "build": "rm -rf dist ; babel src --out-dir dist --source-maps inline",
     "start": "service cocorico-api-web stop ; nodemon dist/index.js -w src -d 5 --exec 'npm run build && nodejs'",
     "doc": "apidoc -i ./src/routes/ -o ../app/public/documentation -c .",
-    "test": "eslint src scripts && jest test"
+    "test": "eslint src scripts && service cocorico-blockchain stop && jest test"
   },
   "devDependencies": {
     "babel-eslint": "^6.1.2",
