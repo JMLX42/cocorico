@@ -23,6 +23,7 @@
     "express-winston": "^2.0.0",
     "follow-redirects": "0.2.0",
     "html-entities": "1.2.0",
+    "jest": "^19.0.2",
     "js-beautify": "1.6.2",
     "json-stable-stringify": "1.0.0",
     "jsonwebtoken": "^7.1.9",
