@@ -8,7 +8,7 @@ env:
     - INVENTORY="provisioning/inventory"
     - LIMIT="local"
     - SKIP_TAGS=""
-    - VERBOSE="vvv"
+    - VERBOSE=""
     - PROVIDER="travis"
 
 script:
