@@ -39,7 +39,7 @@ function restoreDatabase() {
 
 var testrpc = null;
 function startBlockchainMiner() {
-  testrpc = childProcess.spawn('testrpc', ['--unlock', '0']);
+  testrpc = childProcess.spawn('testrpc', ['--unlock', '0', '--blocktime', '1']);
 }
 
 function stopBlockchainMiner() {
