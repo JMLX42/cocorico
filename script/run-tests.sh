@@ -22,8 +22,6 @@ fi
 set +e
 
 pushd api
-npm install && npm run build
-service cocorico-api-web restart
 npm test
 API_RC=$?
 if [[ $API_RC != 0 ]] && [[ $VERBOSE != 0 ]]; then
@@ -36,17 +34,17 @@ popd
 
 
 pushd app
-npm install && npm run build && npm test
+npm test
 APP_RC=$?
 popd
 
 pushd blockchain-worker
-npm install && npm test
+npm test
 BLOCKCHAIN_WORKER_RC=$?
 popd
 
 pushd webhook
-npm install && npm test
+npm test
 popd
 
 if [[ $API_RC != 0 ]] || [[ $APP_RC != 0 ]] || [[ $BLOCKCHAIN_WORKER_RC != 0 ]]; then
