@@ -37,23 +37,6 @@ function restoreDatabase() {
   );
 }
 
-var testrpc = null;
-function startBlockchainMiner() {
-  testrpc = childProcess.spawn('testrpc', ['--unlock', '0', '--blocktime', '1']);
-}
-
-function stopBlockchainMiner() {
-  if (!!testrpc) {
-    testrpc.kill('SIGKILL');
-    testrpc = null;
-  }
-}
-
-function restartBlockchainMiner() {
-  stopBlockchainMiner();
-  startBlockchainMiner();
-}
-
 async function emptyQueues() {
   var conn = await amqplib.connect(null, {heartbeat:30});
   var ch = await conn.createChannel();
@@ -75,12 +58,10 @@ function exitHandler(err) {
 
 beforeAll(() => {
   dumpDatabase();
-  startBlockchainMiner();
   emptyQueues();
 });
 afterAll(() => {
   restoreDatabase();
-  stopBlockchainMiner();
   emptyQueues();
 });
 
