@@ -7,16 +7,7 @@
     "vars": {
       "hostname": "local.cocorico.cc"
     },
-    "memory": 3072
-  },
-  "image": {
-    "provider": "docker",
-    "hosts": [
-      "127.0.0.1"
-    ],
-    "vars": {
-      "hostname": "local.cocorico.cc"
-    }
+    "memory": 4096
   },
   "prod": {
     "provider": "managed",
