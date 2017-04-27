@@ -74,6 +74,7 @@ ethereum_rpc_public_url: "{{ http_protocol_prefix }}://{{ front_web_public_host 
 ethereum_datadir: "{{ project_dir }}/blockchain/data"
 ethereum_mine_on_boot: yes
 ethereum_max_peers: 0
+ethereum_testrpc: yes
 
 certbot_enabled: no
 

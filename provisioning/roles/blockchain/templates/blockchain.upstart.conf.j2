@@ -14,6 +14,9 @@ respawn
 respawn limit 10 5
 
 script
+{%if ethereum_testrpc is defined and ethereum_testrpc %}
+    exec testrpc --unlock 0 --blocktime 1 --db {{ ethereum_datadir }}
+{% else %}
     exec geth \
 {% if ethereum_max_peers is defined and ethereum_max_peers %}
         --maxpeers {{ ethereum_max_peers }} \
@@ -35,4 +38,5 @@ script
         --nodiscover \
         --maxpeers 0 \
         >>{{ log_dir }}/blockchain.log 2>&1
+{% endif %}
 end script

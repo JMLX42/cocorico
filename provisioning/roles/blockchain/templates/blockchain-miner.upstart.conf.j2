@@ -14,10 +14,14 @@ respawn
 respawn limit 10 5
 
 post-start script
+{%if ethereum_testrpc is defined and ethereum_testrpc %}
     sleep 10s
     echo "web3.miner.start({{ ethereum_miner_threads }})" | geth attach ipc:/{{ ethereum_datadir }}/geth.ipc
+{% endif %}
 end script
 
 post-stop script
+{%if ethereum_testrpc is defined and ethereum_testrpc %}
     echo "web3.miner.stop()" | geth attach ipc:/{{ ethereum_datadir }}/geth.ipc || true
+{% endif %}
 end script
