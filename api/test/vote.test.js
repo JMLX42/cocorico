@@ -10,6 +10,8 @@ import {
   sendBallot
 } from 'cocorico-test';
 
+import delay from 'timeout-as-promise';
+
 const url = config.testApp.url;
 
 describe('/vote/:voteId', () => {
@@ -133,6 +135,8 @@ describe('GET /vote/result/:voteId', () => {
   it ('returns 200 if Vote.status is "complete"', async () => {
     const vote = await createVote(true);
     const updatedVote = await updateVote(vote, {status: 'complete'});
+
+    await delay(5000);
 
     const res = await request
       .get(getAPIURL('/vote/result/' + vote.id));
