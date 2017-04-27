@@ -28,7 +28,7 @@ script
         --log {{ log_dir }}/{{ role_name }}.log \
         --merge-logs \
         --name "{{ role_name }}" \
-        --instances 4
+        --instances {{ api_web_count | default(1) }}
 end script
 
 pre-start script
