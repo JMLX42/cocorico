@@ -15,6 +15,7 @@ script:
   - sudo ln -s $TRAVIS_BUILD_DIR /vagrant
   - sudo ln -s $TRAVIS_BUILD_DIR /srv/cocorico
   - cd /vagrant && sudo bash ./deployment/ansible.sh
+  - echo "Wait 30s before running the tests..." && sleep 30s
   - sudo ./script/run-tests.sh --verbose
 
 deploy:
